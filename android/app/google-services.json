@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "698643999415",
+    "project_id": "cambridge-school-dumraon",
+    "storage_bucket": "cambridge-school-dumraon.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:698643999415:android:71d7ce2ac0052a688efb32",
+        "android_client_info": {
+          "package_name": "com.stex.cambridge_school"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYU9lDiSavoxmNiC0dLvAIOsfAHrAEZto"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

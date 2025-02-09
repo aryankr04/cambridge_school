@@ -1,0 +1,12 @@
+specVersion: "v1beta"
+serviceId: "cambridge_school"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "cambridge_school-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]
