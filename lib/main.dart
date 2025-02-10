@@ -1,5 +1,7 @@
 
+import 'package:cambridge_school/app/modules/user_management/screens/otp_screen.dart';
 import 'package:cambridge_school/app/modules/user_management/screens/student_user_list.dart';
+import 'package:cambridge_school/app/modules/user_management/screens/success_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +11,7 @@ import 'app/modules/user_management/screens/create_user_screen.dart';
 import 'app/modules/user_management/screens/user_management_screen.dart';
 import 'core/utils/theme/theme.dart';
 import 'firebase_options.dart';
+import 'modules/auth/login/screens/login.dart';
 import 'modules/auth/register/models/user_model.dart';
 
 Future<void> main() async {
@@ -29,20 +32,16 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: _getAppTheme(context),
-      // initialRoute: '/user-management', // Or whatever your initial route is
-      // getPages: [
-      //   GetPage(
-      //     name: '/user-management',
-      //     page: () => UserManagementScreen(),
-      //     binding: BindingsBuilder(() {
-      //       Get.lazyPut(() => UserManagementRepository());
-      //       Get.lazyPut(() => UserManagementController()); // Initialize here!
-      //     }),
-      //   ),
-      //
-      //
-      // ],
-      home: CreateUserScreen(),
+      initialRoute: '/successScreen',
+      getPages: [
+        GetPage(
+          name: '/successScreen',
+          page: () => SuccessScreen(),
+        ),
+      ],
+      initialBinding: BindingsBuilder(() {
+        Get.lazyPut<SuccessScreenController>(() => SuccessScreenController());
+      }),
     );
   }
 }

@@ -31,45 +31,54 @@ class FirebaseAuthService {
     }
   }
 
-  // Sign in with mobile number (Phone Authentication)
-  Future<User?> signInWithMobile(String phoneNumber, Function(String) onCodeSent, Function(String) onVerificationCompleted, Function(FirebaseAuthException) onVerificationFailed) async {
-    try {
-      await _auth.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        timeout: const Duration(seconds: 60),
-        verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
-          // Automatically sign in when verification is completed
-          await _auth.signInWithCredential(phoneAuthCredential);
-          onVerificationCompleted('Verification completed!');
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          onVerificationFailed(e);
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          onCodeSent(verificationId);
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          print("Auto retrieval timeout for $verificationId");
-        },
-      );
-    } catch (e) {
-      print('Phone Sign In Error: $e');
-      return null;
-    }
-    return null;
+  /// Sends OTP to the user's phone number
+  Future<void> sendOtp(String phoneNumber, Function(String, int?) codeSent) async {
+    await _auth.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        await _auth.signInWithCredential(credential);
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        print("Verification Failed: ${e.message}");
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        codeSent(verificationId, resendToken);
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
   }
 
-  // Verify OTP and sign in after receiving verification code
-  Future<User?> verifyOTP(String verificationId, String smsCode) async {
+  /// Verify OTP and Register User
+  Future<UserCredential?> verifyOtpAndRegister({
+    required String verificationId,
+    required String otp,
+    required String email,
+    required String password,
+    required String displayName,
+    required String photoUrl,
+  }) async {
     try {
-      PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
+      // Create credential from OTP
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verificationId,
-        smsCode: smsCode,
+        smsCode: otp,
       );
-      UserCredential userCredential = await _auth.signInWithCredential(phoneAuthCredential);
-      return userCredential.user;
+
+      // Sign in user with phone number
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+
+      // Link email/password with phone number
+      await userCredential.user?.linkWithCredential(
+        EmailAuthProvider.credential(email: email, password: password),
+      );
+
+      // Update user profile (display name & photo)
+      await userCredential.user?.updateDisplayName(displayName);
+      await userCredential.user?.updatePhotoURL(photoUrl);
+
+      return userCredential;
     } catch (e) {
-      print('OTP Verification Error: $e');
+      print("Error: $e");
       return null;
     }
   }

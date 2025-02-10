@@ -9,12 +9,12 @@ import 'package:form_field_validator/form_field_validator.dart';
 import 'package:cambridge_school/core/utils/constants/colors.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/widgets/date_picker_field.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../../../core/utils/constants/text_styles.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
 import '../controllers/create_user_controller.dart';
 import '../models/user_model.dart';
 import '../widgets/qualification_widget.dart';
-import 'dart:io';
 
 final CreateUserController controller = Get.put(CreateUserController());
 
@@ -23,7 +23,6 @@ class CreateUserScreen extends GetView<CreateUserController> {
 
   @override
   Widget build(BuildContext context) {
-    // Main layout for the Create User Screen
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create User'),
@@ -32,40 +31,41 @@ class CreateUserScreen extends GetView<CreateUserController> {
         padding: const EdgeInsets.all(MySizes.md),
         child: Form(
           key: controller.formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildRolesSection(),
               Obx(() => _buildExpansionTileCustom(
-                    // Wrap with Obx
                     title: 'Personal Information',
-                    leadingIsFilled:
-                        controller.personalInfoValid.value, // Use RxBool
                     isValid: controller.personalInfoValid.value,
                     children: _buildPersonalInformationFields(),
-                    onValidationChanged: (isValid) =>
-                        controller.personalInfoValid.value = isValid,
                   )),
-              _buildExpansionTileCustom(
-                title: 'Health & Medical Information',
-                children: _buildPhysicalHealthInformationFields(),
-              ),
-              _buildExpansionTileCustom(
-                title: 'Father’s Details',
-                children: _buildFatherDetailsFields(),
-              ),
-              _buildExpansionTileCustom(
-                title: 'Mother’s Details',
-                children: _buildMotherDetailsFields(),
-              ),
-              _buildExpansionTileCustom(
-                title: 'Residential Address',
-                children: _buildAddressDetailsFields(),
-              ),
-              _buildExpansionTileCustom(
-                title: 'Emergency Contact Details',
-                children: _buildEmergencyContactFields(),
-              ),
+              Obx(() => _buildExpansionTileCustom(
+                    title: 'Health & Medical Information',
+                    isValid: controller.physicalHealthValid.value,
+                    children: _buildPhysicalHealthInformationFields(),
+                  )),
+              Obx(() => _buildExpansionTileCustom(
+                    title: 'Father’s Details',
+                    isValid: controller.fatherDetailsValid.value,
+                    children: _buildFatherDetailsFields(),
+                  )),
+              Obx(() => _buildExpansionTileCustom(
+                    title: 'Mother’s Details',
+                    isValid: controller.motherDetailsValid.value,
+                    children: _buildMotherDetailsFields(),
+                  )),
+              Obx(() => _buildExpansionTileCustom(
+                    title: 'Residential Address',
+                    isValid: controller.addressDetailsValid.value,
+                    children: _buildAddressDetailsFields(),
+                  )),
+              Obx(() => _buildExpansionTileCustom(
+                    title: 'Emergency Contact Details',
+                    isValid: controller.emergencyContactValid.value,
+                    children: _buildEmergencyContactFields(),
+                  )),
               Obx(() {
                 if (!controller.selectedRoles.contains('Student') &&
                     controller.selectedRoles.isNotEmpty) {
@@ -78,39 +78,26 @@ class CreateUserScreen extends GetView<CreateUserController> {
                 }
               }),
               _buildRoleSpecificDetails(),
-              _buildExpansionTileCustom(
-                title: 'Transport Details',
-                children: _buildTransportationDetailsFields(),
-              ),
+              Obx(() => _buildExpansionTileCustom(
+                    title: 'Transport Details',
+                    isValid: controller.transportDetailsValid.value,
+                    children: _buildTransportationDetailsFields(),
+                  )),
               _buildExpansionTileCustom(
                 title: 'Personal Interests',
                 children: _buildFavoritesFields(),
               ),
               Obx(() => _buildExpansionTileCustom(
-                  title: 'Login & Account Information',
-                  leadingIsFilled: controller.loginInfoValid.value,
-                  isValid: controller.loginInfoValid.value,
-                  children: _buildAccountDetailsFields(),
-                  onValidationChanged: (isValid) =>
-                      controller.loginInfoValid.value = isValid)),
+                    title: 'Login & Account Information',
+                    isValid: controller.loginInfoValid.value,
+                    children: _buildAccountDetailsFields(),
+                  )),
               const SizedBox(height: MySizes.md),
+
               MyButton(
                 text: 'Create User',
                 onPressed: () {
-                  // Validate all forms
-                  controller.personalInfoValid.value =
-                      _validatePersonalInformationFields();
-                  controller.loginInfoValid.value =
-                      _validateLoginInformationFields();
-
-                  // Check if form is valid
-                  if (controller.personalInfoValid.value &&
-                      controller.loginInfoValid.value) {
-                    controller.addUserToFirestore();
-                  } else {
-                    // Show error message
-                    Get.snackbar('Error', 'Please fill all required fields');
-                  }
+                  controller.addUserToFirestore();
                 },
               ),
             ],
@@ -120,10 +107,7 @@ class CreateUserScreen extends GetView<CreateUserController> {
     );
   }
 
-  // --- Widget Building Methods ---
-
   Widget _buildRolesSection() {
-    // Section for selecting user roles
     return Container(
       width: Get.width,
       padding: const EdgeInsets.all(16),
@@ -171,17 +155,24 @@ class CreateUserScreen extends GetView<CreateUserController> {
                 spacing: 10,
                 runSpacing: 10,
                 children: [
-                  ...controller.selectedRoles.map((role) => Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 6, horizontal: 12),
-                        decoration: BoxDecoration(
-                            color: MyColors.activeBlue,
-                            borderRadius: BorderRadius.circular(24)),
-                        child: Text(
+                  ...controller.selectedRoles.map((role) => Chip(
+                        label: Text(
                           role,
                           style: const TextStyle(
                               color: Colors.white, fontSize: 13),
                         ),
+                        backgroundColor: MyColors.activeBlue,
+                        onDeleted: () {
+                          controller.selectedRoles.remove(role);
+                          controller.selectedRoles.refresh();
+                        },
+                        deleteIconColor: Colors.white,
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        padding: EdgeInsets.zero,
+                        labelPadding:
+                            const EdgeInsets.symmetric(horizontal: 12),
+                        deleteButtonTooltipMessage: 'Remove this role',
+                        side: BorderSide.none,
                       )),
                 ],
               )),
@@ -191,13 +182,11 @@ class CreateUserScreen extends GetView<CreateUserController> {
   }
 
   Future<void> _showAddRoleDialog() async {
-    // Shows a dialog to add more roles
     return showDialog<void>(
       context: Get.context!,
       builder: (BuildContext context) {
         return AlertDialog(
-          title:
-              const Text('Select Roles', style: MyTextStyles.headlineSmall),
+          title: const Text('Select Roles', style: MyTextStyles.headlineSmall),
           content: Obx(() => _buildRoleChips()),
           actions: <Widget>[
             TextButton(
@@ -211,9 +200,6 @@ class CreateUserScreen extends GetView<CreateUserController> {
   }
 
   Widget _buildRoleChips() {
-    // Builds the chips for each role, divided by category.
-
-    // Define your categories and the roles that belong to them.  Replace with your actual categories and roles.
     final Map<String, List<UserRole>> roleCategories = {
       'Main Roles': [
         UserRole.student,
@@ -257,7 +243,6 @@ class CreateUserScreen extends GetView<CreateUserController> {
     };
 
     return SingleChildScrollView(
-      // Important for handling long lists of categories and chips.
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: roleCategories.entries.map((entry) {
@@ -283,9 +268,8 @@ class CreateUserScreen extends GetView<CreateUserController> {
                   return FilterChip(
                     side: BorderSide(
                       width: 1,
-                      color: isSelected
-                          ? MyColors.activeBlue
-                          : Colors.transparent,
+                      color:
+                          isSelected ? MyColors.activeBlue : Colors.transparent,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
@@ -303,17 +287,19 @@ class CreateUserScreen extends GetView<CreateUserController> {
                     ),
                     showCheckmark: false,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: MySizes.sm,
-                        vertical: MySizes.sm - 4),
+                        horizontal: MySizes.sm, vertical: MySizes.sm - 4),
                     selectedColor: MyColors.activeBlue,
                     backgroundColor:
                         isSelected ? MyColors.activeBlue : Colors.grey[200],
+                    checkmarkColor: MyColors.activeBlue,
                     selected: isSelected,
                     onSelected: (bool selected) {
                       List<String> newValues =
                           List.from(controller.selectedRoles);
                       if (selected) {
-                        newValues.add(role.name);
+                        if (!controller.selectedRoles.contains(role.name)) {
+                          newValues.add(role.name);
+                        }
                       } else {
                         newValues.remove(role.name);
                       }
@@ -322,7 +308,7 @@ class CreateUserScreen extends GetView<CreateUserController> {
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 16.0), // Add spacing between categories
+              const SizedBox(height: 16.0),
             ],
           );
         }).toList(),
@@ -333,11 +319,17 @@ class CreateUserScreen extends GetView<CreateUserController> {
   Widget _buildExpansionTileCustom({
     required String title,
     required List<Widget> children,
-    bool leadingIsFilled = false,
-    bool isValid = true, // New parameter to track validation state
-    ValueChanged<bool>? onValidationChanged,
+    bool? isValid,
   }) {
-    // Custom ExpansionTile with consistent styling
+    Color color;
+    if (isValid == null) {
+      color = MyColors.activeOrange;
+    } else if (isValid) {
+      color = MyColors.activeGreen;
+    } else {
+      color = MyColors.activeRed;
+    }
+
     return ExpansionTile(
       childrenPadding: const EdgeInsets.only(
           left: MySizes.md + 4,
@@ -345,30 +337,42 @@ class CreateUserScreen extends GetView<CreateUserController> {
           top: MySizes.sm,
           bottom: MySizes.lg),
       expansionAnimationStyle: AnimationStyle.noAnimation,
-      shape: Border.all(
-          color: isValid
-              ? MyColors.activeBlue
-              : Colors.red), // Change border color based on isValid
-      leading: LabelChip(isFilled: leadingIsFilled),
+      shape: Border.all(color: color),
+      leading: Icon(
+        isValid == null
+            ? Icons.error
+            : isValid
+                ? Icons.check_circle
+                : Icons.close_rounded,
+        color: isValid == null
+            ? MyColors.activeOrange
+            : isValid
+                ? MyColors.activeGreen
+                : MyColors.activeRed,
+        size: 24,
+      ),
       title: Text(title),
       children: children,
     );
   }
 
   List<Widget> _buildPersonalInformationFields() {
-    // Personal Information Fields
     return [
       MyTextField(
         labelText: 'Full Name',
         controller: controller.fullNameController,
-        validator: controller.requiredValidator.call,
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Full Name is required'),
+          MinLengthValidator(3,
+              errorText: 'Full Name must be at least 3 characters long')
+        ]).call,
       ),
       const SizedBox(height: MySizes.md),
       MyDatePickerField(
         labelText: 'Date of Birth',
         selectedDate: controller.dateOfBirth,
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
+        firstDate: DateTime(1900),
+        lastDate: DateTime.now(),
         onDateChanged: (DateTime? date) {
           if (date != null) {
             controller.dateOfBirth.value = date;
@@ -379,32 +383,47 @@ class CreateUserScreen extends GetView<CreateUserController> {
       MyDropdownField(
         options: MyLists.genderOptions,
         labelText: 'Gender',
+        selectedValue: controller.gender,
         onSelected: (value) {
           controller.gender.value = value ?? '';
         },
+        isValidate: true,
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
         options: MyLists.religionOptions,
         labelText: 'Religion',
+        selectedValue: controller.religion,
         onSelected: (value) {
           controller.religion.value = value ?? '';
         },
+        isValidate: true,
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
         options: MyLists.categoryOptions,
         labelText: 'Category',
+        selectedValue: controller.category,
         onSelected: (value) {
           controller.category.value = value ?? '';
         },
+        hintText: 'Ass',
+        isValidate: true,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Phone Number',
         controller: controller.phoneNoController,
         keyboardType: TextInputType.phone,
-        validator: controller.requiredValidator.call,
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Phone Number is required'),
+          PatternValidator(r'^[0-9]+$',
+              errorText: 'Phone Number must contain only digits'),
+          MinLengthValidator(10,
+              errorText: 'Phone Number must be at least 10 digits long'),
+          MaxLengthValidator(15,
+              errorText: 'Phone Number cannot exceed 15 digits')
+        ]).call,
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
@@ -413,6 +432,7 @@ class CreateUserScreen extends GetView<CreateUserController> {
         onMultipleChanged: (values) {
           controller.languagesSpoken.value = values ?? [];
         },
+        isValid: controller.languagesSpoken.isNotEmpty,
         isMultipleSelection: true,
       ),
       const SizedBox(height: MySizes.md),
@@ -431,14 +451,17 @@ class CreateUserScreen extends GetView<CreateUserController> {
         onSingleChanged: (value) {
           controller.nationality.value = value ?? '';
         },
+        isValid: true,
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
         options: MyLists.maritalStatusOptions,
-        labelText: 'Martial Status',
+        labelText: 'Marital Status',
+        selectedValue: controller.maritalStatus,
         onSelected: (value) {
           controller.maritalStatus.value = value ?? '';
         },
+        isValidate: true,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
@@ -450,28 +473,34 @@ class CreateUserScreen extends GetView<CreateUserController> {
   }
 
   List<Widget> _buildPhysicalHealthInformationFields() {
-    // Physical & Health Information Fields
     return [
       MyTextField(
         labelText: 'Height (cm)',
         controller: controller.heightController,
         keyboardType: TextInputType.number,
+        validator: PatternValidator(r'^[0-9.]*$',
+                errorText: 'Height must be a valid number')
+            .call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Weight (kg)',
         controller: controller.weightController,
         keyboardType: TextInputType.number,
+        validator: PatternValidator(r'^[0-9.]*$',
+                errorText: 'Weight must be a valid number')
+            .call,
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
         options: MyLists.bloodGroupOptions,
         labelText: 'Blood group',
+        selectedValue: controller.bloodGroup,
         onSelected: (value) {
           controller.bloodGroup.value = value ?? '';
         },
+        isValidate: false, // Make it optional
       ),
-
       const SizedBox(height: MySizes.md),
       MyDropdownField(
         labelText: 'Physical Disability',
@@ -479,47 +508,58 @@ class CreateUserScreen extends GetView<CreateUserController> {
         onSelected: (value) {
           controller.isPhysicalDisability.value = value == 'Yes';
         },
+        selectedValue:
+            controller.isPhysicalDisability.value ? 'Yes'.obs : 'No'.obs,
       ),
       const SizedBox(height: MySizes.md),
     ];
   }
 
   List<Widget> _buildTransportationDetailsFields() {
-    // Transportation Details Fields
     return [
       Obx(() => Column(
             children: [
               MyDropdownField(
                 labelText: 'Mode of Transport',
                 options: MyLists.modeOfTransportOptions,
+                selectedValue: controller.modeOfTransport,
                 onSelected: (value) {
                   controller.modeOfTransport.value = value ?? '';
                 },
+                isValidate: true,
               ),
               const SizedBox(height: MySizes.md),
               if (controller.modeOfTransport.value == 'School Transport') ...[
                 MyTextField(
                   labelText: 'Transport Route Number',
                   controller: controller.transportRouteNumberController,
-                  validator: controller.requiredValidator.call,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Route Number is required')
+                      .call,
                 ),
                 const SizedBox(height: MySizes.md),
                 MyTextField(
                   labelText: 'Transport Pickup Point',
                   controller: controller.transportPickupPointController,
-                  validator: controller.requiredValidator.call,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Pickup Point is required')
+                      .call,
                 ),
                 const SizedBox(height: MySizes.md),
                 MyTextField(
                   labelText: 'Transport Drop Off Point',
                   controller: controller.transportDropOffPointController,
-                  validator: controller.requiredValidator.call,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Drop Off Point is required')
+                      .call,
                 ),
                 const SizedBox(height: MySizes.md),
                 MyTextField(
                   labelText: 'Transport Vehicle Number',
                   controller: controller.transportVehicleNumberController,
-                  validator: controller.requiredValidator.call,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Vehicle Number is required')
+                      .call,
                 ),
                 const SizedBox(height: MySizes.md),
                 MyTextField(
@@ -527,7 +567,7 @@ class CreateUserScreen extends GetView<CreateUserController> {
                   controller: controller.transportFareController,
                   keyboardType: TextInputType.number,
                   validator: MultiValidator([
-                    controller.requiredValidator,
+                    RequiredValidator(errorText: 'Transport Fare is required'),
                     PatternValidator(r'^[0-9]*\.?[0-9]*$',
                         errorText: 'Enter a valid number'),
                   ]).call,
@@ -540,12 +580,15 @@ class CreateUserScreen extends GetView<CreateUserController> {
   }
 
   List<Widget> _buildAccountDetailsFields() {
-    // Account Details Fields
     return [
       MyTextField(
         labelText: 'Username',
         controller: controller.usernameController,
-        validator: controller.requiredValidator.call,
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Username is required'),
+          MinLengthValidator(6,
+              errorText: 'Username must be at least 6 characters long')
+        ]).call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
@@ -553,7 +596,7 @@ class CreateUserScreen extends GetView<CreateUserController> {
         controller: controller.emailController,
         keyboardType: TextInputType.emailAddress,
         validator: MultiValidator([
-          controller.requiredValidator,
+          RequiredValidator(errorText: 'Email is required'),
           EmailValidator(errorText: 'Enter a valid email address')
         ]).call,
       ),
@@ -562,18 +605,28 @@ class CreateUserScreen extends GetView<CreateUserController> {
         labelText: 'Password',
         controller: controller.passwordController,
         keyboardType: TextInputType.visiblePassword,
-        validator: controller.requiredValidator.call,
+        obscureText: true,
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Password is required'),
+          MinLengthValidator(8,
+              errorText: 'Password must be at least 8 characters long'),
+          PatternValidator(r'^(?=.*[A-Z])(?=.*[!@#\$&*~])(?=.*[0-9]).*$',
+              errorText:
+                  'Password must contain at least one uppercase letter, one number, and one special character')
+        ]).call,
       ),
       const SizedBox(height: MySizes.md),
     ];
   }
 
   List<Widget> _buildFatherDetailsFields() {
-    // Father's Details Fields
     return [
       MyTextField(
         labelText: 'Full Name',
         controller: controller.fatherFullNameController,
+        validator:
+            RequiredValidator(errorText: 'Father\'s Full Name is required')
+                .call,
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
@@ -582,90 +635,121 @@ class CreateUserScreen extends GetView<CreateUserController> {
         onSingleChanged: (value) {
           controller.fatherRelationshipToStudent.value = value ?? '';
         },
+        isValid: true,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Occupation',
-        onSelected:(value){ controller.fatherOccupation.value=value;},
         options: MyLists.occupations,
-
+        onSelected: (value) {
+          controller.fatherOccupation.value = value;
+        },
+        isValidate: true,
+        hintText: "Please select Occupation",
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Phone Number',
         controller: controller.fatherPhoneNumberController,
         keyboardType: TextInputType.phone,
+        validator: PatternValidator(r'^[0-9]+$',
+                errorText: 'Phone Number must contain only digits')
+            .call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Email Address',
         controller: controller.fatherEmailAddressController,
         keyboardType: TextInputType.emailAddress,
+        validator:
+            EmailValidator(errorText: 'Enter a valid email address').call,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Highest Education Level',
-        onSelected:(value){ controller.fatherHighestEducationLevel.value=value;},
         options: MyLists.educationDegreeOptions,
+        onSelected: (value) {
+          controller.fatherHighestEducationLevel.value = value;
+        },
+        isValidate: true,
+        hintText: "Please select Highest Education Level",
       ),
-
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Annual Income',
         controller: controller.fatherAnnualIncomeController,
         keyboardType: TextInputType.number,
+        validator: PatternValidator(r'^[0-9.]*$',
+                errorText: 'Annual Income must be a valid number')
+            .call,
       ),
-      const SizedBox(height: MySizes.md),
     ];
   }
 
   List<Widget> _buildMotherDetailsFields() {
-    // Mother's Details Fields
     return [
       MyTextField(
         labelText: 'Full Name',
         controller: controller.motherFullNameController,
+        validator:
+            RequiredValidator(errorText: 'Mother\'s Full Name is required')
+                .call,
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
         labelText: 'Relationship to Student',
         options: MyLists.relationshipOptions,
+        selectedValue: controller.motherRelationshipToStudent,
         onSelected: (value) {
           controller.motherRelationshipToStudent.value = value ?? '';
         },
+        isValidate: true,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Occupation',
-        onSelected:(value){ controller.motherOccupation.value=value;},
         options: MyLists.occupations,
+        onSelected: (value) {
+          controller.motherOccupation.value = value;
+        },
+        isValidate: true,
+        hintText: "Please select Occupation",
       ),
-
-
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Phone Number',
         controller: controller.motherPhoneNumberController,
         keyboardType: TextInputType.phone,
+        validator: PatternValidator(r'^[0-9]+$',
+                errorText: 'Phone Number must contain only digits')
+            .call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Email Address',
         controller: controller.motherEmailAddressController,
         keyboardType: TextInputType.emailAddress,
+        validator:
+            EmailValidator(errorText: 'Enter a valid email address').call,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Highest Education Level',
-        onSelected:(value){ controller.motherHighestEducationLevel.value=value;},
         options: MyLists.educationDegreeOptions,
+        onSelected: (value) {
+          controller.motherHighestEducationLevel.value = value;
+        },
+        isValidate: true,
+        hintText: "Please select Highest Education Level",
       ),
-
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Annual Income',
         controller: controller.motherAnnualIncomeController,
         keyboardType: TextInputType.number,
+        validator: PatternValidator(r'^[0-9.]*$',
+                errorText: 'Annual Income must be a valid number')
+            .call,
       ),
     ];
   }
@@ -683,35 +767,53 @@ class CreateUserScreen extends GetView<CreateUserController> {
       MyTextField(
         labelText: 'House Address',
         controller: controller.permanentHouseAddressController,
+        validator:
+            RequiredValidator(errorText: 'House Address is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'City',
         controller: controller.permanentCityController,
+        validator: RequiredValidator(errorText: 'City is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'District',
-        onSelected:(value){ controller.permanentDistrict.value=value;},
-        options: MyLists.educationDegreeOptions,
+        options: MyLists.indianStateOptions,
+        onSelected: (value) {
+          controller.permanentDistrict.value = value;
+        },
+        isValidate: true,
+        hintText: "Please select District",
       ),
-
       const SizedBox(height: MySizes.md),
       MyDropdownField(
         labelText: 'State',
-        onSelected:(value){ controller.permanentState.value=value!;},
+        selectedValue: controller.permanentState,
+        onSelected: (value) {
+          controller.permanentState.value = value ?? '';
+        },
         options: MyLists.indianStateOptions,
+        isValidate: true,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Village',
         controller: controller.permanentVillageController,
+        validator: RequiredValidator(errorText: 'Village is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Pin Code',
         controller: controller.permanentPinCodeController,
         keyboardType: TextInputType.number,
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Pin Code is required'),
+          PatternValidator(r'^[0-9]+$',
+              errorText: 'Pin Code must contain only digits'),
+          LengthRangeValidator(
+              errorText: 'Pin Code must be 6 digits long', min: 6, max: 6)
+        ]).call,
       ),
       const SizedBox(height: MySizes.md + 4),
       Obx(() => Column(
@@ -726,7 +828,6 @@ class CreateUserScreen extends GetView<CreateUserController> {
               ),
               Row(
                 children: [
-
                   Checkbox(
                     value: controller.isSameAsPermanent.value,
                     onChanged: (value) {
@@ -736,7 +837,7 @@ class CreateUserScreen extends GetView<CreateUserController> {
                             controller.permanentHouseAddressController.text;
                         controller.currentCityController.text =
                             controller.permanentCityController.text;
-                        controller.currentDistrict.value=
+                        controller.currentDistrict.value =
                             controller.permanentDistrict.value;
                         controller.currentState.value =
                             controller.permanentState.value;
@@ -747,8 +848,8 @@ class CreateUserScreen extends GetView<CreateUserController> {
                       } else {
                         controller.currentHouseAddressController.clear();
                         controller.currentCityController.clear();
-                        controller.currentDistrict.value='';
-                        controller.currentState.value='';
+                        controller.currentDistrict.value = '';
+                        controller.currentState.value = '';
                         controller.currentVillageController.clear();
                         controller.currentPinCodeController.clear();
                       }
@@ -767,40 +868,63 @@ class CreateUserScreen extends GetView<CreateUserController> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     MyTextField(
                       labelText: 'House Address',
                       controller: controller.currentHouseAddressController,
+                      validator: RequiredValidator(
+                              errorText: 'House Address is required')
+                          .call,
                     ),
                     const SizedBox(height: MySizes.md),
                     MyTextField(
                       labelText: 'City',
                       controller: controller.currentCityController,
+                      validator:
+                          RequiredValidator(errorText: 'City is required').call,
                     ),
                     const SizedBox(height: MySizes.md),
                     MySearchableDropdown(
                       labelText: 'District',
-                      onSelected:(value){ controller.currentDistrict.value=value;},
                       options: MyLists.indianStateOptions,
+                      onSelected: (value) {
+                        controller.currentDistrict.value = value;
+                      },
+                      isValidate: true,
+                      hintText: "Please select District",
                     ),
-
                     const SizedBox(height: MySizes.md),
                     MyDropdownField(
                       labelText: 'State',
-                      onSelected:(value){ controller.currentState.value=value!;},
                       options: MyLists.indianStateOptions,
+                      selectedValue: controller.currentState,
+                      onSelected: (value) {
+                        controller.currentState.value = value ?? '';
+                      },
+                      isValidate: true,
                     ),
                     const SizedBox(height: MySizes.md),
                     MyTextField(
                       labelText: 'Village',
                       controller: controller.currentVillageController,
+                      validator:
+                          RequiredValidator(errorText: 'Village is required')
+                              .call,
                     ),
                     const SizedBox(height: MySizes.md),
                     MyTextField(
                       labelText: 'Pin Code',
                       controller: controller.currentPinCodeController,
                       keyboardType: TextInputType.number,
-                    ),
+                      validator: MultiValidator([
+                        RequiredValidator(errorText: 'Pin Code is required'),
+                        PatternValidator(r'^[0-9]+$',
+                            errorText: 'Pin Code must contain only digits'),
+                        LengthRangeValidator(
+                            errorText: 'Pin Code must be 6 digits long',
+                            min: 6,
+                            max: 6)
+                      ]).call,
+                    )
                   ],
                 ),
             ],
@@ -809,31 +933,39 @@ class CreateUserScreen extends GetView<CreateUserController> {
   }
 
   List<Widget> _buildEmergencyContactFields() {
-    // Emergency Contact Fields
     return [
       MyTextField(
         labelText: 'Full Name',
         controller: controller.emergencyFullNameController,
+        validator: RequiredValidator(errorText: 'Full Name is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
-        labelText: 'Relationship',
-        options: MyLists.relationshipOptions,
-        onSelected: (value) {
-          controller.emergencyRelationshipController.text = value ?? '';
-        },
-      ),
+          labelText: 'Relationship',
+          options: MyLists.relationshipOptions,
+          selectedValue: controller.emergencyRelationship,
+          onSelected: (value) {
+            controller.emergencyRelationship.value = value ?? '';
+          },
+          isValidate: true),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Phone Number',
         controller: controller.emergencyPhoneNumberController,
         keyboardType: TextInputType.phone,
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Phone Number is required'),
+          PatternValidator(r'^[0-9]+$',
+              errorText: 'Phone Number must contain only digits'),
+        ]).call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Email Address',
         controller: controller.emergencyEmailAddressController,
         keyboardType: TextInputType.emailAddress,
+        validator:
+            EmailValidator(errorText: 'Enter a valid email address').call,
       ),
     ];
   }
@@ -842,8 +974,8 @@ class CreateUserScreen extends GetView<CreateUserController> {
     return [
       MyDialogDropdown(
         labelText: 'Favorite Dish',
-        options: MyLists.dishOptions, // Use SchoolList
-        onSingleChanged: (value) => controller.favoriteDish.value = value!,
+        options: MyLists.dishOptions,
+        onSingleChanged: (value) => controller.favoriteDish.value = value ?? '',
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
@@ -857,12 +989,14 @@ class CreateUserScreen extends GetView<CreateUserController> {
         labelText: 'Favorite Teacher',
         options: MyLists.teacherOptions,
         onSelected: (value) => controller.favoriteTeacher.value = value,
+        hintText: "Select Favourite Teacher",
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Favorite Book',
         options: MyLists.bookOptions,
         onSelected: (value) => controller.favoriteBook.value = value,
+        hintText: "Select Favourite Book",
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
@@ -876,42 +1010,49 @@ class CreateUserScreen extends GetView<CreateUserController> {
         labelText: 'Favorite Athlete',
         options: MyLists.athleteOptions,
         onSelected: (value) => controller.favoriteAthlete.value = value,
+        hintText: "Select Favourite Athlete",
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Favorite Movie',
         options: MyLists.movieOptions,
         onSelected: (value) => controller.favoriteMovie.value = value,
+        hintText: "Select Favourite Movie",
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Favorite Cuisine',
         options: MyLists.cuisineOptions,
         onSelected: (value) => controller.favoriteCuisine.value = value,
+        hintText: "Select Favourite Cuisine",
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Favorite Singer',
         options: MyLists.singerOptions,
         onSelected: (value) => controller.favoriteSinger.value = value,
+        hintText: "Select Favourite Singer",
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Favorite Place to Visit',
         options: MyLists.placeToVisitOptions,
         onSelected: (value) => controller.favoritePlaceToVisit.value = value,
+        hintText: "Select Favourite Place to Visit",
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Favorite Festival',
         options: MyLists.festivalOptions,
         onSelected: (value) => controller.favoriteFestival.value = value,
+        hintText: "Select Favourite Festival",
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
         labelText: 'Favorite Personality',
         options: MyLists.personalityOptions,
         onSelected: (value) => controller.favoritePersonality.value = value,
+        hintText: "Select Favourite Personality",
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
@@ -925,6 +1066,7 @@ class CreateUserScreen extends GetView<CreateUserController> {
         labelText: 'Favorite Animal',
         options: MyLists.animalOptions,
         onSelected: (value) => controller.favoriteAnimal.value = value,
+        hintText: "Select Favourite Animal",
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
@@ -935,7 +1077,6 @@ class CreateUserScreen extends GetView<CreateUserController> {
   }
 
   Widget _buildRoleSpecificDetails() {
-    // Builds role-specific sections based on selected roles
     return Obx(() => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -989,28 +1130,28 @@ class CreateUserScreen extends GetView<CreateUserController> {
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
-        labelText: 'Class',
-        options: MyLists.classOptions,
-        onSingleChanged: (value) {
-          controller.className.value = value ?? '';
-        },
-      ),
+          labelText: 'Class',
+          options: MyLists.classOptions,
+          onSingleChanged: (value) {
+            controller.className.value = value ?? '';
+          },
+          isValid: true),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
-        labelText: 'Section',
-        options: MyLists.sectionOptions,
-        onSingleChanged: (value) {
-          controller.section.value = value ?? '';
-        },
-      ),
+          labelText: 'Section',
+          options: MyLists.sectionOptions,
+          onSingleChanged: (value) {
+            controller.section.value = value ?? '';
+          },
+          isValid: true),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
-        labelText: 'House',
-        options: MyLists.schoolHouseOptions,
-        onSingleChanged: (value) {
-          controller.house.value = value ?? '';
-        },
-      ),
+          labelText: 'House',
+          options: MyLists.schoolHouseOptions,
+          onSingleChanged: (value) {
+            controller.house.value = value ?? '';
+          },
+          isValid: true),
       const SizedBox(height: MySizes.md),
       MyDatePickerField(
         labelText: 'Admission Date',
@@ -1096,6 +1237,9 @@ class CreateUserScreen extends GetView<CreateUserController> {
                   ),
                 ],
               ),
+              if (controller.selectedGuardian.value == null)
+                const Text("Please Select A Guardian",
+                    style: TextStyle(color: MyColors.activeRed)),
             ],
           )),
       const SizedBox(height: MySizes.md),
@@ -1114,6 +1258,8 @@ class CreateUserScreen extends GetView<CreateUserController> {
               MyTextField(
                 labelText: 'Full Name',
                 controller: controller.guardianFullNameController,
+                validator:
+                    RequiredValidator(errorText: 'Full Name is required').call,
               ),
               const SizedBox(height: MySizes.md),
               MyDialogDropdown(
@@ -1122,6 +1268,7 @@ class CreateUserScreen extends GetView<CreateUserController> {
                 onSingleChanged: (value) {
                   controller.guardianRelationshipToStudent.value = value ?? '';
                 },
+                isValid: true,
               ),
               const SizedBox(height: MySizes.md),
               MyDialogDropdown(
@@ -1130,33 +1277,46 @@ class CreateUserScreen extends GetView<CreateUserController> {
                 onSingleChanged: (value) {
                   controller.guardianOccupation.value = value ?? '';
                 },
+                isValid: true,
               ),
               const SizedBox(height: MySizes.md),
               MyTextField(
                 labelText: 'Phone Number',
                 controller: controller.motherPhoneNumberController,
                 keyboardType: TextInputType.phone,
+                validator: MultiValidator([
+                  RequiredValidator(errorText: 'Phone Number is required'),
+                  PatternValidator(r'^[0-9]+$',
+                      errorText: 'Phone Number must contain only digits'),
+                ]).call,
               ),
               const SizedBox(height: MySizes.md),
               MyTextField(
                 labelText: 'Email Address',
                 controller: controller.motherEmailAddressController,
                 keyboardType: TextInputType.emailAddress,
+                validator:
+                    EmailValidator(errorText: 'Enter a valid email address')
+                        .call,
               ),
               const SizedBox(height: MySizes.md),
               MyDropdownField(
                 labelText: 'Highest Education Level',
-                selectedValue: controller.guardianHighestEducationLevel,
                 options: MyLists.educationDegreeOptions,
+                selectedValue: controller.guardianHighestEducationLevel,
                 onSelected: (value) {
-                  controller.guardianHighestEducationLevel.value = value!;
+                  controller.guardianHighestEducationLevel.value = value ?? '';
                 },
+                isValidate: true,
               ),
               const SizedBox(height: MySizes.md),
               MyTextField(
                 labelText: 'Annual Income',
                 controller: controller.motherAnnualIncomeController,
                 keyboardType: TextInputType.number,
+                validator: PatternValidator(r'^[0-9.]*$',
+                        errorText: 'Annual Income must be a valid number')
+                    .call,
               ),
             ],
           );
@@ -1170,12 +1330,14 @@ class CreateUserScreen extends GetView<CreateUserController> {
   List<Widget> _buildTeacherDetails() {
     return [
       MyDialogDropdown(
-          labelText: 'Subjects Taught',
-          options: const ['Mathematics', 'Science', 'English', 'History'],
-          onMultipleChanged: (values) {
-            controller.subjectsTaught.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Subjects Taught',
+        options: const ['Mathematics', 'Science', 'English', 'History'],
+        onMultipleChanged: (values) {
+          controller.subjectsTaught.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
       const SizedBox(height: MySizes.md),
       MyDatePickerField(
         labelText: 'Joining Date',
@@ -1192,6 +1354,9 @@ class CreateUserScreen extends GetView<CreateUserController> {
       MyTextField(
         labelText: 'Experience',
         controller: controller.experienceController,
+        validator: PatternValidator(r'^[0-9.]*$',
+                errorText: 'Experience must be a valid number')
+            .call,
       ),
     ];
   }
@@ -1201,15 +1366,19 @@ class CreateUserScreen extends GetView<CreateUserController> {
       MyTextField(
         labelText: 'License Number',
         controller: controller.licenseNumberController,
+        validator:
+            RequiredValidator(errorText: 'License Number is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
-          labelText: 'Routes Assigned',
-          options: const ['Route A', 'Route B', 'Route C', 'Route D'],
-          onMultipleChanged: (values) {
-            controller.routesAssigned.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Routes Assigned',
+        options: const ['Route A', 'Route B', 'Route C', 'Route D'],
+        onMultipleChanged: (values) {
+          controller.routesAssigned.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
     ];
   }
 
@@ -1234,6 +1403,8 @@ class CreateUserScreen extends GetView<CreateUserController> {
       MyTextField(
         labelText: 'Assigned Area',
         controller: controller.assignedAreaController,
+        validator:
+            RequiredValidator(errorText: 'Assigned Area is required').call,
       ),
       const SizedBox(height: MySizes.md),
     ];
@@ -1242,101 +1413,121 @@ class CreateUserScreen extends GetView<CreateUserController> {
   List<Widget> _buildMaintenanceStaffDetails() {
     return [
       MyDialogDropdown(
-          labelText: 'Responsibilities',
-          options: const ['Cleaning', 'Repairing', 'Gardening', 'Plumbing'],
-          onMultipleChanged: (values) {
-            controller.maintenanceResponsibilities.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Responsibilities',
+        options: const ['Cleaning', 'Repairing', 'Gardening', 'Plumbing'],
+        onMultipleChanged: (values) {
+          controller.maintenanceResponsibilities.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
     ];
   }
 
   List<Widget> _buildAdminDetails() {
     return [
       MyDialogDropdown(
-          labelText: 'Permissions',
-          options: const [
-            'Create Users',
-            'Edit Users',
-            'Delete Users',
-            'View Users'
-          ],
-          onMultipleChanged: (values) {
-            controller.adminPermissions.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Permissions',
+        options: const [
+          'Create Users',
+          'Edit Users',
+          'Delete Users',
+          'View Users'
+        ],
+        onMultipleChanged: (values) {
+          controller.adminPermissions.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
-          labelText: 'Assigned Modules',
-          options: const [
-            'User Management',
-            'School Management',
-            'Finance Management',
-            'Attendance Management'
-          ],
-          onMultipleChanged: (values) {
-            controller.assignedModules.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Assigned Modules',
+        options: const [
+          'User Management',
+          'School Management',
+          'Finance Management',
+          'Attendance Management'
+        ],
+        onMultipleChanged: (values) {
+          controller.adminPermissions.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
-          labelText: 'Manageable Schools',
-          options: const ['School A', 'School B', 'School C', 'School D'],
-          onMultipleChanged: (values) {
-            controller.manageableSchools.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Manageable Schools',
+        options: const ['School A', 'School B', 'School C', 'School D'],
+        onMultipleChanged: (values) {
+          controller.manageableSchools.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
     ];
   }
 
   List<Widget> _buildSchoolAdminDetails() {
     return [
       MyDialogDropdown(
-          labelText: 'Permissions',
-          options: const ['Create Users', 'Edit Users', 'View Users'],
-          onMultipleChanged: (values) {
-            controller.schoolAdminPermissions.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Permissions',
+        options: const ['Create Users', 'Edit Users', 'View Users'],
+        onMultipleChanged: (values) {
+          controller.schoolAdminPermissions.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
-          labelText: 'Assigned Modules',
-          options: const ['User Management', 'Attendance Management'],
-          onMultipleChanged: (values) {
-            controller.schoolAdminAssignedModules.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Assigned Modules',
+        options: const ['User Management', 'Attendance Management'],
+        onMultipleChanged: (values) {
+          controller.schoolAdminAssignedModules.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
     ];
   }
 
   List<Widget> _buildDirectorDetails() {
     return [
       MyDialogDropdown(
-          labelText: 'Schools',
-          options: const ['School A', 'School B', 'School C'],
-          onMultipleChanged: (values) {
-            controller.directorSchools.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Schools',
+        options: const ['School A', 'School B', 'School C'],
+        onMultipleChanged: (values) {
+          controller.directorSchools.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Years In Management',
         controller: controller.yearsInManagementController,
         keyboardType: TextInputType.number,
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Years in Management is required'),
+          PatternValidator(r'^[0-9.]*$', errorText: 'Enter a valid number'),
+        ]).call,
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
-          labelText: 'Permissions',
-          options: const [
-            'Create Schools',
-            'Edit Schools',
-            'Delete Schools',
-            'View Schools'
-          ],
-          onMultipleChanged: (values) {
-            controller.directorPermissions.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Permissions',
+        options: const [
+          'Create Schools',
+          'Edit Schools',
+          'Delete Schools',
+          'View Schools'
+        ],
+        onMultipleChanged: (values) {
+          controller.directorPermissions.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
     ];
   }
 
@@ -1345,52 +1536,31 @@ class CreateUserScreen extends GetView<CreateUserController> {
       MyTextField(
         labelText: 'Department',
         controller: controller.departmentController,
+        validator: RequiredValidator(errorText: 'Department is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Years As Head',
         controller: controller.yearsAsHeadController,
         keyboardType: TextInputType.number,
+        validator: PatternValidator(r'^[0-9.]*$',
+                errorText: 'Years as head must be a valid number')
+            .call,
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
-          labelText: 'Responsibilities',
-          options: const [
-            'Curriculum Design',
-            'Teacher Evaluation',
-            'Student Mentoring'
-          ],
-          onMultipleChanged: (values) {
-            controller.departmentResponsibilities.value = values ?? [];
-          },
-          isMultipleSelection: true),
+        labelText: 'Responsibilities',
+        options: const [
+          'Curriculum Design',
+          'Teacher Evaluation',
+          'Student Mentoring'
+        ],
+        onMultipleChanged: (values) {
+          controller.departmentResponsibilities.value = values ?? [];
+        },
+        isMultipleSelection: true,
+        isValid: true,
+      ),
     ];
-  }
-
-  // Validation methods
-  bool _validatePersonalInformationFields() {
-    return controller.fullNameController.text.isNotEmpty &&
-        controller.phoneNoController.text
-            .isNotEmpty; // Add more validations as needed
-  }
-
-  bool _validateLoginInformationFields() {
-    return controller.usernameController.text.isNotEmpty &&
-        controller
-            .emailController.text.isNotEmpty; // Add more validations as needed
-  }
-}
-
-class LabelChip extends StatelessWidget {
-  final bool isFilled;
-  const LabelChip({super.key, required this.isFilled});
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(
-      isFilled ? Icons.check : Icons.error,
-      color: isFilled ? MyColors.activeGreen : MyColors.activeOrange,
-      size: 24,
-    );
   }
 }

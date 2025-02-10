@@ -28,27 +28,27 @@ class CreateSchoolStep5AcademicDetails extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Expanded(
-                    child: MyDropdownField(
-                      options: MyLists.monthOptions,
-                      labelText: 'Academic Year (Start)',
-                      isValidate: true,
-                      onSelected: (value) {
-                        controller.selectedAcademicYearStart.value = value!;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: MySizes.lg),
-                  Expanded(
-                    child: MyDropdownField(
-                      options: MyLists.monthOptions,
-                      labelText: 'Academic Year (End)',
-                      isValidate: true,
-                      onSelected: (value) {
-                        controller.selectedAcademicYearEnd.value = value!;
-                      },
-                    ),
-                  ),
+                  // Expanded(
+                  //   child: MyDropdownField(
+                  //     options: MyLists.monthOptions,
+                  //     labelText: 'Academic Year (Start)',
+                  //     isValidate: true,
+                  //     onSelected: (value) {
+                  //       controller.selectedAcademicYearStart.value = value!;
+                  //     },
+                  //   ),
+                  // ),
+                  // const SizedBox(width: MySizes.lg),
+                  // Expanded(
+                  //   child: MyDropdownField(
+                  //     options: MyLists.monthOptions,
+                  //     labelText: 'Academic Year (End)',
+                  //     isValidate: true,
+                  //     onSelected: (value) {
+                  //       controller.selectedAcademicYearEnd.value = value!;
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
               const SizedBox(height: MySizes.lg),

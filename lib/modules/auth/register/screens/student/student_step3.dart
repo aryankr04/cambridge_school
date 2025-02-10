@@ -88,6 +88,7 @@ class StudentStep3Form extends StatelessWidget {
                     labelText: 'City',
                     isValidate: true,
                     selectedValue: controller.selectedCity,
+                    onSelected: (val){},
                   );
                 }
               }),

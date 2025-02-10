@@ -55,7 +55,7 @@ class LoginController extends GetxController {
           content: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SchoolIconButton(
+              MyIconButton(
                   height: Get.width * 0.25,
                   width: Get.width * 0.25,
                   content:
@@ -66,7 +66,7 @@ class LoginController extends GetxController {
                         context, const AddStudent());
                   }),
               // SizedBox(width: 24,),
-              SchoolIconButton(
+              MyIconButton(
                   height: Get.width * 0.25,
                   width: Get.width * 0.25,
                   content:

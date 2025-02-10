@@ -112,9 +112,9 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                   ],
                   Expanded(
                     child: Obx(() => Text(
-                      _selectedValue.value ??
-                          widget.hintText ??
-                          defaultHintText,
+                      (_selectedValue.value != null && _selectedValue.value!.isNotEmpty)
+                          ? _selectedValue.value!
+                          : widget.hintText ?? defaultHintText,
                       style: _selectedValue.value != null
                           ? widget.selectedTextStyle ?? MyTextStyles.inputField
                           : widget.hintTextStyle ??

@@ -78,21 +78,26 @@ class UniformFeeStructureWidget extends StatelessWidget {
                               const SizedBox(height: MySizes.md),
                               Row(
                                 children: [
-                                  const Expanded(
-                                    child: MyDropdownField(
-                                      height: 42,
-                                      hintText: 'Size',
-                                      options: [
-                                        'XS',
-                                        'S',
-                                        'M',
-                                        'L',
-                                        'XL',
-                                        'XXL',
-                                        'XXXL'
-                                      ],
-                                    ),
-                                  ),
+                                  // const Expanded(
+                                  //   child: MyDropdownField(
+                                  //     height: 42,
+                                  //     hintText: 'Size',
+                                  //     options: [
+                                  //       'XS',
+                                  //       'S',
+                                  //       'M',
+                                  //       'L',
+                                  //       'XL',
+                                  //       'XXL',
+                                  //       'XXXL'
+                                  //     ],
+                                  //     onSelected: (value){
+                                  //       controller.selectedSize.value = value!;
+                                  //     },
+                                  //     selectedValue: ,
+                                  //
+                                  //   ),
+                                  // ),
                                   const SizedBox(width: MySizes.md),
                                   Expanded(
                                     flex: 1,

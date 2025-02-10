@@ -132,6 +132,7 @@ class HostelFeeStructureWidget extends StatelessWidget {
                 onSelected: (selectedValue) {
                   hostelPlanInput.roomType.value = selectedValue!;
                 },
+                selectedValue:  hostelPlanInput.roomType,
               ),
             ),
             const SizedBox(
@@ -149,6 +150,7 @@ class HostelFeeStructureWidget extends StatelessWidget {
                 onSelected: (selectedValue) {
                   hostelPlanInput.isAC.value = selectedValue == 'AC';
                 },
+                selectedValue: hostelPlanInput.isAC.value ? 'AC'.obs : 'Non-AC'.obs,
               ),
             ),
           ],
@@ -167,6 +169,8 @@ class HostelFeeStructureWidget extends StatelessWidget {
                   hostelPlanInput.timesOfMealsPerDay.value =
                       int.parse(selected!.split(' ')[0]);
                 },
+                selectedValue:
+                    '${hostelPlanInput.timesOfMealsPerDay.value} Times'.obs,
               ),
             ),
             const SizedBox(
@@ -181,6 +185,8 @@ class HostelFeeStructureWidget extends StatelessWidget {
                 onSelected: (selectedValue) {
                   hostelPlanInput.includesMeals.value = selectedValue == 'Yes';
                 },
+                selectedValue:
+                    hostelPlanInput.includesMeals.value ? 'Yes'.obs : 'No'.obs,
               ),
             ),
           ],
@@ -196,6 +202,7 @@ class HostelFeeStructureWidget extends StatelessWidget {
           onSelected: (selectedValue) {
             hostelPlanInput.isVeg.value = selectedValue == 'No';
           },
+          selectedValue: hostelPlanInput.isVeg.value ? 'No'.obs : 'Yes'.obs,
         ),
         const SizedBox(
           height: MySizes.md,

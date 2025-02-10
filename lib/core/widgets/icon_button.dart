@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 enum MyIconButtonShape { rectangle, circle }
 
-class SchoolIconButton extends StatelessWidget {
+class MyIconButton extends StatelessWidget {
   final Widget content; // Icon, Image, SVG, or Lottie
   final String text;
   final VoidCallback onPressed;
@@ -19,7 +19,7 @@ class SchoolIconButton extends StatelessWidget {
   final double padding;
   final MyIconButtonShape shape; // New shape option
 
-  const SchoolIconButton({
+  const MyIconButton({
     super.key,
     required this.content,
     required this.text,

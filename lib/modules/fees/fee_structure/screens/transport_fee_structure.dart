@@ -80,6 +80,7 @@ class TransportFeeStructureWidget extends StatelessWidget {
                                         100, (index) => (index + 1).toString()),
                                     onSelected: (value) =>
                                         controller.updateDistance(index, value!),
+                                    selectedValue: controller.distanceSlabs[index].name.obs,
                                   ),
                                 ),
                                 const SizedBox(width: MySizes.md),

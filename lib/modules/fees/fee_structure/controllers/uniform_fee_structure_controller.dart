@@ -46,13 +46,13 @@ class UniformFeeStructureController extends GetxController {
                 SizedBox(height: MySizes.md),
                 Row(
                   children: [
-                    Expanded(
-                      child: MyDropdownField(
-                        hintText: 'Size',
-                        labelText: 'Size',
-                        options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
-                      ),
-                    ),
+                    // Expanded(
+                    //   child: MyDropdownField(
+                    //     hintText: 'Size',
+                    //     labelText: 'Size',
+                    //     options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+                    //   ),
+                    // ),
                     SizedBox(width: MySizes.md),
                     Expanded(
                       flex: 1,

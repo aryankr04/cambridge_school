@@ -1,4 +1,5 @@
 import '../../../attendance/user_attendance_model.dart';
+
 // Main User Profile
 class UserModelMain {
   // 1️⃣ Basic Information
@@ -22,7 +23,7 @@ class UserModelMain {
   final String? category;
   final String? nationality;
   final String? maritalStatus;
-  final String? phoneNo;
+  final String phoneNo;
   final String? profileDescription;
   final List<String>? languagesSpoken;
   final List<String>? hobbies;
@@ -89,7 +90,7 @@ class UserModelMain {
     this.category,
     this.nationality,
     this.maritalStatus,
-    this.phoneNo,
+    required this.phoneNo,
     this.profileDescription,
     this.languagesSpoken,
     this.hobbies,
@@ -119,7 +120,7 @@ class UserModelMain {
     this.createdAt,
     this.qualifications,
     this.joiningDate,
-    this.schoolId,  // Adding schoolId to constructor
+    this.schoolId, // Adding schoolId to constructor
   });
 
   Map<String, dynamic> toMap() {
@@ -168,7 +169,9 @@ class UserModelMain {
       'favorites': favorites?.toMap(),
       'userAttendance': userAttendance?.toMap(),
       'createdAt': createdAt?.toIso8601String(),
-      'qualifications': qualifications?.map((qualification) => qualification.toMap()).toList(),
+      'qualifications': qualifications
+          ?.map((qualification) => qualification.toMap())
+          .toList(),
       'joiningDate': joiningDate?.toIso8601String(),
       'schoolId': schoolId, //Adding schoolId to toMap
     };
@@ -185,48 +188,108 @@ class UserModelMain {
         profileImageUrl: data['profileImageUrl'] as String?,
         password: data['password'] as String?,
         points: data['points'] as int? ?? 0,
-        performanceRating: (data['performanceRating'] as num?)?.toDouble() ?? 0.0,
+        performanceRating:
+            (data['performanceRating'] as num?)?.toDouble() ?? 0.0,
         isActive: data['isActive'] as bool? ?? true,
-        dob: data['dob'] != null ? DateTime.tryParse(data['dob'] as String) : null,
+        dob: data['dob'] != null
+            ? DateTime.tryParse(data['dob'] as String)
+            : null,
         gender: data['gender'] as String?,
         religion: data['religion'] as String?,
         category: data['category'] as String?,
         nationality: data['nationality'] as String?,
         maritalStatus: data['maritalStatus'] as String?,
-        phoneNo: data['phoneNo'] as String?,
+        phoneNo: data['phoneNo'] as String,
         profileDescription: data['profileDescription'] as String?,
-        languagesSpoken: (data['languagesSpoken'] as List<dynamic>?)?.map((e) => e as String).toList(),
-        hobbies: (data['hobbies'] as List<dynamic>?)?.map((e) => e as String).toList(),
-        height: data['height'] is num ? (data['height'] as num).toDouble() : null,
-        weight: data['weight'] is num ? (data['weight'] as num).toDouble() : null,
+        languagesSpoken: (data['languagesSpoken'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList(),
+        hobbies: (data['hobbies'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList(),
+        height:
+            data['height'] is num ? (data['height'] as num).toDouble() : null,
+        weight:
+            data['weight'] is num ? (data['weight'] as num).toDouble() : null,
         bloodGroup: data['bloodGroup'] as String?,
         isPhysicalDisability: data['isPhysicalDisability'] as bool?,
-        permanentAddress: data['permanentAddress'] != null ? Address.fromMap(data['permanentAddress'] as Map<String, dynamic>) : null,
-        currentAddress: data['currentAddress'] != null ? Address.fromMap(data['currentAddress'] as Map<String, dynamic>) : null,
+        permanentAddress: data['permanentAddress'] != null
+            ? Address.fromMap(data['permanentAddress'] as Map<String, dynamic>)
+            : null,
+        currentAddress: data['currentAddress'] != null
+            ? Address.fromMap(data['currentAddress'] as Map<String, dynamic>)
+            : null,
         modeOfTransport: data['modeOfTransport'] as String?,
-        transportDetails: data['transportDetails'] != null ? TransportDetails.fromMap(data['transportDetails'] as Map<String, dynamic>) : null,
-        roles: (data['roles'] as List<dynamic>?)?.map((roleString) {
-          try {
-            return UserRole.values.firstWhere((element) => element.name == (roleString as String).toLowerCase());
-          } catch (e) {
-            print('Unknown role: $roleString');
-            return null;
-          }
-        }).whereType<UserRole>().toList(),
-        studentDetails: data['studentDetails'] != null ? StudentDetails.fromMap(data['studentDetails'] as Map<String, dynamic>) : null,
-        teacherDetails: data['teacherDetails'] != null ? TeacherDetails.fromMap(data['teacherDetails'] as Map<String, dynamic>) : null,
-        directorDetails: data['directorDetails'] != null ? DirectorDetails.fromMap(data['directorDetails'] as Map<String, dynamic>) : null,
-        adminDetails: data['adminDetails'] != null ? AdminDetails.fromMap(data['adminDetails'] as Map<String, dynamic>) : null,
-        securityGuardDetails: data['securityGuardDetails'] != null ? SecurityGuardDetails.fromMap(data['securityGuardDetails'] as Map<String, dynamic>) : null,
-        maintenanceStaffDetails: data['maintenanceStaffDetails'] != null ? MaintenanceStaffDetails.fromMap(data['maintenanceStaffDetails'] as Map<String, dynamic>) : null,
-        driverDetails: data['driverDetails'] != null ? DriverDetails.fromMap(data['driverDetails'] as Map<String, dynamic>) : null,
-        schoolAdminDetails: data['schoolAdminDetails'] != null ? SchoolAdminDetails.fromMap(data['schoolAdminDetails'] as Map<String, dynamic>) : null,
-        departmentHeadDetails: data['departmentHeadDetails'] != null ? DepartmentHeadDetails.fromMap(data['departmentHeadDetails'] as Map<String, dynamic>) : null,
-        emergencyContact: data['emergencyContact'] != null ? EmergencyContact.fromMap(data['emergencyContact'] as Map<String, dynamic>) : null,
-        fatherDetails: data['fatherDetails'] != null ? GuardianDetails.fromMap(data['fatherDetails'] as Map<String, dynamic>) : null,
-        motherDetails: data['motherDetails'] != null ? GuardianDetails.fromMap(data['motherDetails'] as Map<String, dynamic>) : null,
-        favorites: data['favorites'] != null ? Favorite.fromMap(data['favorites'] as Map<String, dynamic>) : null,
-        userAttendance: data['userAttendance'] != null ? UserAttendance.fromMap(data['userAttendance'] as Map<String, dynamic>) : null,
+        transportDetails: data['transportDetails'] != null
+            ? TransportDetails.fromMap(
+                data['transportDetails'] as Map<String, dynamic>)
+            : null,
+        roles: (data['roles'] as List<dynamic>?)
+            ?.map((roleString) {
+              try {
+                return UserRole.values.firstWhere((element) =>
+                    element.name == (roleString as String).toLowerCase());
+              } catch (e) {
+                print('Unknown role: $roleString');
+                return null;
+              }
+            })
+            .whereType<UserRole>()
+            .toList(),
+        studentDetails: data['studentDetails'] != null
+            ? StudentDetails.fromMap(
+                data['studentDetails'] as Map<String, dynamic>)
+            : null,
+        teacherDetails: data['teacherDetails'] != null
+            ? TeacherDetails.fromMap(
+                data['teacherDetails'] as Map<String, dynamic>)
+            : null,
+        directorDetails: data['directorDetails'] != null
+            ? DirectorDetails.fromMap(
+                data['directorDetails'] as Map<String, dynamic>)
+            : null,
+        adminDetails: data['adminDetails'] != null
+            ? AdminDetails.fromMap(data['adminDetails'] as Map<String, dynamic>)
+            : null,
+        securityGuardDetails: data['securityGuardDetails'] != null
+            ? SecurityGuardDetails.fromMap(
+                data['securityGuardDetails'] as Map<String, dynamic>)
+            : null,
+        maintenanceStaffDetails: data['maintenanceStaffDetails'] != null
+            ? MaintenanceStaffDetails.fromMap(
+                data['maintenanceStaffDetails'] as Map<String, dynamic>)
+            : null,
+        driverDetails: data['driverDetails'] != null
+            ? DriverDetails.fromMap(
+                data['driverDetails'] as Map<String, dynamic>)
+            : null,
+        schoolAdminDetails: data['schoolAdminDetails'] != null
+            ? SchoolAdminDetails.fromMap(
+                data['schoolAdminDetails'] as Map<String, dynamic>)
+            : null,
+        departmentHeadDetails: data['departmentHeadDetails'] != null
+            ? DepartmentHeadDetails.fromMap(
+                data['departmentHeadDetails'] as Map<String, dynamic>)
+            : null,
+        emergencyContact: data['emergencyContact'] != null
+            ? EmergencyContact.fromMap(
+                data['emergencyContact'] as Map<String, dynamic>)
+            : null,
+        fatherDetails: data['fatherDetails'] != null
+            ? GuardianDetails.fromMap(
+                data['fatherDetails'] as Map<String, dynamic>)
+            : null,
+        motherDetails: data['motherDetails'] != null
+            ? GuardianDetails.fromMap(
+                data['motherDetails'] as Map<String, dynamic>)
+            : null,
+        favorites: data['favorites'] != null
+            ? Favorite.fromMap(data['favorites'] as Map<String, dynamic>)
+            : null,
+        userAttendance: data['userAttendance'] != null
+            ? UserAttendance.fromMap(
+                data['userAttendance'] as Map<String, dynamic>)
+            : null,
         qualifications: (data['qualifications'] as List<dynamic>?)
             ?.map((e) => Qualification.fromMap(e as Map<String, dynamic>))
             .whereType<Qualification>()
@@ -326,10 +389,12 @@ class UserModelMain {
       directorDetails: directorDetails ?? this.directorDetails,
       adminDetails: adminDetails ?? this.adminDetails,
       securityGuardDetails: securityGuardDetails ?? this.securityGuardDetails,
-      maintenanceStaffDetails: maintenanceStaffDetails ?? this.maintenanceStaffDetails,
+      maintenanceStaffDetails:
+          maintenanceStaffDetails ?? this.maintenanceStaffDetails,
       driverDetails: driverDetails ?? this.driverDetails,
       schoolAdminDetails: schoolAdminDetails ?? this.schoolAdminDetails,
-      departmentHeadDetails: departmentHeadDetails ?? this.departmentHeadDetails,
+      departmentHeadDetails:
+          departmentHeadDetails ?? this.departmentHeadDetails,
       emergencyContact: emergencyContact ?? this.emergencyContact,
       fatherDetails: fatherDetails ?? this.fatherDetails,
       motherDetails: motherDetails ?? this.motherDetails,
@@ -409,23 +474,23 @@ class StudentDetails {
   });
 
   Map<String, dynamic> toMap() => {
-    'studentId': studentId,
-    'rollNumber': rollNumber,
-    'admissionNo': admissionNo,
-    'className': className,
-    'section': section,
-    'house': house,
-    'admissionDate': admissionDate?.toIso8601String(), // Convert to String
-    'previousSchoolName': previousSchoolName,
-    'averageMarks': averageMarks,
-    'ambition': ambition,
-    'guardian': guardian,
-    'guardianDetails': guardianDetails?.toMap(),
-    'birthCertificate': birthCertificate?.toMap(),
-    'aadhaarCard': aadhaarCard?.toMap(),
-    'transferCertificate': transferCertificate?.toMap(),
-    'passportSizedPhotograph': passportSizedPhotograph?.toMap(),
-  };
+        'studentId': studentId,
+        'rollNumber': rollNumber,
+        'admissionNo': admissionNo,
+        'className': className,
+        'section': section,
+        'house': house,
+        'admissionDate': admissionDate?.toIso8601String(), // Convert to String
+        'previousSchoolName': previousSchoolName,
+        'averageMarks': averageMarks,
+        'ambition': ambition,
+        'guardian': guardian,
+        'guardianDetails': guardianDetails?.toMap(),
+        'birthCertificate': birthCertificate?.toMap(),
+        'aadhaarCard': aadhaarCard?.toMap(),
+        'transferCertificate': transferCertificate?.toMap(),
+        'passportSizedPhotograph': passportSizedPhotograph?.toMap(),
+      };
 
   static StudentDetails? fromMap(Map<String, dynamic> data) {
     try {
@@ -437,30 +502,32 @@ class StudentDetails {
         section: data['section'] as String?,
         house: data['house'] as String?,
         admissionDate: data['admissionDate'] != null
-            ? DateTime.tryParse(data['admissionDate'] as String) // Convert to DateTime
+            ? DateTime.tryParse(
+                data['admissionDate'] as String) // Convert to DateTime
             : null,
         previousSchoolName: data['previousSchoolName'] as String?,
         averageMarks: (data['averageMarks'] as num?)?.toDouble(),
         ambition: data['ambition'] as String?,
         guardian: data['guardian'] as String?,
         guardianDetails: data['guardianDetails'] != null
-            ? GuardianDetails.fromMap(data['guardianDetails'] as Map<String, dynamic>)
+            ? GuardianDetails.fromMap(
+                data['guardianDetails'] as Map<String, dynamic>)
             : null,
         birthCertificate: data['birthCertificate'] != null
             ? DocumentDetails.fromMap(
-            data['birthCertificate'] as Map<String, dynamic>)
+                data['birthCertificate'] as Map<String, dynamic>)
             : null,
         aadhaarCard: data['aadhaarCard'] != null
             ? DocumentDetails.fromMap(
-            data['aadhaarCard'] as Map<String, dynamic>)
+                data['aadhaarCard'] as Map<String, dynamic>)
             : null,
         transferCertificate: data['transferCertificate'] != null
             ? DocumentDetails.fromMap(
-            data['transferCertificate'] as Map<String, dynamic>)
+                data['transferCertificate'] as Map<String, dynamic>)
             : null,
         passportSizedPhotograph: data['passportSizedPhotograph'] != null
             ? DocumentDetails.fromMap(
-            data['passportSizedPhotograph'] as Map<String, dynamic>)
+                data['passportSizedPhotograph'] as Map<String, dynamic>)
             : null,
       );
     } catch (e) {
@@ -483,10 +550,10 @@ class TeacherDetails {
   });
 
   Map<String, dynamic> toMap() => {
-    'teacherId': teacherId,
-    'subjectsTaught': subjectsTaught,
-    'experience': experience,
-  };
+        'teacherId': teacherId,
+        'subjectsTaught': subjectsTaught,
+        'experience': experience,
+      };
 
   static TeacherDetails? fromMap(Map<String, dynamic> data) {
     try {
@@ -548,7 +615,7 @@ class MaintenanceStaffDetails {
     try {
       return MaintenanceStaffDetails(
         responsibilities:
-        (map['responsibilities'] as List<dynamic>?)?.cast<String>(),
+            (map['responsibilities'] as List<dynamic>?)?.cast<String>(),
       );
     } catch (e) {
       print('Error creating MaintenanceStaffDetails from map: $e');
@@ -579,7 +646,7 @@ class DriverDetails {
       return DriverDetails(
         licenseNumber: map['licenseNumber'] as String?,
         routesAssigned:
-        (map['routesAssigned'] as List<dynamic>?)?.cast<String>(),
+            (map['routesAssigned'] as List<dynamic>?)?.cast<String>(),
       );
     } catch (e) {
       print('Error creating DriverDetails from map: $e');
@@ -613,9 +680,9 @@ class AdminDetails {
       return AdminDetails(
         permissions: (map['permissions'] as List<dynamic>?)?.cast<String>(),
         assignedModules:
-        (map['assignedModules'] as List<dynamic>?)?.cast<String>(),
+            (map['assignedModules'] as List<dynamic>?)?.cast<String>(),
         manageableSchools:
-        (map['manageableSchools'] as List<dynamic>?)?.cast<String>(),
+            (map['manageableSchools'] as List<dynamic>?)?.cast<String>(),
       );
     } catch (e) {
       print('Error creating AdminDetails from map: $e');
@@ -646,7 +713,7 @@ class SchoolAdminDetails {
       return SchoolAdminDetails(
         permissions: (map['permissions'] as List<dynamic>?)?.cast<String>(),
         assignedModules:
-        (map['assignedModules'] as List<dynamic>?)?.cast<String>(),
+            (map['assignedModules'] as List<dynamic>?)?.cast<String>(),
       );
     } catch (e) {
       print('Error creating SchoolAdminDetails from map: $e');
@@ -715,7 +782,7 @@ class DepartmentHeadDetails {
         department: map['department'] as String?,
         yearsAsHead: map['yearsAsHead'] as int?,
         responsibilities:
-        (map['responsibilities'] as List<dynamic>?)?.cast<String>(),
+            (map['responsibilities'] as List<dynamic>?)?.cast<String>(),
       );
     } catch (e) {
       print('Error creating DepartmentHeadDetails from map: $e');
@@ -723,9 +790,6 @@ class DepartmentHeadDetails {
     }
   }
 }
-
-
-
 
 enum UserRole {
   superAdmin,
@@ -966,6 +1030,7 @@ class Address {
         addressType: data['addressType'] as String? ?? "other",
       );
 }
+
 // Guardian Class
 class GuardianDetails {
   final String? fullName;
@@ -1087,9 +1152,8 @@ class Qualification {
     this.majorSubject,
     this.resultType,
     this.result,
-  }) : assert(
-  isValidQualification(resultType: resultType, result: result),
-  "If resultType is specified, then result must also be provided.");
+  }) : assert(isValidQualification(resultType: resultType, result: result),
+            "If resultType is specified, then result must also be provided.");
 
   static bool isValidQualification({String? resultType, String? result}) {
     if (resultType == null && result == null) {
@@ -1133,8 +1197,10 @@ class Qualification {
     );
   }
 
-  bool get isValid => isValidQualification(resultType: resultType, result: result);
+  bool get isValid =>
+      isValidQualification(resultType: resultType, result: result);
 }
+
 // DocumentDetails Class
 class DocumentDetails {
   final String? documentName;

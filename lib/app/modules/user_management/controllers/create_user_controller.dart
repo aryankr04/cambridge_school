@@ -1,84 +1,88 @@
+import 'dart:async';
 import 'dart:io';
-import 'package:cambridge_school/app/modules/user_management/screens/create_user_screen.dart';
+import 'package:cambridge_school/app/modules/user_management/repositories/user_management_repository.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
 import 'package:cambridge_school/core/widgets/searchable_dropdown.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/services/firebase/auth_service.dart';
 import '../../../../core/widgets/text_field.dart';
 import '../models/user_model.dart';
+import '../screens/otp_screen.dart';
+import '../screens/success_screen.dart';
 
 class CreateUserController extends GetxController {
   final requiredValidator =
-  RequiredValidator(errorText: 'This field is required');
+      RequiredValidator(errorText: 'This field is required');
 
-  // Validation Flags (NEW)
-  RxBool personalInfoValid = true.obs;
-  RxBool loginInfoValid = true.obs;
-  RxBool studentDetailsValid = true.obs;
-  RxBool teacherDetailsValid = true.obs;
-  RxBool driverDetailsValid = true.obs;
-  RxBool fatherDetailsValid = true.obs;
-  RxBool motherDetailsValid = true.obs;
-  RxBool addressDetailsValid = true.obs;
-  RxBool emergencyContactValid = true.obs;
-  RxBool physicalHealthValid = true.obs;
-  RxBool transportDetailsValid = true.obs;
-  RxBool accountDetailsValid = true.obs;
-  RxBool personalInterestsValid = true.obs;
+  Rx<bool?> personalInfoValid = Rx<bool?>(null);
+  Rx<bool?> loginInfoValid = Rx<bool?>(null);
+  Rx<bool?> studentDetailsValid = Rx<bool?>(null);
+  Rx<bool?> teacherDetailsValid = Rx<bool?>(null);
+  Rx<bool?> driverDetailsValid = Rx<bool?>(null);
+  Rx<bool?> fatherDetailsValid = Rx<bool?>(null);
+  Rx<bool?> motherDetailsValid = Rx<bool?>(null);
+  Rx<bool?> addressDetailsValid = Rx<bool?>(null);
+  Rx<bool?> emergencyContactValid = Rx<bool?>(null);
+  Rx<bool?> physicalHealthValid = Rx<bool?>(null);
+  Rx<bool?> transportDetailsValid = Rx<bool?>(null);
+  Rx<bool?> accountDetailsValid = Rx<bool?>(null);
+  Rx<bool?> personalInterestsValid = Rx<bool?>(null);
 
   // --- Core Identity ---
   final userId = '';
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  RxString verificationId = "".obs;
   final fullNameController = TextEditingController();
 
   // --- Profile Information ---
   Rx<File?> profileImage = Rx<File?>(null);
-  final profileImageUrl = '';
   final Rx<DateTime?> dateOfBirth = Rx<DateTime?>(null);
   final Rx<DateTime?> joiningDate = Rx<DateTime?>(null);
-  RxString gender = ''.obs;
-  RxString religion = ''.obs;
-  RxString category = ''.obs;
+  Rx<String?> gender = Rx<String?>(null);
+  Rx<String?> religion = Rx<String?>(null);
+  Rx<String?> category = Rx<String?>(null);
   final phoneNoController = TextEditingController();
   final profileDescriptionController = TextEditingController();
   RxList<String> languagesSpoken = <String>[].obs;
   RxList<String> hobbies = <String>[].obs;
-  RxString nationality = ''.obs;
+  Rx<String?> nationality = Rx<String?>(null);
 
   // --- Physical Attributes ---
   final heightController = TextEditingController();
   final weightController = TextEditingController();
-  RxString bloodGroup = ''.obs;
+  Rx<String?> bloodGroup = Rx<String?>(null);
   RxBool isPhysicalDisability = false.obs;
 
   // --- Relationship ---
-  RxString maritalStatus = ''.obs;
+  Rx<String?> maritalStatus = Rx<String?>(null);
 
   // --- Address ---
   final isSameAsPermanent = RxBool(false);
 
   final permanentHouseAddressController = TextEditingController();
   final permanentCityController = TextEditingController();
-  final permanentDistrict = ''.obs;
-  final permanentState = ''.obs;
+  Rx<String?> permanentDistrict = Rx<String?>(null);
+  Rx<String?> permanentState = Rx<String?>(null);
   final permanentVillageController = TextEditingController();
   final permanentPinCodeController = TextEditingController();
 
   final currentHouseAddressController = TextEditingController();
   final currentCityController = TextEditingController();
-  final currentDistrict = ''.obs;
-  final currentState = ''.obs;
+  Rx<String?> currentDistrict = Rx<String?>(null);
+  Rx<String?> currentState = Rx<String?>(null);
   final currentVillageController = TextEditingController();
   final currentPinCodeController = TextEditingController();
 
-  RxString modeOfTransport = ''.obs;
+  Rx<String?> modeOfTransport = Rx<String?>(null);
   final transportRouteNumberController = TextEditingController();
   final transportPickupPointController = TextEditingController();
   final transportDropOffPointController = TextEditingController();
@@ -94,9 +98,9 @@ class CreateUserController extends GetxController {
   final studentIdController = TextEditingController();
   final rollNumberController = TextEditingController();
   final admissionNoController = TextEditingController();
-  RxString className = ''.obs;
-  RxString section = ''.obs;
-  RxString house = ''.obs;
+  Rx<String?> className = Rx<String?>(null);
+  Rx<String?> section = Rx<String?>(null);
+  Rx<String?> house = Rx<String?>(null);
   Rx<DateTime?> admissionDate = Rx<DateTime?>(null);
   final previousSchoolNameController = TextEditingController();
   final ambitionController = TextEditingController();
@@ -144,51 +148,51 @@ class CreateUserController extends GetxController {
 
   // --- Emergency Contact ---
   final emergencyFullNameController = TextEditingController();
-  final emergencyRelationshipController = TextEditingController();
+  Rx<String?> emergencyRelationship = Rx<String?>(null);
   final emergencyPhoneNumberController = TextEditingController();
   final emergencyEmailAddressController = TextEditingController();
 
   // --- Parent Details ---
   final fatherFullNameController = TextEditingController();
-  RxString fatherRelationshipToStudent = ''.obs;
-  RxString fatherOccupation = ''.obs;
+  Rx<String?> fatherRelationshipToStudent = Rx<String?>(null);
+  Rx<String?> fatherOccupation = Rx<String?>(null);
   final fatherPhoneNumberController = TextEditingController();
   final fatherEmailAddressController = TextEditingController();
-  final fatherHighestEducationLevel = ''.obs;
+  Rx<String?> fatherHighestEducationLevel = Rx<String?>(null);
   final fatherAnnualIncomeController = TextEditingController();
 
   final motherFullNameController = TextEditingController();
-  RxString motherRelationshipToStudent = ''.obs;
-  RxString motherOccupation = ''.obs;
+  Rx<String?> motherRelationshipToStudent = Rx<String?>(null);
+  Rx<String?> motherOccupation = Rx<String?>(null);
   final motherPhoneNumberController = TextEditingController();
   final motherEmailAddressController = TextEditingController();
-  final motherHighestEducationLevel = ''.obs;
+  Rx<String?> motherHighestEducationLevel = Rx<String?>(null);
   final motherAnnualIncomeController = TextEditingController();
 
   final guardianFullNameController = TextEditingController();
-  RxString guardianRelationshipToStudent = ''.obs;
-  final guardianOccupation = ''.obs;
+  Rx<String?> guardianRelationshipToStudent = Rx<String?>(null);
+  Rx<String?> guardianOccupation = Rx<String?>(null);
   final guardianPhoneNumberController = TextEditingController();
   final guardianEmailAddressController = TextEditingController();
-  final guardianHighestEducationLevel = ''.obs;
+  Rx<String?> guardianHighestEducationLevel = Rx<String?>(null);
   final guardianAnnualIncomeController = TextEditingController();
 
   // --- Favorites ---
-  RxString favoriteDish = ''.obs;
-  RxString favoriteSubject = ''.obs;
-  RxString favoriteTeacher = ''.obs;
-  RxString favoriteBook = ''.obs;
-  RxString favoriteSport = ''.obs;
-  RxString favoriteAthlete = ''.obs;
-  RxString favoriteMovie = ''.obs;
-  RxString favoriteCuisine = ''.obs;
-  RxString favoriteSinger = ''.obs;
-  RxString favoritePlaceToVisit = ''.obs;
-  RxString favoriteFestival = ''.obs;
-  RxString favoritePersonality = ''.obs;
-  RxString favoriteSeason = ''.obs;
-  RxString favoriteAnimal = ''.obs;
-  RxString favoriteQuote = ''.obs;
+  Rx<String?> favoriteDish = Rx<String?>(null);
+  Rx<String?> favoriteSubject = Rx<String?>(null);
+  Rx<String?> favoriteTeacher = Rx<String?>(null);
+  Rx<String?> favoriteBook = Rx<String?>(null);
+  Rx<String?> favoriteSport = Rx<String?>(null);
+  Rx<String?> favoriteAthlete = Rx<String?>(null);
+  Rx<String?> favoriteMovie = Rx<String?>(null);
+  Rx<String?> favoriteCuisine = Rx<String?>(null);
+  Rx<String?> favoriteSinger = Rx<String?>(null);
+  Rx<String?> favoritePlaceToVisit = Rx<String?>(null);
+  Rx<String?> favoriteFestival = Rx<String?>(null);
+  Rx<String?> favoritePersonality = Rx<String?>(null);
+  Rx<String?> favoriteSeason = Rx<String?>(null);
+  Rx<String?> favoriteAnimal = Rx<String?>(null);
+  Rx<String?> favoriteQuote = Rx<String?>(null);
 
   final formKey = GlobalKey<FormState>(); // Form Key
 
@@ -198,11 +202,10 @@ class CreateUserController extends GetxController {
   final degreeNameController = TextEditingController();
   final institutionNameController = TextEditingController();
   final passingYearController = TextEditingController();
-  final majorSubject = ''.obs;
+  Rx<String?> majorSubject = Rx<String?>(null);
 
-  final resultController = TextEditingController(); // Holds the result value
-  final resultType =
-  RxString('Percentage'); // Holds the result type (Grade, Percentage, CGPA)
+  final resultController = TextEditingController();
+  final resultType = RxString('Percentage');
   Rx<Qualification?> editingQualification = Rx<Qualification?>(null);
 
   // Optional school ID
@@ -253,7 +256,7 @@ class CreateUserController extends GetxController {
     Get.dialog(
       AlertDialog(
         title: Obx(
-              () => Text(
+          () => Text(
             editingQualification.value == null
                 ? 'Add Qualification'
                 : 'Edit Qualification',
@@ -328,9 +331,7 @@ class CreateUserController extends GetxController {
                           child: MyDropdownField(
                             labelText: 'Grade',
                             options: MyLists.gradeOptions,
-                            selectedValue: resultController.text.isEmpty
-                                ? null
-                                : resultController.text.obs,
+                            selectedValue: resultController.text.obs,
                             onSelected: (value) {
                               resultController.text = value!;
                             },
@@ -355,9 +356,9 @@ class CreateUserController extends GetxController {
             },
           ),
           Obx(
-                () => FilledButton(
+            () => FilledButton(
               child:
-              Text(editingQualification.value == null ? "Add" : "Update"),
+                  Text(editingQualification.value == null ? "Add" : "Update"),
               onPressed: () {
                 addQualification();
               },
@@ -381,7 +382,7 @@ class CreateUserController extends GetxController {
     degreeNameController.clear();
     institutionNameController.clear();
     passingYearController.clear();
-    majorSubject.value = '';
+    majorSubject.value = null;
     resultType.value = '';
     resultController.clear();
   }
@@ -392,493 +393,471 @@ class CreateUserController extends GetxController {
     // You might initialize some data here if needed
   }
 
-  bool validateForm() {
-    return formKey.currentState?.validate() ?? false;
+  // --- Validate All Fields ---
+  bool validateAllFields() {
+    bool personalInfo = _validatePersonalInformationFields();
+    bool loginInfo = _validateLoginInformationFields();
+    bool fatherDetails = _validateFatherDetailsFields();
+    bool motherDetails = _validateMotherDetailsFields();
+    bool addressDetails = _validateAddressDetailsFields();
+    bool emergencyContact = _validateEmergencyContactFields();
+    bool transportDetails = _validateTransportationDetailsFields();
+    bool physicalHealth = _validatePhysicalHealthInformationFields();
+    bool studentDetails = _validateStudentDetailsFields();
+    bool teacherDetails = _validateTeacherDetailsFields();
+    bool driverDetails = _validateDriverDetailsFields();
+    bool securityGuardDetails = _validateSecurityGuardDetailsFields();
+    bool maintenanceStaffDetails = _validateMaintenanceStaffDetailsFields();
+    bool adminDetails = _validateAdminDetailsFields();
+    bool schoolAdminDetails = _validateSchoolAdminDetailsFields();
+    bool directorDetails = _validateDirectorDetailsFields();
+    bool departmentHeadDetails = _validateDepartmentHeadDetailsFields();
+
+    personalInfoValid.value = personalInfo;
+    loginInfoValid.value = loginInfo;
+    fatherDetailsValid.value = fatherDetails;
+    motherDetailsValid.value = motherDetails;
+    addressDetailsValid.value = addressDetails;
+    emergencyContactValid.value = emergencyContact;
+    transportDetailsValid.value = transportDetails;
+    physicalHealthValid.value = physicalHealth;
+
+    return formKey.currentState!.validate() &&
+        personalInfo &&
+        loginInfo &&
+        fatherDetails &&
+        motherDetails &&
+        addressDetails &&
+        emergencyContact &&
+        transportDetails &&
+        physicalHealth &&
+        studentDetails &&
+        teacherDetails &&
+        driverDetails &&
+        securityGuardDetails &&
+        maintenanceStaffDetails &&
+        adminDetails &&
+        schoolAdminDetails &&
+        directorDetails &&
+        departmentHeadDetails;
   }
 
   // --- Validation Methods ---
   bool _validatePersonalInformationFields() {
-    bool isValid = true;
-
-    if (fullNameController.text.isEmpty) {
-      isValid = false;
-    }
-
-    if (phoneNoController.text.isEmpty) {
-      isValid = false;
-    }
-
-    if (dateOfBirth.value == null) {
-      // If date is required
-      isValid = false;
-    }
-
-    if (gender.value.isEmpty) {
-      isValid = false;
-    }
-
-    // More fields checks...
-    personalInfoValid(isValid);
-    return isValid;
+    return gender.value != null &&
+        gender.value!.isNotEmpty &&
+        religion.value != null &&
+        religion.value!.isNotEmpty &&
+        category.value != null &&
+        category.value!.isNotEmpty &&
+        nationality.value != null &&
+        nationality.value!.isNotEmpty &&
+        maritalStatus.value != null &&
+        maritalStatus.value!.isNotEmpty;
   }
 
-  bool _validatePhysicalHealthFields() {
-    bool isValid = true;
-
-    // Example validations:
-    if (heightController.text.isEmpty) {
-      isValid = false;
-    }
-    if (weightController.text.isEmpty) {
-      isValid = false;
-    }
-    if (bloodGroup.value.isEmpty) {
-      isValid = false;
-    }
-
-    physicalHealthValid(isValid);
-    return isValid;
+  bool _validatePhysicalHealthInformationFields() {
+    return heightController.text.isNotEmpty &&
+        weightController.text.isNotEmpty &&
+        bloodGroup.value != null &&
+        bloodGroup.value!.isNotEmpty;
   }
 
   bool _validateFatherDetailsFields() {
-    bool isValid = true;
-    //Check if fatherNameController is empty or not
-    if (fatherFullNameController.text.isEmpty) {
-      isValid = false;
-    }
-    fatherDetailsValid(isValid);
-    return isValid;
+    return fatherRelationshipToStudent.value != null &&
+        fatherRelationshipToStudent.value!.isNotEmpty &&
+        fatherOccupation.value != null &&
+        fatherOccupation.value!.isNotEmpty &&
+        fatherHighestEducationLevel.value != null &&
+        fatherHighestEducationLevel.value!.isNotEmpty;
   }
 
   bool _validateMotherDetailsFields() {
-    bool isValid = true;
-    //Check if motherNameController is empty or not
-    if (motherFullNameController.text.isEmpty) {
-      isValid = false;
-    }
-    motherDetailsValid(isValid);
-    return isValid;
-  }
-
-  bool _validateLoginInformationFields() {
-    bool isValid = true;
-    //Check if passwordController is empty or not
-    if (passwordController.text.isEmpty) {
-      isValid = false;
-    }
-    //Check if emailController is empty or not
-    if (emailController.text.isEmpty) {
-      isValid = false;
-    }
-    //Check if usernameController is empty or not
-    if (usernameController.text.isEmpty) {
-      isValid = false;
-    }
-
-    loginInfoValid(isValid);
-    return isValid;
-  }
-
-  bool _validateStudentDetailsFields() {
-    bool isValid = true;
-
-    if (rollNumberController.text.isEmpty) {
-      isValid = false;
-    }
-
-    if (admissionNoController.text.isEmpty) {
-      isValid = false;
-    }
-
-    if (className.value.isEmpty) {
-      isValid = false;
-    }
-
-    if (section.value.isEmpty) {
-      isValid = false;
-    }
-
-    studentDetailsValid(isValid);
-    return isValid;
+    return motherRelationshipToStudent.value != null &&
+        motherRelationshipToStudent.value!.isNotEmpty &&
+        motherOccupation.value != null &&
+        motherOccupation.value!.isNotEmpty &&
+        motherHighestEducationLevel.value != null &&
+        motherHighestEducationLevel.value!.isNotEmpty;
   }
 
   bool _validateAddressDetailsFields() {
-    bool isValid = true;
-
-    if (permanentHouseAddressController.text.isEmpty) {
-      isValid = false;
-    }
-    if (permanentCityController.text.isEmpty) {
-      isValid = false;
-    }
-    if (permanentDistrict.value.isEmpty) {
-      isValid = false;
-    }
-    if (permanentState.value.isEmpty) {
-      isValid = false;
-    }
-    if (permanentPinCodeController.text.isEmpty) {
-      isValid = false;
-    }
-
-    if (!isSameAsPermanent.value) {
-      // Only validate current address if it is different
-      if (currentHouseAddressController.text.isEmpty) {
-        isValid = false;
-      }
-      if (currentCityController.text.isEmpty) {
-        isValid = false;
-      }
-      if (currentDistrict.value.isEmpty) {
-        isValid = false;
-      }
-      if (currentState.value.isEmpty) {
-        isValid = false;
-      }
-      if (currentPinCodeController.text.isEmpty) {
-        isValid = false;
-      }
-    }
-
-    addressDetailsValid(isValid);
-    return isValid;
+    return permanentDistrict.value != null &&
+        permanentDistrict.value!.isNotEmpty &&
+        permanentState.value != null &&
+        permanentState.value!.isNotEmpty;
   }
 
   bool _validateEmergencyContactFields() {
-    bool isValid = true;
-
-    if (emergencyFullNameController.text.isEmpty) {
-      isValid = false;
-    }
-    if (emergencyPhoneNumberController.text.isEmpty) {
-      isValid = false;
-    }
-    if (emergencyRelationshipController.text.isEmpty) {
-      isValid = false;
-    }
-
-    emergencyContactValid(isValid);
-    return isValid;
+    return emergencyRelationship.value != null &&
+        emergencyRelationship.value!.isNotEmpty;
   }
 
-  bool _validateTransportDetailsFields() {
-    bool isValid = true;
-
-    // If school transport is selected, all the school transport fields should have values
-    if (modeOfTransport.value == "School Transport") {
-      if (transportRouteNumberController.text.isEmpty) {
-        isValid = false;
-      }
-      if (transportPickupPointController.text.isEmpty) {
-        isValid = false;
-      }
-      if (transportDropOffPointController.text.isEmpty) {
-        isValid = false;
-      }
-      if (transportVehicleNumberController.text.isEmpty) {
-        isValid = false;
-      }
-      if (transportFareController.text.isEmpty) {
-        isValid = false;
+  bool _validateTransportationDetailsFields() {
+    if (modeOfTransport.value == null) {
+      return false;
+    } else {
+      if (modeOfTransport.value == 'School Transport') {
+        return transportRouteNumberController.text.isNotEmpty &&
+            transportPickupPointController.text.isNotEmpty &&
+            transportDropOffPointController.text.isNotEmpty &&
+            transportVehicleNumberController.text.isNotEmpty &&
+            transportFareController.text.isNotEmpty;
+      } else {
+        return true;
       }
     }
-
-    transportDetailsValid(isValid);
-    return isValid;
   }
 
-  bool _validateAccountDetailsFields() {
-    bool isValid = true;
+  bool _validateLoginInformationFields() {
+    return usernameController.text.isNotEmpty &&
+        emailController.text.isNotEmpty &&
+        passwordController.text.isNotEmpty;
+  }
 
-    if (usernameController.text.isEmpty) {
-      isValid = false;
-    }
-    if (emailController.text.isEmpty) {
-      isValid = false;
-    }
-    if (passwordController.text.isEmpty) {
-      isValid = false;
-    }
-
-    accountDetailsValid(isValid);
-    return isValid;
+  bool _validateStudentDetailsFields() {
+    return !selectedRoles.contains(UserRole.student.name) ||
+        (rollNumberController.text.isNotEmpty &&
+            admissionNoController.text.isNotEmpty &&
+            className.value != null &&
+            className.value!.isNotEmpty &&
+            section.value != null &&
+            section.value!.isNotEmpty);
   }
 
   bool _validateTeacherDetailsFields() {
-    bool isValid = true;
-
-    if (subjectsTaught.isEmpty) {
-      isValid = false;
-    }
-
-    if (joiningDate.value == null) {
-      isValid = false;
-    }
-
-    teacherDetailsValid(isValid);
-    return isValid;
+    return !selectedRoles.contains(UserRole.teacher.name) ||
+        subjectsTaught.isNotEmpty;
   }
 
   bool _validateDriverDetailsFields() {
-    bool isValid = true;
-
-    if (licenseNumberController.text.isEmpty) {
-      isValid = false;
-    }
-
-    driverDetailsValid(isValid);
-    return isValid;
+    return !selectedRoles.contains(UserRole.driver.name) ||
+        licenseNumberController.text.isNotEmpty;
   }
 
-  bool _validatePersonalInterestsFields() {
-    personalInterestsValid(true); // Always valid, no required fields
-    return true;
+  bool _validateSecurityGuardDetailsFields() {
+    return !selectedRoles.contains(UserRole.securityGuard.name) ||
+        assignedAreaController.text.isNotEmpty;
   }
 
-  // Function to add user data to Firestore (replace with your Firestore logic)
-  Future<void> addUserToFirestore() async {
-    if (validateForm()) {
-      try {
-        // --- Address ---
-        final permanentAddress = Address(
-          houseAddress: permanentHouseAddressController.text,
-          city: permanentCityController.text,
-          district: permanentDistrict.value,
-          state: permanentState.value,
-          village: permanentVillageController.text,
-          pinCode: permanentPinCodeController.text,
-        );
+  bool _validateMaintenanceStaffDetailsFields() {
+    return !selectedRoles.contains(UserRole.maintenanceStaff.name) ||
+        maintenanceResponsibilities.isNotEmpty;
+  }
 
-        final currentAddress = Address(
-          houseAddress: currentHouseAddressController.text,
-          city: currentCityController.text,
-          district: currentDistrict.value,
-          state: currentState.value,
-          village: currentVillageController.text,
-          pinCode: currentPinCodeController.text,
-        );
+  bool _validateAdminDetailsFields() {
+    return !selectedRoles.contains(UserRole.admin.name) ||
+        (adminPermissions.isNotEmpty &&
+            assignedModules.isNotEmpty &&
+            manageableSchools.isNotEmpty);
+  }
 
-        // --- Transport Details ---
-        final transportDetails = TransportDetails(
-          routeNumber: transportRouteNumberController.text,
-          pickupPoint: transportPickupPointController.text,
-          dropOffPoint: transportDropOffPointController.text,
-          vehicleNumber: transportVehicleNumberController.text,
-          fare: double.tryParse(transportFareController.text),
-        );
+  bool _validateSchoolAdminDetailsFields() {
+    return !selectedRoles.contains(UserRole.schoolAdmin.name) ||
+        (schoolAdminPermissions.isNotEmpty &&
+            schoolAdminAssignedModules.isNotEmpty);
+  }
 
-        // --- Emergency Contact ---
-        final emergencyContact = EmergencyContact(
-          fullName: emergencyFullNameController.text,
-          relationship: emergencyRelationshipController.text,
-          phoneNumber: emergencyPhoneNumberController.text,
-          emailAddress: emergencyEmailAddressController.text,
-        );
+  bool _validateDirectorDetailsFields() {
+    return !selectedRoles.contains(UserRole.director.name) ||
+        (directorSchools.isNotEmpty &&
+            yearsInManagementController.text.isNotEmpty &&
+            directorPermissions.isNotEmpty);
+  }
 
-        // --- Parent Details ---
-        final fatherDetails = GuardianDetails(
-          fullName: fatherFullNameController.text,
-          relationshipToStudent: fatherRelationshipToStudent.value,
-          occupation: fatherOccupation.value,
-          phoneNumber: fatherPhoneNumberController.text,
-          emailAddress: fatherEmailAddressController.text,
-          highestEducationLevel: fatherHighestEducationLevel.value,
-          annualIncome: fatherAnnualIncomeController.text,
-        );
+  bool _validateDepartmentHeadDetailsFields() {
+    return !selectedRoles.contains(UserRole.departmentHead.name) ||
+        (departmentController.text.isNotEmpty &&
+            yearsAsHeadController.text.isNotEmpty &&
+            departmentResponsibilities.isNotEmpty);
+  }
 
-        final motherDetails = GuardianDetails(
-          fullName: motherFullNameController.text,
-          relationshipToStudent: motherRelationshipToStudent.value,
-          occupation: motherOccupation.value,
-          phoneNumber: motherPhoneNumberController.text,
-          emailAddress: motherEmailAddressController.text,
-          highestEducationLevel: motherHighestEducationLevel.value,
-          annualIncome: motherAnnualIncomeController.text,
-        );
+  // 1. Send OTP and Navigate to OTP Screen
+  Future<void> _sendOtpAndNavigate(String phoneNumber) async {
+    FirebaseAuthService firebaseAuth = FirebaseAuthService();
+    //send otp to the number
+    firebaseAuth.sendOtp("+91${phoneNoController.text.trim()}",
+        (newVerificationId, resendToken) {
+      //assign verification id
+      verificationId.value = newVerificationId;
+      print("OTP Sent! Verification ID: ${verificationId.value}");
 
-        // --- Favorites ---
-        final favorites = Favorite(
-          dish: favoriteDish.value,
-          subject: favoriteSubject.value,
-          teacher: favoriteTeacher.value,
-          book: favoriteBook.value,
-          sport: favoriteSport.value,
-          athlete: favoriteAthlete.value,
-          movie: favoriteMovie.value,
-          cuisine: favoriteCuisine.value,
-          singer: favoriteSinger.value,
-          favoritePlaceToVisit: favoritePlaceToVisit.value,
-          festival: favoriteFestival.value,
-          personality: favoritePersonality.value,
-          season: favoriteSeason.value,
-          animal: favoriteAnimal.value,
-          quote: favoriteQuote.value,
-        );
+      Get.to(
+        //Present OtpScreen after getting verificationId
+        () => OtpScreen(
+          mobileNo: phoneNoController.text.trim(),
+          verificationId: verificationId.value, //pass new verification id
+          onOtpEntered: (otp) async {
+            // Make the onOtpEntered async
+            try {
+              final userCredential = await firebaseAuth.verifyOtpAndRegister(
+                verificationId: verificationId.value,
+                otp: otp,
+                email: emailController.text.trim(),
+                password: passwordController.text.trim(),
+                displayName: fullNameController.text.trim(),
+                photoUrl:
+                    "", //profileImageUrl is assigned with empty string and it is never used.
+              );
 
-        // --- Role-Based Details ---
-        final studentDetails =
-        selectedRoles.contains(UserRole.student.name)
-            ? StudentDetails(
-          studentId: studentIdController.text,
-          rollNumber: rollNumberController.text,
-          admissionNo: admissionNoController.text,
-          className: className.value,
-          section: section.value,
-          house: house.value,
-          admissionDate: admissionDate.value,
-          previousSchoolName: previousSchoolNameController.text,
-          averageMarks: 0,
-          ambition: ambitionController.text,
-        )
-            : null;
+              if (userCredential != null) {
+                print("User Registered: ${userCredential.user?.displayName}");
 
-        final teacherDetails =
-        selectedRoles.contains(UserRole.teacher.name)
-            ? TeacherDetails(
-          teacherId: teacherIdController.text,
-          subjectsTaught: subjectsTaught.toList(),
-          experience: experienceController.text,
-        )
-            : null;
+                // ***NOW*** create the Firestore user document:
+                UserModelMain user =
+                    buildUserModel(userCredential.user!.uid); // Pass the userId
+                UserRepository userRepository = UserRepository();
+                await userRepository.createUser(user);
 
-        final securityGuardDetails = selectedRoles
-            .contains(UserRole.securityGuard.name)
+                // ***NAVIGATE TO SUCCESS SCREEN***
+                Get.offAll(() => SuccessScreen(
+                    user: user));
+              } else {
+                Get.snackbar("Error", "Firebase Authentication failed.",
+                    backgroundColor: Colors.red);
+              }
+            } catch (authError) {
+              print("Authentication error: $authError");
+              Get.snackbar("Error", "Authentication failed: $authError",
+                  backgroundColor: Colors.red);
+            }
+          },
+        ),
+      );
+    });
+  }
+
+  // 2. Build UserModel
+  UserModelMain buildUserModel(String userId) {
+    // --- Address ---
+    final permanentAddress = Address(
+      houseAddress: permanentHouseAddressController.text,
+      city: permanentCityController.text,
+      district: permanentDistrict.value,
+      state: permanentState.value,
+      village: permanentVillageController.text,
+      pinCode: permanentPinCodeController.text,
+    );
+
+    final currentAddress = Address(
+      houseAddress: currentHouseAddressController.text,
+      city: currentCityController.text,
+      district: currentDistrict.value,
+      state: currentState.value,
+      village: currentVillageController.text,
+      pinCode: currentPinCodeController.text,
+    );
+
+    // --- Transport Details ---
+    final transportDetails = TransportDetails(
+      routeNumber: transportRouteNumberController.text,
+      pickupPoint: transportPickupPointController.text,
+      dropOffPoint: transportDropOffPointController.text,
+      vehicleNumber: transportVehicleNumberController.text,
+      fare: double.tryParse(transportFareController.text),
+    );
+
+    // --- Emergency Contact ---
+    final emergencyContact = EmergencyContact(
+      fullName: emergencyFullNameController.text,
+      relationship: emergencyRelationship.value,
+      phoneNumber: emergencyPhoneNumberController.text,
+      emailAddress: emergencyEmailAddressController.text,
+    );
+
+    // --- Parent Details ---
+    final fatherDetails = GuardianDetails(
+      fullName: fatherFullNameController.text,
+      relationshipToStudent: fatherRelationshipToStudent.value,
+      occupation: fatherOccupation.value,
+      phoneNumber: fatherPhoneNumberController.text,
+      emailAddress: fatherEmailAddressController.text,
+      highestEducationLevel: fatherHighestEducationLevel.value,
+      annualIncome: fatherAnnualIncomeController.text,
+    );
+
+    final motherDetails = GuardianDetails(
+      fullName: motherFullNameController.text,
+      relationshipToStudent: motherRelationshipToStudent.value,
+      occupation: motherOccupation.value,
+      phoneNumber: motherPhoneNumberController.text,
+      emailAddress: motherEmailAddressController.text,
+      highestEducationLevel: motherHighestEducationLevel.value,
+      annualIncome: motherAnnualIncomeController.text,
+    );
+
+    // --- Favorites ---
+    final favorites = Favorite(
+      dish: favoriteDish.value,
+      subject: favoriteSubject.value,
+      teacher: favoriteTeacher.value,
+      book: favoriteBook.value,
+      sport: favoriteSport.value,
+      athlete: favoriteAthlete.value,
+      movie: favoriteMovie.value,
+      cuisine: favoriteCuisine.value,
+      singer: favoriteSinger.value,
+      favoritePlaceToVisit: favoritePlaceToVisit.value,
+      festival: favoriteFestival.value,
+      personality: favoritePersonality.value,
+      season: favoriteSeason.value,
+      animal: favoriteAnimal.value,
+      quote: favoriteQuote.value,
+    );
+
+    // --- Role-Based Details ---
+    final studentDetails = selectedRoles.contains(UserRole.student.name)
+        ? StudentDetails(
+            studentId: studentIdController.text,
+            rollNumber: rollNumberController.text,
+            admissionNo: admissionNoController.text,
+            className: className.value,
+            section: section.value,
+            house: house.value,
+            admissionDate: admissionDate.value,
+            previousSchoolName: previousSchoolNameController.text,
+            averageMarks: 0,
+            ambition: ambitionController.text,
+          )
+        : null;
+
+    final teacherDetails = selectedRoles.contains(UserRole.teacher.name)
+        ? TeacherDetails(
+            teacherId: teacherIdController.text,
+            subjectsTaught: subjectsTaught.toList(),
+            experience: experienceController.text,
+          )
+        : null;
+
+    final securityGuardDetails =
+        selectedRoles.contains(UserRole.securityGuard.name)
             ? SecurityGuardDetails(
-          assignedArea: assignedAreaController.text,
-        )
+                assignedArea: assignedAreaController.text,
+              )
             : null;
 
-        final maintenanceStaffDetails = selectedRoles
-            .contains(UserRole.maintenanceStaff.name)
+    final maintenanceStaffDetails =
+        selectedRoles.contains(UserRole.maintenanceStaff.name)
             ? MaintenanceStaffDetails(
-          responsibilities: maintenanceResponsibilities.toList(),
-        )
+                responsibilities: maintenanceResponsibilities.toList(),
+              )
             : null;
 
-        final driverDetails = selectedRoles.contains(UserRole.driver.name)
-            ? DriverDetails(
-          licenseNumber: licenseNumberController.text,
-          routesAssigned: routesAssigned.toList(),
-        )
-            : null;
+    final driverDetails = selectedRoles.contains(UserRole.driver.name)
+        ? DriverDetails(
+            licenseNumber: licenseNumberController.text,
+            routesAssigned: routesAssigned.toList(),
+          )
+        : null;
 
-        final adminDetails = selectedRoles.contains(UserRole.admin.name)
-            ? AdminDetails(
-          permissions: adminPermissions.toList(),
-          assignedModules: assignedModules.toList(),
-          manageableSchools: manageableSchools.toList(),
-        )
-            : null;
+    final adminDetails = selectedRoles.contains(UserRole.admin.name)
+        ? AdminDetails(
+            permissions: adminPermissions.toList(),
+            assignedModules: assignedModules.toList(),
+            manageableSchools: manageableSchools.toList(),
+          )
+        : null;
 
-        final schoolAdminDetails = selectedRoles
-            .contains(UserRole.schoolAdmin.name)
-            ? SchoolAdminDetails(
-          permissions: schoolAdminPermissions.toList(),
-          assignedModules: schoolAdminAssignedModules.toList(),
-        )
-            : null;
+    final schoolAdminDetails = selectedRoles.contains(UserRole.schoolAdmin.name)
+        ? SchoolAdminDetails(
+            permissions: schoolAdminPermissions.toList(),
+            assignedModules: schoolAdminAssignedModules.toList(),
+          )
+        : null;
 
-        final directorDetails = selectedRoles.contains(UserRole.director.name)
-            ? DirectorDetails(
-          schools: directorSchools.toList(),
-          yearsInManagement:
-          int.tryParse(yearsInManagementController.text),
-          permissions: directorPermissions.toList(),
-        )
-            : null;
+    final directorDetails = selectedRoles.contains(UserRole.director.name)
+        ? DirectorDetails(
+            schools: directorSchools.toList(),
+            yearsInManagement: int.tryParse(yearsInManagementController.text),
+            permissions: directorPermissions.toList(),
+          )
+        : null;
 
-        final departmentHeadDetails = selectedRoles
-            .contains(UserRole.departmentHead.name)
+    final departmentHeadDetails =
+        selectedRoles.contains(UserRole.departmentHead.name)
             ? DepartmentHeadDetails(
-          department: departmentController.text,
-          yearsAsHead: int.tryParse(yearsAsHeadController.text),
-          responsibilities: departmentResponsibilities.toList(),
-        )
+                department: departmentController.text,
+                yearsAsHead: int.tryParse(yearsAsHeadController.text),
+                responsibilities: departmentResponsibilities.toList(),
+              )
             : null;
 
-        // --- Create UserModelMain instance ---
-        final user = UserModelMain(
-          userId: userId,
-          username: usernameController.text,
-          email: emailController.text,
-          accountStatus: 'pending',
-          fullName: fullNameController.text,
-          profileImageUrl: profileImageUrl,
-          dob: dateOfBirth.value,
-          gender: gender.value,
-          religion: religion.value,
-          category: category.value,
-          phoneNo: phoneNoController.text,
-          profileDescription: profileDescriptionController.text,
-          languagesSpoken: languagesSpoken.toList(),
-          hobbies: hobbies.toList(),
-          nationality: nationality.value,
-          height: double.tryParse(heightController.text),
-          weight: double.tryParse(weightController.text),
-          bloodGroup: bloodGroup.value,
-          isPhysicalDisability: isPhysicalDisability.value,
-          maritalStatus: maritalStatus.value,
-          permanentAddress: permanentAddress,
-          currentAddress: currentAddress,
-          modeOfTransport: modeOfTransport.value,
-          transportDetails: transportDetails,
-          createdAt: DateTime.now(),
-          roles: selectedRoles
-              .map((roleName) =>
+    // --- Create UserModelMain instance ---
+    final user = UserModelMain(
+      userId: userId,
+      username: usernameController.text,
+      email: emailController.text,
+      accountStatus: 'pending',
+      fullName: fullNameController.text,
+      profileImageUrl: "", //profileImageUrl removed to prevent confusion
+      dob: dateOfBirth.value,
+      gender: gender.value,
+      religion: religion.value,
+      category: category.value,
+      phoneNo: phoneNoController.text,
+      profileDescription: profileDescriptionController.text,
+      languagesSpoken: languagesSpoken.toList(),
+      hobbies: hobbies.toList(),
+      nationality: nationality.value,
+      height: double.tryParse(heightController.text),
+      weight: double.tryParse(weightController.text),
+      bloodGroup: bloodGroup.value,
+      isPhysicalDisability: isPhysicalDisability.value,
+      maritalStatus: maritalStatus.value,
+      permanentAddress: permanentAddress,
+      currentAddress: currentAddress,
+      modeOfTransport: modeOfTransport.value,
+      transportDetails: transportDetails,
+      createdAt: DateTime.now(),
+      roles: selectedRoles
+          .map((roleName) =>
               UserRole.values.firstWhere((role) => role.name == roleName))
-              .toList(),
-          studentDetails:
-          selectedRoles.contains(UserRole.student.name)
-              ? studentDetails
-              : null,
-          teacherDetails:
-          selectedRoles.contains(UserRole.teacher.name)
-              ? teacherDetails
-              : null,
-          directorDetails:
-          selectedRoles.contains(UserRole.director.name)
-              ? directorDetails
-              : null,
-          adminDetails: selectedRoles.contains(UserRole.admin.name)
-              ? adminDetails
-              : null,
-          securityGuardDetails: selectedRoles
-              .contains(UserRole.securityGuard.name)
-              ? securityGuardDetails
-              : null,
-          maintenanceStaffDetails: selectedRoles
-              .contains(UserRole.maintenanceStaff.name)
+          .toList(),
+      studentDetails:
+          selectedRoles.contains(UserRole.student.name) ? studentDetails : null,
+      teacherDetails:
+          selectedRoles.contains(UserRole.teacher.name) ? teacherDetails : null,
+      directorDetails: selectedRoles.contains(UserRole.director.name)
+          ? directorDetails
+          : null,
+      adminDetails:
+          selectedRoles.contains(UserRole.admin.name) ? adminDetails : null,
+      securityGuardDetails: selectedRoles.contains(UserRole.securityGuard.name)
+          ? securityGuardDetails
+          : null,
+      maintenanceStaffDetails:
+          selectedRoles.contains(UserRole.maintenanceStaff.name)
               ? maintenanceStaffDetails
               : null,
-          driverDetails: selectedRoles.contains(UserRole.driver.name)
-              ? driverDetails
-              : null,
-          schoolAdminDetails: selectedRoles
-              .contains(UserRole.schoolAdmin.name)
-              ? schoolAdminDetails
-              : null,
-          departmentHeadDetails: selectedRoles
-              .contains(UserRole.departmentHead.name)
+      driverDetails:
+          selectedRoles.contains(UserRole.driver.name) ? driverDetails : null,
+      schoolAdminDetails: selectedRoles.contains(UserRole.schoolAdmin.name)
+          ? schoolAdminDetails
+          : null,
+      departmentHeadDetails:
+          selectedRoles.contains(UserRole.departmentHead.name)
               ? departmentHeadDetails
               : null,
-          emergencyContact: emergencyContact,
-          fatherDetails: fatherDetails,
-          motherDetails: motherDetails,
-          favorites: favorites,
-          points: 0,
-          performanceRating: 0,
-          qualifications: qualifications.toList(),
-          joiningDate: joiningDate.value,
-          schoolId: schoolIdController.text.isNotEmpty
-              ? schoolIdController.text
-              : null,
-          userAttendance: null,
-        );
+      emergencyContact: emergencyContact,
+      fatherDetails: fatherDetails,
+      motherDetails: motherDetails,
+      favorites: favorites,
+      points: 0,
+      performanceRating: 0,
+      qualifications: qualifications.toList(),
+      joiningDate: joiningDate.value,
+      schoolId:
+          schoolIdController.text.isNotEmpty ? schoolIdController.text : null,
+      userAttendance: null,
+    );
+    return user;
+  }
 
-        // Replace with your actual Firestore write operation
-        print("User data: ${user.toMap()}");
-        Get.snackbar("Success", "User data added to Firestore successfully!",
-            backgroundColor: Colors.green);
+  // 3. Combined Function to Add User
+  Future<void> addUserToFirestore() async {
+    if (validateAllFields()) {
+      try {
+        await _sendOtpAndNavigate(phoneNoController.text.trim());
       } catch (e) {
         print("Error adding user to Firestore: $e");
         Get.snackbar("Error", "Failed to add user data: $e",
@@ -927,7 +906,6 @@ class CreateUserController extends GetxController {
     departmentController.dispose();
     yearsAsHeadController.dispose();
     emergencyFullNameController.dispose();
-    emergencyRelationshipController.dispose();
     emergencyPhoneNumberController.dispose();
     emergencyEmailAddressController.dispose();
     fatherFullNameController.dispose();

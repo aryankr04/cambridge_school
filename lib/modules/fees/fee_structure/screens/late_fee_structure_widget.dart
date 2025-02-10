@@ -52,6 +52,7 @@ class LateFeeStructureWidget extends StatelessWidget {
                   onSelected: (selectedValue) {
                     controller.frequency.value = selectedValue!;
                   },
+                  selectedValue: controller.frequency,
                 ),
                 const SizedBox(
                   height: MySizes.md,
