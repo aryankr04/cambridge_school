@@ -86,14 +86,8 @@ flutter:
 
   #--------------- LOCAL ASSETS ------------------#
   assets:
+    - assets/images/illustrations/
     - assets/logos/
-    - assets/animations/loading_animation.json
-    - assets/logos/csd.png
-    - assets/icons/role_icon/student.svg
-    - assets/icons/role_icon/teacher.svg
-    - assets/images/illustrations/signup.svg
-    - assets/images/illustrations/sign_up_cuate.svg
-    - assets/images/illustrations/verify_otp_illu.svg
 
   #--------------- LOCAL FONTS ------------------#
   fonts:

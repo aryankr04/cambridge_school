@@ -1,85 +1,14 @@
-import 'package:cambridge_school/app/modules/user_management/models/user_model.dart';
-import 'package:cambridge_school/app/modules/user_management/repositories/user_repository.dart';
-import 'package:cambridge_school/app/modules/user_management/screens/student_user_list.dart';
-import 'package:cambridge_school/app/modules/user_management/widgets/user_card_widget.dart';
-import 'package:cambridge_school/core/utils/constants/lists.dart';
-import 'package:cambridge_school/core/widgets/dropdown_field.dart';
-import 'package:cambridge_school/core/widgets/selection_widget.dart';
+// user_management_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/utils/constants/dynamic_colors.dart';
-import '../../../../core/utils/constants/sizes.dart';
-import '../../../../core/utils/theme/widget_themes/tab_bar_theme.dart';
-import '../../../../core/widgets/dialog_dropdown.dart';
-import '../../../../core/widgets/search_field.dart';
-import '../models/class_repository_model.dart';
 
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final Theme child;
+import 'package:cambridge_school/core/utils/constants/dynamic_colors.dart';
+import 'package:cambridge_school/core/utils/theme/widget_themes/tab_bar_theme.dart';
+import 'package:cambridge_school/app/modules/user_management/controllers/user_management_controller.dart';
+import 'package:cambridge_school/app/modules/user_management/screens/student_tabview.dart';
 
-  _SliverAppBarDelegate({required this.child});
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: child,
-    );
-  }
-
-  @override
-  double get maxExtent => kToolbarHeight;
-
-  @override
-  double get minExtent => kToolbarHeight;
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return false;
-  }
-}
-
-class UserManagementScreen extends StatefulWidget {
+class UserManagementScreen extends GetView<UserManagementController> {
   const UserManagementScreen({super.key});
-
-  @override
-  State<UserManagementScreen> createState() => _UserManagementScreenState();
-}
-
-class _UserManagementScreenState extends State<UserManagementScreen>
-    with TickerProviderStateMixin {
-  late TabController tabController;
-  final RxString selectedClass = ''.obs;
-  final RxString selectedSection = ''.obs;
-  final RxList<UserModel> students = <UserModel>[].obs;
-
-  @override
-  void initState() {
-    tabController = TabController(length: 6, vsync: this);
-    super.initState();
-    fetchStudentData();
-  }
-
-  Future<void> fetchStudentData() async {}
-
-  Widget _buildStickyHeader(String text, {double indent = 8.0}) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(indent, 8.0, 8.0, 4.0),
-      color: Colors.grey[200], // Or any color you want for the header
-      width: double.infinity, // Make it span the width
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    tabController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,21 +29,11 @@ class _UserManagementScreenState extends State<UserManagementScreen>
         body: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return [
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: const EdgeInsets.all(MySizes.lg),
-                  child: MySearchField(
-                    hintText: 'Search users...',
-                    onSelected: (String value) {},
-                  ),
-                ),
-              ),
               SliverPersistentHeader(
                 delegate: _SliverAppBarDelegate(
                   child: Theme(
                     data: ThemeData(
-                      tabBarTheme:
-                          MyTabBarTheme.defaultTabBarTheme.copyWith(
+                      tabBarTheme: MyTabBarTheme.defaultTabBarTheme.copyWith(
                         indicatorColor: MyDynamicColors.activeBlue,
                         unselectedLabelColor: Colors.grey,
                         labelColor: MyDynamicColors.activeBlue,
@@ -125,29 +44,32 @@ class _UserManagementScreenState extends State<UserManagementScreen>
                       ),
                     ),
                     child: TabBar(
-                      controller: tabController,
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.center,
-                        tabs: const [
-                          Tab(
-                            text: 'Students',
-                          ),
-                          Tab(
-                            text: 'Teachers',
-                          ),
-                          Tab(
-                            text: 'Directors',
-                          ),
-                          Tab(
-                            text: 'Admins',
-                          ),
-                          Tab(
-                            text: 'Staff',
-                          ),
-                          Tab(
-                            text: 'Drivers',
-                          ),
-                        ]),
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.center,
+                      onTap: (index) {
+                        controller.changeTab(index);
+                      },
+                      tabs: const [
+                        Tab(
+                          text: 'Students',
+                        ),
+                        Tab(
+                          text: 'Teachers',
+                        ),
+                        Tab(
+                          text: 'Directors',
+                        ),
+                        Tab(
+                          text: 'Admins',
+                        ),
+                        Tab(
+                          text: 'Staff',
+                        ),
+                        Tab(
+                          text: 'Drivers',
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 pinned: true,
@@ -156,18 +78,81 @@ class _UserManagementScreenState extends State<UserManagementScreen>
             ];
           },
           body: TabBarView(
-            controller: tabController,
+            physics: const NeverScrollableScrollPhysics(), // Disable swipe
             children: [
-              StudentListScreen(),
-              Placeholder(),
-              Placeholder(),
-              Placeholder(),
-              Placeholder(),
-              Placeholder(),
+              UserTabView(
+                rosterType: 'student',
+                title: 'Students',
+                filterOptions: const ['Class', 'Section', 'Name'], // Add your student-specific filter options
+                userList: controller.studentList,
+                onSearchPressed: () => controller.fetchStudents(), // Call fetchStudents
+              ),
+              UserTabView(
+                rosterType: 'teacher',
+                title: 'Teachers',
+                filterOptions: const ['Subject', 'Name', 'Experience'], // Add your teacher-specific filter options
+                userList: controller.teacherList,
+                onSearchPressed: () => controller.fetchTeachers(), // Call fetchTeachers
+              ),
+              UserTabView(
+                rosterType: 'director',  // Director tab
+                title: 'Directors',
+                filterOptions: const ['School', 'Name'], // Add director-specific filter options
+                userList: controller.directorList,
+                onSearchPressed: () => controller.fetchDirectors(), // Call fetchDirectors
+              ),
+              UserTabView(
+                rosterType: 'admin',
+                title: 'Admins',
+                filterOptions: const ['Role', 'Name'], // Add admin-specific filter options
+                userList: controller.adminList,
+                onSearchPressed: () => controller.fetchAdmins(), // Call fetchAdmins
+              ),
+              UserTabView(
+                rosterType: 'staff',
+                title: 'Staff',
+                filterOptions: const ['Department', 'Name'], // Add staff-specific filter options
+                userList: controller.staffList,
+                onSearchPressed: () => controller.fetchStaff(), // Call fetchStaff
+              ),
+              UserTabView(
+                rosterType: 'driver',  // Driver tab
+                title: 'Drivers',
+                filterOptions: const ['Route', 'Name'], // Add driver-specific filter options
+                userList: controller.driverList,
+                onSearchPressed: () => controller.fetchDrivers(),  // Call fetchDrivers
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+// Sliver App Bar Delegate (Extracted for better organization)
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  final Theme child;
+
+  const _SliverAppBarDelegate({required this.child});
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: child,
+    );
+  }
+
+  @override
+  double get maxExtent => kToolbarHeight;
+
+  @override
+  double get minExtent => kToolbarHeight;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return false;
   }
 }

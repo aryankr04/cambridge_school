@@ -1,6 +1,7 @@
-import '../../../attendance/user_attendance_model.dart';
 
 // Main User Profile
+import '../../attendance/user_attendance_model.dart';
+
 class UserModel {
   // 1️⃣ Basic Information
   final String userId;

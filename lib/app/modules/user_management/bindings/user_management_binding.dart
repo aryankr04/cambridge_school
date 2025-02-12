@@ -1,5 +1,6 @@
-import 'package:cambridge_school/app/modules/user_management/controllers/user_management_controller.dart';
+// user_management_binding.dart
 import 'package:get/get.dart';
+import 'package:cambridge_school/app/modules/user_management/controllers/user_management_controller.dart';
 
 class UserManagementBinding extends Bindings {
   @override
@@ -7,3 +8,9 @@ class UserManagementBinding extends Bindings {
     Get.lazyPut<UserManagementController>(() => UserManagementController());
   }
 }
+
+
+
+
+
+

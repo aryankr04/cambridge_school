@@ -39,43 +39,4 @@ class LoginController extends GetxController {
     super.onClose();
   }
 
-  void showSelectRoleDialog() {
-    showDialog(
-      context: Get.context!,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Select Role',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              MyIconButton(
-                  height: Get.width * 0.25,
-                  width: Get.width * 0.25,
-                  content:
-                      SvgPicture.asset('assets/icons/role_icon/student.svg'),
-                  text: 'Student',
-                  onPressed: () {
-                  //   MyHelperFunctions.navigateToScreen(
-                  //       context, const AddStudent());
-                   }),
-              // SizedBox(width: 24,),
-              MyIconButton(
-                  height: Get.width * 0.25,
-                  width: Get.width * 0.25,
-                  content:
-                      SvgPicture.asset('assets/icons/role_icon/teacher.svg'),
-                  text: 'Employee',
-                  onPressed: () {
-                    // SchoolHelperFunctions.navigateToScreen(
-                    //     context, const AddEmployee());
-                  }),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

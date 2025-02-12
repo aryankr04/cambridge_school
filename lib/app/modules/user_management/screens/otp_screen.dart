@@ -52,7 +52,7 @@ class OtpScreen extends GetView<OtpController> {
                 width: Get.width * 0.6,
                 height: Get.width * 0.6,
                 child: SvgPicture.asset(
-                    'assets/images/illustrations/verify_otp_illu.svg'),
+                    'assets/images/illustrations/verify_otp.svg'),
               ),
               const SizedBox(height: MySizes.lg),
               Text(

@@ -1,0 +1,12 @@
+# flutter_native_splash-development.yaml
+flutter_native_splash:
+  color: "#ffffff"             # Background color (light mode)
+  image: assets/logos/csd.png   # Image to display (light mode)
+  branding: assets/logos/csd.png # Small logo/text at the bottom (light mode)
+  color_dark: "#121212"         # Background color (dark mode)
+  image_dark: assets/logos/csd.png  # Image to display (dark mode)
+  branding_dark: assets/logos/csd.png # Small logo/text at the bottom (dark mode)
+
+  android: true                 # Generate Android splash screen
+  ios: true                     # Generate iOS splash screen
+  web: false                    # Do NOT generate web splash screen (set to false)

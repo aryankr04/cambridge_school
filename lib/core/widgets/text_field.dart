@@ -19,7 +19,11 @@ class MyTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final String? prefixText;
+  final TextStyle? prefixTextStyle;
+
   final String? suffixText;
+  final TextStyle? suffixTextStyle;
+
   final bool showClearButton;
   final VoidCallback? onClear;
   final EdgeInsetsGeometry padding;
@@ -55,7 +59,9 @@ class MyTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.prefixText,
+    this.prefixTextStyle,
     this.suffixText,
+    this.suffixTextStyle,
     this.showClearButton = true,
     this.onClear,
     this.padding = const EdgeInsets.symmetric(vertical: 12, horizontal: 12.0),
@@ -129,7 +135,9 @@ class MyTextField extends StatelessWidget {
               prefixIcon: prefixIcon,
               suffixIcon: suffixIcon,
               prefixText: prefixText,
+              prefixStyle: prefixTextStyle,
               suffixText: suffixText,
+              suffixStyle: suffixTextStyle
             ),
           ),
         ),

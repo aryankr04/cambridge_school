@@ -1,4 +1,7 @@
+// lib/app/modules/onboarding/onboarding_screen.dart
+
 import 'package:cambridge_school/core/widgets/button.dart';
+import 'package:cambridge_school/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -6,14 +9,10 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../core/utils/constants/colors.dart';
 import '../../../core/utils/constants/sizes.dart';
-import '../auth/login/controllers/login_controller.dart';
-import '../auth/login/screens/login.dart';
-import 'onboarding_screen_controller.dart';
+import 'onboarding_controller.dart';
 
-class OnboardingScreen extends StatelessWidget {
-  OnboardingScreen({super.key});
-
-  final controller = Get.put(OnboardingController());
+class OnboardingScreen extends GetView<OnboardingController> {
+  const OnboardingScreen({super.key}); // Added Key? key
 
   @override
   Widget build(BuildContext context) {
@@ -22,21 +21,27 @@ class OnboardingScreen extends StatelessWidget {
         child: Column(
           children: [
             // PageView for onboarding screens
-            Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: MySizes.lg,top: MySizes.lg),
-                  child: TextButton(
-                      onPressed: () {
-                        controller.pageController.jumpToPage(4);
-                        const Duration(milliseconds: 400);
-                        Curves.easeInOut;
-
-                      },
-                      child: const Text('Skip',style: TextStyle(fontSize: 14),)),
-                )),
+            Obx(() => controller.currentPage.value != 3
+                ? Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          right: MySizes.lg, top: MySizes.lg),
+                      child: TextButton(
+                        onPressed: () {
+                          controller.pageController.jumpToPage(4);
+                          const Duration(milliseconds: 400);
+                          Curves.easeInOut;
+                        },
+                        child: const Text(
+                          'Skip',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink()),
             Expanded(
-              // flex: 3,
               child: PageView.builder(
                 controller: controller.pageController,
                 onPageChanged: (index) => controller.currentPage.value = index,
@@ -59,19 +64,18 @@ class OnboardingScreen extends StatelessWidget {
                 dotColor: MyColors.activeBlue.withOpacity(0.25),
               ),
             ),
-
             SizedBox(
               height: Get.width * 0.1,
             ),
             Obx(() => controller.currentPage.value <
-                controller.onboardingData.length - 1
+                    controller.onboardingData.length - 1
                 ? MyButton(
-              text: 'Next',
-              onPressed: () {
-                controller.nextPage();
-              },
-              width: Get.width * 0.5,
-            )
+                    text: 'Next',
+                    onPressed: () {
+                      controller.nextPage();
+                    },
+                    width: Get.width * 0.5,
+                  )
                 : const SizedBox()),
             SizedBox(
               height: Get.width * 0.1,
@@ -99,13 +103,15 @@ class OnboardingPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // SVG Image with responsive sizing
-        SvgPicture.asset(
-          image,
+        SizedBox(
           height: title == "Get Started With Us!"
               ? MediaQuery.of(context).size.width * 0.9
               : MediaQuery.of(context).size.width * 1.1,
-          width: double.infinity,
-          fit: BoxFit.contain, // Ensuring the image doesn't overflow
+          width: Get.width,
+          child: SvgPicture.asset(
+            image,
+            fit: BoxFit.contain,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(MySizes.md),
@@ -136,16 +142,31 @@ class OnboardingPage extends StatelessWidget {
                   child: Column(
                     children: [
                       // Login Button
-                      ElevatedButton(
-                        onPressed: () => Get.to(() => Login()),
-                        child: const Text("Login"),
+                      MyButton(
+                        onPressed: () => Get.toNamed(AppRoutes.login),
+                        text: "Login",
                       ),
                       const SizedBox(height: MySizes.md),
                       // Register Button
-                      OutlinedButton(
-                        onPressed: () =>
-                            Get.put(LoginController()).showSelectRoleDialog(),
-                        child: const Text("Register"),
+                      MyButton(
+                        onPressed: () {
+                          Get.toNamed(AppRoutes.createUser);
+                        },
+                        text: 'Create Account',
+                        textColor: MyColors.activeBlue,
+                        isOutlined: true,
+                        borderSide: const BorderSide(
+                            width: 1, color: MyColors.activeBlue),
+                      ),
+                      const SizedBox(
+                        height: MySizes.md,
+                      ),
+                      MyButton(
+                        onPressed: () {
+                          Get.toNamed(AppRoutes.createUser);
+                        },
+                        text: 'Continue as a Guest',
+                        isOutlined: true,
                       ),
                     ],
                   ),

@@ -13,9 +13,9 @@ import 'package:shimmer/shimmer.dart';
 import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/class_repository_model.dart';
+import '../models/roster_model.dart';
+import '../repositories/roster_repository.dart';
 import '../widgets/user_card_widget.dart';
-
 
 class StudentListScreen extends StatelessWidget {
   StudentListScreen({super.key});
@@ -56,7 +56,7 @@ class StudentListScreen extends StatelessWidget {
   }
 
   Widget _buildClassDropdown() {
-    return Obx(() => MyDialogDropdown(
+    return MyDialogDropdown(
       isMultipleSelection: true,
       labelText: 'Class',
       options: ['All', ...userController.classList],
@@ -69,11 +69,11 @@ class StudentListScreen extends StatelessWidget {
           userController.selectedClasses.addAll(value);
         }
       },
-    ));
+    );
   }
 
   Widget _buildSectionDropdown() {
-    return Obx(() => MyDialogDropdown(
+    return MyDialogDropdown(
       isMultipleSelection: true,
       labelText: 'Sec',
       options: ['All', ...userController.sectionList],
@@ -86,7 +86,7 @@ class StudentListScreen extends StatelessWidget {
           userController.selectedSections.addAll(value);
         }
       },
-    ));
+    );
   }
 
   Widget _buildStudentListSection() {
@@ -105,7 +105,7 @@ class StudentListScreen extends StatelessWidget {
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-            (context, index) {
+        (context, index) {
           final key = sortedKeys[index];
           final studentsInGroup = groupedStudents[key]!;
 
@@ -114,17 +114,17 @@ class StudentListScreen extends StatelessWidget {
             content: Column(
               children: studentsInGroup
                   .map((userProfile) => UserCardWidget(
-                userProfile: userProfile,
-                onView: () {
-                  print('View ${userProfile.fullName}');
-                },
-                onEdit: () {
-                  print('Edit ${userProfile.fullName}');
-                },
-                onDelete: () {
-                  print('Delete ${userProfile.fullName}');
-                },
-              ))
+                        userProfile: userProfile,
+                        onView: () {
+                          print('View ${userProfile.fullName}');
+                        },
+                        onEdit: () {
+                          print('Edit ${userProfile.fullName}');
+                        },
+                        onDelete: () {
+                          print('Delete ${userProfile.fullName}');
+                        },
+                      ))
                   .toList(),
             ),
           );
@@ -135,11 +135,9 @@ class StudentListScreen extends StatelessWidget {
   }
 
   Widget _buildShimmerLoading() {
-
-
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
-      highlightColor:  Colors.grey[100]!,
+      highlightColor: Colors.grey[100]!,
       child: ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -174,11 +172,9 @@ class StudentListScreen extends StatelessWidget {
                         color: Colors.grey[300]!,
                         margin: const EdgeInsets.symmetric(vertical: 4),
                       ),
-
                     ],
                   ),
                 ),
-
               ],
             ),
           );
@@ -186,6 +182,7 @@ class StudentListScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildHeader(String key) {
     return Container(
       color: Colors.blueGrey[700],
@@ -297,9 +294,9 @@ class UserController extends GetxController {
 
           if (querySnapshot.docs.isNotEmpty) {
             for (QueryDocumentSnapshot<Map<String, dynamic>> docSnapshot
-            in querySnapshot.docs) {
+                in querySnapshot.docs) {
               ClassRoster classRoster =
-              ClassRoster.fromMap(docSnapshot.data())!;
+                  ClassRoster.fromMap(docSnapshot.data())!;
               allStudents.addAll(classRoster.studentList);
             }
           }
@@ -314,10 +311,11 @@ class UserController extends GetxController {
   }
 }
 
-
 class DummyDataGenerator {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String collectionName = 'class_rosters';
+  FirestoreRosterRepository rosterRepository = FirestoreRosterRepository();
+
+  static const String collectionName = 'rosters';
   final List<String> classNames = [
     'Pre-School',
     'Nursery',
@@ -342,13 +340,10 @@ class DummyDataGenerator {
   ];
   Future<void> generateAndAddDummyData() async {
     try {
-      for (int i = 0; i < 15; i++) {
+      for (int i = 0; i < 5; i++) {
         // Generate 10 class rosters
         final classRoster = _createDummyClassRoster(i);
-        await _firestore
-            .collection(collectionName)
-            .doc(classRoster.classId)
-            .set(classRoster.toMap());
+        await rosterRepository.addUserRoster(classRoster);
 
         print('Added dummy class roster ${i + 1}');
       }
@@ -359,7 +354,7 @@ class DummyDataGenerator {
     }
   }
 
-  ClassRoster _createDummyClassRoster(int index) {
+  UserRoster _createDummyClassRoster(int index) {
     final faker = Faker();
     const uuid = Uuid();
 
@@ -367,25 +362,23 @@ class DummyDataGenerator {
     String sectionName =
         ['A', 'B', 'C'][index % 3]; // Cycle through A, B, C sections
     String academicYear = '2023-2024';
-    String schoolId = 'SCH00000000001'; // Replace with a valid school ID
+    String schoolId = 'SCH00001'; // Replace with a valid school ID
 
     final studentList = List.generate(
-        10, (j) => _createDummyUser(faker, uuid, className, sectionName));
+        20, (j) => _createDummyUser(faker, uuid, className, sectionName));
 
-    return ClassRoster(
-      classId: uuid.v4(), // Generate a unique ID for the class
-      sectionName: sectionName,
-      academicYear: academicYear,
+    return UserRoster(
       schoolId: schoolId,
-      className: className,
-      studentList: studentList,
+      userList: studentList,
+      id: uuid.v4(),
+      rosterType: 'teacher',
     );
   }
 
   UserModel _createDummyUser(
       Faker faker, Uuid uuid, String className, String sectionName) {
     return UserModel(
-      schoolId: 'SCH0000000001',
+      schoolId: 'SCH00001',
 
       userId: uuid.v4(),
       username: faker.internet.userName(),

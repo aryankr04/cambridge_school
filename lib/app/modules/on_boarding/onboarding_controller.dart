@@ -1,7 +1,10 @@
+
+// lib/app/modules/onboarding/onboarding_controller.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../auth/login/screens/login.dart';
+import '../auth/login/screens/login_screen.dart';
 
 class OnboardingController extends GetxController {
   final PageController pageController = PageController();
@@ -9,25 +12,25 @@ class OnboardingController extends GetxController {
 
   final List<Map<String, String>> onboardingData = [
     {
-      "image": "assets/images/illustration/high_school.svg",
+      "image": "assets/images/illustrations/high_school.svg",
       "title": "Your Complete School Hub",
       "description":
       "Welcome to your school app! Access everything you need in one place—grades, schedules, and announcements.",
     },
     {
-      "image": "assets/images/illustration/college_projet.svg",
+      "image": "assets/images/illustrations/college_project.svg",
       "title": "Engage & Achieve Together",
       "description":
       "Stay updated on assignments, communicate easily, and achieve success with collaborative learning.",
     },
     {
-      "image": "assets/images/illustration/success.svg",
+      "image": "assets/images/illustrations/success.svg",
       "title": "Built for Success & Privacy",
       "description":
       "A secure platform you can trust. Privacy and safety come first for all your school data.",
     },
     {
-      "image": "assets/images/illustration/mobile_login.svg",
+      "image": "assets/images/illustrations/mobile_login.svg",
       "title": "Get Started With Us!",
       "description":
       "Ready to get started? Log in or register to join our school community!",

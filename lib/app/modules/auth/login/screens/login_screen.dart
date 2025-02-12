@@ -1,3 +1,6 @@
+import 'package:cambridge_school/core/utils/constants/text_styles.dart';
+import 'package:cambridge_school/core/widgets/divider.dart';
+import 'package:cambridge_school/router.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,7 +41,7 @@ class BottomWaveClipper extends CustomClipper<Path> {
 class Login extends StatelessWidget {
   Login({super.key});
 
-  final LoginController controller = Get.put(LoginController());
+  final controller = Get.find<LoginController>();
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +50,7 @@ class Login extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Flexible(
+          Expanded(
             flex: 1,
             child: ClipPath(
               clipper: BottomWaveClipper(),
@@ -90,12 +93,9 @@ class Login extends StatelessWidget {
               ),
             ),
           ),
-          // TextButton(onPressed: (){SchoolHelperFunctions.navigateToScreen(context, AdminHome());}, child: Text('Admin')),
           Container(
             padding: const EdgeInsets.only(
-                left: MySizes.lg,
-                right: MySizes.lg,
-                bottom: MySizes.lg),
+                left: MySizes.lg, right: MySizes.lg, bottom: MySizes.lg),
             child: Column(
               children: [
                 Align(
@@ -108,58 +108,61 @@ class Login extends StatelessWidget {
                                 fontSize: 28, fontWeight: FontWeight.w500))),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Enter your username & password to login.',
+                  child: Text('Enter your mobile number to get login',
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
-                          ?.copyWith(color: MyColors.subtitleTextColor)),
+                          ?.copyWith(color: MyColors.captionTextColor)),
                 ),
                 const SizedBox(
-                  height: MySizes.lg,
+                  height: MySizes.spaceBtwSections,
                 ),
                 MyTextField(
-                  labelText: 'Username',
-                  prefixIcon: const Icon(Icons.person),
-                  controller: controller.usernameController,
+                  labelText: 'Mobile No',
+                  prefixText: '+91  ',
+                  prefixTextStyle: MyTextStyles.inputField,
+                  keyboardType: TextInputType.phone,
+                  prefixIcon: const Icon(Icons.phone),
+                  controller: Get.find<LoginController>().usernameController,
                 ),
+                // const SizedBox(
+                //   height: MySizes.lg,
+                // ),
+                // Obx(
+                //   () => MyTextField(
+                //     labelText: 'Password',
+                //     controller: controller.passwordController,
+                //     keyboardType: TextInputType.visiblePassword,
+                //     obscureText: controller.isObscure.value,
+                //     prefixIcon: const Icon(Icons.lock),
+                //     suffixIcon: IconButton(
+                //       onPressed: () {
+                //         controller.isObscure.value =
+                //             !controller.isObscure.value;
+                //       },
+                //       icon: Icon(
+                //         controller.isObscure.value
+                //             ? Icons.visibility_off
+                //             : Icons.visibility,
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(height: MySizes.sm),
+                // Align(
+                //   alignment: Alignment.centerRight,
+                //   child: TextButton(
+                //     onPressed: () {},
+                //     child: Text(
+                //       'Forgot Password',
+                //       style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                //           color: MyDynamicColors.primaryColor,
+                //           fontWeight: FontWeight.w600),
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(
-                  height: MySizes.lg,
-                ),
-                Obx(
-                  () => MyTextField(
-                    labelText: 'Password',
-                    controller: controller.passwordController,
-                    keyboardType: TextInputType.visiblePassword,
-                    obscureText: controller.isObscure.value,
-                    prefixIcon: const Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        controller.isObscure.value =
-                            !controller.isObscure.value;
-                      },
-                      icon: Icon(
-                        controller.isObscure.value
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: MySizes.sm),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Forgot Password',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: MyDynamicColors.primaryColor,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: MySizes.spaceBtwItems,
+                  height: MySizes.spaceBtwSections,
                 ),
                 Obx(
                   () => controller.isLoading.value
@@ -173,14 +176,54 @@ class Login extends StatelessWidget {
                           },
                         ),
                 ),
+
+                const SizedBox(
+                  height: MySizes.spaceBtwSections,
+                ),
+                MyButton(
+                  onPressed: () {
+                    Get.toNamed(AppRoutes.createUser);
+                  },
+                  text: 'Create Account',
+                  textColor: MyColors.activeBlue,
+                  isOutlined: true,
+                  borderSide:
+                      const BorderSide(width: 1, color: MyColors.activeBlue),
+                ),
                 const SizedBox(
                   height: MySizes.lg,
                 ),
-                OutlinedButton(
-                    onPressed: () {
-                      controller.showSelectRoleDialog();
-                    },
-                    child: const Text('Create Account')),
+                // Row(
+                //   children: [
+                //     const Expanded(
+                //         child: MyDottedLine(
+                //       dashColor: MyColors.captionTextColor,
+                //     )),
+                //     Text(' OR ',
+                //         style: Theme.of(context)
+                //             .textTheme
+                //             .labelLarge
+                //             ?.copyWith(color: MyColors.captionTextColor)),
+                //     const Expanded(
+                //         child: MyDottedLine(
+                //       dashColor: MyColors.captionTextColor,
+                //     )),
+                //   ],
+                // ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   crossAxisAlignment: CrossAxisAlignment.center,
+                //   children: [
+                //     Text(
+                //       'Not a school member? ',
+                //       style: MyTextStyles.labelSmall
+                //           .copyWith(fontWeight: FontWeight.w400, fontSize: 13),
+                //     ),
+                //     TextButton(
+                //         onPressed: () {},
+                //         child: const Text('Continue as a Guest'))
+                //   ],
+                // ),
               ],
             ),
           ),
