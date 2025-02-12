@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:cambridge_school/app/modules/user_management/repositories/user_management_repository.dart';
+import 'package:cambridge_school/app/modules/user_management/repositories/user_repository.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/services/firebase/auth_service.dart';
 import '../../../../core/widgets/text_field.dart';
@@ -575,46 +576,62 @@ class CreateUserController extends GetxController {
   // 1. Send OTP and Navigate to OTP Screen
   Future<void> _sendOtpAndNavigate(String phoneNumber) async {
     FirebaseAuthService firebaseAuth = FirebaseAuthService();
-    //send otp to the number
+    UserRepository userRepository = UserRepository();
+
     firebaseAuth.sendOtp("+91${phoneNoController.text.trim()}",
         (newVerificationId, resendToken) {
-      //assign verification id
       verificationId.value = newVerificationId;
       print("OTP Sent! Verification ID: ${verificationId.value}");
 
       Get.to(
-        //Present OtpScreen after getting verificationId
         () => OtpScreen(
           mobileNo: phoneNoController.text.trim(),
-          verificationId: verificationId.value, //pass new verification id
+          verificationId: verificationId.value,
           onOtpEntered: (otp) async {
-            // Make the onOtpEntered async
             try {
-              final userCredential = await firebaseAuth.verifyOtpAndRegister(
+              // Attempt Login First
+              final phoneNumberLogin = await firebaseAuth.verifyOtpAndLogin(
                 verificationId: verificationId.value,
                 otp: otp,
-                email: emailController.text.trim(),
-                password: passwordController.text.trim(),
-                displayName: fullNameController.text.trim(),
-                photoUrl:
-                    "", //profileImageUrl is assigned with empty string and it is never used.
               );
 
-              if (userCredential != null) {
-                print("User Registered: ${userCredential.user?.displayName}");
+              if (phoneNumberLogin != null) {
+                //Login Succesfull
+                //Get the users with the logged in phonenumber
 
-                // ***NOW*** create the Firestore user document:
-                UserModelMain user =
-                    buildUserModel(userCredential.user!.uid); // Pass the userId
-                UserRepository userRepository = UserRepository();
-                await userRepository.createUser(user);
+                String userId = const Uuid().v4();
+                UserModel newUser = buildUserModel(userId);
 
-                // ***NAVIGATE TO SUCCESS SCREEN***
-                Get.offAll(() => SuccessScreen(
-                    user: user));
+                await userRepository.createUser(newUser);
+                Get.offAll(() => SuccessScreen(user: newUser));
+
+                print(
+                    "User did exist in FireAuth: ${phoneNumberLogin} creating him in firestore");
               } else {
-                Get.snackbar("Error", "Firebase Authentication failed.",
-                    backgroundColor: Colors.red);
+                //  PHONE NUMBER LOGIN FAILED - Try to Register then
+
+                final phoneNumberRegistration =
+                    await firebaseAuth.verifyOtpAndRegister(
+                  verificationId: verificationId.value,
+                  otp: otp,
+                );
+
+                if (phoneNumberRegistration != null) {
+                  // Registration was successful in Firebase Authentication.
+                  // Now create a new user in Firestore.
+
+                  String userId = const Uuid().v4();
+                  UserModel newUser = buildUserModel(userId);
+
+                  await userRepository.createUser(newUser);
+                  Get.offAll(() => SuccessScreen(user: newUser));
+                  print(
+                      "NEW user created in Firebase Authenthication and Firestore");
+                } else {
+                  // Both login and registration with phone number failed. Something is very wrong.
+                  Get.snackbar("Error", "Authentication failed.",
+                      backgroundColor: Colors.red);
+                }
               }
             } catch (authError) {
               print("Authentication error: $authError");
@@ -628,7 +645,7 @@ class CreateUserController extends GetxController {
   }
 
   // 2. Build UserModel
-  UserModelMain buildUserModel(String userId) {
+  UserModel buildUserModel(String userId) {
     // --- Address ---
     final permanentAddress = Address(
       houseAddress: permanentHouseAddressController.text,
@@ -783,7 +800,7 @@ class CreateUserController extends GetxController {
             : null;
 
     // --- Create UserModelMain instance ---
-    final user = UserModelMain(
+    final user = UserModel(
       userId: userId,
       username: usernameController.text,
       email: emailController.text,
@@ -855,7 +872,7 @@ class CreateUserController extends GetxController {
 
   // 3. Combined Function to Add User
   Future<void> addUserToFirestore() async {
-    if (validateAllFields()) {
+    if (true) {
       try {
         await _sendOtpAndNavigate(phoneNoController.text.trim());
       } catch (e) {

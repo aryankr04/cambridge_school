@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class UserCardWidget extends StatelessWidget {
-  final UserModelMain userProfile;
+  final UserModel userProfile;
   final VoidCallback onView;
   final VoidCallback onEdit;
   final VoidCallback onDelete;

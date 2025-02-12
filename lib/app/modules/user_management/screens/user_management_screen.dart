@@ -1,5 +1,5 @@
 import 'package:cambridge_school/app/modules/user_management/models/user_model.dart';
-import 'package:cambridge_school/app/modules/user_management/repositories/user_management_repository.dart';
+import 'package:cambridge_school/app/modules/user_management/repositories/user_repository.dart';
 import 'package:cambridge_school/app/modules/user_management/screens/student_user_list.dart';
 import 'package:cambridge_school/app/modules/user_management/widgets/user_card_widget.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
@@ -52,7 +52,7 @@ class _UserManagementScreenState extends State<UserManagementScreen>
   late TabController tabController;
   final RxString selectedClass = ''.obs;
   final RxString selectedSection = ''.obs;
-  final RxList<UserModelMain> students = <UserModelMain>[].obs;
+  final RxList<UserModel> students = <UserModel>[].obs;
 
   @override
   void initState() {

@@ -5,8 +5,10 @@ import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/widgets/button.dart';
+
 class SuccessScreen extends GetView<SuccessScreenController> {
-  final UserModelMain? user;
+  final UserModel? user;
 
   const SuccessScreen({
     super.key,
@@ -107,21 +109,13 @@ class SuccessScreen extends GetView<SuccessScreenController> {
                             user: controller
                                 .dummyUser.value), //Use dummy user here
                         const SizedBox(height: MySizes.spaceBtwSections),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: MyColors.activeGreen,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: MySizes.md),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    MySizes.cardRadiusMd)),
-                          ),
+                        MyButton(
+
                           onPressed: () {
                             Get.offAllNamed('/');
                           },
-                          child: const Text('Back to home',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16)),
+                          text: 'Back to home',
+
                         ),
                       ],
                     ),
@@ -138,7 +132,7 @@ class SuccessScreen extends GetView<SuccessScreenController> {
 }
 
 class AccountDetailSection extends GetView<SuccessScreenController> {
-  final UserModelMain user;
+  final UserModel user;
 
   const AccountDetailSection({super.key, required this.user});
 
@@ -446,7 +440,7 @@ class _CategoryTitle extends StatelessWidget {
 class SuccessScreenController extends GetxController {
   //TODO: Implement SuccessScreenController
 
-  final dummyUser = UserModelMain(
+  final dummyUser = UserModel(
           userId: 'dummy-user-123',
           username: 'Test User',
           email: 'test@example.com',

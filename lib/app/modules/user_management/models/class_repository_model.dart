@@ -6,7 +6,7 @@ class ClassRoster {
   String academicYear;
   String schoolId;
   String className;
-  List<UserModelMain> studentList;
+  List<UserModel> studentList;
 
   ClassRoster({
     required this.classId,
@@ -37,7 +37,7 @@ class ClassRoster {
       className: data['className'] as String? ?? '',
       studentList: (data['studentList'] as List<dynamic>?)
           ?.map((dynamic userJson) =>
-      UserModelMain.fromMap(userJson as Map<String, dynamic>)!)
+      UserModel.fromMap(userJson as Map<String, dynamic>)!)
           .toList() ??
           [],
     );

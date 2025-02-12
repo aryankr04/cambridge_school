@@ -199,7 +199,7 @@ class StudentListScreen extends StatelessWidget {
     );
   }
 
-  int _compareStudentsByRollNumber(UserModelMain a, UserModelMain b) {
+  int _compareStudentsByRollNumber(UserModel a, UserModel b) {
     final rollNumberA = a.studentDetails?.rollNumber ?? '0';
     final rollNumberB = b.studentDetails?.rollNumber ?? '0';
 
@@ -214,9 +214,9 @@ class StudentListScreen extends StatelessWidget {
     }
   }
 
-  Map<String, List<UserModelMain>> _groupStudentsByClassAndSection(
-      List<UserModelMain> studentList) {
-    final groupedStudents = <String, List<UserModelMain>>{};
+  Map<String, List<UserModel>> _groupStudentsByClassAndSection(
+      List<UserModel> studentList) {
+    final groupedStudents = <String, List<UserModel>>{};
     for (var student in studentList) {
       final className = student.studentDetails?.className ?? 'Unknown Class';
       final sectionName = student.studentDetails?.section ?? 'Unknown Section';
@@ -229,7 +229,7 @@ class StudentListScreen extends StatelessWidget {
 }
 
 class UserController extends GetxController {
-  final studentList = <UserModelMain>[].obs;
+  final studentList = <UserModel>[].obs;
   final isLoading = false.obs;
   final errorMessage = ''.obs;
 
@@ -270,7 +270,7 @@ class UserController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      List<UserModelMain> students = await _fetchStudentsByClassesAndSections(
+      List<UserModel> students = await _fetchStudentsByClassesAndSections(
           selectedClasses.contains('All') ? classList : selectedClasses,
           selectedSections.contains('All') ? sectionList : selectedSections);
       studentList.assignAll(students);
@@ -282,10 +282,10 @@ class UserController extends GetxController {
     }
   }
 
-  Future<List<UserModelMain>> _fetchStudentsByClassesAndSections(
+  Future<List<UserModel>> _fetchStudentsByClassesAndSections(
       List<String> selectedClasses, List<String> selectedSections) async {
     final collection = FirebaseFirestore.instance.collection('class_rosters');
-    List<UserModelMain> allStudents = [];
+    List<UserModel> allStudents = [];
 
     try {
       for (var className in selectedClasses) {
@@ -382,9 +382,9 @@ class DummyDataGenerator {
     );
   }
 
-  UserModelMain _createDummyUser(
+  UserModel _createDummyUser(
       Faker faker, Uuid uuid, String className, String sectionName) {
-    return UserModelMain(
+    return UserModel(
       schoolId: 'SCH0000000001',
 
       userId: uuid.v4(),

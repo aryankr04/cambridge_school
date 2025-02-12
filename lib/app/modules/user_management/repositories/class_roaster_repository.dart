@@ -73,7 +73,7 @@ class ClassRosterRepository {
     }
   }
 
-  Future<List<UserModelMain>> getStudentsInClassRoster(String classId) async {
+  Future<List<UserModel>> getStudentsInClassRoster(String classId) async {
     final classRoster = await getClassRoster(classId);
     return classRoster?.studentList ?? [];
   }
@@ -91,7 +91,7 @@ class ClassRosterRepository {
     }
   }
 
-  Future<List<UserModelMain>> getStudentsByClassAndSection(
+  Future<List<UserModel>> getStudentsByClassAndSection(
       String className, String sectionName, String schoolId) async {
     try {
       final querySnapshot = await _firestore
@@ -112,7 +112,7 @@ class ClassRosterRepository {
     }
   }
 
-  Future<List<UserModelMain>> getAllStudentsFromAllClassRosters() async {
+  Future<List<UserModel>> getAllStudentsFromAllClassRosters() async {
     try {
       final querySnapshot = await _firestore.collection(collectionName).get();
 

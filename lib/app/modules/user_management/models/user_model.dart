@@ -1,7 +1,7 @@
 import '../../../attendance/user_attendance_model.dart';
 
 // Main User Profile
-class UserModelMain {
+class UserModel {
   // 1️⃣ Basic Information
   final String userId;
   final String username;
@@ -73,7 +73,7 @@ class UserModelMain {
   // 12 Added schoolId
   final String? schoolId; // Making this nullable
 
-  UserModelMain({
+  UserModel({
     required this.userId,
     required this.username,
     required this.email,
@@ -177,9 +177,9 @@ class UserModelMain {
     };
   }
 
-  static UserModelMain? fromMap(Map<String, dynamic> data) {
+  static UserModel? fromMap(Map<String, dynamic> data) {
     try {
-      return UserModelMain(
+      return UserModel(
         userId: data['userId'] as String? ?? '',
         username: data['username'] as String,
         email: data['email'] as String,
@@ -305,7 +305,7 @@ class UserModelMain {
     }
   }
 
-  UserModelMain copyWith({
+  UserModel copyWith({
     String? userId,
     String? username,
     String? email,
@@ -354,7 +354,7 @@ class UserModelMain {
     DateTime? joiningDate,
     String? schoolId, //Adding schoolId in copyWith
   }) {
-    return UserModelMain(
+    return UserModel(
       userId: userId ?? this.userId,
       username: username ?? this.username,
       email: email ?? this.email,
