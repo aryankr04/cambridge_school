@@ -7,7 +7,7 @@ import '../utils/constants/text_styles.dart';
 
 class MyDialogDropdownController extends GetxController {
   final String? hintText;
-  final List<String> options;
+  RxList<String> options = <String>[].obs;
   final Function(String?)? onSingleChanged;
   final Function(List<String>?)? onMultipleChanged;
   final bool isMultipleSelection;
@@ -17,18 +17,19 @@ class MyDialogDropdownController extends GetxController {
 
   MyDialogDropdownController({
     this.hintText,
-    required this.options,
+    required List<String> options,
     this.onSingleChanged,
     this.onMultipleChanged,
     this.isMultipleSelection = true,
     List<String>? initialValues,
   })  : assert(
-  (isMultipleSelection && onMultipleChanged != null) ||
-      (!isMultipleSelection && onSingleChanged != null),
-  "Provide onMultipleChanged for multiple selection, onSingleChanged otherwise.",
-  ),
+          (isMultipleSelection && onMultipleChanged != null) ||
+              (!isMultipleSelection && onSingleChanged != null),
+          "Provide onMultipleChanged for multiple selection, onSingleChanged otherwise.",
+        ),
         super() {
     _initialValues = initialValues;
+    this.options.addAll(options);
     selectedValues.clear();
     if (_initialValues != null) {
       selectedValues.addAll(_initialValues!);
@@ -53,9 +54,10 @@ class MyDialogDropdownController extends GetxController {
     selectedValues.assignAll(values);
 
     if (isMultipleSelection) {
-      onMultipleChanged?.call(List<String>.from(values));
+      onMultipleChanged?.call(List<String>.from(selectedValues));
     } else {
-      onSingleChanged?.call(values.isNotEmpty ? values.first : null);
+      onSingleChanged
+          ?.call(selectedValues.isNotEmpty ? selectedValues.first : null);
     }
     validate(); // Call validate after updating selectedValues
   }
@@ -82,12 +84,6 @@ class MyDialogDropdownController extends GetxController {
     } else {
       errorText.value = 'No options available';
     }
-  }
-
-
-  @override
-  void onClose() {
-    super.onClose();
   }
 }
 
@@ -131,11 +127,7 @@ class MyDialogDropdown extends StatefulWidget {
     this.selectOptionText = 'Select Option',
     this.height,
     this.isValid = true, // Default to true
-  }) : assert(
-  (isMultipleSelection && onMultipleChanged != null) ||
-      (!isMultipleSelection && onSingleChanged != null),
-  "Provide onMultipleChanged for multiple selection, onSingleChanged otherwise.",
-  );
+  });
 
   @override
   State<MyDialogDropdown> createState() => _MyDialogDropdownState();
@@ -143,11 +135,12 @@ class MyDialogDropdown extends StatefulWidget {
 
 class _MyDialogDropdownState extends State<MyDialogDropdown> {
   late final MyDialogDropdownController controller;
-  final RxList<String> _newValues = <String>[].obs; // Use RxList here
+  final String uniqueTag = UniqueKey().toString();
 
   @override
   void initState() {
     super.initState();
+    // Initialize the controller locally
     controller = Get.put(
       MyDialogDropdownController(
         hintText: widget.labelText,
@@ -157,20 +150,12 @@ class _MyDialogDropdownState extends State<MyDialogDropdown> {
         initialValues: widget.initialSelectedValues,
         isMultipleSelection: widget.isMultipleSelection,
       ),
-      tag: widget.labelText,
+      tag: uniqueTag, // Use a unique tag for each instance
     );
-    _newValues.addAll(controller.selectedValues); // Initialize with the current values
-  }
 
-  @override
-  void dispose() {
-    if (Get.isRegistered<MyDialogDropdownController>(
-        tag: widget.labelText)) {
-      Get.delete<MyDialogDropdownController>(tag: widget.labelText);
-    }
-    super.dispose();
+    //Initial validation after setting up
+    controller.validate();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -186,51 +171,49 @@ class _MyDialogDropdownState extends State<MyDialogDropdown> {
         GestureDetector(
           onTap: () async {
             await _showOptionsDialog(context);
-            // controller.validate(); // Validate on tap.  May or may not be needed.
           },
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: widget.height ?? 0, // Use height parameter here
+              minHeight: widget.height ?? 0,
             ),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: widget.borderRadius ??
-                    BorderRadius.circular(MySizes.sm),
+                borderRadius:
+                    widget.borderRadius ?? BorderRadius.circular(MySizes.sm),
                 color: widget.backgroundColor.withOpacity(0.1),
               ),
-              child: Obx(() =>  // Wrap with Obx
-              Container(
+              child: Container(
                 decoration: BoxDecoration(
-                    border: (widget.isValid && controller.errorText.value.isNotEmpty)
+                    border: (widget.isValid &&
+                            controller.errorText.value.isNotEmpty)
                         ? Border.all(color: Colors.red)
-                        : null
-                ),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12.0, vertical: 12),
+                        : null),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Expanded(
-                      child: RichText(
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        text: TextSpan(
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 13.0,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: controller.selectedValues.isEmpty
-                                  ? widget.selectOptionText
-                                  : _getDisplayText(),
-                              style: controller.selectedValues.isEmpty
-                                  ? MyTextStyles.placeholder
-                                  : MyTextStyles.bodyLarge,
+                      child: Obx(() => RichText(
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            text: TextSpan(
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 13.0,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: controller.selectedValues.isEmpty
+                                      ? widget.selectOptionText
+                                      : _getDisplayText(),
+                                  style: controller.selectedValues.isEmpty
+                                      ? MyTextStyles.placeholder
+                                      : MyTextStyles.bodyLarge,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
+                          )),
                     ),
                     const SizedBox(width: MySizes.sm),
                     Icon(
@@ -239,21 +222,20 @@ class _MyDialogDropdownState extends State<MyDialogDropdown> {
                     ),
                   ],
                 ),
-              )),
+              ),
             ),
           ),
         ),
-        Obx(() => // Wrap with Obx
-        Visibility(
-          visible: widget.isValid && controller.errorText.value.isNotEmpty, // Conditionally show error
-          child: Padding(
-            padding: const EdgeInsets.only(top: 4.0),
-            child: Text(
-              controller.errorText.value,
-              style: const TextStyle(color: Colors.red, fontSize: 12),
-            ),
-          ),
-        )),
+        Obx(() => Visibility(
+              visible: widget.isValid && controller.errorText.value.isNotEmpty,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(
+                  controller.errorText.value,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
+            )),
       ],
     );
   }
@@ -279,57 +261,57 @@ class _MyDialogDropdownState extends State<MyDialogDropdown> {
   }
 
   Future<void> _showOptionsDialog(BuildContext context) async {
-    _newValues.clear();
-    _newValues.addAll(controller.selectedValues);
-
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Select Options',
-              style: MyTextStyles.headlineSmall),
+          title:
+              const Text('Select Options', style: MyTextStyles.headlineSmall),
           content: Obx(
-                () => SingleChildScrollView(
+            () => SingleChildScrollView(
               child: Wrap(
                 spacing: 8.0,
-                children: widget.options.map((option) {
-                  final isSelected = _newValues.contains(option);
-                  return FilterChip( // Wrap FilterChip with Obx
+                children: controller.options.map((option) {
+                  final isSelected = controller.selectedValues.contains(option);
+                  return FilterChip(
                     side: BorderSide(
                       width: 1,
-                      color: isSelected ? MyColors.activeBlue : Colors.transparent,
+                      color:
+                          isSelected ? MyColors.activeBlue : Colors.transparent,
                     ),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24)),
                     label: Text(option,
                         style: isSelected
                             ? widget.selectedTextStyle ??
-                            const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13)
+                                const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13)
                             : widget.unselectedTextStyle ??
-                            const TextStyle(
-                                color: MyColors.subtitleTextColor,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 13)),
+                                const TextStyle(
+                                    color: MyColors.subtitleTextColor,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 13)),
                     showCheckmark: false,
                     padding: const EdgeInsets.symmetric(
                         horizontal: MySizes.sm, vertical: MySizes.sm - 4),
                     selectedColor: MyColors.activeBlue,
                     backgroundColor:
-                    isSelected ? MyColors.activeBlue : Colors.grey[200],
+                        isSelected ? MyColors.activeBlue : Colors.grey[200],
                     checkmarkColor: MyColors.activeBlue,
                     selected: isSelected,
                     onSelected: (bool selected) {
-                      if (selected) {
-                        if (!widget.isMultipleSelection) {
-                          _newValues.clear();
+                      setState(() {
+                        if (selected) {
+                          if (!widget.isMultipleSelection) {
+                            controller.selectedValues.clear();
+                          }
+                          controller.selectedValues.add(option);
+                        } else {
+                          controller.selectedValues.remove(option);
                         }
-                        _newValues.add(option);
-                      } else {
-                        _newValues.remove(option);
-                      }
+                      });
                     },
                   );
                 }).toList(),
@@ -340,7 +322,8 @@ class _MyDialogDropdownState extends State<MyDialogDropdown> {
             TextButton(
               child: const Text('Done'),
               onPressed: () {
-                controller.setSelectedValues(_newValues.toList());
+                controller
+                    .setSelectedValues(controller.selectedValues.toList());
                 Navigator.of(context).pop();
               },
             ),

@@ -1,4 +1,4 @@
-import 'package:cambridge_school/app/modules/user_management/repositories/user_repository.dart';
+import 'package:cambridge_school/app/modules/user_management/create_user/repositories/user_repository.dart';
 import 'package:cambridge_school/core/services/firebase/firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
