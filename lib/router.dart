@@ -1,4 +1,4 @@
-import 'package:cambridge_school/app/modules/attendance/mark_attendance_screen.dart';
+import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_binding.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_binding.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_screen.dart';
 import 'package:cambridge_school/app/modules/manage_school/screens/create_school_0.dart';
@@ -8,6 +8,8 @@ import 'package:cambridge_school/app/modules/user_management/manage_user/screens
 import 'package:cambridge_school/demo.dart';
 import 'package:get/get.dart';
 
+import 'app/modules/attendance/attendance_record/attendance_record_controller.dart';
+import 'app/modules/attendance/attendance_record/attendance_record_screen.dart';
 import 'app/modules/auth/login/login_binding.dart';
 import 'app/modules/auth/login/screens/login_screen.dart';
 import 'app/modules/on_boarding/on_boarding_screen.dart';
@@ -23,6 +25,7 @@ class AppRoutes {
   static const String classManagement = '/class-management';
   static const String schoolManagement = '/school-management';
   static const String markAttendance = '/mark-attendance';
+  static const String attendanceRecord = '/attendance-record';
 
   static const String pendingApproval = '/pending-approval';
   static const String successScreen = '/success-screen';
@@ -61,7 +64,10 @@ class AppRoutes {
       page: () => const ClassManagementScreen(),
       binding: ClassManagementBinding(),
     ),
-    // GetPage(name: markAttendance, page:  MarkAttendanceScreen())
-
+    GetPage(
+      name: attendanceRecord,
+      page: () => const AttendanceRecordScreen(),
+      binding: AttendanceRecordBinding(),
+    ),
   ];
 }

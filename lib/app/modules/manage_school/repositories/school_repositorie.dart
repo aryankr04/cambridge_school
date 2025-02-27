@@ -1,77 +1,128 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-//
-// import '../../../data/services/firebase/firbase_services.dart';
-// import '../models/school_model.dart';
-//
-//
-// class SchoolRepository {
-//   final FirebaseService _firebaseService = FirebaseService();
-//
-//   // Add a new school to Firestore
-//   Future<void> addSchool(School school) async {
-//     try {
-//       // Convert the School instance to a JSON map
-//       Map<String, dynamic> schoolData = school.toJson();
-//
-//       // Add school data to Firestore
-//       await _firebaseService.addDocument('schools', school.schoolId, schoolData);
-//
-//       print('School added successfully!');
-//     } catch (e) {
-//       print('Error adding school: $e');
-//       rethrow;
-//     }
-//   }
-//
-//   // Retrieve a school document by ID
-//   Future<School?> getSchoolById(String id) async {
-//     try {
-//       DocumentSnapshot doc = await _firebaseService.getDocument('schools', id);
-//       if (doc.exists) {
-//         return School.fromJson(doc.data() as Map<String, dynamic>);
-//       } else {
-//         print('School not found');
-//         return null;
-//       }
-//     } catch (e) {
-//       print('Error retrieving school: $e');
-//       rethrow;
-//     }
-//   }
-//
-//   // Update a school document
-//   Future<void> updateSchool(School school) async {
-//     try {
-//       Map<String, dynamic> schoolData = school.toJson();
-//       await _firebaseService.updateDocument('schools', school.schoolId, schoolData);
-//       print('School updated successfully!');
-//     } catch (e) {
-//       print('Error updating school: $e');
-//       rethrow;
-//     }
-//   }
-//
-//   // Delete a school document
-//   Future<void> deleteSchool(String id) async {
-//     try {
-//       await _firebaseService.deleteDocument('schools', id);
-//       print('School deleted successfully!');
-//     } catch (e) {
-//       print('Error deleting school: $e');
-//       rethrow;
-//     }
-//   }
-//
-//   // Retrieve all schools
-//   Future<List<School>> getAllSchools() async {
-//     try {
-//       QuerySnapshot snapshot = await _firebaseService.getCollection('schools');
-//       return snapshot.docs.map((doc) => School.fromJson(doc.data() as Map<String, dynamic>)).toList();
-//     } catch (e) {
-//       print('Error retrieving schools: $e');
-//       rethrow;
-//     }
-//   }
-//
-// // Additional methods for school operations can be added here
-// }
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../models/school_model.dart'; // Replace with your actual import path
+
+class FirestoreSchoolRepository {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static const String _collectionName = 'schools'; // Collection name in Firestore
+
+  /// Creates a new school document in Firestore.
+  Future<void> createSchool(SchoolModel school) async {
+    try {
+      await _firestore
+          .collection(_collectionName)
+          .doc(school.schoolId) // Use schoolId as document ID for uniqueness
+          .set(school.toMap());
+      print('School created successfully with ID: ${school.schoolId}');
+    } catch (e) {
+      print('Error creating school: $e');
+      rethrow; // Re-throw the error for handling in the calling function
+    }
+  }
+
+  /// Retrieves a school document from Firestore by its ID.
+  Future<SchoolModel?> getSchoolById(String schoolId) async {
+    try {
+      final docSnapshot = await _firestore
+          .collection(_collectionName)
+          .doc(schoolId)
+          .get();
+
+      if (docSnapshot.exists) {
+        return SchoolModel.fromMap(docSnapshot.data() as Map<String, dynamic>);
+      } else {
+        print('School with ID: $schoolId not found.');
+        return null; // Return null if the document doesn't exist
+      }
+    } catch (e) {
+      print('Error fetching school by ID: $e');
+      rethrow; // Re-throw the error
+    }
+  }
+
+  /// Updates an existing school document in Firestore.
+  Future<void> updateSchool(SchoolModel school) async {
+    try {
+      await _firestore
+          .collection(_collectionName)
+          .doc(school.schoolId)
+          .update(school.toMap());
+      print('School updated successfully with ID: ${school.schoolId}');
+    } catch (e) {
+      print('Error updating school: $e');
+      rethrow; // Re-throw the error
+    }
+  }
+
+  /// Deletes a school document from Firestore by its ID.
+  Future<void> deleteSchool(String schoolId) async {
+    try {
+      await _firestore
+          .collection(_collectionName)
+          .doc(schoolId)
+          .delete();
+      print('School deleted successfully with ID: $schoolId');
+    } catch (e) {
+      print('Error deleting school: $e');
+      rethrow; // Re-throw the error
+    }
+  }
+
+  /// Retrieves all school documents from Firestore.
+  Future<List<SchoolModel>> getAllSchools() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(_collectionName)
+          .get();
+
+      return querySnapshot.docs.map((doc) => SchoolModel.fromMap(doc.data() as Map<String, dynamic>)).toList();
+    } catch (e) {
+      print('Error fetching all schools: $e');
+      rethrow; // Re-throw the error
+    }
+  }
+
+
+  ///  Streams all school documents from Firestore.  This allows for real-time updates.
+  Stream<List<SchoolModel>> streamAllSchools() {
+    return _firestore
+        .collection(_collectionName)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+        .map((doc) => SchoolModel.fromMap(doc.data() as Map<String, dynamic>))
+        .toList());
+  }
+
+  /// Stream single school by ID.
+  Stream<SchoolModel?> streamSchoolById(String schoolId) {
+    return _firestore
+        .collection(_collectionName)
+        .doc(schoolId)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.exists) {
+        return SchoolModel.fromMap(snapshot.data() as Map<String, dynamic>);
+      } else {
+        return null;
+      }
+    });
+  }
+
+  /// Queries schools based on a specific field and value. Useful for searching.
+  Future<List<SchoolModel>> querySchools(String field, dynamic value) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(_collectionName)
+          .where(field, isEqualTo: value)
+          .get();
+
+      return querySnapshot.docs.map((doc) => SchoolModel.fromMap(doc.data() as Map<String, dynamic>)).toList();
+    } catch (e) {
+      print('Error querying schools: $e');
+      rethrow; // Re-throw the error
+    }
+  }
+
+// Add more specific query methods as needed (e.g., schools by city, schools by type, etc.)
+
+}

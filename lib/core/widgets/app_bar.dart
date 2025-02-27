@@ -32,7 +32,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
       leading: showBackButton
           ? IconButton(
-        icon: Icon(leadingIcon?.icon ?? Icons.arrow_back),
+        icon: Icon(leadingIcon?.icon ?? Icons.arrow_back,color: Colors.white,),
         onPressed: () {
           if (onLeadingIconPressed != null) {
             onLeadingIconPressed!();
@@ -44,6 +44,8 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
           : leadingIcon != null
           ? IconButton(
         icon: leadingIcon!,
+
+        color: Colors.white,
         onPressed: () {
           if (onLeadingIconPressed != null) {
             onLeadingIconPressed!();

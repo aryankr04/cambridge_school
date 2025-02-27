@@ -14,6 +14,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../../core/services/firebase/auth_service.dart';
 import '../../../../../core/widgets/text_field.dart';
+import '../models/roles.dart';
 import '../models/user_model.dart';
 import '../screens/success_screen.dart';
 import '../screens/otp_screen.dart';
@@ -92,6 +93,7 @@ class CreateUserController extends GetxController {
 
   // --- Roles
   RxList<String> selectedRoles = <String>[].obs;
+  RxList<UserRole> selectedRoles1 = <UserRole>[].obs;
 
   // --- Role-Based Details ---
 
@@ -517,7 +519,7 @@ class CreateUserController extends GetxController {
   }
 
   bool _validateStudentDetailsFields() {
-    return !selectedRoles.contains(UserRole.student.name) ||
+    return !selectedRoles.contains(UserRole.Student.name) ||
         (rollNumberController.text.isNotEmpty &&
             admissionNoController.text.isNotEmpty &&
             className.value != null &&
@@ -527,47 +529,47 @@ class CreateUserController extends GetxController {
   }
 
   bool _validateTeacherDetailsFields() {
-    return !selectedRoles.contains(UserRole.teacher.name) ||
+    return !selectedRoles.contains(UserRole.Teacher.name) ||
         subjectsTaught.isNotEmpty;
   }
 
   bool _validateDriverDetailsFields() {
-    return !selectedRoles.contains(UserRole.driver.name) ||
+    return !selectedRoles.contains(UserRole.BusDriver.name) ||
         licenseNumberController.text.isNotEmpty;
   }
 
   bool _validateSecurityGuardDetailsFields() {
-    return !selectedRoles.contains(UserRole.securityGuard.name) ||
+    return !selectedRoles.contains(UserRole.SecurityGuard.name) ||
         assignedAreaController.text.isNotEmpty;
   }
 
   bool _validateMaintenanceStaffDetailsFields() {
-    return !selectedRoles.contains(UserRole.maintenanceStaff.name) ||
+    return !selectedRoles.contains(UserRole.Janitor.name) ||
         maintenanceResponsibilities.isNotEmpty;
   }
 
   bool _validateAdminDetailsFields() {
-    return !selectedRoles.contains(UserRole.admin.name) ||
+    return !selectedRoles.contains(UserRole.Admin.name) ||
         (adminPermissions.isNotEmpty &&
             assignedModules.isNotEmpty &&
             manageableSchools.isNotEmpty);
   }
 
   bool _validateSchoolAdminDetailsFields() {
-    return !selectedRoles.contains(UserRole.schoolAdmin.name) ||
+    return !selectedRoles.contains(UserRole.SchoolAdmin.name) ||
         (schoolAdminPermissions.isNotEmpty &&
             schoolAdminAssignedModules.isNotEmpty);
   }
 
   bool _validateDirectorDetailsFields() {
-    return !selectedRoles.contains(UserRole.director.name) ||
+    return !selectedRoles.contains(UserRole.Director.name) ||
         (directorSchools.isNotEmpty &&
             yearsInManagementController.text.isNotEmpty &&
             directorPermissions.isNotEmpty);
   }
 
   bool _validateDepartmentHeadDetailsFields() {
-    return !selectedRoles.contains(UserRole.departmentHead.name) ||
+    return !selectedRoles.contains(UserRole.DepartmentHead.name) ||
         (departmentController.text.isNotEmpty &&
             yearsAsHeadController.text.isNotEmpty &&
             departmentResponsibilities.isNotEmpty);
@@ -723,9 +725,8 @@ class CreateUserController extends GetxController {
     );
 
     // --- Role-Based Details ---
-    final studentDetails = selectedRoles.contains(UserRole.student.name)
+    final studentDetails = selectedRoles.contains(UserRole.Student.name)
         ? StudentDetails(
-            studentId: studentIdController.text,
             rollNumber: rollNumberController.text,
             admissionNo: admissionNoController.text,
             className: className.value,
@@ -738,36 +739,35 @@ class CreateUserController extends GetxController {
           )
         : null;
 
-    final teacherDetails = selectedRoles.contains(UserRole.teacher.name)
+    final teacherDetails = selectedRoles.contains(UserRole.Teacher.name)
         ? TeacherDetails(
-            teacherId: teacherIdController.text,
             subjectsTaught: subjectsTaught.toList(),
             experience: experienceController.text,
           )
         : null;
 
     final securityGuardDetails =
-        selectedRoles.contains(UserRole.securityGuard.name)
+        selectedRoles.contains(UserRole.SecurityGuard.name)
             ? SecurityGuardDetails(
                 assignedArea: assignedAreaController.text,
               )
             : null;
 
     final maintenanceStaffDetails =
-        selectedRoles.contains(UserRole.maintenanceStaff.name)
+        selectedRoles.contains(UserRole.Janitor.name)
             ? MaintenanceStaffDetails(
                 responsibilities: maintenanceResponsibilities.toList(),
               )
             : null;
 
-    final driverDetails = selectedRoles.contains(UserRole.driver.name)
+    final driverDetails = selectedRoles.contains(UserRole.BusDriver.name)
         ? DriverDetails(
             licenseNumber: licenseNumberController.text,
             routesAssigned: routesAssigned.toList(),
           )
         : null;
 
-    final adminDetails = selectedRoles.contains(UserRole.admin.name)
+    final adminDetails = selectedRoles.contains(UserRole.Admin.name)
         ? AdminDetails(
             permissions: adminPermissions.toList(),
             assignedModules: assignedModules.toList(),
@@ -775,14 +775,14 @@ class CreateUserController extends GetxController {
           )
         : null;
 
-    final schoolAdminDetails = selectedRoles.contains(UserRole.schoolAdmin.name)
+    final schoolAdminDetails = selectedRoles.contains(UserRole.SchoolAdmin.name)
         ? SchoolAdminDetails(
             permissions: schoolAdminPermissions.toList(),
             assignedModules: schoolAdminAssignedModules.toList(),
           )
         : null;
 
-    final directorDetails = selectedRoles.contains(UserRole.director.name)
+    final directorDetails = selectedRoles.contains(UserRole.Director.name)
         ? DirectorDetails(
             schools: directorSchools.toList(),
             yearsInManagement: int.tryParse(yearsInManagementController.text),
@@ -791,7 +791,7 @@ class CreateUserController extends GetxController {
         : null;
 
     final departmentHeadDetails =
-        selectedRoles.contains(UserRole.departmentHead.name)
+        selectedRoles.contains(UserRole.DepartmentHead.name)
             ? DepartmentHeadDetails(
                 department: departmentController.text,
                 yearsAsHead: int.tryParse(yearsAsHeadController.text),
@@ -831,28 +831,28 @@ class CreateUserController extends GetxController {
               UserRole.values.firstWhere((role) => role.name == roleName))
           .toList(),
       studentDetails:
-          selectedRoles.contains(UserRole.student.name) ? studentDetails : null,
+          selectedRoles.contains(UserRole.Student.name) ? studentDetails : null,
       teacherDetails:
-          selectedRoles.contains(UserRole.teacher.name) ? teacherDetails : null,
-      directorDetails: selectedRoles.contains(UserRole.director.name)
+          selectedRoles.contains(UserRole.Teacher.name) ? teacherDetails : null,
+      directorDetails: selectedRoles.contains(UserRole.Director.name)
           ? directorDetails
           : null,
       adminDetails:
-          selectedRoles.contains(UserRole.admin.name) ? adminDetails : null,
-      securityGuardDetails: selectedRoles.contains(UserRole.securityGuard.name)
+          selectedRoles.contains(UserRole.Admin.name) ? adminDetails : null,
+      securityGuardDetails: selectedRoles.contains(UserRole.SecurityGuard.name)
           ? securityGuardDetails
           : null,
       maintenanceStaffDetails:
-          selectedRoles.contains(UserRole.maintenanceStaff.name)
+          selectedRoles.contains(UserRole.Janitor.name)
               ? maintenanceStaffDetails
               : null,
       driverDetails:
-          selectedRoles.contains(UserRole.driver.name) ? driverDetails : null,
-      schoolAdminDetails: selectedRoles.contains(UserRole.schoolAdmin.name)
+          selectedRoles.contains(UserRole.BusDriver.name) ? driverDetails : null,
+      schoolAdminDetails: selectedRoles.contains(UserRole.SchoolAdmin.name)
           ? schoolAdminDetails
           : null,
       departmentHeadDetails:
-          selectedRoles.contains(UserRole.departmentHead.name)
+          selectedRoles.contains(UserRole.DepartmentHead.name)
               ? departmentHeadDetails
               : null,
       emergencyContact: emergencyContact,

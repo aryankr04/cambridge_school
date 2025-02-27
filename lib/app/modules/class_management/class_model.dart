@@ -29,7 +29,7 @@ class SchoolClassModel {
           SchoolSectionModel.fromMap(sectionData as Map<String, dynamic>, null))
           .toList(),
       subjects: map['subjects'] != null
-          ? List<String>.from(map['subjects']) //Direct from String List
+          ? List<String>.from(map['subjects'])
           : null,
       examSyllabus: (map['examSyllabus'] as List<dynamic>)
           .map((e) => ExamSyllabus.fromMap(e as Map<String, dynamic>))

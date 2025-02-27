@@ -1,7 +1,8 @@
+import 'dart:ui';
 
 import '../../fees/models/fee_structure.dart';
 
-class School {
+class SchoolModel {
   // **Identification and Branding**
   final String schoolId;
   final String logoUrl;
@@ -10,7 +11,7 @@ class School {
   final String aboutSchool;
   final String status;
 
-// **General Information**
+  // **General Information**
   final DateTime establishedYear;
   final DateTime createdAt;
   final String schoolingSystem;
@@ -19,33 +20,39 @@ class School {
   final String schoolType;
   final String affiliationNumber;
   final String schoolManagementAuthority;
+  final String managingTrustName;
+  final String registeredAddress;
+  final String registeredContactNumber;
 
-// **Location Details**
-  final String address;
-  final String country;
-  final String state;
-  final String city;
-  final String district;
-  final String pinCode;
-  final String street;
-  final String landmark;
+  // **Location Details**
+  final SchoolAddress address;
 
-// **Contact Information**
+  // **Contact Information**
   final String primaryPhoneNo;
   final String secondaryPhoneNo;
   final String email;
   final String website;
   final String faxNumber;
 
-// **Academic Information**
+  // **Academic Information**
   final String gradingSystem;
   final String examPattern;
   final String academicLevel;
   final String mediumOfInstruction;
   final AcademicYear academicYear;
-  final List<String> classes;
+  final List<ClassData> classes;
+  final List<SectionData> sections;
+  final List<SubjectData> subjects;
+  final List<String> grades;
+  final List<String> curriculumFrameworks;
+  final List<String> languagesOffered;
+  final List<String> specializedPrograms;
+  final double studentTeacherRatio;
+  final List<String> scholarshipPrograms;
+  final String transportationDetails;
 
-// **Facilities and Infrastructure**
+
+  // **Facilities and Infrastructure**
   final double campusSize;
   final List<String> facilitiesAvailable;
   final List<String> laboratoriesAvailable;
@@ -54,30 +61,47 @@ class School {
   final int numberOfFloors;
   final int numberOfClassrooms;
   final SchoolTimings schoolTimings;
+  final bool hasCCTV;
+  final bool hasFireSafetyEquipment;
+  final bool isWheelchairAccessible;
+  final bool hasSmartClassrooms;
+  final int numberOfComputers;
+  final bool hasInternetAccess;
 
-// **Activities and Engagement**
+  // **Activities and Engagement**
   final List<String> extracurricularActivities;
   final List<String> clubs;
   final List<String> societies;
   final List<String> sportsTeams;
-  final List<String> annualEvents;
+  final List<AcademicEvent> academicEvents;
 
-// **Recognition and Achievements**
-  final List<String> rankings;
-  final List<String> awards;
+  // **Recognition and Achievements**
   final List<Accreditation> accreditations;
+  final List<Ranking> rankings;
+  final List<Award> awards;
 
-// **Media and Resources**
+  // **Student Demographics**
+  final int totalBoys;
+  final int totalGirls;
+
+  // **Media and Resources**
   final List<String> schoolImagesUrl;
+  final String? onlineLearningPlatform;
+  final List<String> featuredNews;
+  final List<String> importantNotices;
 
-// **Calendar and Scheduling**
+  // **Calendar and Scheduling**
   final List<String> holidays;
   final int noOfPeriodsPerDay;
 
-//**Fee
+  // **Fee**
   final List<FeeStructure> feeStructure;
+  final String feePaymentMethods;
+  final DateTime feeDueDate;
+  final String lateFeePolicy;
 
-  // New properties for staff and management
+
+  // **Staff and Management**
   final List<UserListDetails> principals;
   final List<UserListDetails> vicePrincipals;
   final List<UserListDetails> teachers;
@@ -92,9 +116,18 @@ class School {
   final List<UserListDetails> librarians;
   final List<UserListDetails> departmentHeads;
   final List<UserListDetails> guidanceCounselors;
+  final String emergencyContactName;
+  final String emergencyContactPhone;
+  final String firstAidFacilities;
 
-  School({
-    // All required parameters
+  // **Branding Customization**
+  final Color primaryColor;
+  final Color secondaryColor;
+
+  // **Alumni Network**
+  final List<Alumni> alumni;
+
+  SchoolModel({
     required this.schoolId,
     required this.logoUrl,
     required this.schoolName,
@@ -104,13 +137,6 @@ class School {
     required this.establishedYear,
     required this.createdAt,
     required this.address,
-    required this.country,
-    required this.state,
-    required this.city,
-    required this.district,
-    required this.pinCode,
-    required this.street,
-    required this.landmark,
     required this.primaryPhoneNo,
     required this.secondaryPhoneNo,
     required this.email,
@@ -129,14 +155,18 @@ class School {
     required this.campusSize,
     required this.extracurricularActivities,
     required this.classes,
+    required this.sections,
+    required this.subjects,
+    required this.grades,
     required this.clubs,
     required this.societies,
     required this.sportsTeams,
-    required this.annualEvents,
+    required this.academicEvents,
     required this.facilitiesAvailable,
     required this.laboratoriesAvailable,
     required this.sportsFacilities,
     required this.schoolImagesUrl,
+    required this.accreditations,
     required this.rankings,
     required this.awards,
     required this.holidays,
@@ -146,7 +176,6 @@ class School {
     required this.noOfPeriodsPerDay,
     required this.schoolTimings,
     required this.academicYear,
-    required this.accreditations,
     required this.feeStructure,
     required this.principals,
     required this.vicePrincipals,
@@ -162,10 +191,39 @@ class School {
     required this.librarians,
     required this.departmentHeads,
     required this.guidanceCounselors,
+    required this.emergencyContactName,
+    required this.emergencyContactPhone,
+    required this.firstAidFacilities,
+    required this.primaryColor,
+    required this.secondaryColor,
+    required this.managingTrustName,
+    required this.registeredAddress,
+    required this.registeredContactNumber,
+    required this.totalBoys,
+    required this.totalGirls,
+    required this.studentTeacherRatio,
+    required this.scholarshipPrograms,
+    required this.transportationDetails,
+    required this.feePaymentMethods,
+    required this.lateFeePolicy,
+    required this.curriculumFrameworks,
+    required this.languagesOffered,
+    required this.specializedPrograms,
+    required this.hasCCTV,
+    required this.hasFireSafetyEquipment,
+    required this.isWheelchairAccessible,
+    required this.hasSmartClassrooms,
+    required this.numberOfComputers,
+    required this.hasInternetAccess,
+    required this.onlineLearningPlatform,
+    required this.featuredNews,
+    required this.importantNotices,
+    required this.alumni,
+    required this.feeDueDate,
   });
 
-  factory School.fromMap(Map<String, dynamic> map) {
-    return School(
+  factory SchoolModel.fromMap(Map<String, dynamic> map) {
+    return SchoolModel(
       schoolId: map['schoolId'],
       logoUrl: map['logoUrl'],
       schoolName: map['schoolName'],
@@ -174,14 +232,7 @@ class School {
       status: map['status'],
       establishedYear: DateTime.parse(map['establishedYear']),
       createdAt: DateTime.parse(map['createdAt']),
-      address: map['address'],
-      country: map['country'],
-      state: map['state'],
-      city: map['city'],
-      district: map['district'],
-      pinCode: map['pinCode'],
-      street: map['street'],
-      landmark: map['landmark'],
+      address: SchoolAddress.fromMap(map['address']),
       primaryPhoneNo: map['primaryPhoneNo'],
       secondaryPhoneNo: map['secondaryPhoneNo'],
       email: map['email'],
@@ -199,18 +250,32 @@ class School {
       mediumOfInstruction: map['mediumOfInstruction'],
       campusSize: map['campusSize'],
       extracurricularActivities:
-          List<String>.from(map['extracurricularActivities']),
-      classes: List<String>.from(map['classes']),
+      List<String>.from(map['extracurricularActivities']),
+      classes: (map['classes'] as List)
+          .map((e) => ClassData.fromMap(e))
+          .toList(),
+      sections: (map['sections'] as List)
+          .map((e) => SectionData.fromMap(e))
+          .toList(),
+      subjects: (map['subjects'] as List)
+          .map((e) => SubjectData.fromMap(e))
+          .toList(),
+      grades: List<String>.from(map['grades']),
       clubs: List<String>.from(map['clubs']),
       societies: List<String>.from(map['societies']),
       sportsTeams: List<String>.from(map['sportsTeams']),
-      annualEvents: List<String>.from(map['annualEvents']),
+      academicEvents: (map['academicEvents'] as List)
+          .map((e) => AcademicEvent.fromMap(e))
+          .toList(),
       facilitiesAvailable: List<String>.from(map['facilitiesAvailable']),
       laboratoriesAvailable: List<String>.from(map['laboratoriesAvailable']),
       sportsFacilities: List<String>.from(map['sportsFacilities']),
       schoolImagesUrl: List<String>.from(map['schoolImagesUrl']),
-      rankings: List<String>.from(map['rankings']),
-      awards: List<String>.from(map['awards']),
+      accreditations: (map['accreditations'] as List)
+          .map((e) => Accreditation.fromMap(e))
+          .toList(),
+      rankings: (map['rankings'] as List).map((e) => Ranking.fromMap(e)).toList(),
+      awards: (map['awards'] as List).map((e) => Award.fromMap(e)).toList(),
       holidays: List<String>.from(map['holidays']),
       numberOfBuildings: map['numberOfBuildings'],
       numberOfFloors: map['numberOfFloors'],
@@ -218,9 +283,6 @@ class School {
       noOfPeriodsPerDay: map['noOfPeriodsPerDay'],
       schoolTimings: SchoolTimings.fromMap(map['schoolTimings']),
       academicYear: AcademicYear.fromMap(map['academicYear']),
-      accreditations: (map['accreditations'] as List)
-          .map((e) => Accreditation.fromMap(e))
-          .toList(),
       feeStructure: (map['feeStructure'] as List)
           .map((e) => FeeStructure.fromMap(e))
           .toList(),
@@ -266,6 +328,35 @@ class School {
       guidanceCounselors: (map['guidanceCounselors'] as List)
           .map((e) => UserListDetails.fromMap(e))
           .toList(),
+      emergencyContactName: map['emergencyContactName'],
+      emergencyContactPhone: map['emergencyContactPhone'],
+      firstAidFacilities: map['firstAidFacilities'],
+      primaryColor: Color(map['primaryColor']),
+      secondaryColor:  Color(map['secondaryColor']),
+      managingTrustName: map['managingTrustName'],
+      registeredAddress: map['registeredAddress'],
+      registeredContactNumber: map['registeredContactNumber'],
+      totalBoys: map['totalBoys'],
+      totalGirls:  map['totalGirls'],
+      studentTeacherRatio: map['studentTeacherRatio'],
+      scholarshipPrograms: List<String>.from(map['scholarshipPrograms']),
+      transportationDetails: map['transportationDetails'],
+      feePaymentMethods: map['feePaymentMethods'],
+      lateFeePolicy: map['lateFeePolicy'],
+      curriculumFrameworks: List<String>.from(map['curriculumFrameworks']),
+      languagesOffered: List<String>.from(map['languagesOffered']),
+      specializedPrograms: List<String>.from(map['specializedPrograms']),
+      hasCCTV: map['hasCCTV'],
+      hasFireSafetyEquipment: map['hasFireSafetyEquipment'],
+      isWheelchairAccessible: map['isWheelchairAccessible'],
+      hasSmartClassrooms: map['hasSmartClassrooms'],
+      numberOfComputers: map['numberOfComputers'],
+      hasInternetAccess: map['hasInternetAccess'],
+      onlineLearningPlatform: map['onlineLearningPlatform'],
+      featuredNews: List<String>.from(map['featuredNews']),
+      importantNotices: List<String>.from(map['importantNotices']),
+      alumni: (map['alumni'] as List).map((e) => Alumni.fromMap(e)).toList(),
+      feeDueDate: DateTime.parse(map['feeDueDate']),
     );
   }
 
@@ -279,14 +370,7 @@ class School {
       'status': status,
       'establishedYear': establishedYear.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
-      'address': address,
-      'country': country,
-      'state': state,
-      'city': city,
-      'district': district,
-      'pinCode': pinCode,
-      'street': street,
-      'landmark': landmark,
+      'address': address.toMap(),
       'primaryPhoneNo': primaryPhoneNo,
       'secondaryPhoneNo': secondaryPhoneNo,
       'email': email,
@@ -304,17 +388,21 @@ class School {
       'mediumOfInstruction': mediumOfInstruction,
       'campusSize': campusSize,
       'extracurricularActivities': extracurricularActivities,
-      'classes': classes,
+      'classes': classes.map((e) => e.toMap()).toList(),
+      'sections': sections.map((e) => e.toMap()).toList(),
+      'subjects': subjects.map((e) => e.toMap()).toList(),
+      'grades': grades,
       'clubs': clubs,
       'societies': societies,
       'sportsTeams': sportsTeams,
-      'annualEvents': annualEvents,
+      'academicEvents': academicEvents.map((e) => e.toMap()).toList(),
       'facilitiesAvailable': facilitiesAvailable,
       'laboratoriesAvailable': laboratoriesAvailable,
       'sportsFacilities': sportsFacilities,
       'schoolImagesUrl': schoolImagesUrl,
-      'rankings': rankings,
-      'awards': awards,
+      'accreditations': accreditations.map((e) => e.toMap()).toList(),
+      'rankings': rankings.map((e) => e.toMap()).toList(),
+      'awards': awards.map((e) => e.toMap()).toList(),
       'holidays': holidays,
       'numberOfBuildings': numberOfBuildings,
       'numberOfFloors': numberOfFloors,
@@ -322,7 +410,7 @@ class School {
       'noOfPeriodsPerDay': noOfPeriodsPerDay,
       'schoolTimings': schoolTimings.toMap(),
       'academicYear': academicYear.toMap(),
-      'accreditations': accreditations.map((e) => e.toMap()).toList(),
+      'feeStructure': feeStructure.map((e) => e.toMap()).toList(),
       'principals': principals.map((e) => e.toMap()).toList(),
       'vicePrincipals': vicePrincipals.map((e) => e.toMap()).toList(),
       'teachers': teachers.map((e) => e.toMap()).toList(),
@@ -333,11 +421,116 @@ class School {
       'sportsCoaches': sportsCoaches.map((e) => e.toMap()).toList(),
       'schoolNurses': schoolNurses.map((e) => e.toMap()).toList(),
       'schoolAdministrators':
-          schoolAdministrators.map((e) => e.toMap()).toList(),
+      schoolAdministrators.map((e) => e.toMap()).toList(),
       'itSupportStaff': itSupportStaff.map((e) => e.toMap()).toList(),
       'librarians': librarians.map((e) => e.toMap()).toList(),
       'departmentHeads': departmentHeads.map((e) => e.toMap()).toList(),
       'guidanceCounselors': guidanceCounselors.map((e) => e.toMap()).toList(),
+      'emergencyContactName': emergencyContactName,
+      'emergencyContactPhone': emergencyContactPhone,
+      'firstAidFacilities': firstAidFacilities,
+      'primaryColor': primaryColor.value,
+      'secondaryColor': secondaryColor.value,
+      'managingTrustName': managingTrustName,
+      'registeredAddress': registeredAddress,
+      'registeredContactNumber': registeredContactNumber,
+      'totalBoys': totalBoys,
+      'totalGirls': totalGirls,
+      'studentTeacherRatio': studentTeacherRatio,
+      'scholarshipPrograms': scholarshipPrograms,
+      'transportationDetails': transportationDetails,
+      'feePaymentMethods': feePaymentMethods,
+      'lateFeePolicy': lateFeePolicy,
+      'curriculumFrameworks': curriculumFrameworks,
+      'languagesOffered': languagesOffered,
+      'specializedPrograms': specializedPrograms,
+      'hasCCTV': hasCCTV,
+      'hasFireSafetyEquipment': hasFireSafetyEquipment,
+      'isWheelchairAccessible': isWheelchairAccessible,
+      'hasSmartClassrooms': hasSmartClassrooms,
+      'numberOfComputers': numberOfComputers,
+      'hasInternetAccess': hasInternetAccess,
+      'onlineLearningPlatform': onlineLearningPlatform,
+      'featuredNews': featuredNews,
+      'importantNotices': importantNotices,
+      'alumni': alumni.map((e) => e.toMap()).toList(),
+      'feeDueDate': feeDueDate.toIso8601String(),
+    };
+  }
+}
+
+class AcademicEvent {
+  final String eventName;
+  final DateTime eventDate;
+  final String? description;
+
+  AcademicEvent({
+    required this.eventName,
+    required this.eventDate,
+    this.description,
+  });
+
+  factory AcademicEvent.fromMap(Map<String, dynamic> map) {
+    return AcademicEvent(
+      eventName: map['eventName'] as String,
+      eventDate: DateTime.parse(map['eventDate'] as String),
+      description: map['description'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'eventName': eventName,
+      'eventDate': eventDate.toIso8601String(),
+      'description': description,
+    };
+  }
+}
+
+class Alumni {
+  final String alumniId;
+  final String alumniName;
+  final String? profilePictureUrl;
+  final String? currentOccupation;
+  final String? contactEmail;
+  final String? contactPhone;
+  final String? linkedInProfile;
+  final String? passingYear;
+
+  Alumni({
+    required this.alumniId,
+    required this.alumniName,
+    this.profilePictureUrl,
+    this.currentOccupation,
+    this.contactEmail,
+    this.contactPhone,
+    this.linkedInProfile,
+    this.passingYear,
+  });
+
+  factory Alumni.fromMap(Map<String, dynamic> map) {
+    return Alumni(
+      alumniId: map['alumniId'] ?? '',
+      alumniName: map['alumniName'] ?? '',
+      profilePictureUrl: map['profilePictureUrl'],
+      currentOccupation: map['currentOccupation'],
+      contactEmail: map['contactEmail'],
+      contactPhone: map['contactPhone'],
+      linkedInProfile: map['linkedInProfile'],
+      passingYear: map['passingYear'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'alumniId': alumniId,
+      'alumniName': alumniName,
+      'profilePictureUrl': profilePictureUrl,
+      'currentOccupation': currentOccupation,
+      'contactEmail': contactEmail,
+      'contactPhone': contactPhone,
+      'linkedInProfile': linkedInProfile,
+      'passingYear': passingYear,
     };
   }
 }
@@ -469,19 +662,19 @@ class SchoolTimings {
 
   factory SchoolTimings.fromMap(Map<String, dynamic> json) {
     return SchoolTimings(
-      openingTime: DateTime.parse(json['start'] ?? ''),
-      closingTime: DateTime.parse(json['end'] ?? ''),
-      assemblyStart: DateTime.parse(json['assemblyStart'] ?? ''),
-      assemblyEnd: DateTime.parse(json['assemblyEnd'] ?? ''),
-      breakStart: DateTime.parse(json['breakStart'] ?? ''),
-      breakEnd: DateTime.parse(json['breakEnd'] ?? ''),
+      openingTime: DateTime.parse(json['openingTime'] ?? ''),
+      closingTime: DateTime.parse(json['closingTime'] ?? ''),
+      assemblyStart: json['assemblyStart'] != null ? DateTime.parse(json['assemblyStart']) : null,
+      assemblyEnd: json['assemblyEnd'] != null ? DateTime.parse(json['assemblyEnd']) : null,
+      breakStart: json['breakStart'] != null ? DateTime.parse(json['breakStart']) : null,
+      breakEnd:  json['breakEnd'] != null ? DateTime.parse(json['breakEnd']) : null,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'start': openingTime.toIso8601String(),
-      'end': closingTime.toIso8601String(),
+      'openingTime': openingTime.toIso8601String(),
+      'closingTime': closingTime.toIso8601String(),
       'assemblyStart': assemblyStart?.toIso8601String(),
       'assemblyEnd': assemblyEnd?.toIso8601String(),
       'breakStart': breakStart?.toIso8601String(),
@@ -527,17 +720,141 @@ class UserListDetails {
 
   factory UserListDetails.fromMap(Map<String, dynamic> map) {
     return UserListDetails(
-      userId: map['id'] ?? '',
-      userName: map['name'] ?? '',
+      userId: map['userId'] ?? '',
+      userName: map['userName'] ?? '',
       profilePictureUrl: map['profilePictureUrl'] ?? '',
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': userId,
-      'name': userName,
+      'userId': userId,
+      'userName': userName,
       'profilePictureUrl': profilePictureUrl,
     };
+  }
+}
+
+class SchoolAddress {
+  final String? streetAddress;
+  final String? city;
+  final String? district;
+  final String? state;
+  final String? country;
+  final String? village;
+  final String? pinCode;
+
+  SchoolAddress({
+    this.streetAddress,
+    this.city,
+    this.district,
+    this.state,
+    this.country,
+    this.village,
+    this.pinCode,
+  });
+
+  Map<String, dynamic> toMap() => {
+    'streetAddress': streetAddress,
+    'city': city,
+    'district': district,
+    'state': state,
+    'country': country,
+    'village': village,
+    'pinCode': pinCode,
+  };
+
+  static SchoolAddress fromMap(Map<String, dynamic> data) => SchoolAddress(
+    streetAddress: data['streetAddress'] as String?,
+    city: data['city'] as String?,
+    district: data['district'] as String?,
+    state: data['state'] as String?,
+    country: data['country'] as String?,
+    village: data['village'] as String?,
+    pinCode: data['pinCode'] as String?,
+  );
+}
+
+class ClassData {
+  final String classId;
+  final String className;
+
+  ClassData({
+    required this.classId,
+    required this.className,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'classId': classId,
+      'className': className,
+    };
+  }
+
+  factory ClassData.fromMap(Map<String, dynamic> map) {
+    return ClassData(
+      classId: map['classId'] as String,
+      className: map['className'] as String,
+    );
+  }
+}
+
+class SectionData {
+  final String sectionId;
+  final String sectionName;
+  final String classId;
+  final String className;
+
+  SectionData({
+    required this.sectionId,
+    required this.sectionName,
+    required this.classId,
+    required this.className,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'sectionId': sectionId,
+      'sectionName': sectionName,
+      'classId': classId,
+      'className': className,
+    };
+  }
+
+  factory SectionData.fromMap(Map<String, dynamic> map) {
+    return SectionData(
+      sectionId: map['sectionId'] as String,
+      sectionName: map['sectionName'] as String,
+      classId: map['classId'] as String,
+      className: map['className'] as String,
+    );
+  }
+}
+
+class SubjectData {
+  final String subjectId;
+  final String subjectName;
+  final String? description;
+
+  SubjectData({
+    required this.subjectId,
+    required this.subjectName,
+    this.description,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'subjectId': subjectId,
+      'subjectName': subjectName,
+      'description': description,
+    };
+  }
+
+  factory SubjectData.fromMap(Map<String, dynamic> map) {
+    return SubjectData(
+      subjectId: map['subjectId'] as String,
+      subjectName: map['subjectName'] as String,
+      description: map['description'] as String?,
+    );
   }
 }

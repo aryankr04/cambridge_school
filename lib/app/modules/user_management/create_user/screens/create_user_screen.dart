@@ -9,10 +9,12 @@ import 'package:cambridge_school/core/widgets/dropdown_field.dart';
 import 'package:cambridge_school/core/widgets/searchable_dropdown.dart';
 import 'package:cambridge_school/core/widgets/text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/utils/constants/text_styles.dart';
+import '../models/roles.dart';
 import '../models/user_model.dart';
 import '../widgets/qualification_widget.dart';
 
@@ -28,15 +30,24 @@ class CreateUserScreen extends StatefulWidget {
 class _CreateUserScreenState extends State<CreateUserScreen> {
   String? _currentExpandedTile;
 
-  final ExpansionTileController _personalInfoController = ExpansionTileController();
-  final ExpansionTileController _healthInfoController = ExpansionTileController();
-  final ExpansionTileController _fatherDetailsController = ExpansionTileController();
-  final ExpansionTileController _motherDetailsController = ExpansionTileController();
-  final ExpansionTileController _addressDetailsController = ExpansionTileController();
-  final ExpansionTileController _emergencyContactController = ExpansionTileController();
-  final ExpansionTileController _qualificationDetailsController = ExpansionTileController();
-  final ExpansionTileController _transportDetailsController = ExpansionTileController();
-  final ExpansionTileController _accountDetailsController = ExpansionTileController();
+  final ExpansionTileController _personalInfoController =
+      ExpansionTileController();
+  final ExpansionTileController _healthInfoController =
+      ExpansionTileController();
+  final ExpansionTileController _fatherDetailsController =
+      ExpansionTileController();
+  final ExpansionTileController _motherDetailsController =
+      ExpansionTileController();
+  final ExpansionTileController _addressDetailsController =
+      ExpansionTileController();
+  final ExpansionTileController _emergencyContactController =
+      ExpansionTileController();
+  final ExpansionTileController _qualificationDetailsController =
+      ExpansionTileController();
+  final ExpansionTileController _transportDetailsController =
+      ExpansionTileController();
+  final ExpansionTileController _accountDetailsController =
+      ExpansionTileController();
 
   @override
   Widget build(BuildContext context) {
@@ -54,59 +65,60 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
             children: [
               _buildRolesSection(),
               Obx(() => _buildExpansionTileCustom(
-                controller: _personalInfoController,
-                title: 'Personal Information',
-                isValid: controller.personalInfoValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Personal Information');
-                },
-                children: _buildPersonalInformationFields(),
-              )),
+                    controller: _personalInfoController,
+                    title: 'Personal Information',
+                    isValid: controller.personalInfoValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Personal Information');
+                    },
+                    children: _buildPersonalInformationFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _healthInfoController,
-                title: 'Health & Medical Information',
-                isValid: controller.physicalHealthValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Health & Medical Information');
-                },
-                children: _buildPhysicalHealthInformationFields(),
-              )),
+                    controller: _healthInfoController,
+                    title: 'Health & Medical Information',
+                    isValid: controller.physicalHealthValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(
+                          expanded, 'Health & Medical Information');
+                    },
+                    children: _buildPhysicalHealthInformationFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _fatherDetailsController,
-                title: 'Father’s Details',
-                isValid: controller.fatherDetailsValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Father’s Details');
-                },
-                children: _buildFatherDetailsFields(),
-              )),
+                    controller: _fatherDetailsController,
+                    title: 'Father’s Details',
+                    isValid: controller.fatherDetailsValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Father’s Details');
+                    },
+                    children: _buildFatherDetailsFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _motherDetailsController,
-                title: 'Mother’s Details',
-                isValid: controller.motherDetailsValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Mother’s Details');
-                },
-                children: _buildMotherDetailsFields(),
-              )),
+                    controller: _motherDetailsController,
+                    title: 'Mother’s Details',
+                    isValid: controller.motherDetailsValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Mother’s Details');
+                    },
+                    children: _buildMotherDetailsFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _addressDetailsController,
-                title: 'Residential Address',
-                isValid: controller.addressDetailsValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Residential Address');
-                },
-                children: _buildAddressDetailsFields(),
-              )),
+                    controller: _addressDetailsController,
+                    title: 'Residential Address',
+                    isValid: controller.addressDetailsValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Residential Address');
+                    },
+                    children: _buildAddressDetailsFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _emergencyContactController,
-                title: 'Emergency Contact Details',
-                isValid: controller.emergencyContactValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Emergency Contact Details');
-                },
-                children: _buildEmergencyContactFields(),
-              )),
+                    controller: _emergencyContactController,
+                    title: 'Emergency Contact Details',
+                    isValid: controller.emergencyContactValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Emergency Contact Details');
+                    },
+                    children: _buildEmergencyContactFields(),
+                  )),
               Obx(() {
                 if (!controller.selectedRoles.contains('Student') &&
                     controller.selectedRoles.isNotEmpty) {
@@ -124,29 +136,28 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               }),
               _buildRoleSpecificDetails(),
               Obx(() => _buildExpansionTileCustom(
-                controller: _transportDetailsController,
-                title: 'Transport Details',
-                isValid: controller.transportDetailsValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Transport Details');
-                },
-                children: _buildTransportationDetailsFields(),
-              )),
+                    controller: _transportDetailsController,
+                    title: 'Transport Details',
+                    isValid: controller.transportDetailsValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Transport Details');
+                    },
+                    children: _buildTransportationDetailsFields(),
+                  )),
               _buildExpansionTileCustom(
                 title: 'Personal Interests',
                 children: _buildFavoritesFields(),
               ),
               Obx(() => _buildExpansionTileCustom(
-                controller: _accountDetailsController,
-                title: 'Login & Account Information',
-                isValid: controller.loginInfoValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Login & Account Information');
-                },
-                children: _buildAccountDetailsFields(),
-              )),
+                    controller: _accountDetailsController,
+                    title: 'Login & Account Information',
+                    isValid: controller.loginInfoValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Login & Account Information');
+                    },
+                    children: _buildAccountDetailsFields(),
+                  )),
               const SizedBox(height: MySizes.md),
-
               MyButton(
                 text: 'Create User',
                 onPressed: () {
@@ -182,7 +193,9 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         if (tileId != 'Emergency Contact Details') {
           _emergencyContactController.collapse();
         }
-        if (tileId != 'Educational Qualifications' && !controller.selectedRoles.contains('Student') && controller.selectedRoles.isNotEmpty) {
+        if (tileId != 'Educational Qualifications' &&
+            !controller.selectedRoles.contains('Student') &&
+            controller.selectedRoles.isNotEmpty) {
           _qualificationDetailsController.collapse();
         }
         if (tileId != 'Transport Details') {
@@ -198,7 +211,6 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       }
     });
   }
-
   Widget _buildRolesSection() {
     return Container(
       width: Get.width,
@@ -222,7 +234,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               ),
               GestureDetector(
                 onTap: () {
-                  _showAddRoleDialog();
+                  showSelectRolesDialog(controller.selectedRoles, context); //Use controller.selectedRoles here
                 },
                 child: Container(
                   padding:
@@ -249,14 +261,13 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
             children: [
               ...controller.selectedRoles.map((role) => Chip(
                 label: Text(
-                  role,
+                  role.name, // Change here
                   style: const TextStyle(
                       color: Colors.white, fontSize: 13),
                 ),
                 backgroundColor: MyColors.activeBlue,
                 onDeleted: () {
                   controller.selectedRoles.remove(role);
-                  controller.selectedRoles.refresh();
                 },
                 deleteIconColor: Colors.white,
                 deleteIcon: const Icon(Icons.close, size: 16),
@@ -273,13 +284,41 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     );
   }
 
-  Future<void> _showAddRoleDialog() async {
+  Future<void> showSelectRolesDialog() async {
+    Roles roles =Roles();
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Select Roles', style: MyTextStyles.headlineSmall),
-          content: Obx(() => _buildRoleChips()),
+          content: Obx(
+                () => SizedBox(  // Wrap ListView.builder with SizedBox
+              width: double.maxFinite, // Set width
+              height: 300, // Set height (adjust as needed)
+              child: ListView.builder(
+                shrinkWrap: true, // Add shrinkWrap
+                itemCount: roles.roles.length, // Access length correctly
+                itemBuilder: (context, index) {
+                  final role = roles.roles[index]; // Access the role correctly
+                  final isSelected = controller.isRoleSelected(role.role);
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: roleCard(
+                      role: Roles.getRoleName(role.role), //Call it from Roles class
+                      description: role.description,
+                      isSelected: isSelected,
+                      assetPath: controller.getAssetPath(role.role),
+                      onTap: () => controller.toggleRoleSelection(role.role),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
           actions: <Widget>[
             TextButton(
               child: const Text('Done'),
@@ -290,124 +329,6 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       },
     );
   }
-
-  Widget _buildRoleChips() {
-    final Map<String, List<UserRole>> roleCategories = {
-      'Main Roles': [
-        UserRole.student,
-        UserRole.teacher,
-        UserRole.departmentHead,
-        UserRole.principal,
-        UserRole.director,
-        UserRole.schoolAdmin,
-        UserRole.securityGuard,
-        UserRole.maintenanceStaff,
-        UserRole.driver,
-      ],
-      'Administrative': [
-        UserRole.superAdmin,
-        UserRole.admin,
-        UserRole.schoolAdmin,
-        UserRole.director,
-        UserRole.schoolSecretary,
-        UserRole.principal,
-        UserRole.vicePrincipal,
-        UserRole.departmentHead,
-      ],
-      'Teaching': [
-        UserRole.teacher,
-        UserRole.sportsCoach,
-        UserRole.musicInstructor,
-        UserRole.danceInstructor,
-        UserRole.specialEducationTeacher,
-      ],
-      'Non-Teaching': [
-        UserRole.guidanceCounselor,
-        UserRole.librarian,
-        UserRole.schoolNurse,
-        UserRole.itSupport,
-      ],
-      'Support': [
-        UserRole.maintenanceStaff,
-        UserRole.driver,
-        UserRole.securityGuard,
-      ]
-    };
-
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: roleCategories.entries.map((entry) {
-          final category = entry.key;
-          final rolesInCategory = entry.value;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(
-                  category,
-                  style: MyTextStyles.bodyLarge
-                      .copyWith(fontWeight: FontWeight.w600, fontSize: 15),
-                ),
-              ),
-              Wrap(
-                spacing: 8.0,
-                children: rolesInCategory.map((role) {
-                  final isSelected =
-                  controller.selectedRoles.contains(role.name);
-                  return FilterChip(
-                    side: BorderSide(
-                      width: 1,
-                      color:
-                      isSelected ? MyColors.activeBlue : Colors.transparent,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    label: Text(
-                      role.name,
-                      style: TextStyle(
-                        color: isSelected
-                            ? Colors.white
-                            : MyColors.subtitleTextColor,
-                        fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w400,
-                        fontSize: 13,
-                      ),
-                    ),
-                    showCheckmark: false,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: MySizes.sm, vertical: MySizes.sm - 4),
-                    selectedColor: MyColors.activeBlue,
-                    backgroundColor:
-                    isSelected ? MyColors.activeBlue : Colors.grey[200],
-                    checkmarkColor: MyColors.activeBlue,
-                    selected: isSelected,
-                    onSelected: (bool selected) {
-                      List<String> newValues =
-                      List.from(controller.selectedRoles);
-                      if (selected) {
-                        if (!controller.selectedRoles.contains(role.name)) {
-                          newValues.add(role.name);
-                        }
-                      } else {
-                        newValues.remove(role.name);
-                      }
-                      controller.selectedRoles(newValues);
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16.0),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-
   Widget _buildExpansionTileCustom({
     required String title,
     required List<Widget> children,
@@ -438,13 +359,13 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         isValid == null
             ? Icons.error
             : isValid
-            ? Icons.check_circle
-            : Icons.close_rounded,
+                ? Icons.check_circle
+                : Icons.close_rounded,
         color: isValid == null
             ? MyColors.activeOrange
             : isValid
-            ? MyColors.activeGreen
-            : MyColors.activeRed,
+                ? MyColors.activeGreen
+                : MyColors.activeRed,
         size: 24,
       ),
       title: Text(title),
@@ -575,7 +496,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.heightController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Height must be a valid number')
+                errorText: 'Height must be a valid number')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -584,7 +505,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.weightController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Weight must be a valid number')
+                errorText: 'Weight must be a valid number')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -605,7 +526,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           controller.isPhysicalDisability.value = value == 'Yes';
         },
         selectedValue:
-        controller.isPhysicalDisability.value ? 'Yes'.obs : 'No'.obs,
+            controller.isPhysicalDisability.value ? 'Yes'.obs : 'No'.obs,
       ),
       const SizedBox(height: MySizes.md),
     ];
@@ -614,64 +535,64 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   List<Widget> _buildTransportationDetailsFields() {
     return [
       Obx(() => Column(
-        children: [
-          MyDropdownField(
-            labelText: 'Mode of Transport',
-            options: MyLists.modeOfTransportOptions,
-            selectedValue: controller.modeOfTransport,
-            onSelected: (value) {
-              controller.modeOfTransport.value = value ?? '';
-            },
-            isValidate: true,
-          ),
-          const SizedBox(height: MySizes.md),
-          if (controller.modeOfTransport.value == 'School Transport') ...[
-            MyTextField(
-              labelText: 'Transport Route Number',
-              controller: controller.transportRouteNumberController,
-              validator: RequiredValidator(
-                  errorText: 'Transport Route Number is required')
-                  .call,
-            ),
-            const SizedBox(height: MySizes.md),
-            MyTextField(
-              labelText: 'Transport Pickup Point',
-              controller: controller.transportPickupPointController,
-              validator: RequiredValidator(
-                  errorText: 'Transport Pickup Point is required')
-                  .call,
-            ),
-            const SizedBox(height: MySizes.md),
-            MyTextField(
-              labelText: 'Transport Drop Off Point',
-              controller: controller.transportDropOffPointController,
-              validator: RequiredValidator(
-                  errorText: 'Transport Drop Off Point is required')
-                  .call,
-            ),
-            const SizedBox(height: MySizes.md),
-            MyTextField(
-              labelText: 'Transport Vehicle Number',
-              controller: controller.transportVehicleNumberController,
-              validator: RequiredValidator(
-                  errorText: 'Transport Vehicle Number is required')
-                  .call,
-            ),
-            const SizedBox(height: MySizes.md),
-            MyTextField(
-              labelText: 'Transport Fare',
-              controller: controller.transportFareController,
-              keyboardType: TextInputType.number,
-              validator: MultiValidator([
-                RequiredValidator(errorText: 'Transport Fare is required'),
-                PatternValidator(r'^[0-9]*\.?[0-9]*$',
-                    errorText: 'Enter a valid number'),
-              ]).call,
-            ),
-            const SizedBox(height: MySizes.md),
-          ],
-        ],
-      ))
+            children: [
+              MyDropdownField(
+                labelText: 'Mode of Transport',
+                options: MyLists.modeOfTransportOptions,
+                selectedValue: controller.modeOfTransport,
+                onSelected: (value) {
+                  controller.modeOfTransport.value = value ?? '';
+                },
+                isValidate: true,
+              ),
+              const SizedBox(height: MySizes.md),
+              if (controller.modeOfTransport.value == 'School Transport') ...[
+                MyTextField(
+                  labelText: 'Transport Route Number',
+                  controller: controller.transportRouteNumberController,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Route Number is required')
+                      .call,
+                ),
+                const SizedBox(height: MySizes.md),
+                MyTextField(
+                  labelText: 'Transport Pickup Point',
+                  controller: controller.transportPickupPointController,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Pickup Point is required')
+                      .call,
+                ),
+                const SizedBox(height: MySizes.md),
+                MyTextField(
+                  labelText: 'Transport Drop Off Point',
+                  controller: controller.transportDropOffPointController,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Drop Off Point is required')
+                      .call,
+                ),
+                const SizedBox(height: MySizes.md),
+                MyTextField(
+                  labelText: 'Transport Vehicle Number',
+                  controller: controller.transportVehicleNumberController,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Vehicle Number is required')
+                      .call,
+                ),
+                const SizedBox(height: MySizes.md),
+                MyTextField(
+                  labelText: 'Transport Fare',
+                  controller: controller.transportFareController,
+                  keyboardType: TextInputType.number,
+                  validator: MultiValidator([
+                    RequiredValidator(errorText: 'Transport Fare is required'),
+                    PatternValidator(r'^[0-9]*\.?[0-9]*$',
+                        errorText: 'Enter a valid number'),
+                  ]).call,
+                ),
+                const SizedBox(height: MySizes.md),
+              ],
+            ],
+          ))
     ];
   }
 
@@ -708,7 +629,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               errorText: 'Password must be at least 8 characters long'),
           PatternValidator(r'^(?=.*[A-Z])(?=.*[!@#\$&*~])(?=.*[0-9]).*$',
               errorText:
-              'Password must contain at least one uppercase letter, one number, and one special character')
+                  'Password must contain at least one uppercase letter, one number, and one special character')
         ]).call,
       ),
       const SizedBox(height: MySizes.md),
@@ -721,8 +642,8 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Full Name',
         controller: controller.fatherFullNameController,
         validator:
-        RequiredValidator(errorText: 'Father\'s Full Name is required')
-            .call,
+            RequiredValidator(errorText: 'Father\'s Full Name is required')
+                .call,
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
@@ -749,7 +670,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.fatherPhoneNumberController,
         keyboardType: TextInputType.phone,
         validator: PatternValidator(r'^[0-9]+$',
-            errorText: 'Phone Number must contain only digits')
+                errorText: 'Phone Number must contain only digits')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -758,7 +679,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.fatherEmailAddressController,
         keyboardType: TextInputType.emailAddress,
         validator:
-        EmailValidator(errorText: 'Enter a valid email address').call,
+            EmailValidator(errorText: 'Enter a valid email address').call,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -776,7 +697,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.fatherAnnualIncomeController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Annual Income must be a valid number')
+                errorText: 'Annual Income must be a valid number')
             .call,
       ),
     ];
@@ -788,8 +709,8 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Full Name',
         controller: controller.motherFullNameController,
         validator:
-        RequiredValidator(errorText: 'Mother\'s Full Name is required')
-            .call,
+            RequiredValidator(errorText: 'Mother\'s Full Name is required')
+                .call,
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
@@ -817,7 +738,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.motherPhoneNumberController,
         keyboardType: TextInputType.phone,
         validator: PatternValidator(r'^[0-9]+$',
-            errorText: 'Phone Number must contain only digits')
+                errorText: 'Phone Number must contain only digits')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -826,7 +747,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.motherEmailAddressController,
         keyboardType: TextInputType.emailAddress,
         validator:
-        EmailValidator(errorText: 'Enter a valid email address').call,
+            EmailValidator(errorText: 'Enter a valid email address').call,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -844,7 +765,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.motherAnnualIncomeController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Annual Income must be a valid number')
+                errorText: 'Annual Income must be a valid number')
             .call,
       ),
     ];
@@ -852,178 +773,179 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   List<Widget> _buildAddressDetailsFields() {
     return [
-    const Text(
-      "Permanent Address",
-      style: TextStyle(
-          color: MyColors.headlineTextColor,
-          fontSize: 16,
-          fontWeight: FontWeight.bold),
-    ),
-    const SizedBox(height: MySizes.sm + 4),
-    MyTextField(
-    labelText: 'House Address',
-    controller: controller.permanentHouseAddressController,
-    validator:
-    RequiredValidator(errorText: 'House Address is required').call,
-    ),
-    const SizedBox(height: MySizes.md),
-    MyTextField(
-    labelText: 'City',
-    controller: controller.permanentCityController,
-    validator: RequiredValidator(errorText: 'City is required').call,
-    ),
-    const SizedBox(height: MySizes.md),
-    MySearchableDropdown(
-    labelText: 'District',
-    options: MyLists.indianStateOptions,
-    onSelected: (value) {
-    controller.permanentDistrict.value = value;
-    },
-    isValidate: true,
-    hintText: "Please select District",
-    ),
-    const SizedBox(height: MySizes.md),
-    MyDropdownField(
-    labelText: 'State',
-    selectedValue: controller.permanentState,
-    onSelected: (value) {
-    controller.permanentState.value = value ?? '';
-    },
-    options: MyLists.indianStateOptions,
-    isValidate: true,
-    ),
-    const SizedBox(height: MySizes.md),
-    MyTextField(
-    labelText: 'Village',
-    controller: controller.permanentVillageController,
-    validator: RequiredValidator(errorText: 'Village is required').call,
-    ),
-    const SizedBox(height: MySizes.md),
-    MyTextField(
-    labelText: 'Pin Code',
-    controller: controller.permanentPinCodeController,
-    keyboardType: TextInputType.number,
-    validator: MultiValidator([
-    RequiredValidator(errorText: 'Pin Code is required'),
-    PatternValidator(r'^[0-9]+$',
-    errorText: 'Pin Code must contain only digits'),
-    LengthRangeValidator(
-    errorText: 'Pin Code must be 6 digits long', min: 6, max: 6)
-    ]).call,
-    ),
-    const SizedBox(height: MySizes.md + 4),
-    Obx(() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    const Text(
-    "Current Address",
-    style: TextStyle(
-    color: MyColors.headlineTextColor,
-    fontSize: 16,
-    fontWeight: FontWeight.bold),
-    ),
-    Row(
-    children: [
-    Checkbox(
-    value: controller.isSameAsPermanent.value,
-    onChanged: (value) {
-    controller.isSameAsPermanent.value = value!;
-    if (value) {
-    controller.currentHouseAddressController.text =
-    controller.permanentHouseAddressController.text;
-    controller.currentCityController.text =
-    controller.permanentCityController.text;
-    controller.currentDistrict.value =
-    controller.permanentDistrict.value;
-    controller.currentState.value =
-    controller.permanentState.value;
-    controller.currentVillageController.text =
-    controller.permanentVillageController.text;
-    controller.currentPinCodeController.text =
-    controller.permanentPinCodeController.text;
-    } else {
-    controller.currentHouseAddressController.clear();
-    controller.currentCityController.clear();
-    controller.currentDistrict.value = '';
-    controller.currentState.value = '';
-    controller.currentVillageController.clear();
-    controller.currentPinCodeController.clear();
-    }
-    },
-    ),
-    const Text(
-    "Same as Permanent Address",
-    style: TextStyle(
-    color: MyColors.headlineTextColor,
-    fontSize: 12,
-    fontWeight: FontWeight.w500),
-    ),
-    ],
-    ),
-    if (!controller.isSameAsPermanent.value)
-    Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    MyTextField(
-    labelText: 'House Address',
-    controller: controller.currentHouseAddressController,
-    validator: RequiredValidator(
-    errorText: 'House Address is required')
-        .call,
-    ),
-    const SizedBox(height: MySizes.md),
-    MyTextField(
-    labelText: 'City',
-    controller: controller.currentCityController,
-    validator:
-    RequiredValidator(errorText: 'City is required').call,
-    ),
-    const SizedBox(height: MySizes.md),
-    MySearchableDropdown(
-    labelText: 'District',
-    options: MyLists.indianStateOptions,
-    onSelected: (value) {
-    controller.currentDistrict.value = value;
-    },
-    isValidate: true,
-    hintText: "Please select District",
-    ),
-    const SizedBox(height: MySizes.md),
-    MyDropdownField(
-    labelText: 'State',
-    options: MyLists.indianStateOptions,
-    selectedValue: controller.currentState,
-    onSelected: (value) {
-    controller.currentState.value = value ?? '';
-    },
-    isValidate: true,
-    ),
-    const SizedBox(height:MySizes.md),                 MyTextField(
-        labelText: 'Village',
-        controller: controller.currentVillageController,
+      const Text(
+        "Permanent Address",
+        style: TextStyle(
+            color: MyColors.headlineTextColor,
+            fontSize: 16,
+            fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: MySizes.sm + 4),
+      MyTextField(
+        labelText: 'House Address',
+        controller: controller.permanentHouseAddressController,
         validator:
-        RequiredValidator(errorText: 'Village is required')
-            .call,
+            RequiredValidator(errorText: 'House Address is required').call,
+      ),
+      const SizedBox(height: MySizes.md),
+      MyTextField(
+        labelText: 'City',
+        controller: controller.permanentCityController,
+        validator: RequiredValidator(errorText: 'City is required').call,
+      ),
+      const SizedBox(height: MySizes.md),
+      MySearchableDropdown(
+        labelText: 'District',
+        options: MyLists.indianStateOptions,
+        onSelected: (value) {
+          controller.permanentDistrict.value = value;
+        },
+        isValidate: true,
+        hintText: "Please select District",
+      ),
+      const SizedBox(height: MySizes.md),
+      MyDropdownField(
+        labelText: 'State',
+        selectedValue: controller.permanentState,
+        onSelected: (value) {
+          controller.permanentState.value = value ?? '';
+        },
+        options: MyLists.indianStateOptions,
+        isValidate: true,
+      ),
+      const SizedBox(height: MySizes.md),
+      MyTextField(
+        labelText: 'Village',
+        controller: controller.permanentVillageController,
+        validator: RequiredValidator(errorText: 'Village is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Pin Code',
-        controller: controller.currentPinCodeController,
+        controller: controller.permanentPinCodeController,
         keyboardType: TextInputType.number,
         validator: MultiValidator([
           RequiredValidator(errorText: 'Pin Code is required'),
           PatternValidator(r'^[0-9]+$',
               errorText: 'Pin Code must contain only digits'),
           LengthRangeValidator(
-              errorText: 'Pin Code must be 6 digits long',
-              min: 6,
-              max: 6)
+              errorText: 'Pin Code must be 6 digits long', min: 6, max: 6)
         ]).call,
-      )
-    ],
-    ),
-    ],
-    )),
+      ),
+      const SizedBox(height: MySizes.md + 4),
+      Obx(() => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Current Address",
+                style: TextStyle(
+                    color: MyColors.headlineTextColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
+              ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: controller.isSameAsPermanent.value,
+                    onChanged: (value) {
+                      controller.isSameAsPermanent.value = value!;
+                      if (value) {
+                        controller.currentHouseAddressController.text =
+                            controller.permanentHouseAddressController.text;
+                        controller.currentCityController.text =
+                            controller.permanentCityController.text;
+                        controller.currentDistrict.value =
+                            controller.permanentDistrict.value;
+                        controller.currentState.value =
+                            controller.permanentState.value;
+                        controller.currentVillageController.text =
+                            controller.permanentVillageController.text;
+                        controller.currentPinCodeController.text =
+                            controller.permanentPinCodeController.text;
+                      } else {
+                        controller.currentHouseAddressController.clear();
+                        controller.currentCityController.clear();
+                        controller.currentDistrict.value = '';
+                        controller.currentState.value = '';
+                        controller.currentVillageController.clear();
+                        controller.currentPinCodeController.clear();
+                      }
+                    },
+                  ),
+                  const Text(
+                    "Same as Permanent Address",
+                    style: TextStyle(
+                        color: MyColors.headlineTextColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              if (!controller.isSameAsPermanent.value)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MyTextField(
+                      labelText: 'House Address',
+                      controller: controller.currentHouseAddressController,
+                      validator: RequiredValidator(
+                              errorText: 'House Address is required')
+                          .call,
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MyTextField(
+                      labelText: 'City',
+                      controller: controller.currentCityController,
+                      validator:
+                          RequiredValidator(errorText: 'City is required').call,
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MySearchableDropdown(
+                      labelText: 'District',
+                      options: MyLists.indianStateOptions,
+                      onSelected: (value) {
+                        controller.currentDistrict.value = value;
+                      },
+                      isValidate: true,
+                      hintText: "Please select District",
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MyDropdownField(
+                      labelText: 'State',
+                      options: MyLists.indianStateOptions,
+                      selectedValue: controller.currentState,
+                      onSelected: (value) {
+                        controller.currentState.value = value ?? '';
+                      },
+                      isValidate: true,
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MyTextField(
+                      labelText: 'Village',
+                      controller: controller.currentVillageController,
+                      validator:
+                          RequiredValidator(errorText: 'Village is required')
+                              .call,
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MyTextField(
+                      labelText: 'Pin Code',
+                      controller: controller.currentPinCodeController,
+                      keyboardType: TextInputType.number,
+                      validator: MultiValidator([
+                        RequiredValidator(errorText: 'Pin Code is required'),
+                        PatternValidator(r'^[0-9]+$',
+                            errorText: 'Pin Code must contain only digits'),
+                        LengthRangeValidator(
+                            errorText: 'Pin Code must be 6 digits long',
+                            min: 6,
+                            max: 6)
+                      ]).call,
+                    )
+                  ],
+                ),
+            ],
+          )),
     ];
   }
 
@@ -1060,7 +982,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.emergencyEmailAddressController,
         keyboardType: TextInputType.emailAddress,
         validator:
-        EmailValidator(errorText: 'Enter a valid email address').call,
+            EmailValidator(errorText: 'Enter a valid email address').call,
       ),
     ];
   }
@@ -1077,7 +999,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Favorite Subject',
         options: MyLists.subjectOptions,
         onSingleChanged: (value) =>
-        controller.favoriteSubject.value = value ?? '',
+            controller.favoriteSubject.value = value ?? '',
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -1098,7 +1020,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Favorite Sport',
         options: MyLists.favoriteSportOptions,
         onSingleChanged: (value) =>
-        controller.favoriteSport.value = value ?? '',
+            controller.favoriteSport.value = value ?? '',
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -1154,7 +1076,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Favorite Season',
         options: MyLists.seasonOptions,
         onSingleChanged: (value) =>
-        controller.favoriteSeason.value = value ?? '',
+            controller.favoriteSeason.value = value ?? '',
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -1173,42 +1095,42 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   Widget _buildRoleSpecificDetails() {
     return Obx(() => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (controller.selectedRoles.contains(UserRole.student.name))
-          _buildExpansionTileCustom(
-              title: 'Student Details', children: _buildStudentDetails()),
-        if (controller.selectedRoles.contains(UserRole.teacher.name))
-          _buildExpansionTileCustom(
-              title: 'Teacher Details', children: _buildTeacherDetails()),
-        if (controller.selectedRoles.contains(UserRole.driver.name))
-          _buildExpansionTileCustom(
-              title: 'Driver Details', children: _buildDriverDetails()),
-        if (controller.selectedRoles.contains(UserRole.securityGuard.name))
-          _buildExpansionTileCustom(
-              title: 'Security Guard Details',
-              children: _buildSecurityGuardDetails()),
-        if (controller.selectedRoles
-            .contains(UserRole.maintenanceStaff.name))
-          _buildExpansionTileCustom(
-              title: 'Maintenance Staff Details',
-              children: _buildMaintenanceStaffDetails()),
-        if (controller.selectedRoles.contains(UserRole.admin.name))
-          _buildExpansionTileCustom(
-              title: 'Admin Details', children: _buildAdminDetails()),
-        if (controller.selectedRoles.contains(UserRole.schoolAdmin.name))
-          _buildExpansionTileCustom(
-              title: 'School Admin Details',
-              children: _buildSchoolAdminDetails()),
-        if (controller.selectedRoles.contains(UserRole.director.name))
-          _buildExpansionTileCustom(
-              title: 'Director Details', children: _buildDirectorDetails()),
-        if (controller.selectedRoles.contains(UserRole.departmentHead.name))
-          _buildExpansionTileCustom(
-              title: 'Department Head Details',
-              children: _buildDepartmentHeadDetails())
-      ],
-    ));
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (controller.selectedRoles.contains(UserRole.Student.name))
+              _buildExpansionTileCustom(
+                  title: 'Student Details', children: _buildStudentDetails()),
+            if (controller.selectedRoles.contains(UserRole.Teacher.name))
+              _buildExpansionTileCustom(
+                  title: 'Teacher Details', children: _buildTeacherDetails()),
+            if (controller.selectedRoles.contains(UserRole.BusDriver.name))
+              _buildExpansionTileCustom(
+                  title: 'Driver Details', children: _buildDriverDetails()),
+            if (controller.selectedRoles.contains(UserRole.SecurityGuard.name))
+              _buildExpansionTileCustom(
+                  title: 'Security Guard Details',
+                  children: _buildSecurityGuardDetails()),
+            if (controller.selectedRoles
+                .contains(UserRole.Janitor.name))
+              _buildExpansionTileCustom(
+                  title: 'Maintenance Staff Details',
+                  children: _buildMaintenanceStaffDetails()),
+            if (controller.selectedRoles.contains(UserRole.Admin.name))
+              _buildExpansionTileCustom(
+                  title: 'Admin Details', children: _buildAdminDetails()),
+            if (controller.selectedRoles.contains(UserRole.SchoolAdmin.name))
+              _buildExpansionTileCustom(
+                  title: 'School Admin Details',
+                  children: _buildSchoolAdminDetails()),
+            if (controller.selectedRoles.contains(UserRole.Director.name))
+              _buildExpansionTileCustom(
+                  title: 'Director Details', children: _buildDirectorDetails()),
+            if (controller.selectedRoles.contains(UserRole.DepartmentHead.name))
+              _buildExpansionTileCustom(
+                  title: 'Department Head Details',
+                  children: _buildDepartmentHeadDetails())
+          ],
+        ));
   }
 
   List<Widget> _buildStudentDetails() {
@@ -1271,72 +1193,72 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       ),
       const SizedBox(height: MySizes.lg),
       Obx(() => Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Guardian',
-            style: MyTextStyles.titleLarge,
-          ),
-          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Radio<String>(
-                value: "Father",
-                groupValue: controller.selectedGuardian.value,
-                onChanged: (value) {
-                  controller.selectedGuardian.value = value;
-                },
-              ),
               const Text(
-                "Father",
-                style: TextStyle(
-                    color: MyColors.subtitleTextColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500),
+                'Guardian',
+                style: MyTextStyles.titleLarge,
               ),
+              Row(
+                children: [
+                  Radio<String>(
+                    value: "Father",
+                    groupValue: controller.selectedGuardian.value,
+                    onChanged: (value) {
+                      controller.selectedGuardian.value = value;
+                    },
+                  ),
+                  const Text(
+                    "Father",
+                    style: TextStyle(
+                        color: MyColors.subtitleTextColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Radio<String>(
+                    value: "Mother",
+                    groupValue: controller.selectedGuardian.value,
+                    onChanged: (value) {
+                      controller.selectedGuardian.value = value;
+                    },
+                  ),
+                  const Text(
+                    "Mother",
+                    style: TextStyle(
+                        color: MyColors.subtitleTextColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Radio<String>(
+                    value: "Other",
+                    groupValue: controller.selectedGuardian.value,
+                    onChanged: (value) {
+                      controller.selectedGuardian.value = value;
+                    },
+                  ),
+                  const Text(
+                    "Other Guardian (Relative/Legal Guardian)",
+                    style: TextStyle(
+                        color: MyColors.subtitleTextColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              if (controller.selectedGuardian.value == null)
+                const Text("Please Select A Guardian",
+                    style: TextStyle(color: MyColors.activeRed)),
             ],
-          ),
-          Row(
-            children: [
-              Radio<String>(
-                value: "Mother",
-                groupValue: controller.selectedGuardian.value,
-                onChanged: (value) {
-                  controller.selectedGuardian.value = value;
-                },
-              ),
-              const Text(
-                "Mother",
-                style: TextStyle(
-                    color: MyColors.subtitleTextColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Radio<String>(
-                value: "Other",
-                groupValue: controller.selectedGuardian.value,
-                onChanged: (value) {
-                  controller.selectedGuardian.value = value;
-                },
-              ),
-              const Text(
-                "Other Guardian (Relative/Legal Guardian)",
-                style: TextStyle(
-                    color: MyColors.subtitleTextColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          if (controller.selectedGuardian.value == null)
-            const Text("Please Select A Guardian",
-                style: TextStyle(color: MyColors.activeRed)),
-        ],
-      )),
+          )),
       const SizedBox(height: MySizes.md),
       Obx(() {
         if (controller.selectedGuardian.value == "Other") {
@@ -1354,7 +1276,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 labelText: 'Full Name',
                 controller: controller.guardianFullNameController,
                 validator:
-                RequiredValidator(errorText: 'Full Name is required').call,
+                    RequiredValidator(errorText: 'Full Name is required').call,
               ),
               const SizedBox(height: MySizes.md),
               MyDialogDropdown(
@@ -1391,8 +1313,8 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 controller: controller.motherEmailAddressController,
                 keyboardType: TextInputType.emailAddress,
                 validator:
-                EmailValidator(errorText: 'Enter a valid email address')
-                    .call,
+                    EmailValidator(errorText: 'Enter a valid email address')
+                        .call,
               ),
               const SizedBox(height: MySizes.md),
               MyDropdownField(
@@ -1410,7 +1332,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 controller: controller.motherAnnualIncomeController,
                 keyboardType: TextInputType.number,
                 validator: PatternValidator(r'^[0-9.]*$',
-                    errorText: 'Annual Income must be a valid number')
+                        errorText: 'Annual Income must be a valid number')
                     .call,
               ),
             ],
@@ -1450,7 +1372,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Experience',
         controller: controller.experienceController,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Experience must be a valid number')
+                errorText: 'Experience must be a valid number')
             .call,
       ),
     ];
@@ -1462,7 +1384,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'License Number',
         controller: controller.licenseNumberController,
         validator:
-        RequiredValidator(errorText: 'License Number is required').call,
+            RequiredValidator(errorText: 'License Number is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
@@ -1480,10 +1402,10 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   List<Widget> _buildQualificationDetails() {
     return [
       ...controller.qualifications.map((qualification) => QualificationWidget(
-        qualification: qualification,
-        onEdit: () => controller.editQualification(qualification),
-        onDelete: () => controller.deleteQualification(qualification),
-      )),
+            qualification: qualification,
+            onEdit: () => controller.editQualification(qualification),
+            onDelete: () => controller.deleteQualification(qualification),
+          )),
       TextButton(
         onPressed: () {
           controller.showAddQualificationDialog(Get.context!);
@@ -1499,7 +1421,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Assigned Area',
         controller: controller.assignedAreaController,
         validator:
-        RequiredValidator(errorText: 'Assigned Area is required').call,
+            RequiredValidator(errorText: 'Assigned Area is required').call,
       ),
       const SizedBox(height: MySizes.md),
     ];
@@ -1639,7 +1561,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.yearsAsHeadController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Years as head must be a valid number')
+                errorText: 'Years as head must be a valid number')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -1658,4 +1580,56 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       ),
     ];
   }
+}
+
+
+Widget roleCard({
+  required String role,
+  required String description,
+  required bool isSelected,
+  required String assetPath,
+}) {
+  return Container(
+    decoration: BoxDecoration(
+      color: isSelected ? MyColors.activeBlue.withOpacity(0.1) : Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        width: 1,
+        color: MyColors.activeBlue,
+      ),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(MySizes.md),
+      child: Row(
+        children: [
+          SizedBox(
+            height: 36,
+            width: 36,
+            child: SvgPicture.asset(
+                assetPath), // Use assetPath here
+          ),
+          SizedBox(
+            width: MySizes.md,
+          ),
+          Expanded( // Added Expanded to prevent overflow
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
+              children: [
+                Text(
+                  role,
+                  style: MyTextStyles.titleLarge,
+                ),
+                Text(
+                  description,
+                  style: MyTextStyles.bodyMedium,
+                  maxLines: 2, // Limit to 2 lines
+                  overflow: TextOverflow.ellipsis, // Handle overflow with ellipsis
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

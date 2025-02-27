@@ -1,9 +1,9 @@
 // --- Firestore Repository Class ---
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'attendance_record.dart';
+import 'attendance_record_models.dart';
 
-class FirestoreAttendanceRepository {
+class FirestoreAttendanceRecordRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String attendanceRecordsCollection = 'attendance_records';
   static const String dailyAttendanceRecordsSubcollection = 'daily_attendance_records';

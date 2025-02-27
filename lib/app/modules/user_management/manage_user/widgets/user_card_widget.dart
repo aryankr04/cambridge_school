@@ -24,13 +24,13 @@ class UserCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String fullName = userProfile.fullName;
+    final String? fullName = userProfile.fullName;
     final String? profileImageUrl = userProfile.profileImageUrl;
-    final String accountStatus = userProfile.accountStatus;
+    final String? accountStatus = userProfile.accountStatus;
     final String userId = userProfile.userId;
     final AccountStatus accountStatusEnum =
-    _getAccountStatusFromString(accountStatus);
-    final String rollNumber = userProfile.studentDetails?.rollNumber ?? ''; //Simplified roll number access
+    _getAccountStatusFromString(accountStatus ?? 'pending'); // Provide default value
+    final String? rollNumber = userProfile.studentDetails?.rollNumber; //Simplified roll number access
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
@@ -60,11 +60,11 @@ class UserCardWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      rollNumber.isNotEmpty ? '$rollNumber. $fullName' : fullName, //Simplified conditional display
+                      (rollNumber != null && rollNumber.isNotEmpty) ? '$rollNumber. $fullName' : fullName ?? "N/A", //Simplified conditional display and default
                       style: MyTextStyles.titleLarge.copyWith(fontSize: 15),
                     ),
                     Text(
-                      '$userId',
+                      userId,
                       style: MyTextStyles.labelMedium.copyWith(fontSize: 11),
                     ),
                   ],
@@ -85,8 +85,8 @@ class UserCardWidget extends StatelessWidget {
   // Function to show the Details Dialog
   void _showDetailsDialog(BuildContext context) {
     final AccountStatus accountStatusEnum =
-    _getAccountStatusFromString(userProfile.accountStatus);
-    final String rollNumber = userProfile.studentDetails?.rollNumber ?? ''; //Simplified roll number access
+    _getAccountStatusFromString(userProfile.accountStatus ?? 'pending'); // Provide default value
+    final String? rollNumber = userProfile.studentDetails?.rollNumber; //Simplified roll number access
     final String? className = userProfile.studentDetails?.className; // Get class name
     final String? sectionName = userProfile.studentDetails?.section;
 
@@ -113,7 +113,7 @@ class UserCardWidget extends StatelessWidget {
                     height: MySizes.md,
                   ),
                   Text(
-                    userProfile.fullName,
+                    userProfile.fullName ?? "N/A",// Provide default value
                     style: MyTextStyles.titleLarge.copyWith(fontSize: 18),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -175,7 +175,7 @@ class UserCardWidget extends StatelessWidget {
                                 width: 1, color: MyColors.borderColor),
                             child: Column(
                               children: [
-                                Text(rollNumber,
+                                Text(rollNumber ?? "N/A",
                                     style: MyTextStyles.titleLarge),
                                 Text(
                                   'Roll No',

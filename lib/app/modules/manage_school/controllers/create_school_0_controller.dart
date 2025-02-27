@@ -96,7 +96,7 @@ class CreateSchool0Controller extends GetxController {
         return;
       }
 
-      final School? school = await _buildSchoolData();
+      final SchoolModel? school = await _buildSchoolData();
       if(school == null){
         Get.back();
         MyHelperFunctions.showErrorSnackBar(
@@ -163,84 +163,129 @@ class CreateSchool0Controller extends GetxController {
   }
 
   // -- Private Method to Build School Data --
-  Future<School?> _buildSchoolData() async {
+  Future<SchoolModel?> _buildSchoolData() async {
     try {
-      return School(
-        schoolId: '',// To be generated later
-        logoUrl: '',// Upload URL To be Uploaded Later
+      // Address Data
+      final address = SchoolAddress(
+        streetAddress: step2Controller.addressController.text,
+        country: step2Controller.selectedCountry.value,
+        state: step2Controller.selectedState.value,
+        city: step2Controller.cityController.text,
+        district: step2Controller.districtController.text,
+        pinCode: step2Controller.zipCodeController.text,
+        village: step2Controller.landmarksNearbyController.text,
+      );
 
+      final schoolData = SchoolModel(
+        schoolId: '', // To be generated later - TODO: Generate a unique ID
+        logoUrl: '', // Upload URL To be Uploaded Later - TODO: Handle image upload
         schoolName: step1Controller.schoolNameController.text,
         schoolSlogan: step1Controller.schoolMottoController.text,
-        aboutSchool: '',
-        status: '',
-        establishedYear: DateTime.now(),
-        createdAt: DateTime.now(),
+        aboutSchool: '', // TODO: Add a field for "About School" text
+        status: 'Pending', // Initial status
 
+        establishedYear: DateTime.now(), //TODO : Get this value from user input
+        createdAt: DateTime.now(), //TODO : Get this value from user input
         schoolingSystem: step1Controller.selectedSchoolType.value,
         schoolBoard: step1Controller.selectedAcademicLevel.value,
         schoolCode: step1Controller.schoolIdController.text,
         schoolType: step1Controller.selectedSchoolType.value,
-        affiliationNumber: '',
+        affiliationNumber: '', //  TODO: Input field for affiliation number
+        schoolManagementAuthority: '', // TODO: Input for the correct authority
 
-        schoolManagementAuthority: '',
-
-        address: step2Controller.addressController.text,
-        country: step2Controller.selectedCountry.value,
-        state: step2Controller.selectedState.value,
-        city: step2Controller.cityController.text,
-
-        district: step2Controller.districtController.text,
-        pinCode: step2Controller.zipCodeController.text,
-        street: step2Controller.streetController.text,
-        landmark: step2Controller.landmarksNearbyController.text,
-
+        address: address,
         primaryPhoneNo: step3Controller.primaryPhoneNumberController.text,
         secondaryPhoneNo: step3Controller.secondaryPhoneNumberController.text,
         email: step3Controller.emailAddressController.text,
-
         website: step3Controller.websiteController.text,
         faxNumber: step3Controller.faxNumberController.text,
-        gradingSystem: '',
-        examPattern: '',
-        academicLevel: '',
-        mediumOfInstruction: '',
-        academicYear: AcademicYear(start: DateTime.now(),end:  DateTime.now()),
-        classes: [],
-        campusSize: double.tryParse(step4Controller.campusSizeController.text)?? 0.0 ,
+
+        gradingSystem: '', //TODO add the value from user input
+        examPattern: '', //TODO  add the value from user input
+        academicLevel: '', //TODO  add the value from user input
+        mediumOfInstruction: '', //TODO  add the value from user input
+        academicYear: AcademicYear(start: DateTime.now(), end: DateTime.now()), //TODO  Take from user or set dynamically
+        classes: [], // TODO: Populate from user input
+        sections: [], // TODO: Populate from user input
+        subjects: [],// TODO: Populate from user input
+        grades: [], //TODO: Populate from user input
+
+        campusSize: double.tryParse(step4Controller.campusSizeController.text) ?? 0.0,
         facilitiesAvailable: step4Controller.selectedAvailableFacilities,
         laboratoriesAvailable: step4Controller.selectedLaboratories,
         sportsFacilities: step4Controller.selectedSportsFacilities,
-        numberOfBuildings: int.tryParse(step4Controller.numberOfBuildingsController.text) ?? 0 ,
-        numberOfFloors: int.tryParse(step4Controller.numberOfFloorsController.text)?? 0,
-        numberOfClassrooms: int.tryParse(step4Controller.totalClassroomsController.text)?? 0,
-        schoolTimings: SchoolTimings(openingTime: DateTime.now(), closingTime: DateTime.now()),
-        extracurricularActivities: [],
-        clubs: [],
-        societies: [],
-        sportsTeams: [],
-        annualEvents: [],
-        rankings: [],
-        awards: [],
-        accreditations: [],
-        schoolImagesUrl: [],
-        holidays: [],
-        noOfPeriodsPerDay: 0,
-        feeStructure: [],
-        principals: [],
-        vicePrincipals: [],
-        teachers: [],
-        maintenanceStaff: [],
-        drivers: [],
-        securityGuards: [],
-        directors: [],
-        sportsCoaches: [],
-        schoolNurses: [],
-        schoolAdministrators: [],
-        itSupportStaff: [],
-        librarians: [],
-        departmentHeads: [],
-        guidanceCounselors: [],
+        numberOfBuildings: int.tryParse(step4Controller.numberOfBuildingsController.text) ?? 0,
+        numberOfFloors: int.tryParse(step4Controller.numberOfFloorsController.text) ?? 0,
+        numberOfClassrooms: int.tryParse(step4Controller.totalClassroomsController.text) ?? 0,
+        schoolTimings: SchoolTimings(openingTime: DateTime.now(), closingTime: DateTime.now()),//TODO
+
+        extracurricularActivities: [], //TODO
+        clubs: [],//TODO
+        societies: [],//TODO
+        sportsTeams: [],//TODO
+        academicEvents: [],//TODO
+
+        accreditations: [],//TODO
+        rankings: [],//TODO
+        awards: [],//TODO
+        schoolImagesUrl: [],//TODO
+        holidays: [],//TODO
+        noOfPeriodsPerDay: 0, //TODO add the value from user input
+        feeStructure: [],//TODO
+        principals: [],//TODO
+        vicePrincipals: [],//TODO
+        teachers: [],//TODO
+        maintenanceStaff: [],//TODO
+        drivers: [],//TODO
+        securityGuards: [],//TODO
+        directors: [],//TODO
+        sportsCoaches: [],//TODO
+        schoolNurses: [],//TODO
+        schoolAdministrators: [],//TODO
+        itSupportStaff: [],//TODO
+        librarians: [],//TODO
+        departmentHeads: [],//TODO
+        guidanceCounselors: [], //TODO
+
+        emergencyContactName: '', // TODO: Emergency contact details from user input
+        emergencyContactPhone: '', // TODO: Emergency contact details from user input
+        firstAidFacilities: '', // TODO:  From user input
+
+        primaryColor: const Color(0xFF007BFF),//TODO default branding colors
+        secondaryColor: const Color(0xFF6C757D),//TODO default branding colors
+
+        managingTrustName: '',  // TODO: Get from user input
+        registeredAddress: '',  // TODO: Get from user input
+        registeredContactNumber: '', // TODO: Get from user input
+
+        totalBoys: 0, // TODO:  Get student demographics from input or DB
+        totalGirls: 0, // TODO:  Get student demographics from input or DB
+        studentTeacherRatio: 0.0, //TODO Compute or get from input
+
+        scholarshipPrograms: [], // TODO:  User input to add these
+        transportationDetails: '', // TODO: Get from user input
+        feePaymentMethods: '', //TODO get this value from input
+        lateFeePolicy: '', // TODO get this value from input
+
+        curriculumFrameworks: [],//TODO
+        languagesOffered: [],//TODO
+        specializedPrograms: [],//TODO
+
+        hasCCTV: false, //TODO: All of those to value from user input
+        hasFireSafetyEquipment: false,//TODO: All of those to value from user input
+        isWheelchairAccessible: false,//TODO: All of those to value from user input
+        hasSmartClassrooms: false,//TODO: All of those to value from user input
+        numberOfComputers: 0,//TODO: All of those to value from user input
+        hasInternetAccess: false,//TODO: All of those to value from user input
+
+        onlineLearningPlatform: '',//TODO
+        featuredNews: [], // Fetch those from DB?
+        importantNotices: [], // Fetch from DB, etc.
+        alumni: [], // TODO: Load alumni details from DB
+        feeDueDate: DateTime.now(),
       );
+
+      return schoolData;
     } catch (dataError) {
       print('Error while building school data: $dataError');
       MyHelperFunctions.showErrorSnackBar(

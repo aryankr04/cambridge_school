@@ -1,4 +1,4 @@
-import 'package:cambridge_school/app/modules/attendance/mark_attendance_screen.dart';
+
 import 'package:cambridge_school/router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,9 +27,9 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: _getAppTheme(context),
-      // getPages: AppRoutes.routes,
-      // initialRoute: AppRoutes.schoolManagement,
-      home: MarkAttendanceScreen(),
+      getPages: AppRoutes.routes,
+      initialRoute: AppRoutes.createUser,
+      // home: AttendanceRecordScreen(),
     );
   }
 }

@@ -1,5 +1,4 @@
 // AttendanceCard
-import 'package:cambridge_school/app/modules/attendance/attendance_controller.dart';
 import 'package:cambridge_school/core/utils/constants/dynamic_colors.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../user_management/create_user/models/user_model.dart';
+import 'attendance_controller.dart';
 
 class AttendanceCard extends GetView<AttendanceController> {
   final UserModel user;
@@ -32,11 +32,12 @@ class AttendanceCard extends GetView<AttendanceController> {
           children: [
             CircleAvatar(
               backgroundColor: MyDynamicColors.activeBlue.withOpacity(0.1),
+              radius: 18,
               child: Text(
                 user.studentDetails?.rollNumber ?? '?',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                   color: MyDynamicColors.activeBlue,
                 ),
               ),
@@ -50,15 +51,15 @@ class AttendanceCard extends GetView<AttendanceController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user.fullName,
+                    user.fullName??'No Name',
                     overflow: TextOverflow.ellipsis,
-                    style: MyTextStyles.titleLarge.copyWith(fontSize: 15),
+                    style: MyTextStyles.titleLarge.copyWith(fontSize: 14),
                     maxLines: 1,
                   ),
                   Text(
                     user.userId,
                     overflow: TextOverflow.ellipsis,
-                    style: MyTextStyles.bodyMedium,
+                    style: MyTextStyles.labelMedium,
                     maxLines: 1,
                   ),
                 ],
