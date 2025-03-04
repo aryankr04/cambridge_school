@@ -15,13 +15,12 @@ import 'package:get/get.dart';
 
 import '../../../../../core/utils/constants/text_styles.dart';
 import '../models/roles.dart';
-import '../models/user_model.dart';
 import '../widgets/qualification_widget.dart';
 
 final CreateUserController controller = Get.find<CreateUserController>();
 
 class CreateUserScreen extends StatefulWidget {
-  const CreateUserScreen({Key? key}) : super(key: key);
+  const CreateUserScreen({super.key});
 
   @override
   State<CreateUserScreen> createState() => _CreateUserScreenState();
@@ -63,7 +62,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildRolesSection(),
+              _buildRolesSection(context),
               Obx(() => _buildExpansionTileCustom(
                     controller: _personalInfoController,
                     title: 'Personal Information',
@@ -211,7 +210,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       }
     });
   }
-  Widget _buildRolesSection() {
+  Widget _buildRolesSection(BuildContext context) {
     return Container(
       width: Get.width,
       padding: const EdgeInsets.all(16),
@@ -234,7 +233,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               ),
               GestureDetector(
                 onTap: () {
-                  showSelectRolesDialog(controller.selectedRoles, context); //Use controller.selectedRoles here
+                  showSelectRolesDialog(context); //Use controller.selectedRoles here
                 },
                 child: Container(
                   padding:
@@ -259,15 +258,15 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
             spacing: 10,
             runSpacing: 10,
             children: [
-              ...controller.selectedRoles.map((role) => Chip(
+              ...controller.selectedRoles1.map((role) => Chip(
                 label: Text(
-                  role.name, // Change here
+                  Roles().getRoleName(role), // Change here
                   style: const TextStyle(
                       color: Colors.white, fontSize: 13),
                 ),
                 backgroundColor: MyColors.activeBlue,
                 onDeleted: () {
-                  controller.selectedRoles.remove(role);
+                  controller.selectedRoles1.remove(role);
                 },
                 deleteIconColor: Colors.white,
                 deleteIcon: const Icon(Icons.close, size: 16),
@@ -284,39 +283,60 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     );
   }
 
-  Future<void> showSelectRolesDialog() async {
-    Roles roles =Roles();
+  Future<void> showSelectRolesDialog(BuildContext context) async {
+    Roles roles = Roles();
+    List<String> categories = roles.getCategories();
+
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Select Roles', style: MyTextStyles.headlineSmall),
-          content: Obx(
-                () => SizedBox(  // Wrap ListView.builder with SizedBox
-              width: double.maxFinite, // Set width
-              height: 300, // Set height (adjust as needed)
-              child: ListView.builder(
-                shrinkWrap: true, // Add shrinkWrap
-                itemCount: roles.roles.length, // Access length correctly
-                itemBuilder: (context, index) {
-                  final role = roles.roles[index]; // Access the role correctly
-                  final isSelected = controller.isRoleSelected(role.role);
+          content: SizedBox(
+            width: double.maxFinite,
+            height: Get.height * .75,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: categories.length,
+              itemBuilder: (context, categoryIndex) {
+                final category = categories[categoryIndex];
+                final rolesInCategory = roles.roles
+                    .where((role) => role.category == category)
+                    .toList(); //Get roles of the selected category
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: MySizes.md), // Add some padding
+                      child: Text(
+                        category,
+                        style: MyTextStyles.headlineSmall.copyWith(fontSize: 18),
+                      ),
                     ),
-                    child: roleCard(
-                      role: Roles.getRoleName(role.role), //Call it from Roles class
-                      description: role.description,
-                      isSelected: isSelected,
-                      assetPath: controller.getAssetPath(role.role),
-                      onTap: () => controller.toggleRoleSelection(role.role),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: rolesInCategory.length,
+                      itemBuilder: (context, index) {
+                        final role = rolesInCategory[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              bottom: MySizes.md, ), // Add some padding
+                          child: Obx(() => roleCard(
+                            role: Roles().getRoleName(role.role),
+                            description: role.description,
+                            isSelected: controller.isRoleSelected(role.role),
+                            assetPath: controller.getAssetPath(role.role),
+                            onTap: () =>
+                                controller.toggleRoleSelection(role.role),
+                          )),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
+                  ],
+                );
+              },
             ),
           ),
           actions: <Widget>[
@@ -1588,48 +1608,57 @@ Widget roleCard({
   required String description,
   required bool isSelected,
   required String assetPath,
+  required VoidCallback onTap, // Added onTap callback
 }) {
-  return Container(
-    decoration: BoxDecoration(
-      color: isSelected ? MyColors.activeBlue.withOpacity(0.1) : Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        width: 1,
-        color: MyColors.activeBlue,
+  return GestureDetector( // Wrap with GestureDetector
+    onTap: onTap, // Attach onTap callback
+    child: Container(
+      decoration: BoxDecoration(
+        color: isSelected ? MyColors.activeBlue.withOpacity(0.1) : Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          width: 1,
+          color: isSelected ? MyColors.activeBlue : MyColors.borderColor,
+        ),
       ),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(MySizes.md),
-      child: Row(
-        children: [
-          SizedBox(
-            height: 36,
-            width: 36,
-            child: SvgPicture.asset(
-                assetPath), // Use assetPath here
-          ),
-          SizedBox(
-            width: MySizes.md,
-          ),
-          Expanded( // Added Expanded to prevent overflow
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
-              children: [
-                Text(
-                  role,
-                  style: MyTextStyles.titleLarge,
-                ),
-                Text(
-                  description,
-                  style: MyTextStyles.bodyMedium,
-                  maxLines: 2, // Limit to 2 lines
-                  overflow: TextOverflow.ellipsis, // Handle overflow with ellipsis
-                ),
-              ],
+      child: Padding(
+        padding: const EdgeInsets.all(MySizes.md-4),
+        child: Row(
+          children: [
+            // SizedBox(
+            //   height: 36,
+            //   width: 36,
+            //   child: SvgPicture.asset(
+            //       assetPath), // Use assetPath here
+            // ),
+            // const SizedBox(
+            //   width: MySizes.md,
+            // ),
+            Expanded(
+              // Added Expanded to prevent overflow
+              child: Column(
+                crossAxisAlignment:
+                CrossAxisAlignment.start, // Align text to the left
+                children: [
+                  Text(
+                    role,
+                    style: MyTextStyles.bodyLarge,
+                  ),
+                  SizedBox(height: MySizes.xs,),
+                  Text(
+                    description,
+                    style: MyTextStyles.labelMedium,
+                    maxLines: 2, // Limit to 2 lines
+                    overflow:
+                    TextOverflow.ellipsis, // Handle overflow with ellipsis
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
 }
+

@@ -43,6 +43,37 @@ class UserAttendanceRecord {
     );
   }
 }
+class AttendanceEvent {
+  final DateTime date;
+  final AttendanceTaker markedBy;
+  final int presents;
+  final int absents;
+
+  AttendanceEvent({
+    required this.date,
+    required this.markedBy,
+    required this.presents,
+    required this.absents,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'date': Timestamp.fromDate(date),
+      'markedBy': markedBy.toMap(),
+      'presents': presents,
+      'absents': absents,
+    };
+  }
+
+  factory AttendanceEvent.fromMap(Map<String, dynamic> map) {
+    return AttendanceEvent(
+      date: (map['date'] as Timestamp).toDate(),
+      markedBy: AttendanceTaker.fromMap(map['markedBy'] as Map<String, dynamic>),
+      presents: map['presents'] as int? ?? 0,
+      absents: map['absents'] as int? ?? 0,
+    );
+  }
+}
 
 class AttendanceTaker {
   final String uid;
@@ -89,59 +120,27 @@ class AttendanceTaker {
   int get hashCode => uid.hashCode ^ name.hashCode ^ time.hashCode;
 }
 
-class AttendanceEvent {
-  final DateTime date;
-  final AttendanceTaker markedBy;
-  final int presents;
-  final int absents;
 
-  AttendanceEvent({
-    required this.date,
-    required this.markedBy,
-    required this.presents,
-    required this.absents,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'date': Timestamp.fromDate(date),
-      'markedBy': markedBy.toMap(),
-      'presents': presents,
-      'absents': absents,
-    };
-  }
-
-  factory AttendanceEvent.fromMap(Map<String, dynamic> map) {
-    return AttendanceEvent(
-      date: (map['date'] as Timestamp).toDate(),
-      markedBy: AttendanceTaker.fromMap(map['markedBy'] as Map<String, dynamic>),
-      presents: map['presents'] as int? ?? 0,
-      absents: map['absents'] as int? ?? 0,
-    );
-  }
-}
 
 class DailyAttendanceRecord {
   String schoolId;
   DateTime date;
-  List<ClassAttendanceSummary> classAttendanceSummaries;
-  List<UserAttendanceSummary> userAttendanceSummaries;
+  List<ClassAttendanceSummary>? classAttendanceSummaries;
+  EmployeeAttendanceSummary? employeeAttendanceSummary;
 
   DailyAttendanceRecord({
     required this.schoolId,
     required this.date,
-    required this.classAttendanceSummaries,
-    required this.userAttendanceSummaries,
+    this.classAttendanceSummaries,
+    this.employeeAttendanceSummary,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'schoolId': schoolId,
       'date': Timestamp.fromDate(date),
-      'classAttendanceSummaries':
-      classAttendanceSummaries.map((e) => e.toMap()).toList(),
-      'userAttendanceSummaries':
-      userAttendanceSummaries.map((e) => e.toMap()).toList(),
+      'classAttendanceSummaries': classAttendanceSummaries?.map((e) => e.toMap()).toList(),
+      'employeeAttendanceSummary': employeeAttendanceSummary?.toMap(),
     };
   }
 
@@ -149,13 +148,12 @@ class DailyAttendanceRecord {
     return DailyAttendanceRecord(
       schoolId: map['schoolId'] as String,
       date: (map['date'] as Timestamp).toDate(),
-      classAttendanceSummaries: (map['classAttendanceSummaries']
-      as List<dynamic>)
-          .map((e) => ClassAttendanceSummary.fromMap(e as Map<String, dynamic>))
+      classAttendanceSummaries: (map['classAttendanceSummaries'] as List<dynamic>?)
+          ?.map((e) => ClassAttendanceSummary.fromMap(e as Map<String, dynamic>))
           .toList(),
-      userAttendanceSummaries: (map['userAttendanceSummaries'] as List<dynamic>)
-          .map((e) => UserAttendanceSummary.fromMap(e as Map<String, dynamic>))
-          .toList(),
+      employeeAttendanceSummary: map['employeeAttendanceSummary'] == null
+          ? null
+          : EmployeeAttendanceSummary.fromMap(map['employeeAttendanceSummary'] as Map<String, dynamic>),
     );
   }
 }
@@ -163,9 +161,9 @@ class DailyAttendanceRecord {
 class ClassAttendanceSummary {
   String className;
   String sectionName;
-  final AttendanceTaker markedBy;
-  final int presents;
-  final int absents;
+  AttendanceTaker markedBy;
+  int presents;
+  int absents;
 
   ClassAttendanceSummary({
     required this.className,
@@ -189,21 +187,20 @@ class ClassAttendanceSummary {
     return ClassAttendanceSummary(
       className: map['className'] as String,
       sectionName: map['sectionName'] as String,
-      markedBy: AttendanceTaker.fromMap(map['markedBy'] as Map<String, dynamic>),
+      markedBy:
+      AttendanceTaker.fromMap(map['markedBy'] as Map<String, dynamic>),
       presents: map['presents'] as int,
       absents: map['absents'] as int,
     );
   }
 }
 
-class UserAttendanceSummary {
-  final String userType;
-  final AttendanceTaker markedBy;
-  final int presents;
-  final int absents;
+class EmployeeAttendanceSummary {
+  AttendanceTaker markedBy;
+  int presents;
+  int absents;
 
-  UserAttendanceSummary({
-    required this.userType,
+  EmployeeAttendanceSummary({
     required this.markedBy,
     required this.presents,
     required this.absents,
@@ -211,21 +208,19 @@ class UserAttendanceSummary {
 
   Map<String, dynamic> toMap() {
     return {
-      'userType': userType,
       'markedBy': markedBy.toMap(),
       'presents': presents,
       'absents': absents,
     };
   }
 
-  factory UserAttendanceSummary.fromMap(Map<String, dynamic> map) {
-    return UserAttendanceSummary(
-      userType: map['userType'] as String,
-      markedBy: AttendanceTaker.fromMap(map['markedBy'] as Map<String, dynamic>),
+  factory EmployeeAttendanceSummary.fromMap(Map<String, dynamic> map) {
+    return EmployeeAttendanceSummary(
+      markedBy:
+      AttendanceTaker.fromMap(map['markedBy'] as Map<String, dynamic>),
       presents: map['presents'] as int,
       absents: map['absents'] as int,
     );
   }
 }
-
 

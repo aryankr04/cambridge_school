@@ -1,6 +1,8 @@
+import 'package:cambridge_school/core/widgets/divider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/utils/constants/box_shadow.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/constants/dynamic_colors.dart';
 import '../../../../core/utils/constants/sizes.dart';
@@ -16,101 +18,168 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2, // Number of tabs
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Attendance Record'),
-        ),
-        body: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Attendance Record'),
+      ),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (controller.errorMessage.value != null) {
+          return Center(
+            child: Text(
+              'Error: ${controller.errorMessage.value!}',
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
+        } else {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
+            child: Column(
+              children: [
+                _buildHeader(),
+                _buildEmployeeAttendanceSummary(),
+                const MyDottedLine(
+                  dashColor: MyColors.borderColor,
+                ),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
+                Expanded(
+                  child: _buildClassList(),
+                ),
+              ],
+            ),
+          );
+        }
+      }),
+    );
+  }
+
+  Widget _buildEmployeeAttendanceSummary() {
+    final cardColor = controller.isEmployeeAttendanceTaken
+        ? MyDynamicColors.activeOrange
+        : MyDynamicColors.activeGreen;
+    final buttonText = controller.isEmployeeAttendanceTaken ? 'Update' : 'Take';
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          boxShadow: MyBoxShadows.kLightShadow,
+          color: MyDynamicColors.backgroundColorWhiteLightGrey),
+      margin: const EdgeInsets.only(bottom: MySizes.md),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              margin: EdgeInsets.symmetric(
-                  horizontal: Get.width * 0.10,
-                  vertical: MySizes.spaceBtwSections),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(MySizes.md),
-                color: MyDynamicColors.backgroundColorTintDarkGrey,
-              ),
-              child: const TabBar(
-                tabs: [
-                  Tab(text: 'Class'),
-                  Tab(text: 'User'),
-                ],
-              ),
-            ),
             Expanded(
-              child: TabBarView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTab1Content(),
-                  _buildTab2Content(),
+                  Text(
+                    'Employee Attendance',
+                    style: MyTextStyles.titleLarge
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: MySizes.sm),
+                  if (controller.isEmployeeAttendanceTaken)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Attendance Taken By: ${controller.employeeAttendanceSummary.value?.markedBy.name} (${controller.employeeAttendanceSummary.value?.markedBy.uid})',
+                          style: MyTextStyles.bodyMedium,
+                        ),
+                        const SizedBox(height: MySizes.xs),
+                        Row(
+                          children: [
+                            MyLabelChip(
+                              text:
+                                  'Presents: ${controller.employeeAttendanceSummary.value?.presents}',
+                              color: MyColors.activeGreen,
+                            ),
+                            const SizedBox(width: MySizes.md),
+                            MyLabelChip(
+                              text:
+                                  'Absents: ${controller.employeeAttendanceSummary.value?.absents}',
+                              color: MyColors.activeRed,
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  else
+                    const Row(
+                      children: [
+                        MyLabelChip(
+                          text: 'Attendance Not Taken',
+                          color: MyColors.activeOrange,
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
+            const SizedBox(
+              width: MySizes.md,
+            ),
+            GestureDetector(
+              onTap: () {
+                Get.to(() => MarkAttendanceScreen(
+                      date: controller.selectedDate.value,
+                      attendanceFor: 'Employee',
+                    ));
+              },
+              child: Container(
+                width: Get.width * 0.2,
+                padding: const EdgeInsets.symmetric(vertical: MySizes.sm),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(MySizes.cardRadiusXs),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  buttonText,
+                  style: MyTextStyles.bodyLarge.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTab1Content() {
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      } else if (controller.errorMessage.value != null) {
-        return Center(
-          child: Text(
-            'Error: ${controller.errorMessage.value!}',
-            style: const TextStyle(color: Colors.red),
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            controller.getFormattedSelectedDate(),
+            style: MyTextStyles.headlineSmall
+                .copyWith(fontWeight: FontWeight.bold),
           ),
-        );
-      } else {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
-          child: Column(
-            children: [
-              _buildInputRow(),
-              Expanded(
-                child: _buildClassList(),
-              ),
-            ],
+          const SizedBox(
+            width: MySizes.md,
           ),
-        );
-      }
-    });
-  }
-
-  Widget _buildTab2Content() {
-    return const Center(
-      child: Text(
-        'Tab 2 Content',
-        style: TextStyle(fontSize: 24),
+          TextButton.icon(
+            onPressed: () {
+              _selectDate(Get.context!);
+            },
+            label: const Text('Change Date'),
+            icon: const Icon(
+              Icons.date_range,
+              color: MyColors.activeBlue,
+              size: 20,
+            ),
+          )
+        ],
       ),
-    );
-  }
-
-  Widget _buildInputRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          controller.getFormattedSelectedDate(),
-          style:
-              MyTextStyles.headlineSmall.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(
-          width: MySizes.md,
-        ),
-        TextButton.icon(
-          onPressed: () {},
-          label: Text('Change Date'),
-          icon: Icon(
-            Icons.date_range,
-            color: MyColors.activeBlue,
-            size: 20,
-          ),
-        )
-      ],
     );
   }
 
@@ -132,12 +201,24 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
             Get.to(() => MarkAttendanceScreen(
                   section: sectionData,
                   date: controller.selectedDate.value,
-                  attendanceFor: controller.selectedAttendanceFor.value,
+                  attendanceFor: 'Class',
                 ));
           },
         );
       },
     );
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: controller.selectedDate.value,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(), // Set lastDate to the end of 2025
+    );
+    if (picked != null && picked != controller.selectedDate.value) {
+      controller.updateSelectedDate(picked);
+    }
   }
 }
 
@@ -161,8 +242,12 @@ class ClassAttendanceSummaryCard extends StatelessWidget {
         isTaken ? MyDynamicColors.activeOrange : MyDynamicColors.activeGreen;
     final buttonText = isTaken ? 'Update' : 'Take';
 
-    return Card(
-      elevation: 3,
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          boxShadow: MyBoxShadows.kLightShadow,
+          color: MyDynamicColors.backgroundColorWhiteLightGrey),
+      margin: const EdgeInsets.only(bottom: MySizes.md),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -174,35 +259,52 @@ class ClassAttendanceSummaryCard extends StatelessWidget {
                 children: [
                   Text(
                     'Class ${summary.className} - ${summary.sectionName}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: MyColors.headlineTextColor,
+                    style: MyTextStyles.titleLarge
+                        .copyWith(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (isTaken)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'By: ${summary.markedBy.name} (${summary.markedBy.uid})',
+                          style: MyTextStyles.labelMedium
+                              .copyWith(color: MyColors.captionTextColor),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            MyLabelChip(
+                              text: 'Presents: ${summary.presents}',
+                              color: MyColors.activeGreen,
+                            ),
+                            const SizedBox(
+                              width: MySizes.md,
+                            ),
+                            MyLabelChip(
+                              text: 'Absents: ${summary.absents}',
+                              color: MyColors.activeRed,
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  else
+                    const Column(
+                      children: [
+                        SizedBox(height: MySizes.xs),
+                        Row(
+                          children: [
+                            MyLabelChip(
+                              text: 'Attendance Not Taken',
+                              color: MyColors.activeOrange,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    'By: ${summary.markedBy.name} (${summary.markedBy.uid})',
-                    style: MyTextStyles.labelMedium
-                        .copyWith(color: MyColors.captionTextColor),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      MyLabelChip(
-                        text: 'Presents: ${summary.presents}',
-                        color: MyColors.activeGreen,
-                      ),
-                      const SizedBox(
-                        width: MySizes.md,
-                      ),
-                      MyLabelChip(
-                        text: 'Absents: ${summary.absents}',
-                        color: MyColors.activeRed,
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),

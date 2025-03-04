@@ -6,17 +6,17 @@ import '../../manage_school/repositories/school_repositorie.dart';
 import 'attendance_record_models.dart';
 import 'attendance_record_repository.dart';
 
-/// [AttendanceRecordController] manages attendance records.
 class AttendanceRecordController extends GetxController {
   static const String schoolId = 'SCH00001';
   final selectedDate = Rx<DateTime>(DateTime.now());
-  final selectedAttendanceFor = RxString('Class');
   final sections = RxList<SectionData>();
   final attendanceSummaries = RxList<ClassAttendanceSummary>();
   final isLoading = RxBool(false);
   final errorMessage = RxnString();
   final FirestoreSchoolRepository schoolRepository;
   final FirestoreAttendanceRecordRepository attendanceRepository;
+
+  final employeeAttendanceSummary = Rx<EmployeeAttendanceSummary?>(null);
 
   AttendanceRecordController({
     FirestoreSchoolRepository? schoolRepo,
@@ -31,21 +31,17 @@ class AttendanceRecordController extends GetxController {
     _loadInitialData();
   }
 
-  /// Loads initial data.
   Future<void> _loadInitialData() async {
     await fetchData();
   }
 
-  /// Fetches data, including school sections and attendance summaries.
   Future<void> fetchData() async {
     isLoading(true);
     errorMessage(null);
 
     try {
-      await Future.wait([
-        _fetchSchoolSections(),
-        _fetchAttendanceSummaries(),
-      ]);
+      await _fetchSchoolSections();
+      await _fetchDailyAttendanceRecord(); // Combined fetch
     } catch (error) {
       errorMessage(error.toString());
       print('Error during fetchData: $error');
@@ -54,11 +50,10 @@ class AttendanceRecordController extends GetxController {
     }
   }
 
-  /// Fetches school sections from Firestore.
   Future<void> _fetchSchoolSections() async {
     try {
       final SchoolModel? school =
-          await schoolRepository.getSchoolById(schoolId);
+      await schoolRepository.getSchoolById(schoolId);
       if (school != null) {
         sections.assignAll(school.sections);
       } else {
@@ -70,45 +65,41 @@ class AttendanceRecordController extends GetxController {
     }
   }
 
-  /// Fetches attendance summaries for the selected date from Firestore.
-  Future<void> _fetchAttendanceSummaries() async {
+  Future<void> _fetchDailyAttendanceRecord() async {
     try {
       final DailyAttendanceRecord? dailyRecord =
-          await attendanceRepository.getDailyAttendanceRecord(
+      await attendanceRepository.getDailyAttendanceRecord(
         schoolId,
         selectedDate.value,
       );
+
       attendanceSummaries
           .assignAll(dailyRecord?.classAttendanceSummaries ?? []);
+      employeeAttendanceSummary.value = dailyRecord?.employeeAttendanceSummary;
+
     } catch (error) {
-      errorMessage('Failed to load attendance summaries: $error');
-      print('Error fetching attendance summaries: $error');
+      errorMessage('Failed to load attendance record: $error');
+      print('Error fetching daily attendance record: $error');
     }
   }
 
   bool isAttendanceTakenForSection(String className, String sectionName) {
     return attendanceSummaries.any(
-      (summary) =>
-          summary.className == className && summary.sectionName == sectionName,
+          (summary) =>
+      summary.className == className && summary.sectionName == sectionName,
     );
   }
 
   void updateSelectedDate(DateTime date) {
     selectedDate(date);
-    _fetchAttendanceSummaries();
+    fetchData();
   }
 
-  /// Fetches users based on the selected user type (Class, User).
-  Future<void> fetchUsers() async {
-    print('Fetching users of type: ${selectedAttendanceFor.value}');
-  }
-
-  /// Retrieves the attendance summary for a specific class and section, providing a default summary if none exists.
   ClassAttendanceSummary getClassAttendanceSummary(
       String className, String sectionName) {
     try {
       return attendanceSummaries.firstWhere(
-        (s) => s.className == className && s.sectionName == sectionName,
+            (s) => s.className == className && s.sectionName == sectionName,
       );
     } catch (e) {
       return ClassAttendanceSummary(
@@ -120,8 +111,12 @@ class AttendanceRecordController extends GetxController {
       );
     }
   }
+
   String getFormattedSelectedDate() {
     final formatter = DateFormat('dd MMMM yyyy');
     return formatter.format(selectedDate.value);
   }
+
+  // Helper getter for the screen (avoids needing to check for null in the UI)
+  bool get isEmployeeAttendanceTaken => employeeAttendanceSummary.value != null;
 }

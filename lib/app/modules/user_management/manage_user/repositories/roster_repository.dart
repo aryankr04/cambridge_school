@@ -26,20 +26,46 @@ class FirestoreRosterRepository {
   }
 
   // Get a Class Roster
-  Future<ClassRoster?> getClassRoster(String classId) async {
+  // Future<ClassRoster?> getClassRoster(String classId) async {
+  //   try {
+  //     final classRosterDocRef = _firestore
+  //         .collection(rostersCollection)
+  //         .doc('class_roster')
+  //         .collection('classes')
+  //         .doc(classId);
+  //
+  //     final docSnapshot = await classRosterDocRef.get();
+  //
+  //     if (docSnapshot.exists) {
+  //       return ClassRoster.fromMap(docSnapshot.data() as Map<String, dynamic>);
+  //     } else {
+  //       print('Class roster not found for class ID: $classId');
+  //       return null;
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching class roster: $e');
+  //     return null;
+  //   }
+  // }
+  Future<ClassRoster?> getClassRoster(String className, String sectionName, String schoolId) async {
     try {
-      final classRosterDocRef = _firestore
+      // Query the collection to find a document matching the criteria
+      QuerySnapshot querySnapshot = await _firestore
           .collection(rostersCollection)
           .doc('class_roster')
           .collection('classes')
-          .doc(classId);
+          .where('className', isEqualTo: className)
+          .where('sectionName', isEqualTo: sectionName)
+          .where('schoolId', isEqualTo: schoolId)
+          .get();
 
-      final docSnapshot = await classRosterDocRef.get();
-
-      if (docSnapshot.exists) {
+      if (querySnapshot.docs.isNotEmpty) {
+        // Assuming you only have one document per class/section combination
+        DocumentSnapshot docSnapshot = querySnapshot.docs.first;
         return ClassRoster.fromMap(docSnapshot.data() as Map<String, dynamic>);
       } else {
-        print('Class roster not found for class ID: $classId');
+        print(
+            'Class roster not found for className: $className, sectionName: $sectionName, schoolId: $schoolId');
         return null;
       }
     } catch (e) {

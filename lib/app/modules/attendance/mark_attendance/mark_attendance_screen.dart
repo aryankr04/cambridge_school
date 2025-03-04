@@ -67,7 +67,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
                 padding: const EdgeInsets.symmetric(
                     vertical: MySizes.md, horizontal: MySizes.md),
                 decoration: const BoxDecoration(
-                    // color: MyColors.activeBlue.withOpacity(0.1),
+                  // color: MyColors.activeBlue.withOpacity(0.1),
 
                     color: Colors.white,
                     boxShadow: MyBoxShadows.kLightShadow,
@@ -114,7 +114,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
               ),
               const SizedBox(height: MySizes.lg),
               Obx(
-                () => Row(
+                    () => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _attendanceCardWithIndicator(
@@ -152,35 +152,36 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
                       onMarkAllAbsent: controller.markAllAbsent,
                     ),
                     const SizedBox(
-                      height: MySizes.md - 4,
+                      height: MySizes.sm,
                     ),
                     Obx(
-                      () => controller.isLoading.value
+                          () => controller.isLoading.value
                           ? _buildShimmerStudentsList()
                           : ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: controller.users.length,
-                              itemBuilder: (context, index) {
-                                final user = controller.users[index];
-                                return AttendanceCard(
-                                  user: user,
-                                  isPresent: controller.getIsPresent(user),
-                                  onMarkPresent: () =>
-                                      controller.markPresent(user),
-                                  onMarkAbsent: () =>
-                                      controller.markAbsent(user),
-                                );
-                              },
-                            ),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: controller.users.length,
+                        itemBuilder: (context, index) {
+                          final user = controller.users[index];
+                          return AttendanceCard(
+                            user: user,
+                            isPresent: controller.getIsPresent(user),
+                            onMarkPresent: () =>
+                                controller.markPresent(user),
+                            onMarkAbsent: () =>
+                                controller.markAbsent(user),
+                          );
+                        },
+                      ),
                     ),
+                    const SizedBox(height: MySizes.sm,)
                   ],
                 ),
               ),
               const SizedBox(
                 height: MySizes.lg,
               ),
-              MyButton(text: 'Submit', onPressed: () {})
+              MyButton(text: 'Submit', onPressed: () {controller.updateAttendanceOnFirestore();})
             ],
           ),
         ),
@@ -229,7 +230,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
                 ),
                 const SizedBox(height: MySizes.lg),
                 Obx(
-                  () => Visibility(
+                      () => Visibility(
                     visible: controller.selectedAttendanceFor.value == "Class",
                     child: Column(
                       children: [
@@ -245,7 +246,6 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
                                 labelText: "Class",
                                 onSelected: (value) {
                                   controller.selectedClass.value = value!;
-                                  controller.fetchClassRoster();
                                 },
                                 selectedValue: controller.selectedClass.value.obs,
                               ),
@@ -262,10 +262,9 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
                                 labelText: "Section",
                                 onSelected: (value) {
                                   controller.selectedSection.value = value!;
-                                  controller.fetchClassRoster();
                                 },
                                 selectedValue:
-                                    controller.selectedSection.value.obs,
+                                controller.selectedSection.value.obs,
                               ),
                             ),
                           ],
@@ -476,74 +475,68 @@ class MarkAllWidget extends GetView<AttendanceController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Container(
-          padding: const EdgeInsets.symmetric(
-              vertical: MySizes.sm, horizontal: MySizes.md),
-          margin: const EdgeInsets.only(bottom: 0),
-          decoration: BoxDecoration(
-            color: MyHelperFunctions.isDarkMode(context)
-                ? MyDynamicColors.darkerGreyBackgroundColor
-                : MyDynamicColors.activeBlueTint,
-            border: Border(
-                bottom:
-                    BorderSide(width: 0.5, color: MyDynamicColors.borderColor)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(width: MySizes.xl - 14),
-                    Text(
-                      "Mark All",
-                      style: MyTextStyles.bodyLarge,
-                    ),
-                  ],
+      padding: const EdgeInsets.symmetric(
+          vertical: MySizes.sm, horizontal: MySizes.md),
+      margin: const EdgeInsets.only(bottom: 0),
+      decoration: BoxDecoration(
+        color: MyHelperFunctions.isDarkMode(context)
+            ? MyDynamicColors.darkerGreyBackgroundColor
+            : MyDynamicColors.activeBlueTint,
+        border: Border(
+            bottom:
+            BorderSide(width: 0.5, color: MyDynamicColors.borderColor)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(width: MySizes.xl - 14),
+                Text(
+                  "Mark All",
+                  style: MyTextStyles.bodyLarge,
                 ),
-              ),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: onMarkAllPresent,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                        child: Icon(
-                          controller.isPresentAll.value
-                              ? Icons.check_circle_outline
-                              : Icons.circle_outlined,
-                          size: 24,
-                          color: controller.isPresentAll.value
-                              ? MyDynamicColors.activeGreen
-                              : Colors.black87,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: MySizes.md),
-                    GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: onMarkAllAbsent,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                        child: Icon(
-                          controller.isAbsentAll.value
-                              ? Icons.check_circle_outline
-                              : Icons.circle_outlined,
-                          size: 24,
-                          color: controller.isAbsentAll.value
-                              ? MyDynamicColors.activeRed
-                              : Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
+              ],
+            ),
           ),
-        ));
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: onMarkAllPresent,
+                  child: Icon(
+                    controller.isPresentAll.value
+                        ? Icons.check_circle_outline
+                        : Icons.circle_outlined,
+                    size: 24,
+                    color: controller.isPresentAll.value
+                        ? MyDynamicColors.activeGreen
+                        : Colors.black87,
+                  ),
+                ),
+                const SizedBox(width: MySizes.md+18),
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: onMarkAllAbsent,
+                  child: Icon(
+                    controller.isAbsentAll.value
+                        ? Icons.check_circle_outline
+                        : Icons.circle_outlined,
+                    size: 24,
+                    color: controller.isAbsentAll.value
+                        ? MyDynamicColors.activeRed
+                        : Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    ));
   }
 }

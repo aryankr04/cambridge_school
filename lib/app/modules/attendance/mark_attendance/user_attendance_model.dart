@@ -1,30 +1,31 @@
 import 'package:intl/intl.dart';
+import 'dart:math' as math;
 
 class UserAttendance {
   final DateTime academicPeriodStart;
   final String attendanceString;
 
-  //Valid chars as a variable inside function or class.
+  static const String validAttendanceChars = 'PAHLEN';
+
   UserAttendance({
     required this.academicPeriodStart,
     required this.attendanceString,
   }) : assert(
-            attendanceString.isEmpty ||
-                attendanceString.split('').every((char) => _isValidChar(char)),
-            'Invalid attendance string: Contains invalid characters.');
+  attendanceString.isEmpty ||
+      attendanceString.split('').every((char) => _isValidChar(char)),
+  'Invalid attendance string: Contains invalid characters.',
+  );
 
   static bool _isValidChar(String char) {
-    const String validAttendanceChars = 'PAHLEN';
     return validAttendanceChars.contains(char);
   }
 
   // Factory method to create a UserAttendance instance with an empty string.
-  factory UserAttendance.empty(
-      {required DateTime academicPeriodStart,
-      required String userId,
-      required String name,
-      String? profileUrl,
-      required int numberOfDays}) {
+  factory UserAttendance.empty({
+    required DateTime academicPeriodStart,
+    required int numberOfDays,
+  }) {
+    assert(numberOfDays >= 0, 'Number of days cannot be negative.');
     final emptyString = ''.padRight(numberOfDays, 'N');
     return UserAttendance(
       academicPeriodStart: academicPeriodStart,
@@ -32,7 +33,6 @@ class UserAttendance {
     );
   }
 
-  // Add map and from map
   Map<String, dynamic> toMap() {
     return {
       'academicPeriodStart': academicPeriodStart.toIso8601String(),
@@ -42,44 +42,44 @@ class UserAttendance {
 
   static UserAttendance? fromMap(Map<String, dynamic> map) {
     try {
+      if (!map.containsKey('academicPeriodStart') ||
+          !map.containsKey('attendanceString')) {
+        return null;
+      }
+
       return UserAttendance(
-        academicPeriodStart:
-            DateTime.parse(map['academicPeriodStart'] as String),
+        academicPeriodStart: DateTime.parse(map['academicPeriodStart'] as String),
         attendanceString: map['attendanceString'] as String,
       );
     } catch (e) {
-      print("Exception on UserAttendance fromMap $e");
+      print('Exception on UserAttendance fromMap: $e');
       return null;
     }
   }
 
-  // Update attendance for a specific date
   UserAttendance updateAttendance(DateTime date, String status) {
-    const String validAttendanceChars = 'PAHLEN';
     if (!validAttendanceChars.contains(status)) {
       throw ArgumentError(
-          'Invalid attendance status.  Must be one of: $validAttendanceChars');
+          'Invalid attendance status. Must be one of: $validAttendanceChars');
     }
 
-    final offset = date.difference(academicPeriodStart).inDays;
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final offset = normalizedDate.difference(academicPeriodStart).inDays;
+
     String newAttendanceString = attendanceString;
     DateTime newAcademicPeriodStart = academicPeriodStart;
 
     if (offset < 0) {
-      //Date is before the Academic Period
-
-      final daysBefore = -offset;
-      newAcademicPeriodStart = date;
+      final daysBefore = offset.abs();
+      newAcademicPeriodStart = normalizedDate;
       newAttendanceString = status +
-          ''.padRight(daysBefore > 1 ? daysBefore - 1 : 0, 'N') +
-          attendanceString; //insert date and pad with "N"
+          ''.padRight(math.max(daysBefore - 1, 0), 'N') +
+          attendanceString;
     } else if (offset >= attendanceString.length) {
-      // Extend the string with "N" for the missing days
-      int daysToAdd = offset - attendanceString.length;
+      final daysToAdd = math.max(0, offset - attendanceString.length);
       newAttendanceString =
           attendanceString + ''.padRight(daysToAdd, 'N') + status;
     } else {
-      //Valid Date
       newAttendanceString =
           attendanceString.replaceRange(offset, offset + 1, status);
     }
@@ -90,93 +90,154 @@ class UserAttendance {
     );
   }
 
-  // Update attendance for a date range
   UserAttendance updateMultiDateAttendance(
       DateTime startDate, DateTime endDate, String status) {
-    if (!UserAttendance._isValidChar(status)) {
-      throw ArgumentError('Invalid attendance status: Must be one of PAHLEN');
+    if (!_isValidChar(status)) {
+      throw ArgumentError(
+          'Invalid attendance status: Must be one of $validAttendanceChars');
     }
 
-    UserAttendance updatedAttendance = this; // Start with the current state
-    DateTime currentDate = startDate;
-
-    while (currentDate.isBefore(endDate) ||
-        currentDate.isAtSameMomentAs(endDate)) {
-      updatedAttendance =
-          updatedAttendance.updateAttendance(currentDate, status);
-      currentDate = currentDate.add(const Duration(days: 1));
+    if (endDate.isBefore(startDate)) {
+      throw ArgumentError('End date must not be before start date.');
     }
 
-    return updatedAttendance;
+    int startOffset = startDate.difference(academicPeriodStart).inDays;
+    int endOffset = endDate.difference(academicPeriodStart).inDays;
+
+    startOffset = math.max(0, startOffset);
+    endOffset = math.max(endOffset, startOffset);
+
+    String newAttendanceString = attendanceString;
+
+    if (startOffset >= newAttendanceString.length) {
+      newAttendanceString = newAttendanceString.padRight(startOffset, 'N');
+    }
+
+    if (endOffset >= newAttendanceString.length) {
+      newAttendanceString = newAttendanceString.padRight(endOffset + 1, 'N');
+    }
+
+    newAttendanceString = newAttendanceString.replaceRange(
+        startOffset, endOffset + 1, ''.padRight(endOffset - startOffset + 1, status));
+
+    return UserAttendance(
+      academicPeriodStart: academicPeriodStart,
+      attendanceString: newAttendanceString,
+    );
   }
 
-  // Get attendance status for a specific date
   String getAttendanceStatus(DateTime date) {
     final offset = date.difference(academicPeriodStart).inDays;
-
     if (offset < 0 || offset >= attendanceString.length) {
-      throw RangeError(
-          'Date is outside the academic period. Start date: ${formatDate(academicPeriodStart)} , current date: ${formatDate(date)}');
+      return 'N';
     }
-
     return attendanceString[offset];
   }
 
-  // Format date for better readability in logs/debugging
-  String formatDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
-  }
-
-  // Method to calculate the total present days, absent days, holidays etc
   Map<String, int> calculateAttendanceSummary() {
-    int presentDays = 0;
-    int absentDays = 0;
-    int holidays = 0;
-    int lates = 0;
-    int excusedAbsences = 0;
-    int notApplicable = 0;
+    if (attendanceString.isEmpty) {
+      return {
+        'Present': 0,
+        'Absent': 0,
+        'Holiday': 0,
+        'Late': 0,
+        'Excused': 0,
+        'Not Applicable': 0,
+      };
+    }
 
-    for (int i = 0; i < attendanceString.length; i++) {
-      switch (attendanceString[i]) {
+    final summary = <String, int>{
+      'Present': 0,
+      'Absent': 0,
+      'Holiday': 0,
+      'Late': 0,
+      'Excused': 0,
+      'Not Applicable': 0,
+    };
+
+    for (final char in attendanceString.split('')) {
+      switch (char) {
         case 'P':
-          presentDays++;
+          summary['Present'] = (summary['Present'] ?? 0) + 1;
           break;
         case 'A':
-          absentDays++;
+          summary['Absent'] = (summary['Absent'] ?? 0) + 1;
           break;
         case 'H':
-          holidays++;
+          summary['Holiday'] = (summary['Holiday'] ?? 0) + 1;
           break;
         case 'L':
-          lates++;
+          summary['Late'] = (summary['Late'] ?? 0) + 1;
           break;
         case 'E':
-          excusedAbsences++;
+          summary['Excused'] = (summary['Excused'] ?? 0) + 1;
           break;
         case 'N':
-          notApplicable++;
+          summary['Not Applicable'] = (summary['Not Applicable'] ?? 0) + 1;
           break;
       }
     }
 
-    return {
-      'Present': presentDays,
-      'Absent': absentDays,
-      'Holiday': holidays,
-      'Late': lates,
-      'Excused': excusedAbsences,
-      'Not Applicable': notApplicable,
-    };
+    return summary;
   }
 
-  // Compact - This method handles edge cases such as:
-  //1) User deletes the day and then that's it
-  //2) User compact and adds date before the day.
-  //3) User compact and the days are shorter than the real attendance.
   UserAttendance compact(DateTime newStartDate) {
+    final daysToRemove = newStartDate.difference(academicPeriodStart).inDays;
+    if (daysToRemove <= 0) return this;
+
+    final newAttendanceString = daysToRemove >= attendanceString.length
+        ? ''
+        : attendanceString.substring(daysToRemove);
+
     return UserAttendance(
       academicPeriodStart: newStartDate,
-      attendanceString: attendanceString,
+      attendanceString: newAttendanceString,
     );
+  }
+  // Get the count of consecutive days with a specific status
+  int getConsecutiveAttendanceCount(String status) {
+    if (!_isValidChar(status)) return 0;
+
+    int maxStreak = 0;
+    int currentStreak = 0;
+
+    for (final char in attendanceString.split('')) {
+      if (char == status) {
+        currentStreak++;
+        maxStreak = math.max(maxStreak, currentStreak);
+      } else {
+        currentStreak = 0;
+      }
+    }
+
+    return maxStreak;
+  }
+
+  // Get the date of the first occurrence of a specific status
+  DateTime? getDateForFirstStatusOccurrence(String status) {
+    if (!_isValidChar(status)) return null;
+
+    final index = attendanceString.indexOf(status);
+    if (index == -1) return null;
+
+    return academicPeriodStart.add(Duration(days: index));
+  }
+
+  // Get the total days covered by the attendance string
+  int getTotalDays() {
+    return attendanceString.length;
+  }
+
+  // Get attendance statuses within a specific date range
+  Map<DateTime, String> getAttendanceInRange(DateTime startDate, DateTime endDate) {
+    Map<DateTime, String> attendanceMap = {};
+    DateTime currentDate = startDate;
+
+    while (!currentDate.isAfter(endDate)) {
+      attendanceMap[currentDate] = getAttendanceStatus(currentDate);
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+
+    return attendanceMap;
   }
 }

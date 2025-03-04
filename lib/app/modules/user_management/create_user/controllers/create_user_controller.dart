@@ -945,4 +945,31 @@ class CreateUserController extends GetxController {
 
     super.onClose();
   }
+  bool isRoleSelected(UserRole role) {
+    return selectedRoles1.contains(role);
+  }
+
+  void toggleRoleSelection(UserRole role) {
+    if (isRoleSelected(role)) {
+      selectedRoles1.remove(role);
+    } else {
+      selectedRoles1.add(role);
+    }
+  }
+
+  String getAssetPath(UserRole role) {
+    // Implement logic to map UserRole to SVG asset path
+    // Example (replace with your actual asset paths):
+    switch (role) {
+      case UserRole.SuperAdmin:
+        return 'assets/icons/super_admin.svg'; // Replace with your actual path
+      case UserRole.Admin:
+        return 'assets/icons/admin.svg'; // Replace with your actual path
+      case UserRole.Teacher:
+        return 'assets/icons/teacher.svg'; // Replace with your actual path
+    // Add cases for all other roles
+      default:
+        return 'assets/icons/default.svg'; // Default icon
+    }
+  }
 }

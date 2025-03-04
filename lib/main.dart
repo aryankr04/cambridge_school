@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _getAppTheme(context),
       getPages: AppRoutes.routes,
-      initialRoute: AppRoutes.createUser,
+      initialRoute: AppRoutes.attendanceRecord,
       // home: AttendanceRecordScreen(),
     );
   }
