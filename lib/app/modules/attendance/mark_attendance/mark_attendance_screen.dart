@@ -57,10 +57,11 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
             const SizedBox(height: MySizes.lg),
             _buildAttendanceList(attendanceController),
             const SizedBox(height: MySizes.lg),
-            MyButton(
-              text: 'Submit',
-              onPressed: () => attendanceController.updateAttendanceOnFirestore(),
-            ),
+           Obx(()=> MyButton(
+             text: 'Submit',
+             onPressed: () => attendanceController.updateAttendanceOnFirestore(),
+             isLoading: attendanceController.isUpdatingAttendance.value,
+           ),)
           ],
         ),
       ),

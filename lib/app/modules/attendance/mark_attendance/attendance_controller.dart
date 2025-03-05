@@ -196,7 +196,9 @@ class AttendanceController extends GetxController {
   }
 
   Future<void> updateAttendanceOnFirestore() async {
-    // MyFullScreenLoading.show(loadingText: 'Updating Attendance');
+    isUpdatingAttendance(true);
+
+    MyFullScreenLoading.show(loadingText: 'Updating Attendance');
     FirestoreAttendanceRecordRepository firestoreAttendanceRecordRepository =
     FirestoreAttendanceRecordRepository();
     try {
@@ -213,10 +215,15 @@ class AttendanceController extends GetxController {
       // After updating the roster, update the daily attendance record
       await _updateDailyAttendanceRecord(firestoreAttendanceRecordRepository);
 
+      isUpdatingAttendance(false);
+
     } catch (e) {
       print('Error updating attendance in Firestore: $e');
+      isUpdatingAttendance(false);
+
     } finally {
-      // MyFullScreenLoading.hide();
+      isUpdatingAttendance(false);
+      MyFullScreenLoading.hide();
     }
   }
 

@@ -39,11 +39,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
             child: Column(
               children: [
                 _buildHeader(context), // Pass context to _buildHeader
-                FilledButton(
-                    onPressed: () {
-                      MyFullScreenLoading.show(loadingText: 'Processing...');
-                    },
-                    child: const Text('Send')),
+
                 _buildEmployeeAttendanceSummary(),
                 const MyDottedLine(
                   dashColor: MyColors.borderColor,
