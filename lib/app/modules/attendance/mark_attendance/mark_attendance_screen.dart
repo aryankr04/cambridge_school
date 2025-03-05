@@ -1,16 +1,21 @@
 import 'package:cambridge_school/core/utils/constants/box_shadow.dart';
+import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:cambridge_school/core/widgets/app_bar.dart';
 import 'package:cambridge_school/core/widgets/button.dart';
 import 'package:cambridge_school/core/widgets/date_picker_field.dart';
+import 'package:cambridge_school/core/widgets/full_screen_loading_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/constants/dynamic_colors.dart';
+import '../../../../core/utils/constants/gradients.dart';
 import '../../../../core/utils/constants/sizes.dart';
 import '../../../../core/utils/helpers/helper_functions.dart';
 import '../../../../core/widgets/dropdown_field.dart';
@@ -19,177 +24,190 @@ import 'attendance_controller.dart';
 import 'mark_attendance_user_tile.dart';
 
 class MarkAttendanceScreen extends GetView<AttendanceController> {
-  final SectionData? section;
-  final DateTime? date;
-  final String? attendanceFor;
+  final SectionData? sectionData;
+  final DateTime? initialDate;
+  final String? initialAttendanceType;
 
   const MarkAttendanceScreen({
     super.key,
-    this.section,
-    this.date,
-    this.attendanceFor,
+    this.sectionData,
+    this.initialDate,
+    this.initialAttendanceType,
   });
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(AttendanceController());
+    final AttendanceController attendanceController = Get.put(AttendanceController());
 
-    // Set initial values from optional parameters
-
-    controller.setShouldFetchUsersOnInit(
-        shouldFetch: section != null || date != null || attendanceFor != null);
-
-    if (section != null) {
-      controller.selectedClass.value = section!.className;
-      controller.selectedSection.value = section!.sectionName;
-    }
-    if (date != null) {
-      controller.selectedDate.value = date!;
-    }
-    if (attendanceFor != null) {
-      controller.selectedAttendanceFor.value = attendanceFor!;
-    }
-    if (controller.shouldFetchUsersOnInit.value) {
-      controller.fetchUsers();
-    }
+    // Initialize the attendance controller with provided parameters
+    _initializeController(attendanceController);
 
     return Scaffold(
       appBar: const MyAppBar(
         title: 'Mark Attendance',
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(MySizes.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    vertical: MySizes.md, horizontal: MySizes.md),
-                decoration: const BoxDecoration(
-                  // color: MyColors.activeBlue.withOpacity(0.1),
-
-                    color: Colors.white,
-                    boxShadow: MyBoxShadows.kLightShadow,
-                    borderRadius: BorderRadius.all(Radius.circular(8))),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          section != null
-                              ? "Class ${section!.className}-${section!.sectionName}"
-                              : 'Attendance Details',
-                          style: MyTextStyles.headlineSmall,
-                        ),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.date_range,
-                              color: MyColors.iconColor,
-                              size: 18,
-                            ),
-                            const SizedBox(
-                              width: MySizes.sm,
-                            ),
-                            Text(
-                              controller.getFormattedSelectedDate(),
-                              style: MyTextStyles.bodyMedium
-                                  .copyWith(fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    FilledButton(
-                      onPressed: () {
-                        _showGetAlertDialog(context, controller);
-                      },
-                      child: const Text('Change'),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: MySizes.lg),
-              Obx(
-                    () => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _attendanceCardWithIndicator(
-                      name: 'Present',
-                      value: controller.presentCount.value,
-                      total: controller.users.length,
-                      color: MyDynamicColors.activeGreen,
-                    ),
-                    const SizedBox(width: MySizes.lg),
-                    _attendanceCardWithIndicator(
-                      name: 'Absent',
-                      value: controller.absentCount.value,
-                      total: controller.users.length,
-                      color: MyDynamicColors.activeRed,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: MySizes.lg,
-              ),
-              Container(
-                decoration: BoxDecoration(
-                    border: Border.all(color: MyColors.borderColor, width: 0.5),
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(MySizes.cardRadiusSm),
-                    ),
-                    boxShadow: MyBoxShadows.kLightShadow,
-                    color: Colors.white),
-                child: Column(
-                  children: [
-                    _buildAttendanceHeader(),
-                    MarkAllWidget(
-                      onMarkAllPresent: controller.markAllPresent,
-                      onMarkAllAbsent: controller.markAllAbsent,
-                    ),
-                    const SizedBox(
-                      height: MySizes.sm,
-                    ),
-                    Obx(
-                          () => controller.isLoading.value
-                          ? _buildShimmerStudentsList()
-                          : ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: controller.users.length,
-                        itemBuilder: (context, index) {
-                          final user = controller.users[index];
-                          return AttendanceCard(
-                            user: user,
-                            isPresent: controller.getIsPresent(user),
-                            onMarkPresent: () =>
-                                controller.markPresent(user),
-                            onMarkAbsent: () =>
-                                controller.markAbsent(user),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: MySizes.sm,)
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: MySizes.lg,
-              ),
-              MyButton(text: 'Submit', onPressed: () {controller.updateAttendanceOnFirestore();})
-            ],
-          ),
+        padding: const EdgeInsets.all(MySizes.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAttendanceDetailsCard(context, attendanceController),
+            const SizedBox(height: MySizes.lg),
+            _buildAttendanceSummary(attendanceController),
+            const SizedBox(height: MySizes.lg),
+            _buildAttendanceList(attendanceController),
+            const SizedBox(height: MySizes.lg),
+            MyButton(
+              text: 'Submit',
+              onPressed: () => attendanceController.updateAttendanceOnFirestore(),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void _showGetAlertDialog(
+  void _initializeController(AttendanceController controller) {
+    // Set initial values from optional parameters
+    controller.setShouldFetchUsersOnInit(
+        shouldFetch: sectionData != null || initialDate != null || initialAttendanceType != null);
+
+    if (sectionData != null) {
+      controller.selectedClass.value = sectionData!.className;
+      controller.selectedSection.value = sectionData!.sectionName;
+    }
+    if (initialDate != null) {
+      controller.selectedDate.value = initialDate!;
+    }
+    if (initialAttendanceType != null) {
+      controller.selectedAttendanceFor.value = initialAttendanceType!;
+    }
+
+    // Only fetch if initial values are set or `shouldFetchUsersOnInit` is true
+    if (controller.shouldFetchUsersOnInit.value) {
+      controller.fetchUsers();
+    }
+  }
+
+  Widget _buildAttendanceDetailsCard(BuildContext context, AttendanceController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          vertical: MySizes.md, horizontal: MySizes.md),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: MyBoxShadows.kLightShadow,
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                sectionData != null
+                    ? "Class ${sectionData!.className}-${sectionData!.sectionName}"
+                    : 'Attendance Details',
+                style: MyTextStyles.headlineSmall,
+              ),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.date_range,
+                    color: MyColors.iconColor,
+                    size: 18,
+                  ),
+                  const SizedBox(width: MySizes.sm),
+                  Text(
+                    controller.getFormattedSelectedDate(),
+                    style: MyTextStyles.bodyMedium
+                        .copyWith(fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          FilledButton(
+            onPressed: () => _showAttendanceDetailsDialog(context, controller),
+            child: const Text('Change'),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAttendanceSummary(AttendanceController controller) {
+    return Obx(
+          () => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _attendanceCardWithIndicator(
+            name: 'Present',
+            value: controller.presentCount.value,
+            total: controller.userList.length,
+            color: MyDynamicColors.activeGreen,
+          ),
+          const SizedBox(width: MySizes.lg),
+          _attendanceCardWithIndicator(
+            name: 'Absent',
+            value: controller.absentCount.value,
+            total: controller.userList.length,
+            color: MyDynamicColors.activeRed,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAttendanceList(AttendanceController controller) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: MyColors.borderColor, width: 0.5),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(MySizes.cardRadiusSm),
+        ),
+        boxShadow: MyBoxShadows.kLightShadow,
+        color: Colors.white,
+      ),
+      child: Column(
+        children: [
+          _buildAttendanceHeader(),
+          _buildMarkAllWidget(controller),
+          const SizedBox(height: MySizes.sm),
+          Obx(
+                () => controller.isLoading.value
+                ? _buildShimmerStudentsList()
+                : ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: controller.userList.length,
+              itemBuilder: (context, index) {
+                final user = controller.userList[index];
+                return AttendanceCard(
+                  user: user,
+                  isPresent: controller.isUserPresent(user),
+                  onMarkPresent: () =>
+                      controller.markUserPresent(user),
+                  onMarkAbsent: () =>
+                      controller.markUserAbsent(user),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: MySizes.sm)
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMarkAllWidget(AttendanceController controller) {
+    return MarkAllWidget(
+      onMarkAllPresent: controller.markAllUsersPresent,
+      onMarkAllAbsent: controller.markAllUsersAbsent,
+    );
+  }
+
+  void _showAttendanceDetailsDialog(
       BuildContext context, AttendanceController controller) {
     Get.dialog(
       AlertDialog(
@@ -197,7 +215,8 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
           'Attendance Details',
           style: MyTextStyles.headlineSmall,
         ),
-        content: SizedBox(width: Get.width,
+        content: SizedBox(
+          width: Get.width,
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -212,18 +231,20 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
                         labelText: 'Date',
                       ),
                     ),
-                    const SizedBox(
-                      width: MySizes.md,
-                    ),
+                    const SizedBox(width: MySizes.md),
                     Expanded(
                       child: MyDropdownField(
-                        options: const ['Class', 'User'], // Use your actual list
+                        options: const [
+                          'Class',
+                          'Employee'
+                        ], // Use your actual list
                         labelText: "Attendance Type",
                         onSelected: (value) {
                           controller.selectedAttendanceFor.value = value!;
                           controller.fetchUsers();
                         },
-                        selectedValue: controller.selectedAttendanceFor.value.obs,
+                        selectedValue:
+                        controller.selectedAttendanceFor.value.obs,
                       ),
                     ),
                   ],
@@ -239,26 +260,21 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
                           children: [
                             Expanded(
                               child: MyDropdownField(
-                                options: const [
-                                  'ClassA',
-                                  'ClassB'
-                                ], // Use your actual options list
+                                options: MyLists.classOptions,
+                                // Use your actual options list
                                 labelText: "Class",
                                 onSelected: (value) {
                                   controller.selectedClass.value = value!;
                                 },
-                                selectedValue: controller.selectedClass.value.obs,
+                                selectedValue:
+                                controller.selectedClass.value.obs,
                               ),
                             ),
-                            const SizedBox(
-                              width: MySizes.md,
-                            ),
+                            const SizedBox(width: MySizes.md),
                             Expanded(
                               child: MyDropdownField(
-                                options: const [
-                                  'SectionA',
-                                  'SectionB'
-                                ], // Use your actual options
+                                options: MyLists.sectionOptions,
+                                // Use your actual options
                                 labelText: "Section",
                                 onSelected: (value) {
                                   controller.selectedSection.value = value!;
@@ -269,9 +285,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
                             ),
                           ],
                         ),
-                        const SizedBox(
-                          height: MySizes.lg,
-                        ),
+                        const SizedBox(height: MySizes.lg),
                       ],
                     ),
                   ),
@@ -285,9 +299,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
             children: [
               Expanded(
                 child: TextButton(
-                  onPressed: () {
-                    Get.back();
-                  },
+                  onPressed: () => Get.back(),
                   child: const Text('Cancel'),
                 ),
               ),
@@ -320,9 +332,10 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
         padding: const EdgeInsets.symmetric(
             vertical: MySizes.sm, horizontal: MySizes.sm),
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
-            boxShadow: MyBoxShadows.kLightShadow),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
+          boxShadow: MyBoxShadows.kLightShadow,
+        ),
         child: Column(
           children: [
             CircularPercentIndicator(
@@ -375,8 +388,6 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
           vertical: MySizes.md - 4, horizontal: MySizes.md),
       decoration: BoxDecoration(
         color: MyDynamicColors.activeBlue,
-        // border: Border(
-        //     bottom: BorderSide(width: 0.5, color: MyDynamicColors.borderColor)),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(MySizes.cardRadiusSm),
           topLeft: Radius.circular(MySizes.cardRadiusSm),
@@ -391,9 +402,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
                 "Roll No",
                 style: MyTextStyles.bodyLarge.copyWith(color: Colors.white),
               ),
-              const SizedBox(
-                width: MySizes.md,
-              ),
+              const SizedBox(width: MySizes.md),
               Text("Students",
                   style: MyTextStyles.bodyLarge.copyWith(color: Colors.white)),
             ],
@@ -509,25 +518,25 @@ class MarkAllWidget extends GetView<AttendanceController> {
                   behavior: HitTestBehavior.translucent,
                   onTap: onMarkAllPresent,
                   child: Icon(
-                    controller.isPresentAll.value
+                    controller.isMarkAllPresent.value
                         ? Icons.check_circle_outline
                         : Icons.circle_outlined,
                     size: 24,
-                    color: controller.isPresentAll.value
+                    color: controller.isMarkAllPresent.value
                         ? MyDynamicColors.activeGreen
                         : Colors.black87,
                   ),
                 ),
-                const SizedBox(width: MySizes.md+18),
+                const SizedBox(width: MySizes.md + 18),
                 GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTap: onMarkAllAbsent,
                   child: Icon(
-                    controller.isAbsentAll.value
+                    controller.isMarkAllAbsent.value
                         ? Icons.check_circle_outline
                         : Icons.circle_outlined,
                     size: 24,
-                    color: controller.isAbsentAll.value
+                    color: controller.isMarkAllAbsent.value
                         ? MyDynamicColors.activeRed
                         : Colors.black87,
                   ),
@@ -538,5 +547,98 @@ class MarkAllWidget extends GetView<AttendanceController> {
         ],
       ),
     ));
+  }
+}
+
+class CustomBannerCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final String buttonText;
+  final String svgAsset;
+  final LinearGradient gradient;
+  final VoidCallback onPressed;
+
+  const CustomBannerCard({
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.buttonText,
+    required this.svgAsset,
+    required this.gradient,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.0),
+          gradient: gradient,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  FractionallySizedBox(
+                    widthFactor: 0.5,
+                    child: ElevatedButton(
+                      onPressed: onPressed,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: gradient.colors.first,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        elevation: 2,
+                        textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      child: Text(buttonText,style: const TextStyle(fontSize: 13)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            SvgPicture.asset(
+              svgAsset,
+              height: 60,
+              placeholderBuilder: (context) => const CircularProgressIndicator(),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

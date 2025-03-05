@@ -6,6 +6,7 @@ class MyColors {
   static const Color primaryColor = Color(0xFF0077FF);
   static const Color primaryTintColor = Color(0xFFebf1ff);
 
+
   // Secondary Color
   static const Color secondaryColor = Color(0xFFFF9B25);
   static const Color secondaryTintColor = Color(0xFFffebd3);

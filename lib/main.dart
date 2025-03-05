@@ -1,10 +1,12 @@
 
+import 'package:cambridge_school/app/modules/attendance/mark_attendance/at.dart';
 import 'package:cambridge_school/router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'app/modules/attendance/mark_attendance/user_attendance_model.dart';
 import 'app/modules/user_management/create_user/models/user_model.dart';
 import 'core/utils/theme/theme.dart';
 import 'firebase_options.dart';
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
       theme: _getAppTheme(context),
       getPages: AppRoutes.routes,
       initialRoute: AppRoutes.attendanceRecord,
-      // home: AttendanceRecordScreen(),
+      // home: AttendanceInsightsPage(attendanceData: UserAttendance(academicPeriodStart: DateTime(2025,1,1), attendanceString: 'PAPPPAPAAPPPPAPAAPPAPPPAPAPAPPPAPAAPPPPAPAAPPAPPPAPAPPAPAPPA')),
     );
   }
 }

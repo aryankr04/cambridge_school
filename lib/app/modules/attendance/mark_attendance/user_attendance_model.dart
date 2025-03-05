@@ -16,6 +16,7 @@ class UserAttendance {
   'Invalid attendance string: Contains invalid characters.',
   );
 
+  // Private helper method to check if a character is a valid attendance character.
   static bool _isValidChar(String char) {
     return validAttendanceChars.contains(char);
   }
@@ -33,6 +34,7 @@ class UserAttendance {
     );
   }
 
+  // Convert the UserAttendance object to a Map.
   Map<String, dynamic> toMap() {
     return {
       'academicPeriodStart': academicPeriodStart.toIso8601String(),
@@ -40,6 +42,7 @@ class UserAttendance {
     };
   }
 
+  // Create a UserAttendance object from a Map.
   static UserAttendance? fromMap(Map<String, dynamic> map) {
     try {
       if (!map.containsKey('academicPeriodStart') ||
@@ -57,6 +60,7 @@ class UserAttendance {
     }
   }
 
+  // Update the attendance status for a specific date.
   UserAttendance updateAttendance(DateTime date, String status) {
     if (!validAttendanceChars.contains(status)) {
       throw ArgumentError(
@@ -90,6 +94,7 @@ class UserAttendance {
     );
   }
 
+  // Update the attendance status for a range of dates.
   UserAttendance updateMultiDateAttendance(
       DateTime startDate, DateTime endDate, String status) {
     if (!_isValidChar(status)) {
@@ -126,6 +131,7 @@ class UserAttendance {
     );
   }
 
+  // Get the attendance status for a specific date.
   String getAttendanceStatus(DateTime date) {
     final offset = date.difference(academicPeriodStart).inDays;
     if (offset < 0 || offset >= attendanceString.length) {
@@ -134,6 +140,7 @@ class UserAttendance {
     return attendanceString[offset];
   }
 
+  // Calculate the attendance summary (counts of P, A, H, L, E, N).
   Map<String, int> calculateAttendanceSummary() {
     if (attendanceString.isEmpty) {
       return {
@@ -181,6 +188,7 @@ class UserAttendance {
     return summary;
   }
 
+  // Compact the attendance string to a new start date.
   UserAttendance compact(DateTime newStartDate) {
     final daysToRemove = newStartDate.difference(academicPeriodStart).inDays;
     if (daysToRemove <= 0) return this;
@@ -194,7 +202,8 @@ class UserAttendance {
       attendanceString: newAttendanceString,
     );
   }
-  // Get the count of consecutive days with a specific status
+
+  // Get the count of consecutive days with a specific status.
   int getConsecutiveAttendanceCount(String status) {
     if (!_isValidChar(status)) return 0;
 
@@ -213,7 +222,7 @@ class UserAttendance {
     return maxStreak;
   }
 
-  // Get the date of the first occurrence of a specific status
+  // Get the date of the first occurrence of a specific status.
   DateTime? getDateForFirstStatusOccurrence(String status) {
     if (!_isValidChar(status)) return null;
 
@@ -223,12 +232,12 @@ class UserAttendance {
     return academicPeriodStart.add(Duration(days: index));
   }
 
-  // Get the total days covered by the attendance string
+  // Get the total days covered by the attendance string.
   int getTotalDays() {
     return attendanceString.length;
   }
 
-  // Get attendance statuses within a specific date range
+  // Get attendance statuses within a specific date range.
   Map<DateTime, String> getAttendanceInRange(DateTime startDate, DateTime endDate) {
     Map<DateTime, String> attendanceMap = {};
     DateTime currentDate = startDate;
@@ -239,5 +248,136 @@ class UserAttendance {
     }
 
     return attendanceMap;
+  }
+
+  // Generate heatmap data for attendance (e.g., for calendar heatmap).
+  Map<String, String> getAttendanceHeatmapData() {
+    Map<String, String> heatmapData = {};
+    DateTime currentDate = academicPeriodStart;
+
+    for (int i = 0; i < attendanceString.length; i++) {
+      String formattedDate = DateFormat('yyyy-MM-dd').format(currentDate);
+      heatmapData[formattedDate] = attendanceString[i];
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+    return heatmapData;
+  }
+
+  // Provide data for a monthly attendance trend line chart.
+  Map<String, double> getMonthlyAttendanceTrends() {
+    Map<String, double> monthlyTrends = {};
+    DateTime currentDate = academicPeriodStart;
+
+    Map<String, int> monthlyPresent = {};
+    Map<String, int> monthlyTotal = {};
+
+    for (int i = 0; i < attendanceString.length; i++) {
+      String monthKey = DateFormat('yyyy-MM').format(currentDate);
+      monthlyTotal[monthKey] = (monthlyTotal[monthKey] ?? 0) + 1;
+
+      if (attendanceString[i] == 'P') {
+        monthlyPresent[monthKey] = (monthlyPresent[monthKey] ?? 0) + 1;
+      }
+
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+
+    for (String month in monthlyTotal.keys) {
+      monthlyTrends[month] =
+          (monthlyPresent[month] ?? 0) / monthlyTotal[month]! * 100;
+    }
+
+    return monthlyTrends;
+  }
+
+  // Identify and return streaks of a particular status (e.g., 'P' for Present).
+  List<Map<String, dynamic>> getStreaks(String status) {
+    List<Map<String, dynamic>> streaks = [];
+    DateTime? streakStart;
+    int streakLength = 0;
+
+    DateTime currentDate = academicPeriodStart;
+    for (int i = 0; i < attendanceString.length; i++) {
+      if (attendanceString[i] == status) {
+        streakLength++;
+        streakStart ??= currentDate;
+      } else if (streakLength > 0) {
+        streaks.add({
+          'start': streakStart,
+          'end': currentDate.subtract(const Duration(days: 1)),
+          'length': streakLength,
+        });
+        streakStart = null;
+        streakLength = 0;
+      }
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+
+    if (streakLength > 0) {
+      streaks.add({
+        'start': streakStart,
+        'end': currentDate.subtract(const Duration(days: 1)),
+        'length': streakLength,
+      });
+    }
+
+    return streaks;
+  }
+
+  // Analyze and visualize attendance consistency.
+  double getAttendanceConsistency() {
+    int changes = 0;
+
+    for (int i = 1; i < attendanceString.length; i++) {
+      if (attendanceString[i] != attendanceString[i - 1]) {
+        changes++;
+      }
+    }
+
+    return changes / attendanceString.length * 100;
+  }
+
+  // Prepare data for pie chart visualization of attendance summary.
+  Map<String, double> getPieChartData() {
+    Map<String, int> summary = calculateAttendanceSummary();
+    return summary.map((key, value) => MapEntry(key, value.toDouble()));
+  }
+
+  // Prepare data for a bar chart comparing weekly attendance.
+  Map<String, int> getWeeklyAttendanceData() {
+    Map<String, int> weeklyData = {};
+    DateTime currentDate = academicPeriodStart;
+    int weekNumber = 1;
+
+    for (int i = 0; i < attendanceString.length; i += 7) {
+      int presentCount = 0;
+      for (int j = 0; j < 7 && (i + j) < attendanceString.length; j++) {
+        if (attendanceString[i + j] == 'P') {
+          presentCount++;
+        }
+      }
+      weeklyData['Week $weekNumber'] = presentCount;
+      weekNumber++;
+    }
+
+    return weeklyData;
+  }
+
+  // Provide data for trend analysis using line charts.
+  Map<String, double> getLineChartData() {
+    Map<String, double> lineChartData = {};
+    DateTime currentDate = academicPeriodStart;
+
+    for (int i = 0; i < attendanceString.length; i++) {
+      lineChartData[formatDate(currentDate)] =
+      attendanceString[i] == 'P' ? 1.0 : 0.0;
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+    return lineChartData;
+  }
+
+  // Helper method to format a date.
+  String formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
   }
 }

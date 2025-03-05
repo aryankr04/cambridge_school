@@ -7,6 +7,7 @@ import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/constants/dynamic_colors.dart';
 import '../../../../core/utils/constants/sizes.dart';
 import '../../../../core/utils/constants/text_styles.dart';
+import '../../../../core/widgets/full_screen_loading_widget.dart';
 import '../../../../core/widgets/label_chip.dart';
 import '../../manage_school/models/school_model.dart';
 import 'attendance_record_controller.dart';
@@ -37,7 +38,12 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
             padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(context), // Pass context to _buildHeader
+                FilledButton(
+                    onPressed: () {
+                      MyFullScreenLoading.show(loadingText: 'Processing...');
+                    },
+                    child: const Text('Send')),
                 _buildEmployeeAttendanceSummary(),
                 const MyDottedLine(
                   dashColor: MyColors.borderColor,
@@ -57,10 +63,12 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
   }
 
   Widget _buildEmployeeAttendanceSummary() {
-    final cardColor = controller.isEmployeeAttendanceTaken
+    final bool isEmployeeAttendanceTaken = controller.isEmployeeAttendanceTaken;
+    final Color cardColor = isEmployeeAttendanceTaken
         ? MyDynamicColors.activeOrange
         : MyDynamicColors.activeGreen;
-    final buttonText = controller.isEmployeeAttendanceTaken ? 'Update' : 'Take';
+    final String buttonText = isEmployeeAttendanceTaken ? 'Update' : 'Take';
+
     return Container(
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -82,7 +90,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: MySizes.sm),
-                  if (controller.isEmployeeAttendanceTaken)
+                  if (isEmployeeAttendanceTaken)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -95,13 +103,13 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
                           children: [
                             MyLabelChip(
                               text:
-                                  'Presents: ${controller.employeeAttendanceSummary.value?.presents}',
+                              'Presents: ${controller.employeeAttendanceSummary.value?.presents}',
                               color: MyColors.activeGreen,
                             ),
                             const SizedBox(width: MySizes.md),
                             MyLabelChip(
                               text:
-                                  'Absents: ${controller.employeeAttendanceSummary.value?.absents}',
+                              'Absents: ${controller.employeeAttendanceSummary.value?.absents}',
                               color: MyColors.activeRed,
                             ),
                           ],
@@ -126,9 +134,9 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
             GestureDetector(
               onTap: () {
                 Get.to(() => MarkAttendanceScreen(
-                      date: controller.selectedDate.value,
-                      attendanceFor: 'Employee',
-                    ));
+                  initialDate: controller.selectedDate.value,
+                  initialAttendanceType: 'Employee',
+                ));
               },
               child: Container(
                 width: Get.width * 0.2,
@@ -153,7 +161,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -169,7 +177,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
           ),
           TextButton.icon(
             onPressed: () {
-              _selectDate(Get.context!);
+              _selectDate(context); // Use the passed context
             },
             label: const Text('Change Date'),
             icon: const Icon(
@@ -187,10 +195,11 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
     return ListView.builder(
       itemCount: controller.sections.length,
       itemBuilder: (context, index) {
-        final section = controller.sections[index];
-        final isTaken = controller.isAttendanceTakenForSection(
+        final SectionData section = controller.sections[index];
+        final bool isTaken = controller.isAttendanceTakenForSection(
             section.className, section.sectionName);
-        final summary = controller.getClassAttendanceSummary(
+        final ClassAttendanceSummary summary =
+        controller.getClassAttendanceSummary(
             section.className, section.sectionName);
 
         return ClassAttendanceSummaryCard(
@@ -199,10 +208,10 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
           isTaken: isTaken,
           onTakeAttendance: (SectionData sectionData) {
             Get.to(() => MarkAttendanceScreen(
-                  section: sectionData,
-                  date: controller.selectedDate.value,
-                  attendanceFor: 'Class',
-                ));
+              sectionData: sectionData,
+              initialDate: controller.selectedDate.value,
+              initialAttendanceType: 'Class',
+            ));
           },
         );
       },
@@ -214,7 +223,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
       context: context,
       initialDate: controller.selectedDate.value,
       firstDate: DateTime(2000),
-      lastDate: DateTime.now(), // Set lastDate to the end of 2025
+      lastDate: DateTime.now(),
     );
     if (picked != null && picked != controller.selectedDate.value) {
       controller.updateSelectedDate(picked);
@@ -238,9 +247,9 @@ class ClassAttendanceSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor =
-        isTaken ? MyDynamicColors.activeOrange : MyDynamicColors.activeGreen;
-    final buttonText = isTaken ? 'Update' : 'Take';
+    final Color cardColor =
+    isTaken ? MyDynamicColors.activeOrange : MyDynamicColors.activeGreen;
+    final String buttonText = isTaken ? 'Update' : 'Take';
 
     return Container(
       decoration: BoxDecoration(

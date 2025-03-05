@@ -55,11 +55,23 @@ class MyDropdownField extends StatefulWidget {
 class _MyDropdownFieldState extends State<MyDropdownField> {
   final RxBool _isDropdownOpen = false.obs;
   late Rx<String?> _selectedValue;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _selectedValue = widget.selectedValue ?? Rx<String?>(null);
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        _closeDropdown();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   void _toggleDropdown() {
@@ -80,12 +92,8 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
         ? 'Select ${widget.labelText}'
         : 'Select an Option';
 
-    return FocusScope(
-      onFocusChange: (hasFocus) {
-        if (!hasFocus) {
-          _closeDropdown();
-        }
-      },
+    return Focus(
+      focusNode: _focusNode,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -94,7 +102,10 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
             const SizedBox(height: 6),
           ],
           GestureDetector(
-            onTap: _toggleDropdown,
+            onTap: () {
+              _toggleDropdown();
+              _focusNode.requestFocus(); // Request focus when tapped
+            },
             behavior: HitTestBehavior.translucent,
             child: Container(
               decoration: widget.decoration ??
@@ -166,13 +177,17 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                         color: _selectedValue.value == option
                             ? Colors.lightBlue.withOpacity(0.3)
                             : Colors.transparent,
-                        child: ListTile(
-                          title: Text(option),
+                        child: InkWell( // Use InkWell for better ripple effect
                           onTap: () {
                             _selectedValue.value = option;
                             widget.onSelected?.call(option);
                             _closeDropdown();
+                            _focusNode.unfocus(); //remove the focus from the field after selection
                           },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16), // Adjust padding as needed
+                            child: Text(option),
+                          ),
                         ),
                       );
                     },
@@ -183,7 +198,7 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
           }),
           if (widget.isValidate) ...[
             Obx(() {
-              if (_selectedValue.value == null && _isDropdownOpen.isFalse) {
+              if (_selectedValue.value == null && !_isDropdownOpen.value) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 4.0),
                   child: Text(
