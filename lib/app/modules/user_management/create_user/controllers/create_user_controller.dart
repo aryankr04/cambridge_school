@@ -214,6 +214,7 @@ class CreateUserController extends GetxController {
   // Optional school ID
   final schoolIdController = TextEditingController();
 
+
   void addQualification() {
     // Validation: Check if resultType and result are both provided
     if (resultType.value.isNotEmpty && resultController.text.isEmpty) {

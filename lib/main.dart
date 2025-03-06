@@ -1,4 +1,5 @@
 
+import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_screen.dart';
 import 'package:cambridge_school/app/modules/attendance/mark_attendance/at.dart';
 import 'package:cambridge_school/router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,8 +31,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _getAppTheme(context),
       getPages: AppRoutes.routes,
-      initialRoute: AppRoutes.attendanceRecord,
-      // home: AttendanceInsightsPage(attendanceData: UserAttendance(academicPeriodStart: DateTime(2025,1,1), attendanceString: 'PAPPPAPAAPPPPAPAAPPAPPPAPAPAPPPAPAAPPPPAPAAPPAPPPAPAPPAPAPPA')),
+      initialRoute: AppRoutes.attendanceReport,
+      //  home: AttendanceInsightsPage(attendanceData: UserAttendance(academicPeriodStart: DateTime(2025,1,1), attendanceString: 'PAPPPAPAAPPPPAPAAPPAPPPAPAPAPPPAPAAPPPPAPAAPPAPPPAPAPPAPAPPA')),
     );
   }
 }

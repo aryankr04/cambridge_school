@@ -47,7 +47,14 @@ class MyCard extends StatelessWidget {
         color: color??MyDynamicColors.backgroundColorWhiteDarkGrey,
         borderRadius: isCircular ? null : borderRadius,
         border: border,
-        boxShadow: hasShadow && boxShadow != null ? [boxShadow!] : [],
+        boxShadow: hasShadow && boxShadow != null ? [boxShadow!] :  [
+      BoxShadow(
+      color: Colors.black.withOpacity(0.1),
+      spreadRadius: 1,
+      blurRadius: 10,
+      offset: const Offset(0, 5),
+    ),
+    ],
         shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
       ),
       padding: padding,

@@ -11,10 +11,10 @@ class UserAttendance {
     required this.academicPeriodStart,
     required this.attendanceString,
   }) : assert(
-  attendanceString.isEmpty ||
-      attendanceString.split('').every((char) => _isValidChar(char)),
-  'Invalid attendance string: Contains invalid characters.',
-  );
+          attendanceString.isEmpty ||
+              attendanceString.split('').every((char) => _isValidChar(char)),
+          'Invalid attendance string: Contains invalid characters.',
+        );
 
   // Private helper method to check if a character is a valid attendance character.
   static bool _isValidChar(String char) {
@@ -51,7 +51,8 @@ class UserAttendance {
       }
 
       return UserAttendance(
-        academicPeriodStart: DateTime.parse(map['academicPeriodStart'] as String),
+        academicPeriodStart:
+            DateTime.parse(map['academicPeriodStart'] as String),
         attendanceString: map['attendanceString'] as String,
       );
     } catch (e) {
@@ -122,8 +123,8 @@ class UserAttendance {
       newAttendanceString = newAttendanceString.padRight(endOffset + 1, 'N');
     }
 
-    newAttendanceString = newAttendanceString.replaceRange(
-        startOffset, endOffset + 1, ''.padRight(endOffset - startOffset + 1, status));
+    newAttendanceString = newAttendanceString.replaceRange(startOffset,
+        endOffset + 1, ''.padRight(endOffset - startOffset + 1, status));
 
     return UserAttendance(
       academicPeriodStart: academicPeriodStart,
@@ -238,7 +239,8 @@ class UserAttendance {
   }
 
   // Get attendance statuses within a specific date range.
-  Map<DateTime, String> getAttendanceInRange(DateTime startDate, DateTime endDate) {
+  Map<DateTime, String> getAttendanceInRange(
+      DateTime startDate, DateTime endDate) {
     Map<DateTime, String> attendanceMap = {};
     DateTime currentDate = startDate;
 
@@ -370,14 +372,113 @@ class UserAttendance {
 
     for (int i = 0; i < attendanceString.length; i++) {
       lineChartData[formatDate(currentDate)] =
-      attendanceString[i] == 'P' ? 1.0 : 0.0;
+          attendanceString[i] == 'P' ? 1.0 : 0.0;
       currentDate = currentDate.add(const Duration(days: 1));
     }
     return lineChartData;
   }
 
+  // Prepare data for a bar chart comparing monthly attendance.
+  Map<String, int> getMonthlyAttendanceData() {
+    Map<String, int> monthlyPresent = {};
+    Map<String, int> monthlyAbsent = {};
+    Map<String, int> monthlyData = {};
+    DateTime currentDate = academicPeriodStart;
+
+    for (int i = 0; i < attendanceString.length; i++) {
+      String monthKey = DateFormat('yyyy-MM').format(currentDate);
+
+      if (attendanceString[i] == 'P') {
+        monthlyPresent[monthKey] = (monthlyPresent[monthKey] ?? 0) + 1;
+      } else if (attendanceString[i] == 'A') {
+        monthlyAbsent[monthKey] = (monthlyAbsent[monthKey] ?? 0) + 1;
+      }
+
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+
+    for (String month in monthlyPresent.keys) {
+      monthlyData['${month}_P'] = monthlyPresent[month]!;
+    }
+    for (String month in monthlyAbsent.keys) {
+      monthlyData['${month}_A'] = monthlyAbsent[month]!;
+    }
+
+    return monthlyData;
+  }
+
   // Helper method to format a date.
   String formatDate(DateTime date) {
     return DateFormat('yyyy-MM-dd').format(date);
+  }
+
+  Map<String, dynamic> getMonthlyAttendanceSummary(DateTime month) {
+    DateTime startDate = DateTime(month.year, month.month, 1);
+    DateTime endDate = DateTime(month.year, month.month + 1, 0);
+
+    Map<DateTime, String> attendanceInRange =
+        getAttendanceInRange(startDate, endDate);
+
+    int present = 0;
+    int absent = 0;
+    int holiday = 0;
+    int late = 0;
+    int excused = 0;
+    int notApplicable = 0;
+
+    for (var status in attendanceInRange.values) {
+      switch (status) {
+        case 'P':
+          present++;
+          break;
+        case 'A':
+          absent++;
+          break;
+        case 'H':
+          holiday++;
+          break;
+        case 'L':
+          late++;
+          break;
+        case 'E':
+          excused++;
+          break;
+        case 'N':
+          notApplicable++;
+          break;
+      }
+    }
+
+    int totalDays = attendanceInRange.length;
+    int workingDays = present + absent + late + excused;
+
+    double presentPercentage =
+        totalDays > 0 ? (present / workingDays) * 100 : 0;
+    double absentPercentage = totalDays > 0 ? (absent / workingDays) * 100 : 0;
+    double holidayPercentage = totalDays > 0 ? (holiday / totalDays) * 100 : 0;
+    double latePercentage = totalDays > 0 ? (late / workingDays) * 100 : 0;
+    double excusedPercentage =
+        totalDays > 0 ? (excused / workingDays) * 100 : 0;
+    double notApplicablePercentage =
+        totalDays > 0 ? (notApplicable / totalDays) * 100 : 0;
+    double workingPercentage =
+        totalDays > 0 ? (workingDays / totalDays) * 100 : 0;
+
+    return {
+      'Present': present,
+      'Absent': absent,
+      'Holiday': holiday,
+      'Late': late,
+      'Excused': excused,
+      'Not Applicable': notApplicable,
+      'Working': workingDays,
+      'PresentPercentage': presentPercentage,
+      'AbsentPercentage': absentPercentage,
+      'HolidayPercentage': holidayPercentage,
+      'LatePercentage': latePercentage,
+      'ExcusedPercentage': excusedPercentage,
+      'NotApplicablePercentage': notApplicablePercentage,
+      'WorkingPercentage': workingPercentage,
+    };
   }
 }

@@ -1,4 +1,6 @@
 import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_binding.dart';
+import 'package:cambridge_school/app/modules/attendance/attendance_report/attendance_binding.dart';
+import 'package:cambridge_school/app/modules/attendance/attendance_report/attendance_report_screen.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_binding.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_screen.dart';
 import 'package:cambridge_school/app/modules/manage_school/screens/create_school_0.dart';
@@ -26,15 +28,16 @@ class AppRoutes {
   static const String schoolManagement = '/school-management';
   static const String markAttendance = '/mark-attendance';
   static const String attendanceRecord = '/attendance-record';
+  static const String attendanceReport = '/attendance-report';
 
   static const String pendingApproval = '/pending-approval';
   static const String successScreen = '/success-screen';
 
   static final routes = [
-    GetPage(
-      name: initial,
-      page: () => const Demo(),
-    ),
+    // GetPage(
+    //   name: initial,
+    //   page: () => const Demo(),
+    // ),
     GetPage(
       name: onboarding,
       page: () => const OnboardingScreen(),
@@ -68,6 +71,11 @@ class AppRoutes {
       name: attendanceRecord,
       page: () => const AttendanceRecordScreen(),
       binding: AttendanceRecordBinding(),
+    ),
+    GetPage(
+      name: attendanceReport,
+      page: () =>  AttendanceReportScreen(),
+      binding: AttendanceReportBinding(),
     ),
   ];
 }
