@@ -21,7 +21,7 @@ class MyTextStyles {
   static  TextStyle labelSmall = TextStyle(fontSize: 12.0, fontWeight: FontWeight.normal, color: MyColors.darkBackgroundColor.withOpacity(0.5));
 
 
-  static const TextStyle placeholder = TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400, color: MyColors.placeholderColor);
+  static const TextStyle placeholder = TextStyle(fontSize: 15.0, fontWeight: FontWeight.w400, color: MyColors.placeholderColor);
   static const TextStyle inputField = TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500, color: MyColors.darkBackgroundColor);
   static const TextStyle inputLabel = TextStyle(fontSize: 12.0, fontWeight: FontWeight.w500, color: MyColors.darkBackgroundColor);
 }

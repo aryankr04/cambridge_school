@@ -1,4 +1,4 @@
-// // presentation/screens/contact_list_screen.dart
+// // presentation/notice/contact_list_screen.dart
 // import 'package:cambridge_school/core/utils/constants/sizes.dart';
 // import 'package:cambridge_school/core/widgets/text_field.dart';
 // import 'package:flutter/material.dart';

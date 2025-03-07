@@ -112,6 +112,7 @@ class _AnimatedTextState extends State<AnimatedText>
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             color: MyColors.activeBlue,
             fontWeight: FontWeight.bold,
+            fontSize: 18
           ),
         );
       },

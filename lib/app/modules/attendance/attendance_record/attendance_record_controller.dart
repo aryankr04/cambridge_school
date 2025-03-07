@@ -7,17 +7,26 @@ import 'attendance_record_models.dart';
 import 'attendance_record_repository.dart';
 
 class AttendanceRecordController extends GetxController {
+  //----------------------------------------------------------------------------
+  // Static Data (Consider making this configurable, or injected)
   static const String schoolId = 'SCH00001';
+
+  //----------------------------------------------------------------------------
+  // Observables (Reactive Variables)
   final selectedDate = Rx<DateTime>(DateTime.now());
   final sections = RxList<SectionData>();
   final attendanceSummaries = RxList<ClassAttendanceSummary>();
+  final employeeAttendanceSummary = Rx<EmployeeAttendanceSummary?>(null); // Allow null
   final isLoading = RxBool(false);
   final errorMessage = RxnString();
+
+  //----------------------------------------------------------------------------
+  // Repositories
   final FirestoreSchoolRepository schoolRepository;
   final FirestoreAttendanceRecordRepository attendanceRepository;
 
-  final employeeAttendanceSummary = Rx<EmployeeAttendanceSummary?>(null);
-
+  //----------------------------------------------------------------------------
+  // Constructor
   AttendanceRecordController({
     FirestoreSchoolRepository? schoolRepo,
     FirestoreAttendanceRecordRepository? attendanceRepo,
@@ -25,12 +34,16 @@ class AttendanceRecordController extends GetxController {
         attendanceRepository =
             attendanceRepo ?? FirestoreAttendanceRecordRepository();
 
+  //----------------------------------------------------------------------------
+  // Lifecycle Methods
   @override
   void onInit() {
     super.onInit();
     _loadInitialData();
   }
 
+  //----------------------------------------------------------------------------
+  // Data Fetching
   Future<void> _loadInitialData() async {
     await fetchData();
   }
@@ -41,7 +54,7 @@ class AttendanceRecordController extends GetxController {
 
     try {
       await _fetchSchoolSections();
-      await _fetchDailyAttendanceRecord(); // Combined fetch
+      await _fetchDailyAttendanceRecord();
     } catch (error) {
       errorMessage(error.toString());
       print('Error during fetchData: $error');
@@ -76,23 +89,22 @@ class AttendanceRecordController extends GetxController {
       attendanceSummaries
           .assignAll(dailyRecord?.classAttendanceSummaries ?? []);
       employeeAttendanceSummary.value = dailyRecord?.employeeAttendanceSummary;
-
     } catch (error) {
       errorMessage('Failed to load attendance record: $error');
       print('Error fetching daily attendance record: $error');
     }
   }
 
-  bool isAttendanceTakenForSection(String className, String sectionName) {
-    return attendanceSummaries.any(
-          (summary) =>
-      summary.className == className && summary.sectionName == sectionName,
-    );
-  }
-
+  //----------------------------------------------------------------------------
+  // UI Interaction & Data Manipulation
   void updateSelectedDate(DateTime date) {
     selectedDate(date);
     fetchData();
+  }
+
+  bool isAttendanceTakenForSection(String className, String sectionName) {
+    return attendanceSummaries.any((summary) =>
+    summary.className == className && summary.sectionName == sectionName);
   }
 
   ClassAttendanceSummary getClassAttendanceSummary(
@@ -112,6 +124,8 @@ class AttendanceRecordController extends GetxController {
     }
   }
 
+  //----------------------------------------------------------------------------
+  // Utility Methods
   String getFormattedSelectedDate() {
     final formatter = DateFormat('dd MMMM yyyy');
     return formatter.format(selectedDate.value);

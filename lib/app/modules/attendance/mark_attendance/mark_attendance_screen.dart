@@ -20,10 +20,10 @@ import '../../../../core/utils/constants/sizes.dart';
 import '../../../../core/utils/helpers/helper_functions.dart';
 import '../../../../core/widgets/dropdown_field.dart';
 import '../../manage_school/models/school_model.dart';
-import 'attendance_controller.dart';
+import 'mark_attendance_controller.dart';
 import 'mark_attendance_user_tile.dart';
 
-class MarkAttendanceScreen extends GetView<AttendanceController> {
+class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
   final SectionData? sectionData;
   final DateTime? initialDate;
   final String? initialAttendanceType;
@@ -37,7 +37,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
 
   @override
   Widget build(BuildContext context) {
-    final AttendanceController attendanceController = Get.put(AttendanceController());
+    final MarkAttendanceController attendanceController = Get.put(MarkAttendanceController());
 
     // Initialize the attendance controller with provided parameters
     _initializeController(attendanceController);
@@ -68,7 +68,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
     );
   }
 
-  void _initializeController(AttendanceController controller) {
+  void _initializeController(MarkAttendanceController controller) {
     // Set initial values from optional parameters
     controller.setShouldFetchUsersOnInit(
         shouldFetch: sectionData != null || initialDate != null || initialAttendanceType != null);
@@ -90,7 +90,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
     }
   }
 
-  Widget _buildAttendanceDetailsCard(BuildContext context, AttendanceController controller) {
+  Widget _buildAttendanceDetailsCard(BuildContext context, MarkAttendanceController controller) {
     return Container(
       padding: const EdgeInsets.symmetric(
           vertical: MySizes.md, horizontal: MySizes.md),
@@ -137,7 +137,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
     );
   }
 
-  Widget _buildAttendanceSummary(AttendanceController controller) {
+  Widget _buildAttendanceSummary(MarkAttendanceController controller) {
     return Obx(
           () => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -160,7 +160,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
     );
   }
 
-  Widget _buildAttendanceList(AttendanceController controller) {
+  Widget _buildAttendanceList(MarkAttendanceController controller) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: MyColors.borderColor, width: 0.5),
@@ -201,7 +201,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
     );
   }
 
-  Widget _buildMarkAllWidget(AttendanceController controller) {
+  Widget _buildMarkAllWidget(MarkAttendanceController controller) {
     return MarkAllWidget(
       onMarkAllPresent: controller.markAllUsersPresent,
       onMarkAllAbsent: controller.markAllUsersAbsent,
@@ -209,7 +209,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
   }
 
   void _showAttendanceDetailsDialog(
-      BuildContext context, AttendanceController controller) {
+      BuildContext context, MarkAttendanceController controller) {
     Get.dialog(
       AlertDialog(
         title: const Text(
@@ -472,7 +472,7 @@ class MarkAttendanceScreen extends GetView<AttendanceController> {
   }
 }
 
-class MarkAllWidget extends GetView<AttendanceController> {
+class MarkAllWidget extends GetView<MarkAttendanceController> {
   final VoidCallback onMarkAllPresent;
   final VoidCallback onMarkAllAbsent;
 
@@ -551,95 +551,3 @@ class MarkAllWidget extends GetView<AttendanceController> {
   }
 }
 
-class CustomBannerCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final String buttonText;
-  final String svgAsset;
-  final LinearGradient gradient;
-  final VoidCallback onPressed;
-
-  const CustomBannerCard({
-    Key? key,
-    required this.title,
-    required this.description,
-    required this.buttonText,
-    required this.svgAsset,
-    required this.gradient,
-    required this.onPressed,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.0),
-          gradient: gradient,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  FractionallySizedBox(
-                    widthFactor: 0.5,
-                    child: ElevatedButton(
-                      onPressed: onPressed,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: gradient.colors.first,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        elevation: 2,
-                        textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      child: Text(buttonText,style: const TextStyle(fontSize: 13)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            SvgPicture.asset(
-              svgAsset,
-              height: 60,
-              placeholderBuilder: (context) => const CircularProgressIndicator(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

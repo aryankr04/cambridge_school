@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../user_management/create_user/models/user_model.dart';
-import 'attendance_controller.dart';
+import 'mark_attendance_controller.dart';
 
-class AttendanceCard extends GetView<AttendanceController> {
+class AttendanceCard extends GetView<MarkAttendanceController> {
   final UserModel user;
   final RxBool isPresent;
   final VoidCallback onMarkPresent;

@@ -465,7 +465,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Languages Spoken',
-        options: const ['English', 'Spanish', 'French', 'Hindi'],
+        optionsForChips: const ['English', 'Spanish', 'French', 'Hindi'],
         onMultipleChanged: (values) {
           controller.languagesSpoken.value = values ?? [];
         },
@@ -475,7 +475,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Hobbies',
-        options: MyLists.hobbyOptions,
+        optionsForChips: MyLists.hobbyOptions,
         onMultipleChanged: (values) {
           controller.hobbies.value = values ?? [];
         },
@@ -484,7 +484,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Nationality',
-        options: MyLists.nationalityOptions,
+        optionsForChips: MyLists.nationalityOptions,
         onSingleChanged: (value) {
           controller.nationality.value = value ?? '';
         },
@@ -668,7 +668,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Relationship to Student',
-        options: MyLists.relationshipOptions,
+        optionsForChips: MyLists.relationshipOptions,
         onSingleChanged: (value) {
           controller.fatherRelationshipToStudent.value = value ?? '';
         },
@@ -1011,13 +1011,13 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     return [
       MyDialogDropdown(
         labelText: 'Favorite Dish',
-        options: MyLists.dishOptions,
+        optionsForChips: MyLists.dishOptions,
         onSingleChanged: (value) => controller.favoriteDish.value = value ?? '',
       ),
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Favorite Subject',
-        options: MyLists.subjectOptions,
+        optionsForChips: MyLists.subjectOptions,
         onSingleChanged: (value) =>
             controller.favoriteSubject.value = value ?? '',
       ),
@@ -1038,7 +1038,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Favorite Sport',
-        options: MyLists.favoriteSportOptions,
+        optionsForChips: MyLists.favoriteSportOptions,
         onSingleChanged: (value) =>
             controller.favoriteSport.value = value ?? '',
       ),
@@ -1094,7 +1094,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Favorite Season',
-        options: MyLists.seasonOptions,
+        optionsForChips: MyLists.seasonOptions,
         onSingleChanged: (value) =>
             controller.favoriteSeason.value = value ?? '',
       ),
@@ -1168,7 +1168,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
           labelText: 'Class',
-          options: MyLists.classOptions,
+          optionsForChips: MyLists.classOptions,
           onSingleChanged: (value) {
             controller.className.value = value ?? '';
           },
@@ -1176,7 +1176,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
           labelText: 'Section',
-          options: MyLists.sectionOptions,
+          optionsForChips: MyLists.sectionOptions,
           onSingleChanged: (value) {
             controller.section.value = value ?? '';
           },
@@ -1184,7 +1184,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
           labelText: 'House',
-          options: MyLists.schoolHouseOptions,
+          optionsForChips: MyLists.schoolHouseOptions,
           onSingleChanged: (value) {
             controller.house.value = value ?? '';
           },
@@ -1301,7 +1301,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               const SizedBox(height: MySizes.md),
               MyDialogDropdown(
                 labelText: 'Relationship to Student',
-                options: MyLists.relationshipOptions,
+                optionsForChips: MyLists.relationshipOptions,
                 onSingleChanged: (value) {
                   controller.guardianRelationshipToStudent.value = value ?? '';
                 },
@@ -1310,7 +1310,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               const SizedBox(height: MySizes.md),
               MyDialogDropdown(
                 labelText: 'Occupation',
-                options: MyLists.occupations,
+                optionsForChips: MyLists.occupations,
                 onSingleChanged: (value) {
                   controller.guardianOccupation.value = value ?? '';
                 },
@@ -1368,7 +1368,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     return [
       MyDialogDropdown(
         labelText: 'Subjects Taught',
-        options: const ['Mathematics', 'Science', 'English', 'History'],
+        optionsForChips: const ['Mathematics', 'Science', 'English', 'History'],
         onMultipleChanged: (values) {
           controller.subjectsTaught.value = values ?? [];
         },
@@ -1409,7 +1409,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Routes Assigned',
-        options: const ['Route A', 'Route B', 'Route C', 'Route D'],
+        optionsForChips: const ['Route A', 'Route B', 'Route C', 'Route D'],
         onMultipleChanged: (values) {
           controller.routesAssigned.value = values ?? [];
         },
@@ -1451,7 +1451,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     return [
       MyDialogDropdown(
         labelText: 'Responsibilities',
-        options: const ['Cleaning', 'Repairing', 'Gardening', 'Plumbing'],
+        optionsForChips: const ['Cleaning', 'Repairing', 'Gardening', 'Plumbing'],
         onMultipleChanged: (values) {
           controller.maintenanceResponsibilities.value = values ?? [];
         },
@@ -1465,7 +1465,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     return [
       MyDialogDropdown(
         labelText: 'Permissions',
-        options: const [
+        optionsForChips: const [
           'Create Users',
           'Edit Users',
           'Delete Users',
@@ -1480,7 +1480,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Assigned Modules',
-        options: const [
+        optionsForChips: const [
           'User Management',
           'School Management',
           'Finance Management',
@@ -1495,7 +1495,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Manageable Schools',
-        options: const ['School A', 'School B', 'School C', 'School D'],
+        optionsForChips: const ['School A', 'School B', 'School C', 'School D'],
         onMultipleChanged: (values) {
           controller.manageableSchools.value = values ?? [];
         },
@@ -1509,7 +1509,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     return [
       MyDialogDropdown(
         labelText: 'Permissions',
-        options: const ['Create Users', 'Edit Users', 'View Users'],
+        optionsForChips: const ['Create Users', 'Edit Users', 'View Users'],
         onMultipleChanged: (values) {
           controller.schoolAdminPermissions.value = values ?? [];
         },
@@ -1519,7 +1519,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Assigned Modules',
-        options: const ['User Management', 'Attendance Management'],
+        optionsForChips: const ['User Management', 'Attendance Management'],
         onMultipleChanged: (values) {
           controller.schoolAdminAssignedModules.value = values ?? [];
         },
@@ -1533,7 +1533,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     return [
       MyDialogDropdown(
         labelText: 'Schools',
-        options: const ['School A', 'School B', 'School C'],
+        optionsForChips: const ['School A', 'School B', 'School C'],
         onMultipleChanged: (values) {
           controller.directorSchools.value = values ?? [];
         },
@@ -1553,7 +1553,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Permissions',
-        options: const [
+        optionsForChips: const [
           'Create Schools',
           'Edit Schools',
           'Delete Schools',
@@ -1587,7 +1587,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyDialogDropdown(
         labelText: 'Responsibilities',
-        options: const [
+        optionsForChips: const [
           'Curriculum Design',
           'Teacher Evaluation',
           'Student Mentoring'

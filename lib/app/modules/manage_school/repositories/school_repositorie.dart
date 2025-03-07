@@ -75,7 +75,7 @@ class FirestoreSchoolRepository {
           .collection(_collectionName)
           .get();
 
-      return querySnapshot.docs.map((doc) => SchoolModel.fromMap(doc.data() as Map<String, dynamic>)).toList();
+      return querySnapshot.docs.map((doc) => SchoolModel.fromMap(doc.data())).toList();
     } catch (e) {
       print('Error fetching all schools: $e');
       rethrow; // Re-throw the error
@@ -89,7 +89,7 @@ class FirestoreSchoolRepository {
         .collection(_collectionName)
         .snapshots()
         .map((snapshot) => snapshot.docs
-        .map((doc) => SchoolModel.fromMap(doc.data() as Map<String, dynamic>))
+        .map((doc) => SchoolModel.fromMap(doc.data()))
         .toList());
   }
 
@@ -116,7 +116,7 @@ class FirestoreSchoolRepository {
           .where(field, isEqualTo: value)
           .get();
 
-      return querySnapshot.docs.map((doc) => SchoolModel.fromMap(doc.data() as Map<String, dynamic>)).toList();
+      return querySnapshot.docs.map((doc) => SchoolModel.fromMap(doc.data())).toList();
     } catch (e) {
       print('Error querying schools: $e');
       rethrow; // Re-throw the error

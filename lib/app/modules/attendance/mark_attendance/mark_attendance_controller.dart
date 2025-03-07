@@ -11,43 +11,71 @@ import '../../user_management/create_user/models/user_model.dart';
 import '../../user_management/manage_user/repositories/roster_repository.dart';
 import '../attendance_record/attendance_record_repository.dart';
 
-class AttendanceController extends GetxController {
-  final SchoolDummyData dummySchoolData = SchoolDummyData();
-  final selectedDate = DateTime.now().obs;
+class MarkAttendanceController extends GetxController {
+  //----------------------------------------------------------------------------
+  // Static Data (Consider moving to a config file or dependency injection)
   final String schoolId = 'SCH00001';
-  final String attendanceTakerName = 'Mr. S.K Pandey'; // Changed variable name
+
+  //----------------------------------------------------------------------------
+  // Observables (Reactive Variables)
+  final selectedDate = DateTime.now().obs;
   final selectedAttendanceFor = RxString('Class');
   final selectedClass = ('1').obs;
   final selectedSection = ('A').obs;
   final isLoading = false.obs;
   final isUpdatingAttendance = false.obs;
-  final userList = <UserModel>[].obs; // More descriptive name
-  final Rxn<ClassRoster> classRoster = Rxn<ClassRoster>();
-  final Rxn<UserRoster> employeeRoster = Rxn<UserRoster>();
-  final FirestoreRosterRepository rosterRepository =
-  FirestoreRosterRepository();
-  final isMarkAllPresent = false.obs; // More descriptive name
-  final isMarkAllAbsent = false.obs; // More descriptive name
+  final userList = <UserModel>[].obs;
+  final isMarkAllPresent = false.obs;
+  final isMarkAllAbsent = false.obs;
   final presentCount = 0.obs;
   final absentCount = 0.obs;
   final shouldFetchUsersOnInit = false.obs;
+  final Rxn<ClassRoster> classRoster = Rxn<ClassRoster>();
+  final Rxn<UserRoster> employeeRoster = Rxn<UserRoster>();
+
+  //----------------------------------------------------------------------------
+  // Non-Reactive Variables (Consider making configurable or injected)
+  final String attendanceTakerName = 'Mr. S.K Pandey';
+  //----------------------------------------------------------------------------
+  // Repositories
+  final FirestoreRosterRepository rosterRepository = FirestoreRosterRepository();
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  // Dependency Injection
+  final SchoolDummyData dummySchoolData = SchoolDummyData();
+
+  //----------------------------------------------------------------------------
+  // Lifecycle Methods
+  @override
+  void onInit() {
+    super.onInit();
+    if (shouldFetchUsersOnInit.value) {
+      fetchUsers();
+    }
+  }
 
   @override
   void onClose() {
+    // Properly close all Rx variables to prevent memory leaks
     selectedDate.close();
     selectedAttendanceFor.close();
     selectedClass.close();
     selectedSection.close();
     isLoading.close();
+    isUpdatingAttendance.close();
     userList.close();
     isMarkAllPresent.close();
     isMarkAllAbsent.close();
     presentCount.close();
     absentCount.close();
+    shouldFetchUsersOnInit.close();
+    classRoster.close();
+    employeeRoster.close();
     super.onClose();
   }
 
+  //----------------------------------------------------------------------------
+  // UI Interaction and Logic
   void setShouldFetchUsersOnInit({bool shouldFetch = true}) {
     shouldFetchUsersOnInit.value = shouldFetch;
   }
@@ -57,15 +85,8 @@ class AttendanceController extends GetxController {
     return (attendance == 'P').obs;
   }
 
-  String getUserAttendanceStatus(UserModel user) {
-    try {
-      return user.userAttendance!.getAttendanceStatus(selectedDate.value);
-    } catch (e) {
-      print("Error fetching attendance for this date - $e");
-      return 'N';
-    }
-  }
-
+  //----------------------------------------------------------------------------
+  // Data Fetching
   Future<void> fetchUsers() async {
     isLoading(true);
     try {
@@ -76,9 +97,10 @@ class AttendanceController extends GetxController {
       }
 
       _initializeUserAttendance();
-      updateAttendanceCounts(); // Updated name for clarity
+      updateAttendanceCounts();
     } catch (e) {
       print('Error fetching users: $e');
+      Get.snackbar('Error', 'Failed to fetch users: $e');
     } finally {
       isLoading(false);
     }
@@ -90,11 +112,14 @@ class AttendanceController extends GetxController {
 
     if (fetchedClassRoster != null) {
       classRoster.value = fetchedClassRoster;
-      userList.value = fetchedClassRoster.studentList; // Updated to userList
+      userList.value = fetchedClassRoster.studentList;
     } else {
       print(
-          'Class roster not found for className: ${selectedClass.value}, sectionName: ${selectedSection.value}, schoolId: $schoolId');
-      userList.value = []; // Updated to userList
+          'Class roster not found for className: ${selectedClass
+              .value}, sectionName: ${selectedSection
+              .value}, schoolId: $schoolId');
+      Get.snackbar('Error', 'Class roster not found.');
+      userList.value = [];
     }
   }
 
@@ -105,16 +130,20 @@ class AttendanceController extends GetxController {
 
     if (fetchedEmployeeRoster != null) {
       employeeRoster.value = fetchedEmployeeRoster;
-      userList.value = fetchedEmployeeRoster.userList; // Updated to userList
+      userList.value = fetchedEmployeeRoster.userList;
     } else {
       print('Employee roster not found for schoolId: $schoolId');
-      userList.value = []; // Updated to userList
+      Get.snackbar('Error', 'Employee roster not found.');
+      userList.value = [];
     }
   }
 
+  //----------------------------------------------------------------------------
+  // Attendance Management Logic
   void _initializeUserAttendance() {
     final today = DateTime(
-        selectedDate.value.year, selectedDate.value.month, selectedDate.value.day);
+        selectedDate.value.year, selectedDate.value.month, selectedDate.value
+        .day);
     for (var user in userList) {
       user.userAttendance ??= UserAttendance.empty(
         academicPeriodStart: today,
@@ -154,7 +183,8 @@ class AttendanceController extends GetxController {
     }
   }
 
-  void updateUserAttendance(UserModel user, String status, {bool isAll = false}) {
+  void updateUserAttendance(UserModel user, String status,
+      {bool isAll = false}) {
     try {
       final updatedAttendance =
       user.userAttendance!.updateAttendance(selectedDate.value, status);
@@ -173,6 +203,16 @@ class AttendanceController extends GetxController {
       update();
     } catch (e) {
       print('Error updating attendance: $e');
+      Get.snackbar('Error', 'Failed to update attendance: $e');
+    }
+  }
+
+  String getUserAttendanceStatus(UserModel user) {
+    try {
+      return user.userAttendance!.getAttendanceStatus(selectedDate.value);
+    } catch (e) {
+      print("Error fetching attendance for this date - $e");
+      return 'N';
     }
   }
 
@@ -190,17 +230,15 @@ class AttendanceController extends GetxController {
     }
   }
 
-  String getFormattedSelectedDate() {
-    final formatter = DateFormat('dd MMMM yyyy');
-    return formatter.format(selectedDate.value);
-  }
-
+  //----------------------------------------------------------------------------
+  // Firestore Interaction
   Future<void> updateAttendanceOnFirestore() async {
     isUpdatingAttendance(true);
-
     MyFullScreenLoading.show(loadingText: 'Updating Attendance');
+
     FirestoreAttendanceRecordRepository firestoreAttendanceRecordRepository =
     FirestoreAttendanceRecordRepository();
+
     try {
       final rosterType = selectedAttendanceFor.value.toLowerCase();
       final userListMaps = userList.map((user) => user.toMap()).toList();
@@ -215,12 +253,10 @@ class AttendanceController extends GetxController {
       // After updating the roster, update the daily attendance record
       await _updateDailyAttendanceRecord(firestoreAttendanceRecordRepository);
 
-      isUpdatingAttendance(false);
-
+      Get.snackbar('Success', 'Attendance updated successfully!');
     } catch (e) {
       print('Error updating attendance in Firestore: $e');
-      isUpdatingAttendance(false);
-
+      Get.snackbar('Error', 'Failed to update attendance: $e');
     } finally {
       isUpdatingAttendance(false);
       MyFullScreenLoading.hide();
@@ -253,7 +289,7 @@ class AttendanceController extends GetxController {
       FirestoreAttendanceRecordRepository firestoreAttendanceRecordRepository) async {
     final date = selectedDate.value;
     final markedBy = AttendanceTaker(
-        uid: schoolId, name: attendanceTakerName, time: DateTime.now()); // Updated variable name
+        uid: schoolId, name: attendanceTakerName, time: DateTime.now());
 
     DailyAttendanceRecord? existingRecord =
     await firestoreAttendanceRecordRepository.getDailyAttendanceRecord(
@@ -303,11 +339,19 @@ class AttendanceController extends GetxController {
     if (existingRecord.classAttendanceSummaries == null &&
         existingRecord.employeeAttendanceSummary == null) {
       print("Existing record not found");
+      Get.snackbar('Error', "Existing Attendance record not found!");
       return;
     }
 
     await firestoreAttendanceRecordRepository
         .updateDailyAttendanceRecord(existingRecord);
     print('Daily Attendance Record updated successfully in Firestore');
+  }
+
+  //----------------------------------------------------------------------------
+  // Utility Methods
+  String getFormattedSelectedDate() {
+    final formatter = DateFormat('dd MMMM yyyy');
+    return formatter.format(selectedDate.value);
   }
 }

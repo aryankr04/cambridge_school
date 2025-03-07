@@ -100,6 +100,76 @@ class MyLists {
     'History',
     'English Grammar'
   ];
+  static final Map<String, String> noticeCategoriesWithEmojis = {
+    // Academic
+    'Exam Schedules': '📅',
+    'Class Timetables': '🕰️',
+    'Assignment Deadlines': '⏰',
+    'Results and Grades': '🎓',
+    'Syllabus Updates': '📝',
+
+    // Administrative
+    'Fee Payment Reminders': '💰',
+    'Admission Announcements': '📢',
+    'School Policy Updates': '📋',
+    'Parent-Teacher Meetings': '👨‍👩‍👧',
+    'Administrative Holidays': '🏖️',
+
+    // Events & Activities
+    'Sports Events': '⚽',
+    'Cultural Programs': '🎉',
+    'Workshops & Seminars': '🎓',
+    'Field Trips': '🚌',
+    'Annual Day / Celebrations': '🎂',
+
+    // Health & Safety
+    'Health Checkup Camps': '🩺',
+    'Emergency Announcements': '🚨',
+    'COVID-19 Protocols': '😷',
+    'Safety Drills': '🛡️',
+    'Medical Alerts': '🚑',
+
+    // Extracurricular
+    'Club Activities': '🎤',
+    'Competitions & Contests': '🏆',
+    'Talent Shows': '🎬',
+    'Art & Craft Events': '🎨',
+
+    // Transport
+    'Bus Schedule Changes': '🚌',
+    'Route Updates': '🗺️',
+    'Safety Guidelines': '🚦',
+    'Pickup/Drop-off Changes': '🚏',
+
+    // General
+    'Public Holidays': '🛌 🎉 🕶️ 🏖️ 📅',
+    'Weather-Related Closures': '🌧️',
+    'Lost and Found': '🔍',
+    'General Announcements': '📢',
+
+    // Disciplinary
+    'Code of Conduct Reminders': '📋',
+    'Disciplinary Actions': '⚖️',
+    'Behavioral Guidelines': '📋',
+
+    // Special Programs
+    'Scholarship Announcements': '🎓',
+    'Special Coaching Classes': '✍️',
+    'Internship/Placement Information': '💼',
+
+    // Maintenance & Infrastructure
+    'Facility Repairs': '🔧',
+    'Lab/Library Closures': '🧪',
+    'New Facility Announcements': '📢',
+  };
+
+  static String getNoticeCategoryEmoji(String category) {
+    return noticeCategoriesWithEmojis[category] ?? '❓ Category not found';
+  }
+
+  static  List<String> noticeCategories() {
+    return noticeCategoriesWithEmojis.keys.toList();
+  }
 
   static List<String> majorSubjects = [
     // Foundational Subjects

@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import '../utils/constants/dynamic_colors.dart';
 import '../utils/constants/sizes.dart';
 
-enum DialogAction { Delete, Save, Exit }
+enum DialogAction { Delete, Save, Exit, Edit, }
 
 class MyConfirmationDialog extends StatelessWidget {
   final DialogAction action;
@@ -26,7 +26,7 @@ class MyConfirmationDialog extends StatelessWidget {
     String confirmText = '';
     String cancelText = 'Cancel';
     Color color = Colors.black;
-    Icon icon = const Icon(Icons.circle);
+    IconData icon = Icons.circle; // Changed to IconData
 
     switch (action) {
       case DialogAction.Delete:
@@ -34,35 +34,44 @@ class MyConfirmationDialog extends StatelessWidget {
         content = 'Are you sure you want to delete this item?';
         confirmText = 'Delete';
         color = MyDynamicColors.activeRed;
-        icon = Icon(Icons.delete_forever_rounded, size: 24, color: color);
+        icon = Icons.delete_forever_rounded;
         break;
       case DialogAction.Save:
         title = 'Confirm Save';
         content = 'Are you sure you want to save this item?';
         confirmText = 'Save';
         color = MyDynamicColors.activeGreen;
-        icon = Icon(Icons.save_rounded, size: 24, color: color);
+        icon = Icons.save_rounded;
         break;
       case DialogAction.Exit:
         title = 'Confirm Exit';
         content = 'Are you sure you want to exit without saving your changes?';
         confirmText = 'Exit';
         color = MyDynamicColors.activeRed;
-        icon = Icon(Icons.exit_to_app_rounded, size: 24, color: color);
+        icon = Icons.exit_to_app_rounded;
         break;
+      case DialogAction.Edit:
+        title = 'Confirm Edit';
+        content = 'Are you sure you want to edit this item?';
+        confirmText = 'Edit';
+        color = MyDynamicColors.activeBlue; // Example color
+        icon = Icons.edit_rounded;
+        break;
+
     }
 
     return AlertDialog(
       contentPadding: const EdgeInsets.all(MySizes.lg),
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(MySizes.cardRadiusMd)),
+        borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
             radius: 24,
             backgroundColor: color.withOpacity(0.1),
-            child: icon,
+            child: Icon(icon, size: 24, color: color), // Used IconData
           ),
           const SizedBox(height: MySizes.md),
           Text(
@@ -110,10 +119,10 @@ class MyConfirmationDialog extends StatelessWidget {
 
   // Static method to show the dialog
   static Future<void> show(
-    DialogAction action, {
-    required VoidCallback onConfirm,
-    VoidCallback? onCancel,
-  }) {
+      DialogAction action, {
+        required VoidCallback onConfirm,
+        VoidCallback? onCancel,
+      }) {
     return showDialog(
       context: Get.context!,
       builder: (BuildContext context) {

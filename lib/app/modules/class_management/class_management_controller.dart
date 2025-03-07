@@ -1,33 +1,40 @@
 // Filename: management/admin/class_management/class_management_controller.dart
 
-import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../core/utils/constants/lists.dart';
 import '../../../core/utils/constants/sizes.dart';
 import '../../../core/utils/constants/text_styles.dart';
 import '../../../core/widgets/button.dart';
-import '../../../core/widgets/text_field.dart';
 import '../../../core/widgets/dropdown_field.dart';
+import '../../../core/widgets/text_field.dart';
 import 'class_management_repositories.dart';
 import 'class_model.dart';
 
 class ClassManagementController extends GetxController {
-  // Constants
+  //----------------------------------------------------------------------------
+  // Constants (Consider making these configurable or injected)
   static const String schoolId = 'SCH0000000001';
 
-  // Observables
+  //----------------------------------------------------------------------------
+  // Observables (Reactive Variables)
   final RxString selectedClassName = RxString('');
   final RxBool isLoadingClassNames = RxBool(false);
-  final RxBool isLoadingClassDetails = RxBool(false); //Loading Specific Class Doc.
+  final RxBool isLoadingClassDetails =
+  RxBool(false); // Loading Specific Class Doc.
   final RxList<String> availableClassNames = <String>[].obs;
-  final Rx<SchoolClassModel?> selectedClass = Rx<SchoolClassModel?>(null); // Hold selected class details
+  final Rx<SchoolClassModel?> selectedClass =
+  Rx<SchoolClassModel?>(null); // Hold selected class details
   final Rxn<String> selectedClassValue = Rxn<String>();
 
+  //----------------------------------------------------------------------------
   // Text Editing Controllers
   final TextEditingController classNameController = TextEditingController();
   final TextEditingController sectionNameController = TextEditingController();
   final TextEditingController teacherIdController = TextEditingController();
-  final TextEditingController classTeacherNameController = TextEditingController();
+  final TextEditingController classTeacherNameController =
+  TextEditingController();
   final TextEditingController capacityController = TextEditingController();
   final TextEditingController roomNumberController = TextEditingController();
   final TextEditingController academicYearController = TextEditingController();
@@ -35,11 +42,15 @@ class ClassManagementController extends GetxController {
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
   final TextEditingController subjectNameController = TextEditingController();
-  final TextEditingController subjectTeacherIdController = TextEditingController();
+  final TextEditingController subjectTeacherIdController =
+  TextEditingController();
 
+  //----------------------------------------------------------------------------
   // Repository
   final ClassManagementRepository _repository = ClassManagementRepository();
 
+  //----------------------------------------------------------------------------
+  // Lifecycle Methods
   @override
   void onInit() {
     super.onInit();
@@ -51,14 +62,23 @@ class ClassManagementController extends GetxController {
     classNameController.dispose();
     disposeSectionDialogControllers();
     disposeSubjectDialogControllers();
+    // Dispose all Rx variables
+    selectedClassName.close();
+    isLoadingClassNames.close();
+    isLoadingClassDetails.close();
+    availableClassNames.close();
+    selectedClass.close();
+    selectedClassValue.close();
     super.onClose();
   }
 
-  // Fetch Class Names and Reorder
+  //----------------------------------------------------------------------------
+  // Data Loading and Manipulation
   Future<void> loadClassNames() async {
     try {
       isLoadingClassNames.value = true;
-      List<String> fetchedClassNames = await _repository.fetchClassNames(schoolId);
+      List<String> fetchedClassNames =
+      await _repository.fetchClassNames(schoolId);
       availableClassNames.value = _reorderClassNames(fetchedClassNames);
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch or reorder class names: $e');
@@ -123,44 +143,55 @@ class ClassManagementController extends GetxController {
     }
   }
 
-  Future<void> deleteClassesAndClassName(String schoolId, String className) async {
-    Get.dialog(AlertDialog(
-      title: const Text("Confirm Delete", style: MyTextStyles.headlineSmall,),
-      content: Text("Are you sure you want to delete the class $className?"),
-      actions: [
-        TextButton(child: const Text("Cancel"), onPressed: () => Get.back()),
-        TextButton(
-          child: const Text("Delete"),
-          onPressed: () async {
-            Get.back();
-            availableClassNames.remove(className); //Optimistic
+  //----------------------------------------------------------------------------
+  // Deletion of Class and ClassName
+  Future<void> deleteClassesAndClassName(
+      String schoolId, String className) async {
+    Get.dialog(
+      AlertDialog(
+        title: const Text(
+          "Confirm Delete",
+          style: MyTextStyles.headlineSmall,
+        ),
+        content: Text("Are you sure you want to delete the class $className?"),
+        actions: [
+          TextButton(child: const Text("Cancel"), onPressed: () => Get.back()),
+          TextButton(
+            child: const Text("Delete"),
+            onPressed: () async {
+              Get.back();
+              availableClassNames.remove(className); //Optimistic
 
-            try{
-              await _repository.deleteClassName(schoolId, className);
-              await _repository.deleteClassesUnderClassName(schoolId, className);
+              try {
+                await _repository.deleteClassName(schoolId, className);
+                await _repository.deleteClassesUnderClassName(
+                    schoolId, className);
 
-              selectedClassName.value = '';
-              selectedClass.value = null;  //Clear Selected Class
-              loadClassNames();
-              Get.snackbar('Success','Class "$className" and its classes deleted successfully.');
-
-            }catch(e){
-              Get.snackbar('Error', 'Failed to delete class: $e');
-            }
-          },
-        )
-      ],
-    ));
+                selectedClassName.value = '';
+                selectedClass.value = null; // Clear Selected Class
+                loadClassNames();
+                Get.snackbar('Success',
+                    'Class "$className" and its classes deleted successfully.');
+              } catch (e) {
+                Get.snackbar('Error', 'Failed to delete class: $e');
+              }
+            },
+          )
+        ],
+      ),
+    );
   }
 
+  //----------------------------------------------------------------------------
   // Load single class detail and store selected class
   Future<void> loadClassDetails(String className) async {
     try {
       isLoadingClassDetails.value = true;
-      final List<SchoolClassModel> fetchedClasses = await _repository.fetchClasses(schoolId); // Fetch again
+      final List<SchoolClassModel> fetchedClasses =
+      await _repository.fetchClasses(schoolId); // Fetch again
 
-      selectedClass.value = fetchedClasses.firstWhereOrNull((element) => element.className == className);
-
+      selectedClass.value = fetchedClasses.firstWhereOrNull(
+              (element) => element.className == className);
     } catch (e) {
       Get.snackbar('Error', 'Failed to load class details: $e');
     } finally {
@@ -168,6 +199,7 @@ class ClassManagementController extends GetxController {
     }
   }
 
+  //----------------------------------------------------------------------------
   // Add Or Edit Class (Section)
   Future<void> addOrUpdateClass(SchoolClassModel schoolClass) async {
     if (selectedClassName.isEmpty) {
@@ -175,69 +207,83 @@ class ClassManagementController extends GetxController {
       return;
     }
 
-    try{
+    try {
       await _repository.addOrUpdateClass(schoolClass);
-      selectedClass.value = schoolClass; //Optimistic Update the Selected class value.
+      selectedClass.value =
+          schoolClass; // Optimistic Update the Selected class value.
       Get.snackbar('Success', 'Class updated successfully');
-    }catch(e){
+    } catch (e) {
       Get.snackbar('Error', 'Failed to add/update class: $e');
-    }finally {
+    } finally {
       disposeSectionDialogControllers();
       disposeSubjectDialogControllers();
     }
   }
 
+  //----------------------------------------------------------------------------
   // Delete Section: Remove an existing section from a class
-  Future<void> deleteSection(SchoolClassModel schoolClass, SchoolSectionModel sectionToDelete) async {
+  Future<void> deleteSection(
+      SchoolClassModel schoolClass, SchoolSectionModel sectionToDelete) async {
     if (selectedClassName.isEmpty) {
       Get.snackbar('Error', 'Please select a class name first.');
       return;
     }
 
-    try{
-      List<SchoolSectionModel> updatedSections = schoolClass.sections!.where((section) => section != sectionToDelete).toList();
-      SchoolClassModel updatedClass = schoolClass.copyWith(sections: updatedSections);
+    try {
+      List<SchoolSectionModel> updatedSections = schoolClass.sections!
+          .where((section) => section != sectionToDelete)
+          .toList();
+      SchoolClassModel updatedClass =
+      schoolClass.copyWith(sections: updatedSections);
 
       await _repository.deleteSection(schoolClass.id!, updatedSections);
       selectedClass.value = updatedClass;
       Get.snackbar('Success', 'Section deleted successfully');
-
-    }catch(e){
+    } catch (e) {
       Get.snackbar('Error', 'Failed to delete section: $e');
     }
   }
 
+  //----------------------------------------------------------------------------
   // Delete Subject: Remove an existing subject from a class
   Future<void> deleteSubject(String? subjectId) async {
     try {
-      if (selectedClass.value == null) return; // Check selectedClass is not null
+      if (selectedClass.value == null)
+        return; // Check selectedClass is not null
 
       final classModel = selectedClass.value!; // Get the class
 
       List<String> updatedSubjects = List.from(classModel.subjects ?? []);
       updatedSubjects.removeWhere((element) => element == subjectId);
 
-      SchoolClassModel updatedClass = classModel.copyWith(subjects: updatedSubjects);
+      SchoolClassModel updatedClass =
+      classModel.copyWith(subjects: updatedSubjects);
       await _repository.addOrUpdateClass(updatedClass);
 
-      selectedClass.value = updatedClass; //Update Subject
+      selectedClass.value = updatedClass; // Update Subject
       Get.snackbar('Success', 'Subject deleted successfully');
-
     } catch (e) {
       Get.snackbar('Error', 'Failed to delete Subject: $e');
     }
   }
 
-  //Dialog
+  //----------------------------------------------------------------------------
+  // Dialogs
   void showAddClassNameDialog() {
     Get.dialog(
       AlertDialog(
-        title: const Text('Add Class Name', style: MyTextStyles.headlineSmall,),
-        content: SizedBox(width: Get.width,
+        title: const Text(
+          'Add Class Name',
+          style: MyTextStyles.headlineSmall,
+        ),
+        content: SizedBox(
+          width: Get.width,
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyDropdownField(
                   options: MyLists.classOptions,
                   labelText: 'Class',
@@ -251,14 +297,18 @@ class ClassManagementController extends GetxController {
           ),
         ),
         actions: [
-          TextButton(child: const Text("Cancel"), onPressed: () {
-            Get.back();
-            selectedClassValue.value = null;
-          }),
-          TextButton(child: const Text("Save"), onPressed: () {
-            addClassName();
-            Get.back();
-          }),
+          TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Get.back();
+                selectedClassValue.value = null;
+              }),
+          TextButton(
+              child: const Text("Save"),
+              onPressed: () {
+                addClassName();
+                Get.back();
+              }),
         ],
       ),
       barrierDismissible: false,
@@ -284,7 +334,9 @@ class ClassManagementController extends GetxController {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: subjectNameController,
                     labelText: 'Subject Name'),
@@ -309,20 +361,22 @@ class ClassManagementController extends GetxController {
                 return;
               }
 
-              List<String> updatedSubjects = List.from(selectedClass.subjects ?? []);
+              List<String> updatedSubjects =
+              List.from(selectedClass.subjects ?? []);
 
               if (existingSubject == null) {
                 updatedSubjects.add(subjectNameController.text);
               } else {
                 int index = updatedSubjects.indexOf(existingSubject);
-                if(index != -1){
+                if (index != -1) {
                   updatedSubjects[index] = subjectNameController.text;
                 }
               }
-              SchoolClassModel updatedClass = selectedClass.copyWith(subjects: updatedSubjects);
+              SchoolClassModel updatedClass =
+              selectedClass.copyWith(subjects: updatedSubjects);
 
-              addOrUpdateClass(updatedClass);  //Update Class
-              loadClassDetails(selectedClass.className!); // UPDATED: Refresh class details to update subjects
+              addOrUpdateClass(updatedClass); // Update Class
+              loadClassDetails(selectedClass.className!); // Refresh class details to update subjects
               Get.back();
             },
           ),
@@ -345,26 +399,38 @@ class ClassManagementController extends GetxController {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: sectionNameController,
                     labelText: 'Section Name'),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: teacherIdController, labelText: 'Teacher ID'),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: classTeacherNameController,
                     labelText: 'Teacher Name'),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: capacityController,
                     labelText: 'Capacity',
                     keyboardType: TextInputType.number),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: roomNumberController, labelText: 'Room Number'),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: descriptionController,
                     labelText: 'Description',
@@ -388,7 +454,9 @@ class ClassManagementController extends GetxController {
                   hasShadow: false,
                 ),
               ),
-              const SizedBox(width: MySizes.lg,),
+              const SizedBox(
+                width: MySizes.lg,
+              ),
               Expanded(
                 child: MyButton(
                   text: 'Save',
@@ -418,7 +486,7 @@ class ClassManagementController extends GetxController {
                     await _repository.addOrUpdateClass(updatedClass);
 
                     Get.back();
-                    loadClassDetails(selectedClassModel.className!); // UPDATED: Refresh class details to update sections
+                    loadClassDetails(selectedClassModel.className!); // Refresh class details to update sections
                   },
                   backgroundColor: Colors.green,
                   borderRadius: MySizes.borderRadiusMd,
@@ -443,7 +511,10 @@ class ClassManagementController extends GetxController {
 
     Get.dialog(
       AlertDialog(
-        title: Text('Edit Section',style: MyTextStyles.headlineSmall,),
+        title: Text(
+          'Edit Section',
+          style: MyTextStyles.headlineSmall,
+        ),
         content: SingleChildScrollView(
           child: SizedBox(
             width: Get.width,
@@ -453,22 +524,32 @@ class ClassManagementController extends GetxController {
                 MyTextField(
                     controller: sectionNameController,
                     labelText: 'Section Name'),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: teacherIdController, labelText: 'Teacher ID'),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: classTeacherNameController,
                     labelText: 'Teacher Name'),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: capacityController,
                     labelText: 'Capacity',
                     keyboardType: TextInputType.number),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: roomNumberController, labelText: 'Room Number'),
-                const SizedBox(height: MySizes.md,),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
                 MyTextField(
                     controller: descriptionController,
                     labelText: 'Description',
@@ -518,8 +599,7 @@ class ClassManagementController extends GetxController {
                     int index = updatedSections
                         .indexWhere((element) => element == existingSection);
                     if (index != -1) {
-                      updatedSections[index] =
-                          updatedSection;
+                      updatedSections[index] = updatedSection;
                     }
                     SchoolClassModel updatedClass =
                     selectedClass.copyWith(sections: updatedSections);
@@ -527,7 +607,7 @@ class ClassManagementController extends GetxController {
                     await _repository.addOrUpdateClass(updatedClass);
 
                     Get.back();
-                    loadClassDetails(selectedClass.className!); // UPDATED: Refresh class details to update sections
+                    loadClassDetails(selectedClass.className!); // Refresh class details to update sections
                   },
                   backgroundColor: Colors.green,
                   borderRadius: MySizes.borderRadiusMd,
@@ -541,6 +621,8 @@ class ClassManagementController extends GetxController {
     );
   }
 
+  //----------------------------------------------------------------------------
+  // Helper Methods (Dialog Controller Management)
   // Helper method to dispose Section Dialog's controller to avoid overlapping
   void disposeSectionDialogControllers() {
     sectionNameController.clear();

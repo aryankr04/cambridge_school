@@ -117,7 +117,7 @@ class MyTextField extends StatelessWidget {
             textAlign: textAlign,
             readOnly: readOnly,
             enabled: enabled,
-            style: MyTextStyles.bodyLarge,
+            style: MyTextStyles.inputField,
             onTap: onTap,
             onChanged: onChanged,
             onFieldSubmitted: (value) {
@@ -129,7 +129,7 @@ class MyTextField extends StatelessWidget {
             decoration: InputDecoration(
               isDense: true, // Added to reduce extra padding
               hintText: hintText ?? 'Enter $labelText',
-              hintStyle: hintStyle ,
+              hintStyle: hintStyle??MyTextStyles.placeholder ,
               fillColor: fillColor,
               contentPadding: padding,
               prefixIcon: prefixIcon,

@@ -1,19 +1,23 @@
 import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_binding.dart';
 import 'package:cambridge_school/app/modules/attendance/attendance_report/attendance_binding.dart';
 import 'package:cambridge_school/app/modules/attendance/attendance_report/attendance_report_screen.dart';
+import 'package:cambridge_school/app/modules/attendance/mark_attendance/mark_attendance_screen.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_binding.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_screen.dart';
 import 'package:cambridge_school/app/modules/manage_school/screens/create_school_0.dart';
 import 'package:cambridge_school/app/modules/user_management/create_user/bindings/create_user_binding.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/bindings/user_management_binding.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/screens/user_management_screen.dart';
-import 'package:cambridge_school/demo.dart';
 import 'package:get/get.dart';
 
-import 'app/modules/attendance/attendance_record/attendance_record_controller.dart';
 import 'app/modules/attendance/attendance_record/attendance_record_screen.dart';
+import 'app/modules/attendance/mark_attendance/mark_attendance_binding.dart';
 import 'app/modules/auth/login/login_binding.dart';
 import 'app/modules/auth/login/screens/login_screen.dart';
+import 'app/modules/notice/create_notice/create_notice_binding.dart';
+import 'app/modules/notice/create_notice/create_notice_screen.dart';
+import 'app/modules/notice/notice/notice_binding.dart';
+import 'app/modules/notice/notice/notice_screen.dart';
 import 'app/modules/on_boarding/on_boarding_screen.dart';
 import 'app/modules/on_boarding/onboarding_binding.dart';
 import 'app/modules/user_management/create_user/screens/create_user_screen.dart';
@@ -32,6 +36,8 @@ class AppRoutes {
 
   static const String pendingApproval = '/pending-approval';
   static const String successScreen = '/success-screen';
+  static const String createNotice = '/create-notice';
+  static const String noticeScreen = '/notice-screen';
 
   static final routes = [
     // GetPage(
@@ -73,9 +79,24 @@ class AppRoutes {
       binding: AttendanceRecordBinding(),
     ),
     GetPage(
+      name: markAttendance,
+      page: () => const MarkAttendanceScreen(),
+      binding: MarkAttendanceBinding(),
+    ),
+    GetPage(
       name: attendanceReport,
-      page: () =>  AttendanceReportScreen(),
+      page: () => AttendanceReportScreen(),
       binding: AttendanceReportBinding(),
+    ),
+    GetPage(
+      name: createNotice,
+      page: () => CreateNoticeScreen(),
+      binding: CreateNoticeBinding(),
+    ),
+    GetPage(
+      name: noticeScreen,
+      page: () => NoticeScreen(),
+      binding: NoticeBinding(),
     ),
   ];
 }

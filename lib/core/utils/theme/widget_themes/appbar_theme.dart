@@ -7,7 +7,7 @@ class MyAppBarTheme {
 
   static final lightAppBarTheme = _buildAppBarTheme(
     backgroundColor: MyColors.activeBlue,
-    iconColor: MyColors.darkBackgroundColor,
+    iconColor: MyColors.white,
     textColor: MyColors.white,
     isDark: false,
   );
