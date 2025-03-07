@@ -1,7 +1,10 @@
-// notice_controller.dart
+// notice_screen.dart
 import 'package:get/get.dart';
 import '../notice_model.dart';
 import '../notice_repository.dart';
+
+
+
 
 class NoticeController extends GetxController {
   final isLoading = false.obs;
@@ -13,12 +16,14 @@ class NoticeController extends GetxController {
   String academicYear = '2024-2025';
   final selectedTargetAudience = <String>[].obs;
   final selectedForClass = <String>[].obs;
+  final selectedCategory = <String>[].obs; // Added for category filter
 
   @override
   void onInit() {
     super.onInit();
     fetchNotices();
-    everAll([selectedTargetAudience, selectedForClass], (_) => filterNotices());
+    everAll([selectedTargetAudience, selectedForClass, selectedCategory],
+            (_) => filterNotices()); // Included Category
   }
 
   Future<void> fetchNotices() async {
@@ -41,51 +46,63 @@ class NoticeController extends GetxController {
   void filterNotices() {
     filteredNoticeList.clear();
 
-    if (selectedTargetAudience.contains('All')) {
+    if (selectedTargetAudience.contains('All') &&
+        selectedForClass.isEmpty &&
+        selectedCategory.isEmpty) {
       filteredNoticeList.assignAll(noticeList);
       return;
     }
 
-    if (selectedTargetAudience.isEmpty && selectedForClass.isEmpty) {
-      filteredNoticeList.assignAll(noticeList);
-    } else {
-      filteredNoticeList.assignAll(noticeList.where((notice) {
-        bool audienceMatch = true;
-        bool classMatch = true;
+    filteredNoticeList.assignAll(noticeList.where((notice) {
+      bool audienceMatch = true;
+      bool classMatch = true;
+      bool categoryMatch = true;
 
-        if (selectedTargetAudience.isNotEmpty) {
-          if (notice.targetAudience == null || notice.targetAudience!.isEmpty) {
-            audienceMatch = false;
-          } else {
-            bool anyAudienceMatch = false;
-            for (String selectedAudience in selectedTargetAudience) {
-              if (notice.targetAudience!.contains(selectedAudience)) {
-                anyAudienceMatch = true;
-                break;
-              }
+      if (selectedTargetAudience.isNotEmpty &&
+          !selectedTargetAudience.contains('All')) {
+        if (notice.targetAudience.isEmpty) {
+          audienceMatch = false;
+        } else {
+          bool anyAudienceMatch = false;
+          for (String selectedAudience in selectedTargetAudience) {
+            if (notice.targetAudience.contains(selectedAudience)) {
+              anyAudienceMatch = true;
+              break;
             }
-            audienceMatch = anyAudienceMatch;
+          }
+          audienceMatch = anyAudienceMatch;
+        }
+      }
+
+      if (selectedForClass.isNotEmpty) {
+        if (notice.targetClass == null || notice.targetClass!.isEmpty) {
+          classMatch = false;
+        } else {
+          bool anyClassMatch = false;
+          for (String selectedClass in selectedForClass) {
+            if (notice.targetClass!.contains(selectedClass)) {
+              anyClassMatch = true;
+              break;
+            }
+          }
+          classMatch = anyClassMatch;
+        }
+      }
+
+      //Category Filter
+      if (selectedCategory.isNotEmpty) {
+        bool anyCategoryMatch = false;
+        for (String selected in selectedCategory) {
+          if (notice.category == selected) {
+            anyCategoryMatch = true;
+            break;
           }
         }
-
-        if (selectedForClass.isNotEmpty) {
-          if (notice.targetClass == null || notice.targetClass!.isEmpty) {
-            classMatch = false;
-          } else {
-            bool anyClassMatch = false;
-            for (String selectedClass in selectedForClass) {
-              if (notice.targetClass!.contains(selectedClass)) {
-                anyClassMatch = true;
-                break;
-              }
+        categoryMatch = anyCategoryMatch;
             }
-            classMatch = anyClassMatch;
-          }
-        }
 
-        return audienceMatch && classMatch;
-      }).toList());
-    }
+      return audienceMatch && classMatch && categoryMatch;
+    }).toList());
   }
 
   void setSelectedTargetAudience(List<String>? audience) {
@@ -101,6 +118,14 @@ class NoticeController extends GetxController {
       selectedForClass.assignAll(classes);
     } else {
       selectedForClass.clear();
+    }
+  }
+
+  void setSelectedCategory(List<String>? categories) {
+    if (categories != null) {
+      selectedCategory.assignAll(categories);
+    } else {
+      selectedCategory.clear();
     }
   }
 

@@ -10,7 +10,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/widgets/banner_card.dart';
-import '../../attendance/mark_attendance/mark_attendance_screen.dart';
 import '../../user_management/create_user/models/roles.dart';
 import '../create_notice/create_notice_screen.dart';
 import '../notice_model.dart';
@@ -33,83 +32,104 @@ class NoticeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Container(
-                color: Colors.white,
-                margin: const EdgeInsets.symmetric(vertical: MySizes.md),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: MySizes.md),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: MySizes.md),
-                      const Icon(
-                        Icons.filter_alt_outlined,
-                        color: MyColors.iconColor,
-                      ),
-                      const SizedBox(width: MySizes.sm),
-                      const Text(
-                        'Filter',
-                        style: MyTextStyles.titleLarge,
-                      ),
-                      const SizedBox(width: MySizes.md),
-                      SizedBox(
-                        width: 125,
-                        child: MyDialogDropdown(
-                          optionsForChips: Roles().getAllRolesAsString(),
-                          isMultipleSelection: true,
-                          onMultipleChanged: (List<String>? values) {
-                            controller.setSelectedTargetAudience(values);
-                          },
-                          showAllOption: true,
-                          showMultiple: true,
-                          dropdownWidgetType: DropdownWidgetType.Filter,
-                          hintText: 'Role',
-                        ),
-                      ),
-                      const SizedBox(width: MySizes.lg),
-                      Obx(() => controller.selectedTargetAudience
-                          .contains('Student') ||
-                          controller.selectedTargetAudience.contains('All')
-                          ? Row(
-                        children: [
-                          SizedBox(
-                            width: 125,
-                            child: MyDialogDropdown(
-                              optionsForChips: MyLists.classOptions,
-                              isMultipleSelection: true,
-                              onMultipleChanged: (List<String>? values) {
-                                controller.setSelectedForClass(values);
-                              },
-                              hintText: 'Class',
-                              showAllOption: true,
-                              dropdownWidgetType:
-                              DropdownWidgetType.Filter,
+            ExpansionTile(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0.0),
+                side: BorderSide.none,
+              ),
+              collapsedShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0.0),
+                side: BorderSide.none,
+              ),              title: const Row(
+                children: [
+                  Icon(
+                    Icons.filter_alt_outlined,
+                    color: MyColors.iconColor,
+                  ),
+                  SizedBox(width: MySizes.sm),
+                  Text(
+                    'Filter',
+                    style: MyTextStyles.titleLarge,
+                  ),
+                ],
+              ),
+              children: [
+                Container(
+                  color: Colors.white,
+                  margin: const EdgeInsets.symmetric(vertical: 0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: MySizes.md, horizontal: MySizes.md),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: MyDialogDropdown(
+                                optionsForChips: Roles().getAllRolesAsString(),
+                                isMultipleSelection: true,
+                                onMultipleChanged: (List<String>? values) {
+                                  controller.setSelectedTargetAudience(values);
+                                },
+                                showAllOption: true,
+                                showMultiple: true,
+                                dropdownWidgetType: DropdownWidgetType.Filter,
+                                hintText: 'Role',
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: MySizes.md),
-                        ],
-                      )
-                          : const SizedBox.shrink()),
-                      SizedBox(
-                        width: 125,
-                        child: MyDialogDropdown(
-                          optionsForChips: Roles().getAllRolesAsString(),
-                          isMultipleSelection: true,
-                          onMultipleChanged: (List<String>? values) {
-                            controller.setSelectedTargetAudience(values);
-                          },
-                          showAllOption: true,
-                          showMultiple: true,
-                          dropdownWidgetType: DropdownWidgetType.Filter,
-                          hintText: 'Category',
+                            const SizedBox(width: MySizes.lg),
+                            Expanded(
+                              child: MyDialogDropdown(
+                                optionsForChips: MyLists.noticeCategories(),
+                                isMultipleSelection: true,
+                                onMultipleChanged: (List<String>? values) {
+                                  controller.setSelectedCategory(values);
+                                },
+                                showAllOption: true,
+                                showMultiple: true,
+                                dropdownWidgetType: DropdownWidgetType.Filter,
+                                hintText: 'Category',
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: MySizes.lg),
-                    ],
+                        const SizedBox(
+                          height: MySizes.md,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Obx(() => controller.selectedTargetAudience
+                                        .contains('Student') ||
+                                    controller.selectedTargetAudience
+                                        .contains('All')
+                                ? Expanded(
+                                    child: MyDialogDropdown(
+                                      optionsForChips: MyLists.classOptions,
+                                      isMultipleSelection: true,
+                                      onMultipleChanged:
+                                          (List<String>? values) {
+                                        controller.setSelectedForClass(values);
+                                      },
+                                      hintText: 'Class',
+                                      showAllOption: true,
+                                      showMultiple: true,
+                                      dropdownWidgetType:
+                                          DropdownWidgetType.Filter,
+                                    ),
+                                  )
+                                : const SizedBox.shrink()),
+                            const SizedBox(width: MySizes.lg,),
+                            Expanded(
+                              child:TextButton(onPressed: (){}, child: const Text('Clear Filter',style: TextStyle(color: MyColors.activeBlue),))
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
@@ -117,8 +137,7 @@ class NoticeScreen extends StatelessWidget {
                 title: 'Publish Important Notices',
                 description: 'Create and share school-wide notices.',
                 onPressed: () {
-                  // Navigate to CreateNoticeScreen
-                  Get.to(() => CreateNoticeScreen());
+                  Get.to(() => const CreateNoticeScreen());
                 },
                 buttonText: 'Create Notice',
                 icon: const Text('📢', style: TextStyle(fontSize: 56)),
@@ -159,7 +178,6 @@ class NoticeScreen extends StatelessWidget {
                       controller.deleteNotice(notice);
                     },
                     onEdit: (Notice notice) {
-                      // Navigate to CreateNoticeScreen with the notice to edit
                       Get.to(() => CreateNoticeScreen(noticeToEdit: notice));
                     },
                   );
@@ -255,9 +273,9 @@ class NoticeList extends StatelessWidget {
 
   const NoticeList(
       {super.key,
-        required this.notices,
-        required this.onDelete,
-        required this.onEdit});
+      required this.notices,
+      required this.onDelete,
+      required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -291,7 +309,7 @@ class NoticeList extends StatelessWidget {
               notice: notice,
               isExpanded: false,
               isEdit: true,
-              onEdit: () => onEdit(notice), // Pass the notice to onEdit
+              onEdit: () => onEdit(notice),
               onDelete: () => onDelete(notice),
             ),
           ],

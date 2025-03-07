@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -101,7 +103,11 @@ class MyColors {
     colorPurple,
     colorViolet,
   ];
-
+  static Color getRandomColor() {
+    final random = Random();
+    final index = random.nextInt(colorList.length);
+    return colorList[index];
+  }
   // Neutral Shades
   static const Color black = Color(0xFF1D1D27);
   static const Color darkerGrey = Color(0xFF4F4F4F);

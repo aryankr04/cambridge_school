@@ -32,10 +32,14 @@ class NoticeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = DateFormat('dd MMM yy');
+    final dateFormatter = DateFormat('dd MMM yy');
+    final formattedDate = dateFormatter.format(notice.createdTime);
+    final timeFormatter =
+        DateFormat('h:mm a'); // 'h' for 1-12 hour format, 'a' for am/pm
+    final formattedTime = timeFormatter.format(notice.createdTime);
+
     final deviceWidth = Get.width;
     final categoryEmoji = MyLists.getNoticeCategoryEmoji(notice.category);
-    final formattedDate = formatter.format(notice.createdTime);
 
     return MyCard(
       margin: const EdgeInsets.only(
@@ -82,18 +86,31 @@ class NoticeTile extends StatelessWidget {
           ),
           const SizedBox(height: MySizes.md),
           Row(
+            children: [
+              MyLabelChip(
+                text: notice.category,
+                color: MyColors.getRandomColor(),
+              ),
+            ],
+          ),
+          const SizedBox(height: MySizes.md),
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              const SizedBox(width: MySizes.sm),
               Expanded(
-                child: _buildRoundedInfoContainer(notice.category, null),
+                child: _buildRoundedInfoContainer(
+                    notice.createdById, Icons.person),
               ),
               const SizedBox(width: MySizes.sm),
               Expanded(
-                child: _buildRoundedInfoContainer(notice.createdById, Icons.person),
+                child: _buildRoundedInfoContainer(
+                    formattedDate, Icons.calendar_month),
               ),
               const SizedBox(width: MySizes.sm),
               Expanded(
-                child: _buildRoundedInfoContainer(formattedDate, Icons.calendar_month),
+                child: _buildRoundedInfoContainer(
+                    formattedTime, Icons.access_time),
               ),
             ],
           ),
@@ -108,13 +125,14 @@ class NoticeTile extends StatelessWidget {
               runSpacing: MySizes.sm,
               children: notice.targetAudience
                   .map((audience) => Row(
-                children: [
-                  MyLabelChip(text: audience),
-                ],
-              ))
+                        children: [
+                          MyLabelChip(text: audience),
+                        ],
+                      ))
                   .toList(),
             ),
-            if (notice.targetClass != null && notice.targetClass!.isNotEmpty) ...[
+            if (notice.targetClass != null &&
+                notice.targetClass!.isNotEmpty) ...[
               const SizedBox(height: MySizes.md),
               const Text('Target Class', style: MyTextStyles.bodyLarge),
               const SizedBox(height: MySizes.sm),
@@ -123,10 +141,10 @@ class NoticeTile extends StatelessWidget {
                 runSpacing: MySizes.sm,
                 children: notice.targetClass!
                     .map((audience) => Row(
-                  children: [
-                    MyLabelChip(text: audience),
-                  ],
-                ))
+                          children: [
+                            MyLabelChip(text: audience),
+                          ],
+                        ))
                     .toList(),
               ),
             ]
@@ -134,23 +152,29 @@ class NoticeTile extends StatelessWidget {
           if (isEdit) ...[
             const SizedBox(height: MySizes.md),
             Row(
-               mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 FilledButton.icon(
                   onPressed: () => onEdit(),
                   icon: const Icon(Icons.edit, color: Colors.white, size: 18),
-                  label: const Text('Edit', style: TextStyle(color: Colors.white)),
+                  label:
+                      const Text('Edit', style: TextStyle(color: Colors.white)),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all<Color>(MyColors.activeBlue),
+                    backgroundColor:
+                        WidgetStateProperty.all<Color>(MyColors.activeBlue),
                   ),
                 ),
                 const SizedBox(width: MySizes.md),
                 FilledButton.icon(
-                  onPressed: () => MyConfirmationDialog.show(DialogAction.Delete, onConfirm: onDelete),
+                  onPressed: () => MyConfirmationDialog.show(
+                      DialogAction.Delete,
+                      onConfirm: onDelete),
                   icon: const Icon(Icons.delete, color: Colors.white, size: 18),
-                  label: const Text('Delete', style: TextStyle(color: Colors.white)),
+                  label: const Text('Delete',
+                      style: TextStyle(color: Colors.white)),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all<Color>(MyColors.activeRed),
+                    backgroundColor:
+                        WidgetStateProperty.all<Color>(MyColors.activeRed),
                   ),
                 ),
               ],
@@ -168,7 +192,8 @@ class NoticeTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(MySizes.cardRadiusLg),
         color: MyDynamicColors.backgroundColorGreyLightGrey,
       ),
-      padding: const EdgeInsets.symmetric(vertical: MySizes.sm, horizontal: MySizes.sm),
+      padding: const EdgeInsets.symmetric(
+          vertical: MySizes.sm, horizontal: MySizes.sm),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -186,7 +211,8 @@ class NoticeTile extends StatelessWidget {
             child: Text(
               text,
               style: MyTextStyles.labelMedium.copyWith(
-                  fontSize: 11, color: MyColors.subtitleTextColor.withOpacity(0.75)),
+                  fontSize: 11,
+                  color: MyColors.subtitleTextColor.withOpacity(0.75)),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
