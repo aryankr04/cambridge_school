@@ -67,7 +67,8 @@ class CreateSchoolStep4InfrastructureDetails extends StatelessWidget {
               onMultiSelectChanged: (List<String> val) {
                 // Ensure the selected values are updated correctly
                 controller.selectedAvailableFacilities.assignAll(val);
-              },
+              },                      tag: 'available facilities',
+
               selectionWidgetType: SelectionWidgetType.chip,
               title: 'Facilities Available',
             ),
@@ -83,7 +84,8 @@ class CreateSchoolStep4InfrastructureDetails extends StatelessWidget {
               onMultiSelectChanged: (List<String> val) {
                 // Ensure the selected values are updated correctly
                 controller.selectedLaboratories.assignAll(val);
-              },
+              },                      tag: 'laboratories available',
+
               selectionWidgetType: SelectionWidgetType.chip,
               title: 'Laboratories Available',
             ),
@@ -97,7 +99,8 @@ class CreateSchoolStep4InfrastructureDetails extends StatelessWidget {
               onMultiSelectChanged: (List<String> val) {
                 // Ensure the selected values are updated correctly
                 controller.selectedSportsFacilities.assignAll(val);
-              },
+              },                      tag: 'sports facilities available',
+
               selectionWidgetType: SelectionWidgetType.chip,
               title: 'Sports Facilities Available',
             ),

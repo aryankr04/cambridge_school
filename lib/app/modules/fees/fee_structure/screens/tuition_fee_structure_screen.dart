@@ -43,6 +43,8 @@ class TuitionFeeWidget extends StatelessWidget {
                       controller.updateSelectedMode(selectedMode!);
                     },
                     selectedItem: controller.selectedMode.value,
+                    tag: 'mode',
+
                   ),
                 ),
                 const SizedBox(height: MySizes.lg),

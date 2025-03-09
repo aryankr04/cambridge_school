@@ -100,6 +100,8 @@ selectedDate:holidayDate ,                ),
                     },
                     selectionWidgetType: SelectionWidgetType.chip,
                     title: 'Holiday Type',
+                    tag: 'Holiday type',
+
                   ),
                 ),
                 const SizedBox(height: MySizes.lg),

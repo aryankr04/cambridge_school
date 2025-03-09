@@ -5,10 +5,10 @@ class Notice {
   String title;
   String description;
   String createdById;
+  String createdByName;
   DateTime createdTime;
   String category;
   String? attachmentUrl;
-  bool isImportant;
   List<String> targetAudience;
   List<String>? targetClass;
 
@@ -16,10 +16,10 @@ class Notice {
     required this.title,
     required this.description,
     required this.createdById,
+    required this.createdByName,
     required this.createdTime,
     required this.category,
     this.attachmentUrl,
-    this.isImportant = false,
     required this.targetAudience,
     this.targetClass,
   });
@@ -29,10 +29,10 @@ class Notice {
       title: map['title'] ?? '',
       description: map['description'] ?? '',
       createdById: map['createdById'] ?? '',
+      createdByName: map['createdByName'] ?? '',
       createdTime: (map['createdTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
       category: map['category'] ?? 'General',
       attachmentUrl: map['attachmentUrl'],
-      isImportant: map['isImportant'] ?? false,
       targetAudience: List<String>.from(map['targetAudience'] ?? []),
       targetClass: List<String>.from(map['targetClass'] ?? []),
     );
@@ -43,10 +43,10 @@ class Notice {
       'title': title,
       'description': description,
       'createdById': createdById,
+      'createdByName': createdByName,
       'createdTime': createdTime,
       'category': category,
       'attachmentUrl': attachmentUrl,
-      'isImportant': isImportant,
       'targetAudience': targetAudience,
       'targetClass': targetClass ?? [],
     };

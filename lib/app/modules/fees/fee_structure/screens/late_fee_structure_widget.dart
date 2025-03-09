@@ -38,6 +38,8 @@ class LateFeeStructureWidget extends StatelessWidget {
                   onSelectionChanged: (selectedValue) {
                     controller.basedOn.value = selectedValue!;
                   },
+                  tag: 'based on',
+
                 ),
                 const SizedBox(
                   height: MySizes.md,

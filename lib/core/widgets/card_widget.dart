@@ -1,3 +1,4 @@
+import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 
 import '../utils/constants/dynamic_colors.dart';
@@ -24,7 +25,7 @@ class MyCard extends StatelessWidget {
     this.elevation = 0,
     this.color,
 
-    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(MySizes.cardRadiusMd)),
     this.padding = const EdgeInsets.all(16.0),
     this.boxShadow,
     this.onTap,
@@ -70,6 +71,7 @@ class MyCard extends StatelessWidget {
       )
           : Card(
         elevation: hasShadow ? elevation! : 0,
+        shadowColor: Colors.grey.withOpacity(0.1),
         shape: RoundedRectangleBorder(
           borderRadius: borderRadius!,
         ),

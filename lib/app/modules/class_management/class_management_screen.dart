@@ -87,7 +87,10 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
                       controller.selectedClassName.value = className;
                       controller.loadClassDetails(className);
                     }
-                  }),
+                  },
+            tag: 'class',
+
+          ),
         ),
       ],
     );

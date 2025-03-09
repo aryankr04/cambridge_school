@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/services/firebase/firestore_service.dart';
-import 'leave_model.dart'; // Assuming LeaveModel and LeaveRoster are in this file
-
+import 'leave_model.dart';
 
 class LeaveRosterRepository {
   //----------------------------------------------------------------------------
   // Instance Variables
+
   final FirestoreService _firestoreService = FirestoreService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Direct Firestore access.
 
   //----------------------------------------------------------------------------
   // Helper Methods (Private)
@@ -22,7 +23,7 @@ class LeaveRosterRepository {
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
-    final monthName = monthNames[month.month - 1]; // Subtract 1 as month is 1-indexed
+    final monthName = monthNames[month.month - 1];
     return '${className}_${sectionName}_${monthName}_$year';
   }
 
@@ -56,15 +57,10 @@ class LeaveRosterRepository {
   /// Creates a new LeaveRoster document.
   Future<void> createLeaveRoster(String schoolId, LeaveRoster leaveRoster) async {
     try {
-      final rosterId = generateLeaveRosterId(
-        className: leaveRoster.className,
-        sectionName: leaveRoster.sectionName,
-        month: leaveRoster.month,
-      );
-
       await _firestoreService.addDocument(
         _getLeaveRosterCollectionPath(schoolId),
         leaveRoster.toMap(),
+        documentId: leaveRoster.id, // Use existing ID to avoid overwrite issue.
       );
     } catch (e) {
       print('Error creating LeaveRoster: $e');
@@ -75,15 +71,9 @@ class LeaveRosterRepository {
   /// Updates an existing LeaveRoster document.
   Future<void> updateLeaveRoster(String schoolId, LeaveRoster leaveRoster) async {
     try {
-      final rosterId = generateLeaveRosterId(
-        className: leaveRoster.className,
-        sectionName: leaveRoster.sectionName,
-        month: leaveRoster.month,
-      );
-
       await _firestoreService.updateDocument(
         _getLeaveRosterCollectionPath(schoolId),
-        rosterId,
+        leaveRoster.id, // Use LeaveRoster.id, not re-generated ID.
         leaveRoster.toMap(),
       );
     } catch (e) {
@@ -106,10 +96,7 @@ class LeaveRosterRepository {
   }
 
   //----------------------------------------------------------------------------
-// FirestoreService instance
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-// List Operations (LeaveRoster)
+  // List Operations (LeaveRoster)
 
   /// Returns a list of all LeaveRosters for a given school.
   Future<List<LeaveRoster>> getAllLeaveRosters(String schoolId) async {
@@ -146,11 +133,10 @@ class LeaveRosterRepository {
     }
   }
 
-
   //----------------------------------------------------------------------------
   // CRUD Operations (Leaves within a Roster)
 
-  /// Adds a LeaveModel to a specific LeaveRoster.
+  /// Adds a LeaveModel to a specific LeaveRoster. Also used for UPDATING leaves.
   Future<void> addLeaveToRoster({
     required String schoolId,
     required String rosterId,
@@ -160,10 +146,11 @@ class LeaveRosterRepository {
     required DateTime month,
   }) async {
     try {
-      final docRef = FirebaseFirestore.instance.collection(_getLeaveRosterCollectionPath(schoolId)).doc(rosterId);
+      final docRef = _firestore.collection(_getLeaveRosterCollectionPath(schoolId)).doc(rosterId); // Direct Firestore access
       final docSnapshot = await docRef.get();
 
       if (!docSnapshot.exists) {
+        // Roster doesn't exist, create a new one with the leave
         final newRoster = LeaveRoster(
           id: rosterId,
           className: className,
@@ -171,14 +158,35 @@ class LeaveRosterRepository {
           month: month,
           leaves: [leave],
         );
-        await _firestoreService.addDocument(_getLeaveRosterCollectionPath(schoolId), newRoster.toMap(),documentId: rosterId);
+        await createLeaveRoster(schoolId, newRoster);
       } else {
-        await docRef.update({
-          'leaves': FieldValue.arrayUnion([leave.toMap()])
-        });
+        // Roster exists, check if the leave already exists
+        final data = docSnapshot.data() as Map<String, dynamic>;
+        List<dynamic> leavesData = (data['leaves'] as List<dynamic>?) ?? [];
+        List<LeaveModel> existingLeaves = leavesData.map((leaveData) => LeaveModel.fromMap(leaveData as Map<String, dynamic>, leaveData['id']?.toString() ?? '')).toList();
+
+        final existingLeaveIndex = existingLeaves.indexWhere((existingLeave) => existingLeave.id == leave.id);
+
+        if (existingLeaveIndex != -1) {
+          // Leave with the same ID exists, update it
+          existingLeaves[existingLeaveIndex] = leave;
+
+          // Convert LeaveModel objects back to Maps for Firestore
+          List<Map<String, dynamic>> updatedLeavesData = existingLeaves.map((leave) => leave.toMap()).toList();
+
+          await docRef.update({'leaves': updatedLeavesData});
+        } else {
+          // Leave with the same ID doesn't exist, add it to the array
+          await docRef.update({
+            'leaves': FieldValue.arrayUnion([leave.toMap()])
+          });
+        }
       }
+
+
+
     } catch (e) {
-      print('Error adding leave to roster: $e');
+      print('Error adding/updating leave in roster: $e');
       rethrow;
     }
   }
@@ -190,13 +198,97 @@ class LeaveRosterRepository {
     required LeaveModel leave,
   }) async {
     try {
-      final docRef = FirebaseFirestore.instance.collection(_getLeaveRosterCollectionPath(schoolId)).doc(rosterId);
+      final docRef = _firestore.collection(_getLeaveRosterCollectionPath(schoolId)).doc(rosterId);
 
       await docRef.update({
         'leaves': FieldValue.arrayRemove([leave.toMap()])
       });
     } catch (e) {
       print('Error removing leave from roster: $e');
+      rethrow;
+    }
+  }
+
+  /// Approves a LeaveModel in a specific LeaveRoster.
+  Future<void> approveLeave({
+    required String schoolId,
+    required String rosterId,
+    required LeaveModel leave,
+    required String approverId,
+    required String approverName,
+    required String className,
+    required String sectionName,
+    required DateTime month,
+  }) async {
+    try {
+      final updatedLeave = LeaveModel(
+        id: leave.id,
+        applicantId: leave.applicantId,
+        applicantName: leave.applicantName,
+        leaveType: leave.leaveType,
+        startDate: leave.startDate,
+        endDate: leave.endDate,
+        reason: leave.reason,
+        status: "approved",
+        approverId: approverId,
+        approverName: approverName,
+        appliedAt: leave.appliedAt,
+        approvedAt: DateTime.now(),
+      );
+
+      await addLeaveToRoster(
+        schoolId: schoolId,
+        rosterId: rosterId,
+        leave: updatedLeave,
+        className: className,
+        sectionName: sectionName,
+        month: month,
+      );
+
+    } catch (e) {
+      print('Error approving leave: $e');
+      rethrow;
+    }
+  }
+
+  /// Rejects a LeaveModel in a specific LeaveRoster.
+  Future<void> rejectLeave({
+    required String schoolId,
+    required String rosterId,
+    required LeaveModel leave,
+    required String approverId,
+    required String approverName,
+    required String className,
+    required String sectionName,
+    required DateTime month,
+  }) async {
+    try {
+      final updatedLeave = LeaveModel(
+        id: leave.id,
+        applicantId: leave.applicantId,
+        applicantName: leave.applicantName,
+        leaveType: leave.leaveType,
+        startDate: leave.startDate,
+        endDate: leave.endDate,
+        reason: leave.reason,
+        status: "rejected",
+        approverId: approverId,
+        approverName: approverName,
+        appliedAt: leave.appliedAt,
+        approvedAt: DateTime.now(),
+      );
+
+      await addLeaveToRoster(
+        schoolId: schoolId,
+        rosterId: rosterId,
+        leave: updatedLeave,
+        className: className,
+        sectionName: sectionName,
+        month: month,
+      );
+
+    } catch (e) {
+      print('Error rejecting leave: $e');
       rethrow;
     }
   }

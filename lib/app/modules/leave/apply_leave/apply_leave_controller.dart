@@ -1,4 +1,5 @@
 
+import 'package:cambridge_school/core/widgets/full_screen_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nanoid/async.dart';
@@ -13,6 +14,7 @@ class ApplyLeaveController extends GetxController {
   final selectedLeaveType = Rx<String?>(null);
   final startDate = Rx<DateTime?>(null);
   final endDate = Rx<DateTime?>(null);
+  final leave = Rx<LeaveModel?>(null);
 
   //----------------------------------------------------------------------------
   // Constants
@@ -40,6 +42,22 @@ class ApplyLeaveController extends GetxController {
     super.onClose();
   }
 
+  // Method to set the leave
+  void setLeave(LeaveModel? leaveModel) {
+    leave.value = leaveModel;
+    if (leaveModel != null) {
+      selectedLeaveType.value = leaveModel.leaveType;
+      startDate.value = leaveModel.startDate;
+      endDate.value = leaveModel.endDate;
+      reasonController.text = leaveModel.reason;
+    } else {
+      // Reset fields if leaveModel is null
+      selectedLeaveType.value = '';
+      startDate.value = null;
+      endDate.value = null;
+      reasonController.clear();
+    }
+  }
   //----------------------------------------------------------------------------
   // Helper Methods (Private)
 
@@ -86,6 +104,7 @@ class ApplyLeaveController extends GetxController {
 
   /// Adds a new leave application to Firestore.
   Future<void> addLeaveToFirestore({String? leaveIdToUpdate}) async {
+    MyFullScreenLoading.show();
     if (!_validateInputs()) {
       return;
     }
@@ -115,14 +134,16 @@ class ApplyLeaveController extends GetxController {
         leave: newLeave,
         className: className.value,
         sectionName: sectionName.value,
-        month: currentMonth,
+        month: currentMonth
+
       );
 
-      Get.snackbar('Success', 'Leave application submitted successfully!');
+      //Get.snackbar('Success', 'Leave application submitted successfully!');
       _resetForm();
     } catch (e) {
       Get.snackbar('Error', 'Failed to submit leave application: $e');
       print('Error submitting leave application: $e');
     }
+    MyFullScreenLoading.hide();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
+import 'package:cambridge_school/core/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -23,10 +24,10 @@ class MyBannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return MyCard(
+      padding: EdgeInsets.zero,
+      margin: EdgeInsets.zero,
       elevation: 5,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
         decoration: BoxDecoration(
@@ -43,20 +44,13 @@ class MyBannerCard extends StatelessWidget {
         child: Row(
           children: [
             if (icon != null)
-              ...[
-                if (icon is String)
-                  SvgPicture.asset(
-                    icon,
-                    height: 60,
-                    placeholderBuilder: (context) =>
-                    const CircularProgressIndicator(),
-                  )
-                else if (icon is Icon)
-                  icon
-                else if (icon is Text)
-                    icon,
-                const SizedBox(width: MySizes.lg),
-              ],
+              Container(
+                margin: const EdgeInsets.only(right: MySizes.md),
+                alignment: Alignment.center,
+                width: Get.width * 0.15,
+                height: Get.width * 0.15,
+                child: _buildIcon(icon),
+              ),
             Expanded(
               flex: 2,
               child: Column(
@@ -93,7 +87,8 @@ class MyBannerCard extends StatelessWidget {
                         elevation: 0,
                         textStyle: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      child: Text(buttonText, style: const TextStyle(fontSize: 13)),
+                      child: Text(buttonText,
+                          style: const TextStyle(fontSize: 13)),
                     ),
                   ),
                 ],
@@ -103,5 +98,25 @@ class MyBannerCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildIcon(dynamic icon) {
+    if (icon == null) {
+      return const SizedBox.shrink(); // Or a default placeholder widget
+    }
+
+    if (icon is String) {
+      return SvgPicture.asset(
+        icon,
+        height: 60,
+        placeholderBuilder: (context) => const CircularProgressIndicator(),
+      );
+    } else if (icon is Icon) {
+      return icon;
+    } else if (icon is Text) {
+      return icon;
+    } else {
+      return const SizedBox.shrink(); // Handle unknown icon types
+    }
   }
 }

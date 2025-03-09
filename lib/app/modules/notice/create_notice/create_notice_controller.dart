@@ -1,4 +1,3 @@
-// create_notice_controller.dart
 import 'package:cambridge_school/core/widgets/full_screen_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,16 +11,16 @@ class CreateNoticeController extends GetxController {
 
   String schoolId = 'SCH00001';
   String academicYear = '2024-2025';
-  String createdBy = 'STU00001';
+  String createdById = 'STU00001';
+  String createdByName = 'Aryan Kumar';
 
   //----------------------------------------------------------------------------
   // Observables (Reactive Variables)
 
   final isLoading = false.obs;
-  final isImportant = false.obs;
   final selectedCategory = Rxn<String>();
-  final selectedTargetAudience = <String>[].obs;
-  final selectedForClass = <String>[].obs;
+  final RxList<String>? selectedTargetAudience = <String>[].obs;
+  final RxList<String>? selectedForClass = <String>[].obs;
 
   //----------------------------------------------------------------------------
   // Controllers (For Form Fields)
@@ -37,7 +36,6 @@ class CreateNoticeController extends GetxController {
   //----------------------------------------------------------------------------
   // Validation
 
-  /// Validates the form input fields.  Returns an error message if validation fails, otherwise returns null.
   String? validateForm() {
     if (titleController.text.isEmpty) {
       return 'Title cannot be empty.';
@@ -45,16 +43,15 @@ class CreateNoticeController extends GetxController {
     if (descriptionController.text.isEmpty) {
       return 'Description cannot be empty.';
     }
-    if (selectedTargetAudience.isEmpty) {
+    if (selectedTargetAudience == null || selectedTargetAudience!.isEmpty) {
       return 'Please select at least one target audience.';
     }
-    return null; // Return null if the form is valid
+    return null;
   }
 
   //----------------------------------------------------------------------------
   // Firebase Interaction (Adding and Updating Notices)
 
-  /// Adds a new notice to Firebase.
   Future<void> addNoticeToFirebase() async {
     MyFullScreenLoading.show();
     try {
@@ -67,11 +64,13 @@ class CreateNoticeController extends GetxController {
       final title = titleController.text;
       final description = descriptionController.text;
       final category = selectedCategory.value;
-      final createdById = createdBy;
-      final isImportantValue = isImportant.value;
-      final targetAudience = List<String>.from(selectedTargetAudience);
+      final targetAudience = List<String>.from(
+          selectedTargetAudience!.where((e) => e != null).map((e) => e!));
 
-      List<String>? targetClass = List<String>.from(selectedForClass);
+      List<String>? targetClass = selectedForClass
+          ?.where((e) => e != null)
+          .map((e) => e!)
+          .toList();
 
       if (!(targetAudience.contains('All') ||
           targetAudience.contains('Student'))) {
@@ -84,10 +83,10 @@ class CreateNoticeController extends GetxController {
       final newNotice = Notice(
         title: title,
         description: description,
-        createdById: createdById.isNotEmpty ? createdById : 'System',
+        createdById: createdById,
+        createdByName: createdByName,
         createdTime: DateTime.now(),
         category: category ?? 'General',
-        isImportant: isImportantValue,
         targetAudience: targetAudience,
         targetClass: targetClass,
       );
@@ -98,7 +97,6 @@ class CreateNoticeController extends GetxController {
         notice: newNotice,
       );
 
-      Get.snackbar('Success', 'Notice added successfully!');
       clearForm();
     } catch (e) {
       print('Error adding notice to Firebase: $e');
@@ -109,11 +107,8 @@ class CreateNoticeController extends GetxController {
     }
   }
 
-  /// Updates an existing notice in Firebase.
   Future<void> updateNoticeInFirebase(Notice existingNotice) async {
-    MyFullScreenLoading.show(
-        loadingText: 'Updating Notice...'); // Show the loading indicator
-
+    MyFullScreenLoading.show(loadingText: 'Updating Notice...');
     try {
       final validationError = validateForm();
       if (validationError != null) {
@@ -124,10 +119,13 @@ class CreateNoticeController extends GetxController {
       final title = titleController.text;
       final description = descriptionController.text;
       final category = selectedCategory.value;
-      final createdById = createdBy;
-      final isImportantValue = isImportant.value;
-      final targetAudience = List<String>.from(selectedTargetAudience);
-      List<String>? targetClass = List<String>.from(selectedForClass);
+      final targetAudience = List<String>.from(
+          selectedTargetAudience!.where((e) => e != null).map((e) => e!));
+
+      List<String>? targetClass = selectedForClass
+          ?.where((e) => e != null)
+          .map((e) => e!)
+          .toList();
 
       if (!(targetAudience.contains('All') ||
           targetAudience.contains('Student'))) {
@@ -140,10 +138,10 @@ class CreateNoticeController extends GetxController {
       final updatedNotice = Notice(
         title: title,
         description: description,
-        createdById: createdById.isNotEmpty ? createdById : 'System',
+        createdById: createdById,
+        createdByName: createdByName,
         createdTime: DateTime.now(),
         category: category ?? 'General',
-        isImportant: isImportantValue,
         targetAudience: targetAudience,
         targetClass: targetClass,
       );
@@ -154,63 +152,50 @@ class CreateNoticeController extends GetxController {
         createdTime: existingNotice.createdTime,
         notice: updatedNotice,
       );
-      //clearForm();
     } catch (e) {
       print('Error updating notice in Firebase: $e');
       Get.snackbar(
           'Error', 'Failed to update notice. Please try again. Error: $e');
     } finally {
       MyFullScreenLoading.hide();
-      // Get.toNamed('notice-screen');
     }
   }
 
   //----------------------------------------------------------------------------
-  // UI Interaction Logic (Toggling Values)
+  // UI Interaction Logic
 
-  /// Toggles the importance flag for the notice.
-  void toggleImportance(bool value) {
-    isImportant.value = value;
-  }
-
-  /// Toggles the selected target audience for the notice.
   void toggleTargetAudience(String value) {
-    if (selectedTargetAudience.contains(value)) {
-      selectedTargetAudience.remove(value);
+    if (selectedTargetAudience?.contains(value) == true) {
+      selectedTargetAudience?.remove(value);
     } else {
-      selectedTargetAudience.add(value);
+      selectedTargetAudience?.add(value);
     }
   }
 
-  /// Toggles the selected class for the notice.
   void toggleForClass(String value) {
-    if (selectedForClass.contains(value)) {
-      selectedForClass.remove(value);
+    if (selectedForClass?.contains(value) == true) {
+      selectedForClass?.remove(value);
     } else {
-      selectedForClass.add(value);
+      selectedForClass?.add(value);
     }
   }
 
   //----------------------------------------------------------------------------
-  // Form Management (Clearing and Populating)
+  // Form Management
 
-  /// Clears all form fields.
   void clearForm() {
     titleController.clear();
     descriptionController.clear();
     selectedCategory.value = null;
-    isImportant.value = false;
-    selectedTargetAudience.value = [];
-    selectedForClass.clear();
+    selectedTargetAudience?.clear();
+    selectedForClass?.clear();
   }
 
-  /// Populates the form fields with data from an existing notice for editing.
   void populateFormForEdit(Notice notice) {
     titleController.text = notice.title;
     descriptionController.text = notice.description;
     selectedCategory.value = notice.category;
-    isImportant.value = notice.isImportant;
-    selectedTargetAudience.assignAll(notice.targetAudience ?? []);
-    selectedForClass.assignAll(notice.targetClass ?? []);
+    selectedTargetAudience?.assignAll(notice.targetAudience ?? []);
+    selectedForClass?.assignAll(notice.targetClass ?? []);
   }
 }

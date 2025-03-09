@@ -1,6 +1,5 @@
 // create_notice_screen.dart
 import 'package:cambridge_school/app/modules/user_management/create_user/models/roles.dart';
-import 'package:cambridge_school/core/utils/constants/colors.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/widgets/button.dart';
@@ -8,7 +7,6 @@ import 'package:cambridge_school/core/widgets/dialog_dropdown.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/utils/constants/text_styles.dart';
 import '../../../../core/widgets/text_field.dart';
 import '../notice_model.dart';
 import 'create_notice_controller.dart';
@@ -65,74 +63,41 @@ class _CreateNoticeScreenState extends State<CreateNoticeScreen> {
                 selectedValue: controller.selectedCategory,
                 labelText: 'Category',
               ),
-              SizedBox(height: MySizes.md,),
-              Padding(
-                padding: const EdgeInsets.only(bottom: MySizes.lg),
-                child: Column(
-                  children: [
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Is Important',
-                        style: MyTextStyles.inputLabel,
-                      ),
-                    ),
-                    const SizedBox(height: MySizes.sm),
-                    Obx(() => SwitchListTile(
-                      title: const Text(
-                        'Mark this as an important notice',
-                        style: MyTextStyles.inputField,
-                      ),
-                      value: controller.isImportant.value,
-                      onChanged: controller.toggleImportance,
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 0, horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                      tileColor: MyColors.activeBlue.withOpacity(0.1),
-                      visualDensity: const VisualDensity(vertical: -3),
-                      inactiveTrackColor: MyColors.grey.withOpacity(0.1),
-                      inactiveThumbColor: MyColors.darkGrey,
-                      trackOutlineColor:
-                      WidgetStateProperty.resolveWith((states) {
-                        return states.contains(WidgetState.selected)
-                            ? MyColors.activeBlue
-                            : MyColors.darkGrey;
-                      }),
-                    )),
-                  ],
-                ),
-              ),
+              const SizedBox(height: MySizes.md,),
+
               MyDialogDropdown(
                 optionsForChips: Roles().getAllRolesAsString(),
                 isMultipleSelection: true,
                 onMultipleChanged: (List<String>? values) {
-                  controller.selectedTargetAudience.clear();
-                  if (values != null) {
-                    controller.selectedTargetAudience.addAll(values);
+                  controller.selectedTargetAudience?.clear();
+                  if (values != null && controller.selectedTargetAudience != null) {
+                    controller.selectedTargetAudience?.addAll(values);
                   }
                 },
                 labelText: 'Target Audience',
                 showAllOption: true,
-                initialSelectedValues: controller.selectedTargetAudience.toList(),
+                initialSelectedValues: controller.selectedTargetAudience?.toList() ?? [],
               ),
+
               const SizedBox(height: MySizes.lg),
-              Obx(() => controller.selectedTargetAudience.contains('Student') ||
-                  controller.selectedTargetAudience.contains('All')
+
+              Obx(() => (controller.selectedTargetAudience?.contains('Student') ?? false) ||
+                  (controller.selectedTargetAudience?.contains('All') ?? false)
                   ? MyDialogDropdown(
                 optionsForChips: MyLists.classOptions,
                 isMultipleSelection: true,
                 onMultipleChanged: (List<String>? values) {
-                  controller.selectedForClass.clear();
-                  if (values != null) {
-                    controller.selectedForClass.addAll(values);
+                  controller.selectedForClass?.clear();
+                  if (values != null && controller.selectedForClass != null) {
+                    controller.selectedForClass?.addAll(values);
                   }
                 },
                 labelText: 'For Class',
                 showAllOption: true,
-                initialSelectedValues: controller.selectedForClass.toList(),
+                initialSelectedValues: controller.selectedForClass?.toList() ?? [],
               )
                   : const SizedBox.shrink()),
+
               const SizedBox(height: MySizes.lg),
               MyButton(
                 onPressed: () {

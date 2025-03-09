@@ -46,38 +46,53 @@ class NoticeRosterRepository {
   }
 
   /// Retrieves all notices from a NoticeRoster for a given school and academic year.
-  Future<List<Notice>> getAllNotices(
-      String schoolId, String academicYear) async {
+  Future<List<Notice>> getAllNotices(String schoolId, String academicYear) async {
     try {
+      print("Fetching notices for schoolId: $schoolId, academicYear: $academicYear");
+
       DocumentSnapshot docSnapshot = await _firestoreService.getDocumentById(
-          'noticeRosters', '$schoolId-$academicYear');
+        noticeRosterCollection,
+        '$schoolId-$academicYear',
+      );
 
       if (docSnapshot.exists) {
-        Map<String, dynamic>? data =
-        docSnapshot.data() as Map<String, dynamic>?;
+        print("Document exists: ${docSnapshot.id}");
+
+        Map<String, dynamic>? data = docSnapshot.data() as Map<String, dynamic>?;
 
         if (data != null && data.containsKey('notices')) {
+          print("Notices field found in document");
+
           List<dynamic> noticeMaps = data['notices'] as List<dynamic>;
 
-          //Iterate with a index i and generate the list with the new parameter to get a Notice with the documentId attribute in null
+          print("Number of notices found: ${noticeMaps.length}");
+
+          // Iterate through the notices and print each notice data
+          for (int i = 0; i < noticeMaps.length; i++) {
+            print("Notice $i data: ${noticeMaps[i]}");
+          }
+
+          // Generate the list of Notice objects
           List<Notice> notices = List<Notice>.generate(noticeMaps.length, (i) {
             return Notice.fromMap(noticeMaps[i] as Map<String, dynamic>);
           });
 
+          print("Generated ${notices.length} Notice objects.");
           return notices;
         } else {
-          // 'notices' field does not exist in the document
+          print("No 'notices' field found in the document.");
           return [];
         }
       } else {
-        // Document does not exist
+        print("Document does not exist for ID: $schoolId-$academicYear");
         return [];
       }
     } catch (e) {
       print("Error fetching notices: $e");
-      return []; // Return an empty list in case of error
+      return [];
     }
   }
+
 
   //----------------------------------------------------------------------------
   // Create Operations
@@ -109,27 +124,18 @@ class NoticeRosterRepository {
     required Notice notice,
   }) async {
     try {
-      final docRef = _firestoreService.getDocumentById(noticeRosterCollection, '$schoolId-$academicYear');
-
-      final doc = await docRef;
-
-      if (!doc.exists) {
-        // NoticeRoster does not exist, create it with the new notice
-        await _firestoreService.addDocument(noticeRosterCollection, {
-          'schoolId': schoolId,
-          'academicYear': academicYear,
-          'notices': [notice.toMap()], // Initialize with the new notice
-        });
-        return; // Exit the function after creating the roster
-      }
-
-      // NoticeRoster exists, add the new notice to the existing notices array
-      await FirebaseFirestore.instance
+      final docId = '$schoolId-$academicYear';
+      final docRef = FirebaseFirestore.instance
           .collection(noticeRosterCollection)
-          .doc('$schoolId-$academicYear')
-          .update({
-        'notices': FieldValue.arrayUnion([notice.toMap()])
-      });
+          .doc(docId);
+
+      // Use set with merge: true to create or update the document
+      await docRef.set({
+        'schoolId': schoolId,
+        'academicYear': academicYear,
+        'notices': FieldValue.arrayUnion([notice.toMap()]),
+      }, SetOptions(merge: true));
+
     } catch (e) {
       print('Error adding notice to NoticeRoster: $e');
       rethrow;

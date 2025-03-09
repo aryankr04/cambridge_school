@@ -27,42 +27,46 @@ class MyLabelChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: constraints??const BoxConstraints(minWidth: 32),
-      alignment: Alignment.center,
-      padding: padding ??
-          const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 8,
+    return Row(
+      children: [
+        Container(
+          constraints: constraints??const BoxConstraints(minWidth: 32),
+          alignment: Alignment.center,
+          padding: padding ??
+              const EdgeInsets.symmetric(
+                vertical: 4,
+                horizontal: 8,
+              ),
+          decoration: BoxDecoration(
+            borderRadius:
+            BorderRadius.circular(borderRadius ?? MySizes.cardRadiusXs),
+            color: color?.withOpacity(0.1) ??
+                MyDynamicColors.backgroundColorGreyLightGrey,
           ),
-      decoration: BoxDecoration(
-        borderRadius:
-        BorderRadius.circular(borderRadius ?? MySizes.cardRadiusXs),
-        color: color?.withOpacity(0.1) ??
-            MyDynamicColors.backgroundColorGreyLightGrey,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min, // Important for fitting content
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (prefixIcon != null) ...[
-            prefixIcon!,
-            const SizedBox(width: 8), // Add some spacing between icon and text
-          ],
-          Text(
-            text,
-            style: Theme.of(Get.context!).textTheme.labelLarge?.copyWith(
-              color: color,
-              fontSize: textSize ?? 12.0,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min, // Important for fitting content
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (prefixIcon != null) ...[
+                prefixIcon!,
+                const SizedBox(width: 8), // Add some spacing between icon and text
+              ],
+              Text(
+                text,
+                style: Theme.of(Get.context!).textTheme.labelLarge?.copyWith(
+                  color: color,
+                  fontSize: textSize ?? 12.0,
+                ),
+              ),
+              if (suffixIcon != null) ...[
+                const SizedBox(width: 8), // Add some spacing between text and icon
+                suffixIcon!,
+              ],
+            ],
           ),
-          if (suffixIcon != null) ...[
-            const SizedBox(width: 8), // Add some spacing between text and icon
-            suffixIcon!,
-          ],
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -14,211 +14,273 @@ import '../../../../core/widgets/card_widget.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
 import '../notice_model.dart';
 
-class NoticeTile extends StatelessWidget {
+class NoticeTile extends StatefulWidget {
   const NoticeTile({
     super.key,
     required this.notice,
-    this.isExpanded = false,
     this.isEdit = false,
     required this.onEdit,
     required this.onDelete,
   });
 
   final Notice notice;
-  final bool isExpanded;
   final bool isEdit;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) {
-    final dateFormatter = DateFormat('dd MMM yy');
-    final formattedDate = dateFormatter.format(notice.createdTime);
-    final timeFormatter =
-        DateFormat('h:mm a'); // 'h' for 1-12 hour format, 'a' for am/pm
-    final formattedTime = timeFormatter.format(notice.createdTime);
+  State<NoticeTile> createState() => _NoticeTileState();
+}
 
+class _NoticeTileState extends State<NoticeTile> {
+  final RxBool _isExpanded = false.obs;
+
+  @override
+  Widget build(BuildContext context) {
     final deviceWidth = Get.width;
-    final categoryEmoji = MyLists.getNoticeCategoryEmoji(notice.category);
+    Theme.of(context);
+    final categoryEmoji =
+        MyLists.getNoticeCategoryEmoji(widget.notice.category);
+    final formattedCreatedTime =
+        DateFormat('d MMMM \'at\' h:mm a').format(widget.notice.createdTime);
 
     return MyCard(
+      padding: EdgeInsets.zero,
       margin: const EdgeInsets.only(
           left: MySizes.md, right: MySizes.md, bottom: MySizes.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: ExpansionTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
+          side: BorderSide.none,
+        ),
+        collapsedShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0.0),
+          side: BorderSide.none,
+        ),
+        childrenPadding: EdgeInsets.zero,
+        tilePadding: const EdgeInsets.symmetric(horizontal: MySizes.md),
+        title: _buildTitle(deviceWidth, widget.notice.title, categoryEmoji,
+            formattedCreatedTime),
+        onExpansionChanged: (bool expanded) {
+          _isExpanded.value = expanded;
+        },
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                alignment: Alignment.center,
-                width: deviceWidth * 0.1,
-                height: deviceWidth * 0.1,
-                decoration: BoxDecoration(
-                  border: Border.all(color: MyColors.borderColor, width: 0.5),
-                  borderRadius: BorderRadius.circular(MySizes.cardRadiusXs),
-                ),
-                child: Text(
-                  categoryEmoji,
-                  style: const TextStyle(fontSize: 24),
-                ),
-              ),
-              const SizedBox(width: MySizes.md),
-              Expanded(
-                child: Text(
-                  notice.title,
-                  style: MyTextStyles.titleLarge.copyWith(fontSize: 15),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: MySizes.sm),
           const MyDottedLine(dashColor: MyColors.dividerColor),
-          const SizedBox(height: MySizes.sm),
-          ReadMoreText(
-            notice.description,
-            style: MyTextStyles.labelMedium.copyWith(color: MyColors.iconColor),
-            trimLines: 3,
-            trimMode: TrimMode.Line,
-            colorClickableText: MyColors.iconColor,
-          ),
-          const SizedBox(height: MySizes.md),
-          Row(
-            children: [
-              MyLabelChip(
-                text: notice.category,
-                color: MyColors.getRandomColor(),
-              ),
-            ],
-          ),
-          const SizedBox(height: MySizes.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SizedBox(width: MySizes.sm),
-              Expanded(
-                child: _buildRoundedInfoContainer(
-                    notice.createdById, Icons.person),
-              ),
-              const SizedBox(width: MySizes.sm),
-              Expanded(
-                child: _buildRoundedInfoContainer(
-                    formattedDate, Icons.calendar_month),
-              ),
-              const SizedBox(width: MySizes.sm),
-              Expanded(
-                child: _buildRoundedInfoContainer(
-                    formattedTime, Icons.access_time),
-              ),
-            ],
-          ),
-          if (isExpanded) ...[
-            const SizedBox(height: MySizes.md),
-            const MyDottedLine(dashColor: MyColors.dividerColor),
-            const SizedBox(height: MySizes.md),
-            const Text('Target Audience', style: MyTextStyles.bodyLarge),
-            const SizedBox(height: MySizes.sm),
-            Wrap(
-              spacing: MySizes.sm,
-              runSpacing: MySizes.sm,
-              children: notice.targetAudience
-                  .map((audience) => Row(
-                        children: [
-                          MyLabelChip(text: audience),
-                        ],
-                      ))
-                  .toList(),
-            ),
-            if (notice.targetClass != null &&
-                notice.targetClass!.isNotEmpty) ...[
-              const SizedBox(height: MySizes.md),
-              const Text('Target Class', style: MyTextStyles.bodyLarge),
-              const SizedBox(height: MySizes.sm),
-              Wrap(
-                spacing: MySizes.sm,
-                runSpacing: MySizes.sm,
-                children: notice.targetClass!
-                    .map((audience) => Row(
-                          children: [
-                            MyLabelChip(text: audience),
-                          ],
-                        ))
-                    .toList(),
-              ),
-            ]
-          ],
-          if (isEdit) ...[
-            const SizedBox(height: MySizes.md),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+          Padding(
+            padding: const EdgeInsets.all(MySizes.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FilledButton.icon(
-                  onPressed: () => onEdit(),
-                  icon: const Icon(Icons.edit, color: Colors.white, size: 18),
-                  label:
-                      const Text('Edit', style: TextStyle(color: Colors.white)),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.all<Color>(MyColors.activeBlue),
-                  ),
+                ReadMoreText(
+                  widget.notice.description,
+                  style: MyTextStyles.labelMedium
+                      .copyWith(color: MyColors.iconColor),
+                  trimLines: 3,
+                  trimMode: TrimMode.Line,
+                  colorClickableText: MyColors.iconColor,
                 ),
-                const SizedBox(width: MySizes.md),
-                FilledButton.icon(
-                  onPressed: () => MyConfirmationDialog.show(
-                      DialogAction.Delete,
-                      onConfirm: onDelete),
-                  icon: const Icon(Icons.delete, color: Colors.white, size: 18),
-                  label: const Text('Delete',
-                      style: TextStyle(color: Colors.white)),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.all<Color>(MyColors.activeRed),
+                const SizedBox(height: MySizes.md),
+                _buildInfoRow('Published By', widget.notice.createdByName,
+                    ' (${widget.notice.createdById})'),
+                // Added null check
+                const SizedBox(height: MySizes.md),
+
+                if (widget.isEdit) ...[
+                  const Text(
+                    'Audience',
+                    style: MyTextStyles.bodyLarge,
                   ),
-                ),
+                  SizedBox(
+                    height: MySizes.sm,
+                  ),
+                  Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4.0,
+                    children: [
+                      ...widget.notice.targetAudience.map(
+                        (audience) => MyLabelChip(text: audience),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: MySizes.md,
+                  ),
+                  if (widget.notice.targetClass != null &&
+                      widget.notice.targetClass!.isNotEmpty) ...[
+                    const Text(
+                      'Class',
+                      style: MyTextStyles.bodyLarge,
+                    ),
+                    const SizedBox(
+                      height: MySizes.sm,
+                    ),
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children: [
+                        ...widget.notice.targetClass!.map(
+                          (audience) => MyLabelChip(text: audience),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: MySizes.md,
+                    ),
+                  ],
+                  _buildEditActions()
+                ],
               ],
-            )
-          ]
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildRoundedInfoContainer(String text, IconData? icon) {
+  Widget _buildTitle(double deviceWidth, String title, String categoryEmoji,
+      String formattedCreatedTime) {
+    return Row(
+      children: [
+        Container(
+          alignment: Alignment.center,
+          width: deviceWidth * 0.1,
+          height: deviceWidth * 0.1,
+          decoration: BoxDecoration(
+            border: Border.all(color: MyColors.borderColor, width: 0.5),
+            borderRadius: BorderRadius.circular(MySizes.cardRadiusXs),
+          ),
+          child: Text(
+            categoryEmoji,
+            style: const TextStyle(fontSize: 24),
+          ),
+        ),
+        const SizedBox(width: MySizes.md),
+        Expanded(
+          // Wrap the Column with Expanded
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: MyTextStyles.bodyLarge
+                    .copyWith(letterSpacing: 0, height: 1.25,fontSize: 13),
+                maxLines: 2, // Limit title to 2 lines
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                formattedCreatedTime,
+                style: MyTextStyles.labelSmall,
+                maxLines: 1, // Limit time to 1 line
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(
+    String label,
+    String name,
+    String id,
+  ) {
     return Container(
-      alignment: Alignment.center,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(MySizes.cardRadiusLg),
+        borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
         color: MyDynamicColors.backgroundColorGreyLightGrey,
       ),
       padding: const EdgeInsets.symmetric(
-          vertical: MySizes.sm, horizontal: MySizes.sm),
+        vertical: MySizes.sm,
+        horizontal: MySizes.sm,
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) ...[
-            Icon(
-              icon,
-              color: MyColors.subtitleTextColor.withOpacity(0.75),
-              size: 15,
-            ),
-            const SizedBox(width: MySizes.xs),
-          ],
-          Flexible(
-            child: Text(
-              text,
-              style: MyTextStyles.labelMedium.copyWith(
-                  fontSize: 11,
-                  color: MyColors.subtitleTextColor.withOpacity(0.75)),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+          Icon(
+            Icons.person,
+            color: MyColors.subtitleTextColor.withOpacity(0.75),
+            size: 18,
+          ),
+          const SizedBox(width: MySizes.sm),
+          Expanded(
+            // Wrap the Column with Expanded
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: MyColors.subtitleTextColor.withOpacity(0.75),
+                      fontWeight: FontWeight.w400),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Row(
+                  children: [
+                    Flexible(
+                      // Use Flexible instead of Expanded for text
+                      flex: 1,
+                      child: Text(
+                        name,
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: MyColors.subtitleTextColor,
+                            fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Flexible(
+                      // Use Flexible instead of Expanded for text
+                      flex: 1,
+                      child: Text(
+                        id,
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: MyColors.subtitleTextColor,
+                            fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEditActions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        FilledButton.icon(
+          onPressed: () => widget.onEdit(),
+          icon: const Icon(Icons.edit, color: Colors.white, size: 18),
+          label: const Text('Edit', style: TextStyle(color: Colors.white)),
+          style: ButtonStyle(
+            backgroundColor:
+                WidgetStateProperty.all<Color>(MyColors.activeBlue),
+          ),
+        ),
+        const SizedBox(width: MySizes.md),
+        FilledButton.icon(
+          onPressed: () => MyConfirmationDialog.show(DialogAction.Delete,
+              onConfirm: widget.onDelete),
+          icon: const Icon(Icons.delete, color: Colors.white, size: 18),
+          label: const Text('Delete', style: TextStyle(color: Colors.white)),
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all<Color>(MyColors.activeRed),
+          ),
+        ),
+      ],
     );
   }
 }

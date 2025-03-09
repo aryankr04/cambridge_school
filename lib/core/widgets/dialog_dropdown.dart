@@ -194,40 +194,13 @@ class _MyDialogDropdownState extends State<MyDialogDropdown> {
           ),
           const SizedBox(height: 6),
         ],
-        GestureDetector(
+        DropdownContainer(
+          dropdownWidgetType: widget.dropdownWidgetType,
+          isValid: widget.isValid,
+          hintText: widget.hintText ?? 'Select Option',
+          controller: controller,
           onTap: () => _showOptionsDialog(context),
-          child: Container(
-            decoration: _getDefaultDecoration(widget.dropdownWidgetType),
-            child: Container(
-              decoration: BoxDecoration(
-                border: (widget.isValid && controller.errorText.isNotEmpty)
-                    ? Border.all(color: Colors.red)
-                    : null,
-              ),
-              padding: widget.dropdownWidgetType == DropdownWidgetType.General
-                  ? const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10)
-                  : const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Obx(() => Text(
-                      controller.selectedValues.isEmpty
-                          ? widget.hintText ?? 'Select Option' //show hint text
-                          : _getDisplayText(),
-                      style: controller.selectedValues.isEmpty
-                          ? (widget.dropdownWidgetType == DropdownWidgetType.Filter?MyTextStyles.inputField:MyTextStyles.placeholder)
-                          : MyTextStyles.inputField,
-                      maxLines: (widget.dropdownWidgetType == DropdownWidgetType.Filter)?1:null,
-                      overflow: TextOverflow.ellipsis,
-                    )),
-                  ),
-                  const SizedBox(width: MySizes.sm),
-                  const Icon(Icons.arrow_drop_down_outlined,
-                      color: MyColors.iconColor),
-                ],
-              ),
-            ),
-          ),
+          showMultiple: widget.showMultiple,
         ),
         Obx(() => Visibility(
           visible: widget.isValid && controller.errorText.isNotEmpty,
@@ -241,42 +214,6 @@ class _MyDialogDropdownState extends State<MyDialogDropdown> {
         )),
       ],
     );
-  }
-
-  // Helper function to get default container decoration for each dropdown type
-  BoxDecoration _getDefaultDecoration(DropdownWidgetType type) {
-    switch (type) {
-      case DropdownWidgetType.General:
-        return BoxDecoration(
-          color: MyColors.activeBlue.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
-        );
-
-      case DropdownWidgetType.Filter:
-        return BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: MyColors.iconColor),
-          borderRadius: BorderRadius.circular(MySizes.cardRadiusXs),
-        );
-    }
-  }
-
-  String _getDisplayText() {
-    if (widget.isMultipleSelection) {
-      if (controller.selectedValues.contains('All')) {
-        return 'All';
-      }
-      if (controller.selectedValues.length > 1) {
-        return widget.showMultiple
-            ? 'Multiple'
-            : controller.selectedValues.join(', ');
-      } else if (controller.selectedValues.isNotEmpty) {
-        return controller.selectedValues.first;
-      }
-    } else if (controller.selectedValues.isNotEmpty) {
-      return controller.selectedValues.first;
-    }
-    return ''; // Return an empty string if nothing is selected.
   }
 
   Future<void> _showOptionsDialog(BuildContext context) async {
@@ -467,5 +404,95 @@ class _MyDialogDropdownState extends State<MyDialogDropdown> {
         );
       },
     );
+  }
+}
+
+class DropdownContainer extends StatelessWidget {
+  const DropdownContainer({
+    super.key,
+    required this.dropdownWidgetType,
+    required this.isValid,
+    required this.hintText,
+    required this.controller,
+    required this.onTap,
+    required this.showMultiple,
+  });
+
+  final DropdownWidgetType dropdownWidgetType;
+  final bool isValid;
+  final String hintText;
+  final MyDialogDropdownController controller;
+  final VoidCallback onTap;
+  final bool showMultiple;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: _getDefaultDecoration(dropdownWidgetType),
+        child: Container(
+          decoration: BoxDecoration(
+            border: (isValid && controller.errorText.isNotEmpty)
+                ? Border.all(color: Colors.red)
+                : null,
+          ),
+          padding: dropdownWidgetType == DropdownWidgetType.General
+              ? const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10)
+              : const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Obx(() => Text(
+                  controller.selectedValues.isEmpty
+                      ? hintText //show hint text
+                      : _getDisplayText(),
+                  style: controller.selectedValues.isEmpty
+                      ? (dropdownWidgetType == DropdownWidgetType.Filter?MyTextStyles.inputField:MyTextStyles.placeholder)
+                      : MyTextStyles.inputField,
+                  maxLines: (dropdownWidgetType == DropdownWidgetType.Filter)?1:null,
+                  overflow: TextOverflow.ellipsis,
+                )),
+              ),
+              const SizedBox(width: MySizes.sm),
+              const Icon(Icons.arrow_drop_down_outlined,
+                  color: MyColors.iconColor),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper function to get default container decoration for each dropdown type
+  BoxDecoration _getDefaultDecoration(DropdownWidgetType type) {
+    switch (type) {
+      case DropdownWidgetType.General:
+        return BoxDecoration(
+          color: MyColors.activeBlue.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+        );
+
+      case DropdownWidgetType.Filter:
+        return BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: MyColors.iconColor),
+          borderRadius: BorderRadius.circular(MySizes.cardRadiusXs),
+        );
+    }
+  }
+
+  String _getDisplayText() {
+    if (controller.selectedValues.contains('All')) {
+      return 'All';
+    }
+    if (controller.selectedValues.length > 1) {
+      return showMultiple
+          ? 'Multiple'
+          : controller.selectedValues.join(', ');
+    } else if (controller.selectedValues.isNotEmpty) {
+      return controller.selectedValues.first;
+    }
+    return ''; // Return an empty string if nothing is selected.
   }
 }

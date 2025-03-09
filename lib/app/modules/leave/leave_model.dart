@@ -22,7 +22,7 @@ class LeaveModel {
     required this.startDate,
     required this.endDate,
     required this.reason,
-    this.status = "Pending",
+    this.status = "pending",
     this.approverId = "",
     this.approverName = "",
     required this.appliedAt,
@@ -65,6 +65,11 @@ class LeaveModel {
       'appliedAt': appliedAt,
       'approvedAt': approvedAt,
     };
+  }
+
+  // Helper function to calculate leave period
+  int getLeavePeriod() {
+    return endDate.difference(startDate).inDays + 1; // +1 to include both start and end dates
   }
 }
 
@@ -112,5 +117,98 @@ class LeaveRoster {
       'leaves': leaves.map((leave) => leave.toMap()).toList(),
       'month': month,
     };
+  }
+
+  // Sorting functions
+
+  // Sort by Applied Date (appliedAt)
+  void sortByAppliedDate({bool ascending = true}) {
+    leaves.sort((a, b) {
+      if (ascending) {
+        return a.appliedAt.compareTo(b.appliedAt);
+      } else {
+        return b.appliedAt.compareTo(a.appliedAt);
+      }
+    });
+  }
+
+  // Sort by Status
+  void sortByStatus({bool ascending = true}) {
+    leaves.sort((a, b) {
+      if (ascending) {
+        return a.status.compareTo(b.status);
+      } else {
+        return b.status.compareTo(a.status);
+      }
+    });
+  }
+
+  // Sort by Leave Type
+  void sortByLeaveType({bool ascending = true}) {
+    leaves.sort((a, b) {
+      if (ascending) {
+        return a.leaveType.compareTo(b.leaveType);
+      } else {
+        return b.leaveType.compareTo(a.leaveType);
+      }
+    });
+  }
+
+  // Sort by Applicant ID
+  void sortByApplicantId({bool ascending = true}) {
+    leaves.sort((a, b) {
+      if (ascending) {
+        return a.applicantId.compareTo(b.applicantId);
+      } else {
+        return b.applicantId.compareTo(a.applicantId);
+      }
+    });
+  }
+
+  // Sort by Leave Period (EndDate - StartDate)
+  void sortByLeavePeriod({bool ascending = true}) {
+    leaves.sort((a, b) {
+      final periodA = a.getLeavePeriod();
+      final periodB = b.getLeavePeriod();
+
+      if (ascending) {
+        return periodA.compareTo(periodB);
+      } else {
+        return periodB.compareTo(periodA);
+      }
+    });
+  }
+
+  // Filtering functions
+
+  // Filter by Status
+  List<LeaveModel> filterByStatus(String status) {
+    return leaves.where((leave) => leave.status == status).toList();
+  }
+
+  // Filter by Leave Type
+  List<LeaveModel> filterByLeaveType(String leaveType) {
+    return leaves.where((leave) => leave.leaveType == leaveType).toList();
+  }
+
+  // Filter by Applicant ID
+  List<LeaveModel> filterByApplicantId(String applicantId) {
+    return leaves.where((leave) => leave.applicantId == applicantId).toList();
+  }
+
+  // Filter by Date Range (Applied Date)
+  List<LeaveModel> filterByAppliedDateRange(DateTime startDate, DateTime endDate) {
+    return leaves.where((leave) =>
+    leave.appliedAt.isAfter(startDate.subtract(const Duration(days: 1))) &&
+        leave.appliedAt.isBefore(endDate.add(const Duration(days: 1)))
+    ).toList();
+  }
+
+  //Filter by Date Range (Leave Period Date)
+  List<LeaveModel> filterByLeavePeriodDateRange(DateTime startDate, DateTime endDate) {
+    return leaves.where((leave) =>
+    leave.startDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
+        leave.endDate.isBefore(endDate.add(const Duration(days: 1)))
+    ).toList();
   }
 }

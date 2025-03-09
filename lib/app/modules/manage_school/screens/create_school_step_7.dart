@@ -29,7 +29,9 @@ class CreateSchoolStep4AccreditationAndAchievements extends StatelessWidget {
                     items: const ['Accreditation', 'Awards', 'Rankings'],
                     onSelectionChanged: (value) {
                       controller.selectedSection.value = value!;
-                    }),
+                    },                      tag: 'section',
+
+                ),
                 const SizedBox(height: MySizes.lg),
                 controller.selectedSection.value == 'Accreditation'
                     ? Column(

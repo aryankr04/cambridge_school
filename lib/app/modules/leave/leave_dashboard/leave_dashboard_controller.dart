@@ -83,9 +83,9 @@ class LeaveDashboardController extends GetxController {
   // Helper function to calculate leave stats
   void calculateLeaveStats() {
     totalLeaveApplied.value = userLeaves.length;
-    totalLeaveRejected.value = userLeaves.where((leave) => leave.status == "Rejected").length;
-    totalLeaveApproved.value = userLeaves.where((leave) => leave.status == "Approved").length;
-    totalLeavePending.value = userLeaves.where((leave) => leave.status == "Pending").length;
+    totalLeaveRejected.value = userLeaves.where((leave) => leave.status == "rejected").length;
+    totalLeaveApproved.value = userLeaves.where((leave) => leave.status == "approved").length;
+    totalLeavePending.value = userLeaves.where((leave) => leave.status == "pending").length;
 
     if (totalLeaveApplied.value > 0) {
       leaveApprovalRate.value = (totalLeaveApproved.value / totalLeaveApplied.value) * 100;
@@ -99,10 +99,9 @@ class LeaveDashboardController extends GetxController {
   Future<void> deleteLeave(LeaveModel leave) async {
     MyConfirmationDialog.show(DialogAction.Delete, onConfirm:() async {try {
 
-      DateTime now = DateTime.now();
-      DateTime currentMonth = DateTime(now.year, now.month);
+      DateTime month = DateTime(leave.appliedAt.year, leave.appliedAt.month);
       String rosterId = _leaveRosterRepository.generateLeaveRosterId(
-          className: className, sectionName: sectionName, month: currentMonth);
+          className: className, sectionName: sectionName, month: month);
 
       await _leaveRosterRepository.removeLeaveFromRoster(
         schoolId: schoolId,
@@ -123,9 +122,13 @@ class LeaveDashboardController extends GetxController {
 
   /// Navigates to the ApplyLeaveScreen with the leave data for editing.
   void editLeave(LeaveModel leave) {
-    // Put the ApplyLeaveController
-    Get.put(ApplyLeaveController());
-    Get.toNamed('/apply-leave', arguments: leave);
+    // Put the ApplyLeaveController if it's not already in memory
+    if (!Get.isRegistered<ApplyLeaveController>()) {
+      Get.put(ApplyLeaveController());
+    }
+
+    Get.find<ApplyLeaveController>().setLeave(leave); //set leave model
+    Get.toNamed('/apply-leave');
 
     //Note: Make sure you have route defined as "/apply-leave"
     // e.g. GetPage(name: '/apply-leave', page: () => ApplyLeaveScreen()),

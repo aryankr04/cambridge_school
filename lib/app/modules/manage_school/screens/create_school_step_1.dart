@@ -90,6 +90,8 @@ class _CreateSchoolStep1GeneralInformationState extends State<CreateSchoolStep1G
 
               selectionWidgetType: SelectionWidgetType.chip,
               title: 'School Type',
+              tag: 'school Type',
+
             ),
 
             const SizedBox(height: MySizes.lg),
@@ -106,6 +108,7 @@ class _CreateSchoolStep1GeneralInformationState extends State<CreateSchoolStep1G
               onSelectionChanged: (val) {
                 widget.controller.selectedAcademicLevel.value = val!;
               },
+              tag: 'mediun of instruction',
 
               selectionWidgetType: SelectionWidgetType.chip,
               title: 'Medium of Instruction',
@@ -122,6 +125,7 @@ class _CreateSchoolStep1GeneralInformationState extends State<CreateSchoolStep1G
               onSelectionChanged: (val) {
                 widget.controller.selectedGradingSystem.value = val!;
               },
+              tag: 'grading system',
 
               selectionWidgetType: SelectionWidgetType.chip,
               title: 'Grading System',
@@ -136,6 +140,7 @@ class _CreateSchoolStep1GeneralInformationState extends State<CreateSchoolStep1G
               onSelectionChanged: (val) {
                 widget.controller.selectedExaminationPattern.value = val!;
               },
+              tag: 'exam pattern',
 
               selectionWidgetType: SelectionWidgetType.chip,
               title: 'Examination Pattern',
@@ -186,6 +191,7 @@ class _CreateSchoolStep1GeneralInformationState extends State<CreateSchoolStep1G
               onSelectionChanged: (val) {
                 widget.controller.selectedAcademicLevel.value = val!;
               },
+              tag: 'academic level',
 
               selectionWidgetType: SelectionWidgetType.chip,
               title: 'Academic Level',
@@ -234,6 +240,8 @@ class SchoolCardSelectionWidget extends StatelessWidget {
             selectedItem: selectedItem,
             onSelectionChanged: onSelectionChanged, // Pass the callback
             selectionWidgetType: SelectionWidgetType.chip,
+            tag: 'academic level',
+
           ),
         ],
       ),
