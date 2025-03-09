@@ -1,15 +1,28 @@
 // Filename: management/admin/class_management/class_management_repository.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'class_model.dart'; // Import your data models
 import 'package:get/get.dart';
 
-class ClassManagementRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+import '../../../../../core/services/firebase/firestore_service.dart';
+import 'class_model.dart';
 
+class ClassManagementRepository {
+  //----------------------------------------------------------------------------
+  // Instance Variables
+
+  final FirestoreService _firestoreService = FirestoreService();
+
+  //----------------------------------------------------------------------------
+  // Helper Methods (Private)
+
+  // None currently. Could add helpers for constructing collection paths if needed.
+
+  //----------------------------------------------------------------------------
+  // School Class Name Operations (Managing the 'classes' array in the 'schools' document)
+
+  /// Fetches the list of class names for a given school.
   Future<List<String>> fetchClassNames(String schoolId) async {
     try {
-      final docSnapshot =
-      await _firestore.collection('schools').doc(schoolId).get();
+      final docSnapshot = await _firestoreService.getDocumentById('schools', schoolId);
 
       if (docSnapshot.exists && docSnapshot.data()!.containsKey('classes')) {
         return List<String>.from(docSnapshot['classes'] as List);
@@ -22,9 +35,10 @@ class ClassManagementRepository {
     }
   }
 
+  /// Adds a new class name to the list of classes for a given school.
   Future<void> addClassName(String schoolId, String className) async {
     try {
-      await _firestore.collection('schools').doc(schoolId).update({
+      await FirebaseFirestore.instance.collection('schools').doc(schoolId).update({
         'classes': FieldValue.arrayUnion([className]),
       });
     } catch (e) {
@@ -33,9 +47,10 @@ class ClassManagementRepository {
     }
   }
 
+  /// Deletes a class name from the list of classes for a given school.
   Future<void> deleteClassName(String schoolId, String className) async {
     try {
-      await _firestore.collection('schools').doc(schoolId).update({
+      await FirebaseFirestore.instance.collection('schools').doc(schoolId).update({
         'classes': FieldValue.arrayRemove([className]),
       });
     } catch (e) {
@@ -44,9 +59,13 @@ class ClassManagementRepository {
     }
   }
 
+  //----------------------------------------------------------------------------
+  // SchoolClassModel Operations (Managing 'classes' collection)
+
+  /// Fetches all classes (SchoolClassModel) for a given school.
   Future<List<SchoolClassModel>> fetchClasses(String schoolId) async {
     try {
-      final snapshot = await _firestore
+      final snapshot = await FirebaseFirestore.instance
           .collection('classes')
           .where('schoolId', isEqualTo: schoolId)
           .get();
@@ -60,9 +79,11 @@ class ClassManagementRepository {
     }
   }
 
+  /// Adds or updates a SchoolClassModel.
   Future<void> addOrUpdateClass(SchoolClassModel schoolClass) async {
     try {
-      await _firestore
+
+      await FirebaseFirestore.instance
           .collection('classes')
           .doc(schoolClass.id)
           .set(schoolClass.toMap(), SetOptions(merge: true));
@@ -72,9 +93,10 @@ class ClassManagementRepository {
     }
   }
 
+  /// Deletes a section from a SchoolClassModel.
   Future<void> deleteSection(String classId, List<SchoolSectionModel> updatedSections) async {
     try {
-      await _firestore.collection('classes').doc(classId).update({
+      await FirebaseFirestore.instance.collection('classes').doc(classId).update({
         'sections': updatedSections.map((section) => section.toMap()).toList(),
       });
     } catch (e) {
@@ -83,15 +105,16 @@ class ClassManagementRepository {
     }
   }
 
+  /// Deletes all classes under a specific class name for a given school.
   Future<void> deleteClassesUnderClassName(String schoolId, String className) async {
     try {
-      final classesQuery = await _firestore
+      final classesQuery = await FirebaseFirestore.instance
           .collection('classes')
           .where('schoolId', isEqualTo: schoolId)
           .where('className', isEqualTo: className)
           .get();
 
-      WriteBatch batch = _firestore.batch();
+      WriteBatch batch = FirebaseFirestore.instance.batch();
       for (var docSnapshot in classesQuery.docs) {
         batch.delete(docSnapshot.reference);
       }

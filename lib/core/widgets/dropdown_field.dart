@@ -101,51 +101,54 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
             Text(widget.labelText!, style: MyTextStyles.inputLabel),
             const SizedBox(height: 6),
           ],
-          GestureDetector(
-            onTap: () {
-              _toggleDropdown();
-              _focusNode.requestFocus(); // Request focus when tapped
-            },
-            behavior: HitTestBehavior.translucent,
-            child: Container(
-              decoration: widget.decoration ??
-                  BoxDecoration(
-                    borderRadius: BorderRadius.circular(MySizes.sm),
-                    color: MyColors.activeBlue.withOpacity(0.1),
-                  ),
-              height: widget.height,
-              padding: widget.padding,
-              child: Row(
-                children: [
-                  if (widget.prefixIcon != null) ...[
-                    widget.prefixIcon!,
-                    const SizedBox(width: 8.0),
+          Padding(
+            padding: const EdgeInsets.only(bottom: MySizes.md),
+            child: GestureDetector(
+              onTap: () {
+                _toggleDropdown();
+                _focusNode.requestFocus(); // Request focus when tapped
+              },
+              behavior: HitTestBehavior.translucent,
+              child: Container(
+                decoration: widget.decoration ??
+                    BoxDecoration(
+                      borderRadius: BorderRadius.circular(MySizes.sm),
+                      color: MyColors.activeBlue.withOpacity(0.1),
+                    ),
+                height: widget.height,
+                padding: widget.padding,
+                child: Row(
+                  children: [
+                    if (widget.prefixIcon != null) ...[
+                      widget.prefixIcon!,
+                      const SizedBox(width: 8.0),
+                    ],
+                    Expanded(
+                      child: Obx(() => Text(
+                        (_selectedValue.value != null && _selectedValue.value!.isNotEmpty)
+                            ? _selectedValue.value!
+                            : widget.hintText ?? defaultHintText,
+                        style: _selectedValue.value != null
+                            ? widget.selectedTextStyle ?? MyTextStyles.inputField
+                            : widget.hintTextStyle ??
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: MyColors.placeholderColor,
+                            ),
+                        overflow: TextOverflow.ellipsis,
+                      )),
+                    ),
+                    if (widget.suffixIcon != null) ...[
+                      const SizedBox(width: 8.0),
+                      widget.suffixIcon!,
+                    ],
+                    Icon(
+                      _isDropdownOpen.value
+                          ? Icons.arrow_drop_up
+                          : Icons.arrow_drop_down,
+                      color: widget.arrowColor,
+                    ),
                   ],
-                  Expanded(
-                    child: Obx(() => Text(
-                      (_selectedValue.value != null && _selectedValue.value!.isNotEmpty)
-                          ? _selectedValue.value!
-                          : widget.hintText ?? defaultHintText,
-                      style: _selectedValue.value != null
-                          ? widget.selectedTextStyle ?? MyTextStyles.inputField
-                          : widget.hintTextStyle ??
-                          Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: MyColors.placeholderColor,
-                          ),
-                      overflow: TextOverflow.ellipsis,
-                    )),
-                  ),
-                  if (widget.suffixIcon != null) ...[
-                    const SizedBox(width: 8.0),
-                    widget.suffixIcon!,
-                  ],
-                  Icon(
-                    _isDropdownOpen.value
-                        ? Icons.arrow_drop_up
-                        : Icons.arrow_drop_down,
-                    color: widget.arrowColor,
-                  ),
-                ],
+                ),
               ),
             ),
           ),

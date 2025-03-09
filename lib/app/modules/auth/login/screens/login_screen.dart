@@ -182,7 +182,7 @@ class Login extends StatelessWidget {
                 ),
                 MyButton(
                   onPressed: () {
-                    Get.toNamed(AppRoutes.createUser);
+                    Get.toNamed(AppRoutes.createUserRoute);
                   },
                   text: 'Create Account',
                   textColor: MyColors.activeBlue,

@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../core/services/firebase/firestore_service.dart';
 import 'notice_model.dart';
 
 class NoticeRosterRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String noticeRosterCollection = 'noticeRosters';
+  //----------------------------------------------------------------------------
+  // Instance Variables
+  final FirestoreService _firestoreService = FirestoreService();
+  final String noticeRosterCollection = 'notice_rosters';
+
+  //----------------------------------------------------------------------------
+  // Get Operations
 
   /// Retrieves a NoticeRoster for a given school and academic year.
   Future<NoticeRoster?> getNoticeRoster({
@@ -12,10 +18,10 @@ class NoticeRosterRepository {
     required String academicYear,
   }) async {
     try {
-      final doc = await _firestore
-          .collection(noticeRosterCollection)
-          .doc('$schoolId-$academicYear')
-          .get();
+      final doc = await _firestoreService.getDocumentById(
+        noticeRosterCollection,
+        '$schoolId-$academicYear',
+      );
 
       if (doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
@@ -39,54 +45,12 @@ class NoticeRosterRepository {
     }
   }
 
-  /// Creates a new NoticeRoster.
-  Future<void> createNoticeRoster(NoticeRoster noticeRoster) async {
-    try {
-      final docRef = _firestore
-          .collection(noticeRosterCollection)
-          .doc('${noticeRoster.schoolId}-${noticeRoster.academicYear}');
-
-      // Convert Notice objects to Map
-      List<Map<String, dynamic>> noticeMaps =
-      noticeRoster.notices.map((notice) => notice.toMap()).toList();
-
-      await docRef.set({
-        'schoolId': noticeRoster.schoolId,
-        'academicYear': noticeRoster.academicYear,
-        'notices': noticeMaps,
-      });
-    } catch (e) {
-      print('Error creating NoticeRoster: $e');
-      rethrow; // Or handle the error as appropriate
-    }
-  }
-
-  /// Updates an existing NoticeRoster.
-  Future<void> updateNoticeRoster(NoticeRoster noticeRoster) async {
-    try {
-      final docRef = _firestore
-          .collection(noticeRosterCollection)
-          .doc('${noticeRoster.schoolId}-${noticeRoster.academicYear}');
-
-      List<Map<String, dynamic>> noticeMaps =
-      noticeRoster.notices.map((notice) => notice.toMap()).toList();
-
-      await docRef.update({
-        'notices': noticeMaps,
-      });
-    } catch (e) {
-      print('Error updating NoticeRoster: $e');
-      rethrow; // Or handle the error as appropriate
-    }
-  }
-
+  /// Retrieves all notices from a NoticeRoster for a given school and academic year.
   Future<List<Notice>> getAllNotices(
       String schoolId, String academicYear) async {
     try {
-      DocumentSnapshot docSnapshot = await _firestore
-          .collection('noticeRosters')
-          .doc('${schoolId}-${academicYear}')
-          .get();
+      DocumentSnapshot docSnapshot = await _firestoreService.getDocumentById(
+          'noticeRosters', '$schoolId-$academicYear');
 
       if (docSnapshot.exists) {
         Map<String, dynamic>? data =
@@ -115,6 +79,29 @@ class NoticeRosterRepository {
     }
   }
 
+  //----------------------------------------------------------------------------
+  // Create Operations
+
+  /// Creates a new NoticeRoster.
+  Future<void> createNoticeRoster(NoticeRoster noticeRoster) async {
+    try {
+      final docRef = '$noticeRosterCollection/${noticeRoster.schoolId}-${noticeRoster.academicYear}';
+
+      // Convert Notice objects to Map
+      List<Map<String, dynamic>> noticeMaps =
+      noticeRoster.notices.map((notice) => notice.toMap()).toList();
+
+      await _firestoreService.addDocument(noticeRosterCollection, {
+        'schoolId': noticeRoster.schoolId,
+        'academicYear': noticeRoster.academicYear,
+        'notices': noticeMaps,
+      });
+    } catch (e) {
+      print('Error creating NoticeRoster: $e');
+      rethrow; // Or handle the error as appropriate
+    }
+  }
+
   /// Adds a new notice to an existing NoticeRoster, or creates a new one if it doesn't exist.
   Future<void> addNoticeToRoster({
     required String schoolId,
@@ -122,15 +109,13 @@ class NoticeRosterRepository {
     required Notice notice,
   }) async {
     try {
-      final docRef = _firestore
-          .collection(noticeRosterCollection)
-          .doc('$schoolId-$academicYear');
+      final docRef = _firestoreService.getDocumentById(noticeRosterCollection, '$schoolId-$academicYear');
 
-      final doc = await docRef.get();
+      final doc = await docRef;
 
       if (!doc.exists) {
         // NoticeRoster does not exist, create it with the new notice
-        await docRef.set({
+        await _firestoreService.addDocument(noticeRosterCollection, {
           'schoolId': schoolId,
           'academicYear': academicYear,
           'notices': [notice.toMap()], // Initialize with the new notice
@@ -139,12 +124,39 @@ class NoticeRosterRepository {
       }
 
       // NoticeRoster exists, add the new notice to the existing notices array
-      await docRef.update({
+      await FirebaseFirestore.instance
+          .collection(noticeRosterCollection)
+          .doc('$schoolId-$academicYear')
+          .update({
         'notices': FieldValue.arrayUnion([notice.toMap()])
       });
     } catch (e) {
       print('Error adding notice to NoticeRoster: $e');
       rethrow;
+    }
+  }
+
+  //----------------------------------------------------------------------------
+  // Update Operations
+
+  /// Updates an existing NoticeRoster.
+  Future<void> updateNoticeRoster(NoticeRoster noticeRoster) async {
+    try {
+      final docRef = _firestoreService.getDocumentById(noticeRosterCollection, '${noticeRoster.schoolId}-${noticeRoster
+          .academicYear}');
+
+      List<Map<String, dynamic>> noticeMaps =
+      noticeRoster.notices.map((notice) => notice.toMap()).toList();
+
+      await FirebaseFirestore.instance
+          .collection(noticeRosterCollection)
+          .doc('${noticeRoster.schoolId}-${noticeRoster.academicYear}')
+          .update({
+        'notices': noticeMaps,
+      });
+    } catch (e) {
+      print('Error updating NoticeRoster: $e');
+      rethrow; // Or handle the error as appropriate
     }
   }
 
@@ -156,7 +168,7 @@ class NoticeRosterRepository {
     required Notice notice, // The updated notice object
   }) async {
     try {
-      final docRef = _firestore
+      final docRef = FirebaseFirestore.instance
           .collection(noticeRosterCollection)
           .doc('$schoolId-$academicYear');
 
@@ -194,14 +206,17 @@ class NoticeRosterRepository {
     }
   }
 
-  /// Deletes a notice from an existing NoticeRoster.  It identifies the notice by its title.
+  //----------------------------------------------------------------------------
+  // Delete Operations
+
+  /// Deletes a notice from an existing NoticeRoster, identified by its title.
   Future<void> deleteNoticeFromRoster({
     required String schoolId,
     required String academicYear,
     required String noticeTitle,
   }) async {
     try {
-      final docRef = _firestore
+      final docRef = FirebaseFirestore.instance
           .collection(noticeRosterCollection)
           .doc('$schoolId-$academicYear');
 
@@ -238,22 +253,24 @@ class NoticeRosterRepository {
     }
   }
 
-  ///Deletes entire notice roster
+  /// Deletes an entire NoticeRoster.
   Future<void> deleteNoticeRoster({
     required String schoolId,
     required String academicYear,
   }) async {
     try {
-      final docRef = _firestore
-          .collection(noticeRosterCollection)
-          .doc('$schoolId-$academicYear');
-
-      await docRef.delete();
+      await _firestoreService.deleteDocument(
+        noticeRosterCollection,
+        '$schoolId-$academicYear',
+      );
     } catch (e) {
       print('Error deleting NoticeRoster: $e');
       rethrow;
     }
   }
+
+//----------------------------------------------------------------------------
+// Future Enhancements (Filtering and Sorting)
 
 //Consider adding methods for filtering notices based on category, importance, etc.
 }

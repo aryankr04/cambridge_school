@@ -1,3 +1,4 @@
+import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -47,58 +48,56 @@ class MyDatePickerField extends StatelessWidget {
           ...[
             Text(
               labelText!,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelLarge
-                  ?.copyWith(fontWeight: FontWeight.w500),
+              style: MyTextStyles.inputLabel,
             ),
             const SizedBox(height: 6),
           ],
-        InkWell(
-          onTap: () => _selectDate(context),
-          child: InputDecorator(
-            decoration: InputDecoration(
+        Padding(
+          padding: const EdgeInsets.only(bottom: MySizes.md),
+          child: InkWell(
+            onTap: () => _selectDate(context),
+            child: InputDecorator(
+              decoration: InputDecoration(
 
-              hintText: hintText,
-              border: border,
-              suffixIcon: suffixIcon ?? const Icon(Icons.calendar_today),
-              prefixIcon: prefixIcon,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
-                borderSide:BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
-                borderSide: BorderSide(
-                  width: 1.5,
-                  color: MyDynamicColors.primaryColor,
+                hintText: hintText,
+                border: border,
+                suffixIcon: suffixIcon ?? const Icon(Icons.calendar_month),
+                prefixIcon: prefixIcon,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
+                  borderSide:BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
+                  borderSide: BorderSide(
+                    width: 1.5,
+                    color: MyDynamicColors.primaryColor,
+                  ),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
+                  borderSide: BorderSide(
+                    width: 1,
+                    color: MyDynamicColors.activeRed,
+                  ),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: MyDynamicColors.activeRed,
+                  ),
                 ),
               ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
-                borderSide: BorderSide(
-                  width: 1,
-                  color: MyDynamicColors.activeRed,
-                ),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
-                borderSide: BorderSide(
-                  width: 2,
-                  color: MyDynamicColors.activeRed,
-                ),
-              ),
+              child: Obx(() => Text(
+                selectedDate.value != null
+                    ? DateFormat('yyyy-MM-dd').format(selectedDate.value!)
+                    : hintText ?? 'Select Date',
+                style: selectedDate.value != null ? textStyle??MyTextStyles.inputField : hintStyle??MyTextStyles.placeholder,
+                textAlign: textAlign,
+              )),
+
             ),
-            child: Obx(() => Text(
-              selectedDate.value != null
-                  ? DateFormat('yyyy-MM-dd').format(selectedDate.value!)
-                  : hintText ?? 'Select Date',
-              style: selectedDate.value != null ? textStyle??Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-              ) : hintStyle,
-              textAlign: textAlign,
-            )),
-
           ),
         ),
       ],

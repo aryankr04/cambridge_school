@@ -7,27 +7,37 @@ import '../notice_model.dart';
 import '../notice_repository.dart';
 
 class CreateNoticeController extends GetxController {
-  // Static Data (Consider making these configurable)
+  //----------------------------------------------------------------------------
+  // Static Data (Consider making these configurable or injectable)
+
   String schoolId = 'SCH00001';
   String academicYear = '2024-2025';
   String createdBy = 'STU00001';
 
+  //----------------------------------------------------------------------------
   // Observables (Reactive Variables)
+
   final isLoading = false.obs;
   final isImportant = false.obs;
   final selectedCategory = Rxn<String>();
   final selectedTargetAudience = <String>[].obs;
   final selectedForClass = <String>[].obs;
 
+  //----------------------------------------------------------------------------
   // Controllers (For Form Fields)
+
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
 
+  //----------------------------------------------------------------------------
   // Repository
+
   final noticeRosterRepository = NoticeRosterRepository();
 
   //----------------------------------------------------------------------------
-  // Validation function
+  // Validation
+
+  /// Validates the form input fields.  Returns an error message if validation fails, otherwise returns null.
   String? validateForm() {
     if (titleController.text.isEmpty) {
       return 'Title cannot be empty.';
@@ -42,7 +52,9 @@ class CreateNoticeController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // Firebase Interaction
+  // Firebase Interaction (Adding and Updating Notices)
+
+  /// Adds a new notice to Firebase.
   Future<void> addNoticeToFirebase() async {
     MyFullScreenLoading.show();
     try {
@@ -97,7 +109,7 @@ class CreateNoticeController extends GetxController {
     }
   }
 
-  // Function to update a notice in Firebase
+  /// Updates an existing notice in Firebase.
   Future<void> updateNoticeInFirebase(Notice existingNotice) async {
     MyFullScreenLoading.show(
         loadingText: 'Updating Notice...'); // Show the loading indicator
@@ -154,11 +166,14 @@ class CreateNoticeController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // UI Interaction Logic
+  // UI Interaction Logic (Toggling Values)
+
+  /// Toggles the importance flag for the notice.
   void toggleImportance(bool value) {
     isImportant.value = value;
   }
 
+  /// Toggles the selected target audience for the notice.
   void toggleTargetAudience(String value) {
     if (selectedTargetAudience.contains(value)) {
       selectedTargetAudience.remove(value);
@@ -167,6 +182,7 @@ class CreateNoticeController extends GetxController {
     }
   }
 
+  /// Toggles the selected class for the notice.
   void toggleForClass(String value) {
     if (selectedForClass.contains(value)) {
       selectedForClass.remove(value);
@@ -176,7 +192,9 @@ class CreateNoticeController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // Form Management
+  // Form Management (Clearing and Populating)
+
+  /// Clears all form fields.
   void clearForm() {
     titleController.clear();
     descriptionController.clear();
@@ -186,6 +204,7 @@ class CreateNoticeController extends GetxController {
     selectedForClass.clear();
   }
 
+  /// Populates the form fields with data from an existing notice for editing.
   void populateFormForEdit(Notice notice) {
     titleController.text = notice.title;
     descriptionController.text = notice.description;

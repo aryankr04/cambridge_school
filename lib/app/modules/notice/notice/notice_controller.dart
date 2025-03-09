@@ -3,10 +3,10 @@ import 'package:get/get.dart';
 import '../notice_model.dart';
 import '../notice_repository.dart';
 
-
-
-
 class NoticeController extends GetxController {
+  //----------------------------------------------------------------------------
+  // Instance Variables
+
   final isLoading = false.obs;
   final noticeList = <Notice>[].obs;
   final filteredNoticeList = <Notice>[].obs;
@@ -14,9 +14,16 @@ class NoticeController extends GetxController {
   final NoticeRosterRepository noticeRepository = NoticeRosterRepository();
   String schoolId = 'SCH00001';
   String academicYear = '2024-2025';
+
+  //----------------------------------------------------------------------------
+  // Observables for Filters
+
   final selectedTargetAudience = <String>[].obs;
   final selectedForClass = <String>[].obs;
   final selectedCategory = <String>[].obs; // Added for category filter
+
+  //----------------------------------------------------------------------------
+  // Lifecycle Methods
 
   @override
   void onInit() {
@@ -26,6 +33,10 @@ class NoticeController extends GetxController {
             (_) => filterNotices()); // Included Category
   }
 
+  //----------------------------------------------------------------------------
+  // Data Fetching
+
+  /// Fetches all notices from the repository.
   Future<void> fetchNotices() async {
     isLoading.value = true;
     errorMessage.value = null;
@@ -43,6 +54,10 @@ class NoticeController extends GetxController {
     }
   }
 
+  //----------------------------------------------------------------------------
+  // Filtering Logic
+
+  /// Filters the notice list based on the selected criteria.
   void filterNotices() {
     filteredNoticeList.clear();
 
@@ -99,12 +114,16 @@ class NoticeController extends GetxController {
           }
         }
         categoryMatch = anyCategoryMatch;
-            }
+      }
 
       return audienceMatch && classMatch && categoryMatch;
     }).toList());
   }
 
+  //----------------------------------------------------------------------------
+  // Filter Setters
+
+  /// Sets the selected target audience filter.
   void setSelectedTargetAudience(List<String>? audience) {
     if (audience != null) {
       selectedTargetAudience.assignAll(audience);
@@ -113,6 +132,7 @@ class NoticeController extends GetxController {
     }
   }
 
+  /// Sets the selected class filter.
   void setSelectedForClass(List<String>? classes) {
     if (classes != null) {
       selectedForClass.assignAll(classes);
@@ -121,6 +141,7 @@ class NoticeController extends GetxController {
     }
   }
 
+  /// Sets the selected category filter.
   void setSelectedCategory(List<String>? categories) {
     if (categories != null) {
       selectedCategory.assignAll(categories);
@@ -129,6 +150,10 @@ class NoticeController extends GetxController {
     }
   }
 
+  //----------------------------------------------------------------------------
+  // Data Deletion
+
+  /// Deletes a notice from the repository.
   Future<void> deleteNotice(Notice notice) async {
     isLoading.value = true;
     try {

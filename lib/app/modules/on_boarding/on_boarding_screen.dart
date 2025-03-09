@@ -143,14 +143,14 @@ class OnboardingPage extends StatelessWidget {
                     children: [
                       // Login Button
                       MyButton(
-                        onPressed: () => Get.toNamed(AppRoutes.login),
+                        onPressed: () => Get.toNamed(AppRoutes.loginRoute),
                         text: "Login",
                       ),
                       const SizedBox(height: MySizes.md),
                       // Register Button
                       MyButton(
                         onPressed: () {
-                          Get.toNamed(AppRoutes.createUser);
+                          Get.toNamed(AppRoutes.createUserRoute);
                         },
                         text: 'Create Account',
                         textColor: MyColors.activeBlue,
@@ -163,7 +163,7 @@ class OnboardingPage extends StatelessWidget {
                       ),
                       MyButton(
                         onPressed: () {
-                          Get.toNamed(AppRoutes.createUser);
+                          Get.toNamed(AppRoutes.createUserRoute);
                         },
                         text: 'Continue as a Guest',
                         isOutlined: true,

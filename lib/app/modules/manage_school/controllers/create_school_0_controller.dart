@@ -105,13 +105,7 @@ class CreateSchool0Controller extends GetxController {
         return;
       }
 
-      final String? schoolId = await FirestoreService.generateNewIdWithPrefix('SCH', 'schools');
-      if (schoolId == null) {
-        MyHelperFunctions.showErrorSnackBar(
-          'Failed to generate school ID. Please try again.',
-        );
-        return;
-      }
+      const String schoolId = 'SCH00001';
 
       String? schoolLogoImageUrl;
       try {

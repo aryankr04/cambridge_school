@@ -20,8 +20,14 @@ import '../screens/success_screen.dart';
 import '../screens/otp_screen.dart';
 
 class CreateUserController extends GetxController {
+  //----------------------------------------------------------------------------
+  // Constants
+
   final requiredValidator =
-      RequiredValidator(errorText: 'This field is required');
+  RequiredValidator(errorText: 'This field is required');
+
+  //----------------------------------------------------------------------------
+  // Observables (Reactive Variables) for Form Validation
 
   Rx<bool?> personalInfoValid = Rx<bool?>(null);
   Rx<bool?> loginInfoValid = Rx<bool?>(null);
@@ -37,8 +43,10 @@ class CreateUserController extends GetxController {
   Rx<bool?> accountDetailsValid = Rx<bool?>(null);
   Rx<bool?> personalInterestsValid = Rx<bool?>(null);
 
+  //----------------------------------------------------------------------------
+  // Form Controllers
+
   // --- Core Identity ---
-  final userId = '';
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -91,12 +99,11 @@ class CreateUserController extends GetxController {
   final transportVehicleNumberController = TextEditingController();
   final transportFareController = TextEditingController();
 
-  // --- Roles
+  // --- Roles ---
   RxList<String> selectedRoles = <String>[].obs;
   RxList<UserRole> selectedRoles1 = <UserRole>[].obs;
 
   // --- Role-Based Details ---
-
   // Student Details
   final studentIdController = TextEditingController();
   final rollNumberController = TextEditingController();
@@ -107,9 +114,7 @@ class CreateUserController extends GetxController {
   Rx<DateTime?> admissionDate = Rx<DateTime?>(null);
   final previousSchoolNameController = TextEditingController();
   final ambitionController = TextEditingController();
-
   final selectedGuardian = Rx<String?>(null);
-
   Rx<File?> studentImage = Rx<File?>(null);
   Rx<File?> aadhaarCardImage = Rx<File?>(null);
   Rx<File?> birthCertificateImage = Rx<File?>(null);
@@ -197,7 +202,13 @@ class CreateUserController extends GetxController {
   Rx<String?> favoriteAnimal = Rx<String?>(null);
   Rx<String?> favoriteQuote = Rx<String?>(null);
 
+  //----------------------------------------------------------------------------
+  // Form Management
+
   final formKey = GlobalKey<FormState>(); // Form Key
+
+  //----------------------------------------------------------------------------
+  // Qualification Details
 
   RxList<Qualification> qualifications = <Qualification>[].obs;
 
@@ -206,7 +217,6 @@ class CreateUserController extends GetxController {
   final institutionNameController = TextEditingController();
   final passingYearController = TextEditingController();
   Rx<String?> majorSubject = Rx<String?>(null);
-
   final resultController = TextEditingController();
   final resultType = RxString('Percentage');
   Rx<Qualification?> editingQualification = Rx<Qualification?>(null);
@@ -214,7 +224,19 @@ class CreateUserController extends GetxController {
   // Optional school ID
   final schoolIdController = TextEditingController();
 
+  //----------------------------------------------------------------------------
+  // Initialization
 
+  @override
+  void onInit() {
+    super.onInit();
+    // You might initialize some data here if needed
+  }
+
+  //----------------------------------------------------------------------------
+  // Dialog Related Methods (Add/Edit Qualification)
+
+  /// Adds a new qualification or edits an existing one.
   void addQualification() {
     // Validation: Check if resultType and result are both provided
     if (resultType.value.isNotEmpty && resultController.text.isEmpty) {
@@ -246,21 +268,24 @@ class CreateUserController extends GetxController {
     editingQualification.value = null; // Reset editing mode
   }
 
+  /// Edits an existing qualification.
   void editQualification(Qualification qualification) {
     editingQualification.value = qualification;
     fillDialogFields(qualification);
     showAddQualificationDialog(Get.context!); // Show the dialog in edit mode
   }
 
+  /// Deletes a qualification.
   void deleteQualification(Qualification qualification) {
     qualifications.remove(qualification);
   }
 
+  /// Shows the Add Qualification dialog.
   void showAddQualificationDialog(BuildContext context) {
     Get.dialog(
       AlertDialog(
         title: Obx(
-          () => Text(
+              () => Text(
             editingQualification.value == null
                 ? 'Add Qualification'
                 : 'Edit Qualification',
@@ -360,9 +385,9 @@ class CreateUserController extends GetxController {
             },
           ),
           Obx(
-            () => FilledButton(
+                () => FilledButton(
               child:
-                  Text(editingQualification.value == null ? "Add" : "Update"),
+              Text(editingQualification.value == null ? "Add" : "Update"),
               onPressed: () {
                 addQualification();
               },
@@ -373,6 +398,7 @@ class CreateUserController extends GetxController {
     );
   }
 
+  /// Fills the dialog fields with data from a `Qualification` object for editing.
   void fillDialogFields(Qualification qualification) {
     degreeNameController.text = qualification.degreeName ?? '';
     institutionNameController.text = qualification.institutionName ?? '';
@@ -382,6 +408,7 @@ class CreateUserController extends GetxController {
     resultController.text = qualification.result ?? '';
   }
 
+  /// Clears all the fields in the Add Qualification dialog.
   void clearDialogFields() {
     degreeNameController.clear();
     institutionNameController.clear();
@@ -391,13 +418,10 @@ class CreateUserController extends GetxController {
     resultController.clear();
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    // You might initialize some data here if needed
-  }
+  //----------------------------------------------------------------------------
+  // Validation Related Methods
 
-  // --- Validate All Fields ---
+  /// Validates all form fields at once.
   bool validateAllFields() {
     bool personalInfo = _validatePersonalInformationFields();
     bool loginInfo = _validateLoginInformationFields();
@@ -446,7 +470,7 @@ class CreateUserController extends GetxController {
         departmentHeadDetails;
   }
 
-  // --- Validation Methods ---
+  /// Validates personal information fields.
   bool _validatePersonalInformationFields() {
     return gender.value != null &&
         gender.value!.isNotEmpty &&
@@ -460,6 +484,7 @@ class CreateUserController extends GetxController {
         maritalStatus.value!.isNotEmpty;
   }
 
+  /// Validates physical health information fields.
   bool _validatePhysicalHealthInformationFields() {
     return heightController.text.isNotEmpty &&
         weightController.text.isNotEmpty &&
@@ -467,6 +492,7 @@ class CreateUserController extends GetxController {
         bloodGroup.value!.isNotEmpty;
   }
 
+  /// Validates father details fields.
   bool _validateFatherDetailsFields() {
     return fatherRelationshipToStudent.value != null &&
         fatherRelationshipToStudent.value!.isNotEmpty &&
@@ -476,6 +502,7 @@ class CreateUserController extends GetxController {
         fatherHighestEducationLevel.value!.isNotEmpty;
   }
 
+  /// Validates mother details fields.
   bool _validateMotherDetailsFields() {
     return motherRelationshipToStudent.value != null &&
         motherRelationshipToStudent.value!.isNotEmpty &&
@@ -485,6 +512,7 @@ class CreateUserController extends GetxController {
         motherHighestEducationLevel.value!.isNotEmpty;
   }
 
+  /// Validates address details fields.
   bool _validateAddressDetailsFields() {
     return permanentDistrict.value != null &&
         permanentDistrict.value!.isNotEmpty &&
@@ -492,11 +520,13 @@ class CreateUserController extends GetxController {
         permanentState.value!.isNotEmpty;
   }
 
+  /// Validates emergency contact fields.
   bool _validateEmergencyContactFields() {
     return emergencyRelationship.value != null &&
         emergencyRelationship.value!.isNotEmpty;
   }
 
+  /// Validates transportation details fields.
   bool _validateTransportationDetailsFields() {
     if (modeOfTransport.value == null) {
       return false;
@@ -513,12 +543,14 @@ class CreateUserController extends GetxController {
     }
   }
 
+  /// Validates login information fields.
   bool _validateLoginInformationFields() {
     return usernameController.text.isNotEmpty &&
         emailController.text.isNotEmpty &&
         passwordController.text.isNotEmpty;
   }
 
+  /// Validates student details fields.
   bool _validateStudentDetailsFields() {
     return !selectedRoles.contains(UserRole.Student.name) ||
         (rollNumberController.text.isNotEmpty &&
@@ -529,26 +561,31 @@ class CreateUserController extends GetxController {
             section.value!.isNotEmpty);
   }
 
+  /// Validates teacher details fields.
   bool _validateTeacherDetailsFields() {
     return !selectedRoles.contains(UserRole.Teacher.name) ||
         subjectsTaught.isNotEmpty;
   }
 
+  /// Validates driver details fields.
   bool _validateDriverDetailsFields() {
     return !selectedRoles.contains(UserRole.BusDriver.name) ||
         licenseNumberController.text.isNotEmpty;
   }
 
+  /// Validates security guard details fields.
   bool _validateSecurityGuardDetailsFields() {
     return !selectedRoles.contains(UserRole.SecurityGuard.name) ||
         assignedAreaController.text.isNotEmpty;
   }
 
+  /// Validates maintenance staff details fields.
   bool _validateMaintenanceStaffDetailsFields() {
     return !selectedRoles.contains(UserRole.Janitor.name) ||
         maintenanceResponsibilities.isNotEmpty;
   }
 
+  /// Validates admin details fields.
   bool _validateAdminDetailsFields() {
     return !selectedRoles.contains(UserRole.Admin.name) ||
         (adminPermissions.isNotEmpty &&
@@ -556,12 +593,14 @@ class CreateUserController extends GetxController {
             manageableSchools.isNotEmpty);
   }
 
+  /// Validates school admin details fields.
   bool _validateSchoolAdminDetailsFields() {
     return !selectedRoles.contains(UserRole.SchoolAdmin.name) ||
         (schoolAdminPermissions.isNotEmpty &&
             schoolAdminAssignedModules.isNotEmpty);
   }
 
+  /// Validates director details fields.
   bool _validateDirectorDetailsFields() {
     return !selectedRoles.contains(UserRole.Director.name) ||
         (directorSchools.isNotEmpty &&
@@ -569,6 +608,7 @@ class CreateUserController extends GetxController {
             directorPermissions.isNotEmpty);
   }
 
+  /// Validates department head details fields.
   bool _validateDepartmentHeadDetailsFields() {
     return !selectedRoles.contains(UserRole.DepartmentHead.name) ||
         (departmentController.text.isNotEmpty &&
@@ -576,78 +616,81 @@ class CreateUserController extends GetxController {
             departmentResponsibilities.isNotEmpty);
   }
 
-  // 1. Send OTP and Navigate to OTP Screen
+  //----------------------------------------------------------------------------
+  // Firebase Authentication and Firestore Interaction
+
+  /// Sends an OTP to the user's phone number and navigates to the OTP screen.
   Future<void> _sendOtpAndNavigate(String phoneNumber) async {
     FirebaseAuthService firebaseAuth = FirebaseAuthService();
     UserRepository userRepository = UserRepository();
 
     firebaseAuth.sendOtp("+91${phoneNoController.text.trim()}",
-        (newVerificationId, resendToken) {
-      verificationId.value = newVerificationId;
-      print("OTP Sent! Verification ID: ${verificationId.value}");
+            (newVerificationId, resendToken) {
+          verificationId.value = newVerificationId;
+          print("OTP Sent! Verification ID: ${verificationId.value}");
 
-      Get.to(
-        () => OtpScreen(
-          mobileNo: phoneNoController.text.trim(),
-          verificationId: verificationId.value,
-          onOtpEntered: (otp) async {
-            try {
-              // Attempt Login First
-              final phoneNumberLogin = await firebaseAuth.verifyOtpAndLogin(
-                verificationId: verificationId.value,
-                otp: otp,
-              );
+          Get.to(
+                () => OtpScreen(
+              mobileNo: phoneNoController.text.trim(),
+              verificationId: verificationId.value,
+              onOtpEntered: (otp) async {
+                try {
+                  // Attempt Login First
+                  final phoneNumberLogin = await firebaseAuth.verifyOtpAndLogin(
+                    verificationId: verificationId.value,
+                    otp: otp,
+                  );
 
-              if (phoneNumberLogin != null) {
-                //Login Succesfull
-                //Get the users with the logged in phonenumber
+                  if (phoneNumberLogin != null) {
+                    //Login Succesfull
+                    //Get the users with the logged in phonenumber
 
-                String userId = const Uuid().v4();
-                UserModel newUser = buildUserModel(userId);
+                    String userId = const Uuid().v4();
+                    UserModel newUser = buildUserModel(userId);
 
-                await userRepository.createUser(newUser);
-                Get.offAll(() => SuccessScreen(user: newUser));
+                    await userRepository.createUser(newUser);
+                    Get.offAll(() => SuccessScreen(user: newUser));
 
-                print(
-                    "User did exist in FireAuth: ${phoneNumberLogin} creating him in firestore");
-              } else {
-                //  PHONE NUMBER LOGIN FAILED - Try to Register then
+                    print(
+                        "User did exist in FireAuth: ${phoneNumberLogin} creating him in firestore");
+                  } else {
+                    //  PHONE NUMBER LOGIN FAILED - Try to Register then
 
-                final phoneNumberRegistration =
+                    final phoneNumberRegistration =
                     await firebaseAuth.verifyOtpAndRegister(
-                  verificationId: verificationId.value,
-                  otp: otp,
-                );
+                      verificationId: verificationId.value,
+                      otp: otp,
+                    );
 
-                if (phoneNumberRegistration != null) {
-                  // Registration was successful in Firebase Authentication.
-                  // Now create a new user in Firestore.
+                    if (phoneNumberRegistration != null) {
+                      // Registration was successful in Firebase Authentication.
+                      // Now create a new user in Firestore.
 
-                  String userId = const Uuid().v4();
-                  UserModel newUser = buildUserModel(userId);
+                      String userId = const Uuid().v4();
+                      UserModel newUser = buildUserModel(userId);
 
-                  await userRepository.createUser(newUser);
-                  Get.offAll(() => SuccessScreen(user: newUser));
-                  print(
-                      "NEW user created in Firebase Authenthication and Firestore");
-                } else {
-                  // Both login and registration with phone number failed. Something is very wrong.
-                  Get.snackbar("Error", "Authentication failed.",
+                      await userRepository.createUser(newUser);
+                      Get.offAll(() => SuccessScreen(user: newUser));
+                      print(
+                          "NEW user created in Firebase Authenthication and Firestore");
+                    } else {
+                      // Both login and registration with phone number failed. Something is very wrong.
+                      Get.snackbar("Error", "Authentication failed.",
+                          backgroundColor: Colors.red);
+                    }
+                  }
+                } catch (authError) {
+                  print("Authentication error: $authError");
+                  Get.snackbar("Error", "Authentication failed: $authError",
                       backgroundColor: Colors.red);
                 }
-              }
-            } catch (authError) {
-              print("Authentication error: $authError");
-              Get.snackbar("Error", "Authentication failed: $authError",
-                  backgroundColor: Colors.red);
-            }
-          },
-        ),
-      );
-    });
+              },
+            ),
+          );
+        });
   }
 
-  // 2. Build UserModel
+  /// Builds a `UserModel` object from the form data.
   UserModel buildUserModel(String userId) {
     // --- Address ---
     final permanentAddress = Address(
@@ -728,77 +771,77 @@ class CreateUserController extends GetxController {
     // --- Role-Based Details ---
     final studentDetails = selectedRoles.contains(UserRole.Student.name)
         ? StudentDetails(
-            rollNumber: rollNumberController.text,
-            admissionNo: admissionNoController.text,
-            className: className.value,
-            section: section.value,
-            house: house.value,
-            admissionDate: admissionDate.value,
-            previousSchoolName: previousSchoolNameController.text,
-            averageMarks: 0,
-            ambition: ambitionController.text,
-          )
+      rollNumber: rollNumberController.text,
+      admissionNo: admissionNoController.text,
+      className: className.value,
+      section: section.value,
+      house: house.value,
+      admissionDate: admissionDate.value,
+      previousSchoolName: previousSchoolNameController.text,
+      averageMarks: 0,
+      ambition: ambitionController.text,
+    )
         : null;
 
     final teacherDetails = selectedRoles.contains(UserRole.Teacher.name)
         ? TeacherDetails(
-            subjectsTaught: subjectsTaught.toList(),
-            experience: experienceController.text,
-          )
+      subjectsTaught: subjectsTaught.toList(),
+      experience: experienceController.text,
+    )
         : null;
 
     final securityGuardDetails =
-        selectedRoles.contains(UserRole.SecurityGuard.name)
-            ? SecurityGuardDetails(
-                assignedArea: assignedAreaController.text,
-              )
-            : null;
+    selectedRoles.contains(UserRole.SecurityGuard.name)
+        ? SecurityGuardDetails(
+      assignedArea: assignedAreaController.text,
+    )
+        : null;
 
     final maintenanceStaffDetails =
-        selectedRoles.contains(UserRole.Janitor.name)
-            ? MaintenanceStaffDetails(
-                responsibilities: maintenanceResponsibilities.toList(),
-              )
-            : null;
+    selectedRoles.contains(UserRole.Janitor.name)
+        ? MaintenanceStaffDetails(
+      responsibilities: maintenanceResponsibilities.toList(),
+    )
+        : null;
 
     final driverDetails = selectedRoles.contains(UserRole.BusDriver.name)
         ? DriverDetails(
-            licenseNumber: licenseNumberController.text,
-            routesAssigned: routesAssigned.toList(),
-          )
+      licenseNumber: licenseNumberController.text,
+      routesAssigned: routesAssigned.toList(),
+    )
         : null;
 
     final adminDetails = selectedRoles.contains(UserRole.Admin.name)
         ? AdminDetails(
-            permissions: adminPermissions.toList(),
-            assignedModules: assignedModules.toList(),
-            manageableSchools: manageableSchools.toList(),
-          )
+      permissions: adminPermissions.toList(),
+      assignedModules: assignedModules.toList(),
+      manageableSchools: manageableSchools.toList(),
+    )
         : null;
 
     final schoolAdminDetails = selectedRoles.contains(UserRole.SchoolAdmin.name)
         ? SchoolAdminDetails(
-            permissions: schoolAdminPermissions.toList(),
-            assignedModules: schoolAdminAssignedModules.toList(),
-          )
+      permissions: schoolAdminPermissions.toList(),
+      assignedModules: schoolAdminAssignedModules.toList(),
+    )
         : null;
 
     final directorDetails = selectedRoles.contains(UserRole.Director.name)
         ? DirectorDetails(
-            schools: directorSchools.toList(),
-            yearsInManagement: int.tryParse(yearsInManagementController.text),
-            permissions: directorPermissions.toList(),
-          )
+      schools: directorSchools.toList(),
+      yearsInManagement: int.tryParse(yearsInManagementController.text),
+      permissions: directorPermissions.toList(),
+    )
         : null;
 
     final departmentHeadDetails =
-        selectedRoles.contains(UserRole.DepartmentHead.name)
-            ? DepartmentHeadDetails(
-                department: departmentController.text,
-                yearsAsHead: int.tryParse(yearsAsHeadController.text),
-                responsibilities: departmentResponsibilities.toList(),
-              )
-            : null;
+    selectedRoles.contains(UserRole.DepartmentHead.name)
+        ? DepartmentHeadDetails(
+      department: departmentController.text,
+      yearsAsHead: int.tryParse(yearsAsHeadController.text),
+      responsibilities: departmentResponsibilities.toList(),
+    )
+        : null;
 
     // --- Create UserModelMain instance ---
     final user = UserModel(
@@ -829,33 +872,33 @@ class CreateUserController extends GetxController {
       createdAt: DateTime.now(),
       roles: selectedRoles
           .map((roleName) =>
-              UserRole.values.firstWhere((role) => role.name == roleName))
+          UserRole.values.firstWhere((role) => role.name == roleName))
           .toList(),
       studentDetails:
-          selectedRoles.contains(UserRole.Student.name) ? studentDetails : null,
+      selectedRoles.contains(UserRole.Student.name) ? studentDetails : null,
       teacherDetails:
-          selectedRoles.contains(UserRole.Teacher.name) ? teacherDetails : null,
+      selectedRoles.contains(UserRole.Teacher.name) ? teacherDetails : null,
       directorDetails: selectedRoles.contains(UserRole.Director.name)
           ? directorDetails
           : null,
       adminDetails:
-          selectedRoles.contains(UserRole.Admin.name) ? adminDetails : null,
+      selectedRoles.contains(UserRole.Admin.name) ? adminDetails : null,
       securityGuardDetails: selectedRoles.contains(UserRole.SecurityGuard.name)
           ? securityGuardDetails
           : null,
       maintenanceStaffDetails:
-          selectedRoles.contains(UserRole.Janitor.name)
-              ? maintenanceStaffDetails
-              : null,
+      selectedRoles.contains(UserRole.Janitor.name)
+          ? maintenanceStaffDetails
+          : null,
       driverDetails:
-          selectedRoles.contains(UserRole.BusDriver.name) ? driverDetails : null,
+      selectedRoles.contains(UserRole.BusDriver.name) ? driverDetails : null,
       schoolAdminDetails: selectedRoles.contains(UserRole.SchoolAdmin.name)
           ? schoolAdminDetails
           : null,
       departmentHeadDetails:
-          selectedRoles.contains(UserRole.DepartmentHead.name)
-              ? departmentHeadDetails
-              : null,
+      selectedRoles.contains(UserRole.DepartmentHead.name)
+          ? departmentHeadDetails
+          : null,
       emergencyContact: emergencyContact,
       fatherDetails: fatherDetails,
       motherDetails: motherDetails,
@@ -865,13 +908,13 @@ class CreateUserController extends GetxController {
       qualifications: qualifications.toList(),
       joiningDate: joiningDate.value,
       schoolId:
-          schoolIdController.text.isNotEmpty ? schoolIdController.text : null,
+      schoolIdController.text.isNotEmpty ? schoolIdController.text : null,
       userAttendance: null,
     );
     return user;
   }
 
-  // 3. Combined Function to Add User
+  /// Combines the steps to add a new user to Firestore.
   Future<void> addUserToFirestore() async {
     if (true) {
       try {
@@ -886,6 +929,41 @@ class CreateUserController extends GetxController {
           backgroundColor: Colors.orange);
     }
   }
+
+  //----------------------------------------------------------------------------
+  // Utility Methods (Role Selection)
+
+  /// Checks if a role is selected.
+  bool isRoleSelected(UserRole role) {
+    return selectedRoles1.contains(role);
+  }
+
+  /// Toggles the selection of a role.
+  void toggleRoleSelection(UserRole role) {
+    if (isRoleSelected(role)) {
+      selectedRoles1.remove(role);
+    } else {
+      selectedRoles1.add(role);
+    }
+  }
+
+  /// Gets the asset path for a given `UserRole`.
+  String getAssetPath(UserRole role) {
+    switch (role) {
+      case UserRole.SuperAdmin:
+        return 'assets/icons/super_admin.svg'; // Replace with your actual path
+      case UserRole.Admin:
+        return 'assets/icons/admin.svg'; // Replace with your actual path
+      case UserRole.Teacher:
+        return 'assets/icons/teacher.svg'; // Replace with your actual path
+    // Add cases for all other roles
+      default:
+        return 'assets/icons/default.svg'; // Default icon
+    }
+  }
+
+  //----------------------------------------------------------------------------
+  // Cleanup
 
   @override
   void onClose() {
@@ -934,10 +1012,10 @@ class CreateUserController extends GetxController {
     motherPhoneNumberController.dispose();
     motherEmailAddressController.dispose();
     motherAnnualIncomeController.dispose();
-    guardianFullNameController.dispose(); //Added Guardian name Controller
-    guardianPhoneNumberController.dispose(); //Added Guardian Number Controller
-    guardianEmailAddressController.dispose(); //Added Guardian email Controller
-    guardianAnnualIncomeController.dispose(); //Added Guardian Income Controller
+    guardianFullNameController.dispose();
+    guardianPhoneNumberController.dispose();
+    guardianEmailAddressController.dispose();
+    guardianAnnualIncomeController.dispose();
     schoolIdController.dispose();
     degreeNameController.dispose();
     institutionNameController.dispose();
@@ -945,32 +1023,5 @@ class CreateUserController extends GetxController {
     resultController.dispose();
 
     super.onClose();
-  }
-  bool isRoleSelected(UserRole role) {
-    return selectedRoles1.contains(role);
-  }
-
-  void toggleRoleSelection(UserRole role) {
-    if (isRoleSelected(role)) {
-      selectedRoles1.remove(role);
-    } else {
-      selectedRoles1.add(role);
-    }
-  }
-
-  String getAssetPath(UserRole role) {
-    // Implement logic to map UserRole to SVG asset path
-    // Example (replace with your actual asset paths):
-    switch (role) {
-      case UserRole.SuperAdmin:
-        return 'assets/icons/super_admin.svg'; // Replace with your actual path
-      case UserRole.Admin:
-        return 'assets/icons/admin.svg'; // Replace with your actual path
-      case UserRole.Teacher:
-        return 'assets/icons/teacher.svg'; // Replace with your actual path
-    // Add cases for all other roles
-      default:
-        return 'assets/icons/default.svg'; // Default icon
-    }
   }
 }

@@ -100,44 +100,47 @@ class MyTextField extends StatelessWidget {
             ),
             const SizedBox(height: 6),
           ],
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: height ?? 0,
-          ),
-          child: TextFormField(
-            initialValue: initialValue,
-            controller: finalController,
-            focusNode: focusNode,
-            keyboardType: keyboardType,
-            textInputAction: textInputAction,
-            obscureText: obscureText,
-            validator: validator,
-            autofocus: autoFocus,
-            maxLines: maxLines,
-            textAlign: textAlign,
-            readOnly: readOnly,
-            enabled: enabled,
-            style: MyTextStyles.inputField,
-            onTap: onTap,
-            onChanged: onChanged,
-            onFieldSubmitted: (value) {
-              if (nextFocusNode != null) {
-                FocusScope.of(context).requestFocus(nextFocusNode);
-              }
-              onFieldSubmitted?.call(value);
-            },
-            decoration: InputDecoration(
-              isDense: true, // Added to reduce extra padding
-              hintText: hintText ?? 'Enter $labelText',
-              hintStyle: hintStyle??MyTextStyles.placeholder ,
-              fillColor: fillColor,
-              contentPadding: padding,
-              prefixIcon: prefixIcon,
-              suffixIcon: suffixIcon,
-              prefixText: prefixText,
-              prefixStyle: prefixTextStyle,
-              suffixText: suffixText,
-              suffixStyle: suffixTextStyle
+        Padding(
+          padding: const EdgeInsets.only(bottom: MySizes.md),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: height ?? 0,
+            ),
+            child: TextFormField(
+              initialValue: initialValue,
+              controller: finalController,
+              focusNode: focusNode,
+              keyboardType: keyboardType,
+              textInputAction: textInputAction,
+              obscureText: obscureText,
+              validator: validator,
+              autofocus: autoFocus,
+              maxLines: maxLines,
+              textAlign: textAlign,
+              readOnly: readOnly,
+              enabled: enabled,
+              style: MyTextStyles.inputField,
+              onTap: onTap,
+              onChanged: onChanged,
+              onFieldSubmitted: (value) {
+                if (nextFocusNode != null) {
+                  FocusScope.of(context).requestFocus(nextFocusNode);
+                }
+                onFieldSubmitted?.call(value);
+              },
+              decoration: InputDecoration(
+                isDense: true, // Added to reduce extra padding
+                hintText: hintText ?? 'Enter $labelText',
+                hintStyle: hintStyle??MyTextStyles.placeholder ,
+                fillColor: fillColor,
+                contentPadding: padding,
+                prefixIcon: prefixIcon,
+                suffixIcon: suffixIcon,
+                prefixText: prefixText,
+                prefixStyle: prefixTextStyle,
+                suffixText: suffixText,
+                suffixStyle: suffixTextStyle
+              ),
             ),
           ),
         ),

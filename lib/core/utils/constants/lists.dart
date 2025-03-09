@@ -885,6 +885,7 @@ class MyLists {
 
   // **Administrative and Miscellaneous Lists**
   static const List<String> categoryOptions = ['General', 'OBC', 'ST/SC', 'EWS'];
+
   static const List<String> holidayTypeOptions = [
     'National',
     'Regional',
@@ -893,19 +894,31 @@ class MyLists {
     'Festival',
     'Public',
   ];
-  static const List<String> leaveTypeOptions = [
-    'Sick Leave',
-    'Half Day Leave',
-    'One Day Leave',
-    'Medical Leave',
-    'Marriage Leave',
-    'Vacation Leave',
-    'Casual Leave',
-    'Bereavement Leave', //For death in the family
-    'Maternity Leave',
-    'Paternity Leave',
-    'Sabbatical Leave'
-  ];
+
+  static final Map<String, String> leaveTypeOptionsWithEmojis = {
+    'Sick Leave': '🤒',
+    'Half Day Leave': '⏰',
+    'One Day Leave': '🗓️',
+    'Medical Leave': '🚑',
+    'Marriage Leave': '💍',
+    'Vacation Leave': '🏖️',
+    'Casual Leave': '🛌',
+    'Bereavement Leave': '🕊️',
+    'Maternity Leave': '🤰',
+    'Paternity Leave': '👨‍🍼',
+    'Sabbatical Leave': '📚',
+  };
+
+// Get emoji for a specific leave type
+  static String getLeaveTypeEmoji(String leaveType) {
+    return leaveTypeOptionsWithEmojis[leaveType] ?? '❓';
+  }
+
+// Get a list of all leave types
+  static List<String> leaveTypes() {
+    return leaveTypeOptionsWithEmojis.keys.toList();
+  }
+
   static const List<String> educationDegreeOptions = [
     // Basic and Intermediate Education
     "10th Grade / Secondary School Certificate (SSC)",

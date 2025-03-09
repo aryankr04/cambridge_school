@@ -4,6 +4,10 @@ import 'package:cambridge_school/app/modules/attendance/attendance_report/attend
 import 'package:cambridge_school/app/modules/attendance/mark_attendance/mark_attendance_screen.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_binding.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_screen.dart';
+import 'package:cambridge_school/app/modules/leave/apply_leave/apply_leave_binding.dart';
+import 'package:cambridge_school/app/modules/leave/apply_leave/apply_leave_screen.dart';
+import 'package:cambridge_school/app/modules/leave/leave_dashboard/leave_dashboard_binding.dart';
+import 'package:cambridge_school/app/modules/leave/leave_dashboard/leave_dashboard_screen.dart';
 import 'package:cambridge_school/app/modules/manage_school/screens/create_school_0.dart';
 import 'package:cambridge_school/app/modules/user_management/create_user/bindings/create_user_binding.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/bindings/user_management_binding.dart';
@@ -23,80 +27,124 @@ import 'app/modules/on_boarding/onboarding_binding.dart';
 import 'app/modules/user_management/create_user/screens/create_user_screen.dart';
 
 class AppRoutes {
-  static const String initial = '/demo';
-  static const String onboarding = '/onboarding';
-  static const String login = '/login';
-  static const String createUser = '/create-user';
-  static const String userManagement = '/user-management';
-  static const String classManagement = '/class-management';
-  static const String schoolManagement = '/school-management';
-  static const String markAttendance = '/mark-attendance';
-  static const String attendanceRecord = '/attendance-record';
-  static const String attendanceReport = '/attendance-report';
+  //----------------------------------------------------------------------------
+  // Route Names (Constants)
 
-  static const String pendingApproval = '/pending-approval';
-  static const String successScreen = '/success-screen';
-  static const String createNotice = '/create-notice';
-  static const String noticeScreen = '/notice-screen';
+  /// The initial route of the application.
+  static const String initialRoute = '/onboarding';
+
+  /// Route for the Onboarding screen.
+  static const String onboardingRoute = '/onboarding';
+
+  /// Route for the Login screen.
+  static const String loginRoute = '/login';
+
+  /// Route for the Create User screen.
+  static const String createUserRoute = '/create-user';
+
+  /// Route for the User Management screen.
+  static const String userManagementRoute = '/user-management';
+
+  /// Route for the Class Management screen.
+  static const String classManagementRoute = '/class-management';
+
+  /// Route for the School Management screen.
+  static const String schoolManagementRoute = '/school-management';
+
+  /// Route for the Mark Attendance screen.
+  static const String markAttendanceRoute = '/mark-attendance';
+
+  /// Route for the Attendance Record screen.
+  static const String attendanceRecordRoute = '/attendance-record';
+
+  /// Route for the Attendance Report screen.
+  static const String attendanceReportRoute = '/attendance-report';
+
+  /// Route for the Pending Approval screen (currently unused).
+  static const String pendingApprovalRoute = '/pending-approval';
+
+  /// Route for the Success screen (currently unused).
+  static const String successScreenRoute = '/success-screen';
+
+  /// Route for the Create Notice screen.
+  static const String createNoticeRoute = '/create-notice';
+
+  /// Route for the Notice screen.
+  static const String noticeScreenRoute = '/notice';
+
+  /// Route for the Apply Leave screen.
+  static const String applyLeaveRoute = '/apply-leave';
+
+  /// Route for the Leave Dashboard screen.
+  static const String leaveDashboardRoute = '/leave-dashboard';
+
+  //----------------------------------------------------------------------------
+  // Route Definitions (Using GetX GetPage)
 
   static final routes = [
-    // GetPage(
-    //   name: initial,
-    //   page: () => const Demo(),
-    // ),
     GetPage(
-      name: onboarding,
+      name: onboardingRoute,
       page: () => const OnboardingScreen(),
       binding: OnboardingBinding(),
     ),
     GetPage(
-      name: login,
+      name: loginRoute,
       page: () => Login(),
       binding: LoginBinding(),
     ),
     GetPage(
-      name: createUser,
+      name: createUserRoute,
       page: () => const CreateUserScreen(),
       binding: CreateUserBinding(),
     ),
     GetPage(
-      name: userManagement,
+      name: userManagementRoute,
       page: () => const UserManagementScreen(),
       binding: UserManagementBinding(),
     ),
     GetPage(
-      name: schoolManagement,
+      name: schoolManagementRoute,
       page: () => const CreateSchool0(),
     ),
     GetPage(
-      name: classManagement,
+      name: classManagementRoute,
       page: () => const ClassManagementScreen(),
       binding: ClassManagementBinding(),
     ),
     GetPage(
-      name: attendanceRecord,
+      name: attendanceRecordRoute,
       page: () => const AttendanceRecordScreen(),
       binding: AttendanceRecordBinding(),
     ),
     GetPage(
-      name: markAttendance,
+      name: markAttendanceRoute,
       page: () => const MarkAttendanceScreen(),
       binding: MarkAttendanceBinding(),
     ),
     GetPage(
-      name: attendanceReport,
+      name: attendanceReportRoute,
       page: () => AttendanceReportScreen(),
       binding: AttendanceReportBinding(),
     ),
     GetPage(
-      name: createNotice,
-      page: () => CreateNoticeScreen(),
+      name: createNoticeRoute,
+      page: () => const CreateNoticeScreen(),
       binding: CreateNoticeBinding(),
     ),
     GetPage(
-      name: noticeScreen,
+      name: noticeScreenRoute,
       page: () => NoticeScreen(),
       binding: NoticeBinding(),
+    ),
+    GetPage(
+      name: applyLeaveRoute,
+      page: () => const ApplyLeaveScreen(),
+      binding: ApplyLeaveBinding(),
+    ),
+    GetPage(
+      name: leaveDashboardRoute,
+      page: () =>  LeaveDashboardScreen(),
+      binding: LeaveDashboardBinding(),
     ),
   ];
 }

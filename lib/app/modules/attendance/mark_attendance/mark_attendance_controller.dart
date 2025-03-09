@@ -14,10 +14,12 @@ import '../attendance_record/attendance_record_repository.dart';
 class MarkAttendanceController extends GetxController {
   //----------------------------------------------------------------------------
   // Static Data (Consider moving to a config file or dependency injection)
+
   final String schoolId = 'SCH00001';
 
   //----------------------------------------------------------------------------
   // Observables (Reactive Variables)
+
   final selectedDate = DateTime.now().obs;
   final selectedAttendanceFor = RxString('Class');
   final selectedClass = ('1').obs;
@@ -35,17 +37,19 @@ class MarkAttendanceController extends GetxController {
 
   //----------------------------------------------------------------------------
   // Non-Reactive Variables (Consider making configurable or injected)
+
   final String attendanceTakerName = 'Mr. S.K Pandey';
+
   //----------------------------------------------------------------------------
-  // Repositories
+  // Repositories and Services
+
   final FirestoreRosterRepository rosterRepository = FirestoreRosterRepository();
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-  // Dependency Injection
-  final SchoolDummyData dummySchoolData = SchoolDummyData();
+  final SchoolDummyData dummySchoolData = SchoolDummyData(); // Dependency Injection
 
   //----------------------------------------------------------------------------
   // Lifecycle Methods
+
   @override
   void onInit() {
     super.onInit();
@@ -75,18 +79,23 @@ class MarkAttendanceController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // UI Interaction and Logic
+  // UI Interaction and Configuration
+
+  /// Sets whether the users should be fetched automatically on initialization.
   void setShouldFetchUsersOnInit({bool shouldFetch = true}) {
     shouldFetchUsersOnInit.value = shouldFetch;
   }
 
+  /// Determines if a user is marked as present.
   RxBool isUserPresent(UserModel user) {
     final attendance = getUserAttendanceStatus(user);
     return (attendance == 'P').obs;
   }
 
   //----------------------------------------------------------------------------
-  // Data Fetching
+  // Data Fetching and Initialization
+
+  /// Fetches users based on the selected attendance type (Class or Employee).
   Future<void> fetchUsers() async {
     isLoading(true);
     try {
@@ -106,6 +115,7 @@ class MarkAttendanceController extends GetxController {
     }
   }
 
+  /// Fetches the class roster from Firestore.
   Future<void> _fetchClassRoster() async {
     ClassRoster? fetchedClassRoster = await rosterRepository.getClassRoster(
         selectedClass.value, selectedSection.value, schoolId);
@@ -123,6 +133,7 @@ class MarkAttendanceController extends GetxController {
     }
   }
 
+  /// Fetches the employee roster from Firestore.
   Future<void> _fetchEmployeeRoster() async {
     UserRoster? fetchedEmployeeRoster = await rosterRepository.getUserRoster(
         'employee', // Corrected 'Employee' to 'employee' to match roster type
@@ -138,8 +149,7 @@ class MarkAttendanceController extends GetxController {
     }
   }
 
-  //----------------------------------------------------------------------------
-  // Attendance Management Logic
+  /// Initializes the user attendance data for the selected date.
   void _initializeUserAttendance() {
     final today = DateTime(
         selectedDate.value.year, selectedDate.value.month, selectedDate.value
@@ -153,20 +163,27 @@ class MarkAttendanceController extends GetxController {
     }
   }
 
+  //----------------------------------------------------------------------------
+  // Attendance Marking and Updates
+
+  /// Updates the attendance status for all users to the specified status.
   void _updateAttendanceForAll(String status) {
     for (var user in userList) {
       updateUserAttendance(user, status, isAll: true);
     }
   }
 
+  /// Marks a user as present.
   void markUserPresent(UserModel user) {
     updateUserAttendance(user, 'P');
   }
 
+  /// Marks a user as absent.
   void markUserAbsent(UserModel user) {
     updateUserAttendance(user, 'A');
   }
 
+  /// Marks all users as present.
   void markAllUsersPresent() {
     if (!isMarkAllPresent.value) {
       _updateAttendanceForAll('P');
@@ -175,6 +192,7 @@ class MarkAttendanceController extends GetxController {
     }
   }
 
+  /// Marks all users as absent.
   void markAllUsersAbsent() {
     if (!isMarkAllAbsent.value) {
       _updateAttendanceForAll('A');
@@ -183,6 +201,7 @@ class MarkAttendanceController extends GetxController {
     }
   }
 
+  /// Updates the attendance status for a specific user.
   void updateUserAttendance(UserModel user, String status,
       {bool isAll = false}) {
     try {
@@ -207,6 +226,7 @@ class MarkAttendanceController extends GetxController {
     }
   }
 
+  /// Gets the attendance status for a specific user on the selected date.
   String getUserAttendanceStatus(UserModel user) {
     try {
       return user.userAttendance!.getAttendanceStatus(selectedDate.value);
@@ -216,6 +236,7 @@ class MarkAttendanceController extends GetxController {
     }
   }
 
+  /// Updates the counts for present and absent users.
   void updateAttendanceCounts() {
     presentCount.value = 0;
     absentCount.value = 0;
@@ -231,7 +252,9 @@ class MarkAttendanceController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // Firestore Interaction
+  // Firestore Interaction (Updating Attendance)
+
+  /// Updates the attendance data in Firestore.
   Future<void> updateAttendanceOnFirestore() async {
     isUpdatingAttendance(true);
     MyFullScreenLoading.show(loadingText: 'Updating Attendance');
@@ -263,6 +286,7 @@ class MarkAttendanceController extends GetxController {
     }
   }
 
+  /// Updates the class roster data in Firestore.
   Future<void> _updateClassRosterOnFirestore(
       List<Map<String, dynamic>> userListMaps) async {
     final userRosterDocRef = firestore
@@ -274,6 +298,7 @@ class MarkAttendanceController extends GetxController {
     await userRosterDocRef.update({'studentList': userListMaps});
   }
 
+  /// Updates the employee roster data in Firestore.
   Future<void> _updateEmployeeRosterOnFirestore(
       List<Map<String, dynamic>> userListMaps) async {
     final userRosterDocRef = firestore
@@ -285,6 +310,7 @@ class MarkAttendanceController extends GetxController {
     await userRosterDocRef.update({'userList': userListMaps});
   }
 
+  /// Updates the daily attendance record in Firestore.
   Future<void> _updateDailyAttendanceRecord(
       FirestoreAttendanceRecordRepository firestoreAttendanceRecordRepository) async {
     final date = selectedDate.value;
@@ -349,7 +375,9 @@ class MarkAttendanceController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // Utility Methods
+  // Utility Methods (Formatting and UI Helpers)
+
+  /// Returns the selected date formatted as 'dd MMMM yyyy'.
   String getFormattedSelectedDate() {
     final formatter = DateFormat('dd MMMM yyyy');
     return formatter.format(selectedDate.value);

@@ -62,6 +62,7 @@ class ClassManagementController extends GetxController {
     classNameController.dispose();
     disposeSectionDialogControllers();
     disposeSubjectDialogControllers();
+
     // Dispose all Rx variables
     selectedClassName.close();
     isLoadingClassNames.close();
@@ -74,6 +75,8 @@ class ClassManagementController extends GetxController {
 
   //----------------------------------------------------------------------------
   // Data Loading and Manipulation
+
+  /// Loads the available class names from the repository.
   Future<void> loadClassNames() async {
     try {
       isLoadingClassNames.value = true;
@@ -87,6 +90,7 @@ class ClassManagementController extends GetxController {
     }
   }
 
+  /// Reorders the class names based on a predefined list.
   List<String> _reorderClassNames(List<String> fetchedClassNames) {
     List<String> reorderedList = [];
     Set<String> addedClassNames = <String>{};
@@ -106,7 +110,7 @@ class ClassManagementController extends GetxController {
     return reorderedList;
   }
 
-  //Optimized Add ClassName
+  /// Adds a new class name to the available list.
   Future<void> addClassName() async {
     final String? className = selectedClassValue.value;
     if (className == null || className.isEmpty) {
@@ -144,7 +148,9 @@ class ClassManagementController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // Deletion of Class and ClassName
+  // Data Deletion
+
+  /// Deletes a class and its associated data.
   Future<void> deleteClassesAndClassName(
       String schoolId, String className) async {
     Get.dialog(
@@ -183,7 +189,9 @@ class ClassManagementController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // Load single class detail and store selected class
+  // Class Detail Loading
+
+  /// Loads details for a specific class.
   Future<void> loadClassDetails(String className) async {
     try {
       isLoadingClassDetails.value = true;
@@ -200,7 +208,9 @@ class ClassManagementController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // Add Or Edit Class (Section)
+  // Class Section Management
+
+  /// Adds or updates a class (section).
   Future<void> addOrUpdateClass(SchoolClassModel schoolClass) async {
     if (selectedClassName.isEmpty) {
       Get.snackbar('Error', 'Please select a class name first.');
@@ -220,8 +230,7 @@ class ClassManagementController extends GetxController {
     }
   }
 
-  //----------------------------------------------------------------------------
-  // Delete Section: Remove an existing section from a class
+  /// Deletes a section from a class.
   Future<void> deleteSection(
       SchoolClassModel schoolClass, SchoolSectionModel sectionToDelete) async {
     if (selectedClassName.isEmpty) {
@@ -245,7 +254,9 @@ class ClassManagementController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // Delete Subject: Remove an existing subject from a class
+  // Class Subject Management
+
+  /// Deletes a subject from a class.
   Future<void> deleteSubject(String? subjectId) async {
     try {
       if (selectedClass.value == null)
@@ -268,7 +279,9 @@ class ClassManagementController extends GetxController {
   }
 
   //----------------------------------------------------------------------------
-  // Dialogs
+  // Dialog Management
+
+  /// Shows the Add Class Name dialog.
   void showAddClassNameDialog() {
     Get.dialog(
       AlertDialog(
@@ -315,6 +328,7 @@ class ClassManagementController extends GetxController {
     );
   }
 
+  /// Shows the Add Subject dialog.
   void showAddSubjectDialog(
       SchoolClassModel selectedClass, String? existingSubject) {
     if (existingSubject != null) {
@@ -376,7 +390,8 @@ class ClassManagementController extends GetxController {
               selectedClass.copyWith(subjects: updatedSubjects);
 
               addOrUpdateClass(updatedClass); // Update Class
-              loadClassDetails(selectedClass.className!); // Refresh class details to update subjects
+              loadClassDetails(
+                  selectedClass.className!); // Refresh class details to update subjects
               Get.back();
             },
           ),
@@ -386,6 +401,7 @@ class ClassManagementController extends GetxController {
     );
   }
 
+  /// Shows the Add Section dialog.
   void showAddSectionDialog(SchoolClassModel selectedClassModel) {
     Get.dialog(
       AlertDialog(
@@ -486,7 +502,8 @@ class ClassManagementController extends GetxController {
                     await _repository.addOrUpdateClass(updatedClass);
 
                     Get.back();
-                    loadClassDetails(selectedClassModel.className!); // Refresh class details to update sections
+                    loadClassDetails(
+                        selectedClassModel.className!); // Refresh class details to update sections
                   },
                   backgroundColor: Colors.green,
                   borderRadius: MySizes.borderRadiusMd,
@@ -500,6 +517,7 @@ class ClassManagementController extends GetxController {
     );
   }
 
+  /// Shows the Add Section dialog for editing an existing section.
   void showAddSectionDialogForEdit(
       SchoolClassModel selectedClass, SchoolSectionModel existingSection) {
     sectionNameController.text = existingSection.sectionName ?? '';
@@ -511,7 +529,7 @@ class ClassManagementController extends GetxController {
 
     Get.dialog(
       AlertDialog(
-        title: Text(
+        title: const Text(
           'Edit Section',
           style: MyTextStyles.headlineSmall,
         ),
@@ -607,7 +625,8 @@ class ClassManagementController extends GetxController {
                     await _repository.addOrUpdateClass(updatedClass);
 
                     Get.back();
-                    loadClassDetails(selectedClass.className!); // Refresh class details to update sections
+                    loadClassDetails(
+                        selectedClass.className!); // Refresh class details to update sections
                   },
                   backgroundColor: Colors.green,
                   borderRadius: MySizes.borderRadiusMd,
@@ -623,7 +642,8 @@ class ClassManagementController extends GetxController {
 
   //----------------------------------------------------------------------------
   // Helper Methods (Dialog Controller Management)
-  // Helper method to dispose Section Dialog's controller to avoid overlapping
+
+  /// Disposes of the section dialog controllers to avoid overlapping.
   void disposeSectionDialogControllers() {
     sectionNameController.clear();
     teacherIdController.clear();
@@ -633,7 +653,7 @@ class ClassManagementController extends GetxController {
     descriptionController.clear();
   }
 
-  // Helper method to dispose Subject Dialog's controller to avoid overlapping
+  /// Disposes of the subject dialog controllers to avoid overlapping.
   void disposeSubjectDialogControllers() {
     subjectNameController.clear();
     subjectTeacherIdController.clear();
