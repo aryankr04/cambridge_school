@@ -367,18 +367,21 @@ class MyLists {
     // Generic Catch All
     "Other",
   ];
+
   static const List<String> examOptions = [
     'FA1',
     'Half Yearly',
     'FA2',
     'Final Exam'
   ];
+
   static const List<String> examPatternOptions = [
     'Annual Exams',
     'Semester Exams',
     'Trimester Exams',
     'Quarterly Exams',
   ];
+
   static const List<String> gradingSystemOptions = [
     'Letter Grades (A+, A, B+, B, etc.)',
     'Percentage-Based (90% and above, 80%-89%, etc.)',
@@ -397,6 +400,7 @@ class MyLists {
     'Saturday',
     'Sunday' // Added Sunday
   ];
+
   static List<String> monthOptions = [
     'January',
     'February',
@@ -411,6 +415,7 @@ class MyLists {
     'November',
     'December',
   ];
+
   static const List<String> eventTypeOptions = [
     'Start',
     'Class',
@@ -446,6 +451,7 @@ class MyLists {
     "Liberty House",
     "Justice House",
   ];
+
   static const List<String> schoolActivityOptions = [
     'Morning Assembly',
     'Sports Day',
@@ -491,6 +497,7 @@ class MyLists {
     'Environmental Cleanup Activities',
     'Student Leadership Training'
   ];
+
   static const List<String> schoolBoardOptions = [
     'CBSE',
     'ICSE',
@@ -499,11 +506,13 @@ class MyLists {
     'CIE',
     'State Board'
   ];
+
   static const List<String> schoolTypeOptions = [
     'Private',
     'Government Aided Private School',
     'Government'
   ];
+
   static const List<String> schoolingSystemOptions = [
     'Play School',
     'Kindergarten (LKG - UKG)',
@@ -540,6 +549,7 @@ class MyLists {
     '10',
     '11',
   ];
+
   static const List<String> visionConditionOptions = [
     'No vision correction',
     'Wears glasses',

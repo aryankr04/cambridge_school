@@ -14,10 +14,14 @@ class CreateRoutineController extends GetxController {
 
   // Rx Variables
   final schoolId = RxString('SCH00001');
+  final userRole = RxString('Teacher');
+
   final selectedClassName = RxString('');
   final selectedSectionName = RxString('');
   final selectedDay = RxString('');
   final isLoading = RxBool(false);
+  final isEditMode = RxBool(true);
+  final isUpdateMode = RxBool(false);
   final selectedEventIndex = RxInt(-1);
   final sectionList = RxList<SectionModel>([]);
   Rx<ClassModel?> classModel = Rx<ClassModel?>(null);
@@ -42,8 +46,8 @@ class CreateRoutineController extends GetxController {
   void onInit() {
     super.onInit();
     fetchSchoolSectionsAndPrepareClassAndSectionOption();
-    ever(selectedClassName, (_) => fetchClassData());
     ever(selectedDay, (_) => updateEventListForSelectedDay());
+    ever(events, (_) => isUpdateMode(true));
   }
 
   // ---------------------------------------------------------------------------
@@ -51,12 +55,14 @@ class CreateRoutineController extends GetxController {
   // ---------------------------------------------------------------------------
 
   Future<void> fetchClassData() async {
+    isUpdateMode(false);
+    isEditMode(false);
     if (schoolId.value.isEmpty || selectedClassName.value.isEmpty) {
       print("School ID or Class Name is empty. Skipping fetch.");
       return;
     }
 
-    isLoading.value = true;
+    // isLoading.value = true;
     try {
       final fetchedClassModel =
       await _classManagementRepository.fetchClassByClassNameAndSchoolId(
@@ -68,11 +74,13 @@ class CreateRoutineController extends GetxController {
       Get.snackbar('Error', 'Failed to fetch class data: $e');
       print('Error fetching class data: $e');
     } finally {
-      isLoading.value = false;
+      // isLoading.value = false;
     }
   }
 
   Future<void> fetchSchoolSectionsAndPrepareClassAndSectionOption() async {
+    isUpdateMode(false);
+    isEditMode(false);
     isLoading.value = true;
     try {
       sectionsData?.value =
@@ -101,7 +109,9 @@ class CreateRoutineController extends GetxController {
   // ---------------------------------------------------------------------------
 
   void updateEventListForSelectedDay() {
-    events.clear();
+    // isUpdateMode(false);
+    // isEditMode(false);
+   events.clear();
     final section = classModel.value?.sections?.firstWhereOrNull(
             (section) => section.sectionName == selectedSectionName.value);
 
@@ -398,6 +408,33 @@ class CreateRoutineController extends GetxController {
     }
     print("--------------------------------------------------");
   }
+
+
+  String calculateTimeInterval(TimeOfDay startTime, TimeOfDay endTime) {
+    // Convert TimeOfDay to minutes since midnight
+    int startMinutes = startTime.hour * 60 + startTime.minute;
+    int endMinutes = endTime.hour * 60 + endTime.minute;
+
+    // Handle cases where end time is past midnight (next day)
+    if (endMinutes < startMinutes) {
+      endMinutes += 24 * 60;
+    }
+
+    // Calculate the difference in minutes
+    int totalMinutes = endMinutes - startMinutes;
+
+    // Convert to hours and minutes
+    int hours = totalMinutes ~/ 60;
+    int minutes = totalMinutes % 60;
+
+    // Return formatted string
+    if (hours > 0) {
+      return '$hours hr${hours > 1 ? 's' : ''} ${minutes > 0 ? '$minutes min' : ''}';
+    } else {
+      return '$minutes min';
+    }
+  }
+
 
   // ---------------------------------------------------------------------------
   // Dummy Data Creation - KEEP for Testing Purposes

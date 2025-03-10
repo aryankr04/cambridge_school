@@ -1,6 +1,11 @@
+import 'package:cambridge_school/core/utils/constants/colors.dart';
+import 'package:cambridge_school/core/utils/constants/dynamic_colors.dart';
+import 'package:cambridge_school/core/utils/constants/sizes.dart';
+import 'package:cambridge_school/core/utils/constants/text_styles.dart';
+import 'package:cambridge_school/core/widgets/card_widget.dart';
+import 'package:cambridge_school/core/widgets/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
-import '../../../core/utils/constants/dynamic_colors.dart';
-import '../../../core/utils/constants/sizes.dart';
+import 'package:get/get.dart';
 
 enum TimelineItemType {
   classEvent,
@@ -9,6 +14,7 @@ enum TimelineItemType {
   assembly,
   start,
 }
+
 extension TimelineItemTypeExtension on TimelineItemType {
   static TimelineItemType fromString(String type) {
     switch (type) {
@@ -39,225 +45,26 @@ extension TimelineItemTypeExtension on TimelineItemType {
         return 'Start';
     }
   }
-}
 
-class TimelineItem extends StatefulWidget {
-  final bool isMatch;
-  final bool isStudent;
-  final bool isWrite;
-  final String id;
-  final String startsAt;
-  final String endsAt;
-  final String? subject;
-  final String? classTeacherName;
-  final String? className;
-  final String? sectionName;
-  final TimelineItemType itemType;
-  final VoidCallback? onDeletePressed;
-  final VoidCallback? onEditPressed;
-
-  const TimelineItem(
-      {super.key,
-        required this.id,
-        required this.isWrite,
-        required this.startsAt,
-        this.subject,
-        this.classTeacherName,
-        required this.itemType,
-        this.onEditPressed,
-        this.onDeletePressed,
-        this.className,
-        this.sectionName,
-        required this.isStudent, required this.endsAt, required this.isMatch});
-
-  @override
-  State<TimelineItem> createState() => _TimelineItemState();
-}
-
-TimelineItemType getItemType(String eventType) {
-  switch (eventType) {
-    case 'Class':
-      return TimelineItemType.classEvent;
-    case 'Break':
-      return TimelineItemType.breakEvent;
-    case 'Departure':
-      return TimelineItemType.departure;
-    case 'Start':
-      return TimelineItemType.start;
-    case 'Assembly':
-      return TimelineItemType.assembly;
-    default:
-      throw Exception('Invalid event type: $eventType');
-  }
-}
-
-class _TimelineItemState extends State<TimelineItem> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Time
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(right: 16),
-                  width: 70,
-                  alignment: Alignment.topCenter,
-                  child: Text(
-                    widget.startsAt,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if (widget.isWrite)
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Confirm Deletion'),
-                                content: const Text(
-                                    'Are you sure you want to delete this routine?'),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () async {
-                                      widget.onDeletePressed!();
-                                    },
-                                    child: const Text('Delete'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        icon:  Icon(
-                          Icons.delete,
-                          color: MyDynamicColors.activeRed,
-                          size: 20,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          widget.onEditPressed!();
-                        },
-                        icon:  Icon(
-                          Icons.edit,
-                          color: MyDynamicColors.activeBlue,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                if(!widget.isWrite)SizedBox(height: getItemHeight()-24,),
-                if (!widget.isMatch)
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    width: 70,
-                    alignment: Alignment.topCenter,
-                    child: Text(
-                      widget.endsAt,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-
-            // Vertical Line and Circle Avatar
-            Column(
-              children: [
-                CircleAvatar(
-                  backgroundColor: getCircleColor(),
-                  radius: 5,
-                ),
-                Container(
-                  width: 2,
-                  height: widget.isWrite?getItemHeight()+10:getItemHeight(),
-                  color: getCircleColor(),
-                ),
-                if (widget.itemType == TimelineItemType.departure || !widget.isMatch)
-                  CircleAvatar(
-                    backgroundColor: getCircleColor(),
-                    radius: 5,
-                  ),
-              ],
-            ),
-            const SizedBox(width: 8),
-
-            // Event Details
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: getContainerColor(),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        getItemText(),
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: getItemTextColor(),
-                        ),
-                      ),
-                      if (widget.itemType == TimelineItemType.classEvent &&
-                          widget.classTeacherName != null)
-                        Row(
-                          children: [
-                            Icon(
-                              widget.isStudent ? Icons.person : Icons.class_,
-                              size: 16,
-                              color: MyDynamicColors.iconColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                widget.isStudent
-                                    ? widget.classTeacherName ?? ''
-                                    : '${widget.className} ${widget.sectionName}',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-
-                              ),
-                            ),
-                          ],
-                        ),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        !widget.isMatch?const SizedBox(height: MySizes.lg,):const SizedBox()
-      ],
-    );
-
+  String get emoji {
+    switch (this) {
+      case TimelineItemType.classEvent:
+        return '📝'; // Class
+      case TimelineItemType.breakEvent:
+        return '🍔'; // Break
+      case TimelineItemType.departure:
+        return '🚌'; // Departure
+      case TimelineItemType.start:
+        return '🛎️'; // School Start
+      case TimelineItemType.assembly:
+        return '🥁'; // Assembly
+      default:
+        return '❓'; // Default/Unknown
+    }
   }
 
-  Color getCircleColor() {
-    switch (widget.itemType) {
+  Color get color {
+    switch (this) {
       case TimelineItemType.classEvent:
         return MyDynamicColors.activeBlue;
       case TimelineItemType.breakEvent:
@@ -273,44 +80,10 @@ class _TimelineItemState extends State<TimelineItem> {
     }
   }
 
-  double getItemHeight() {
-    switch (widget.itemType) {
+  String getText(String? subject) {
+    switch (this) {
       case TimelineItemType.classEvent:
-        return 75;
-      case TimelineItemType.breakEvent:
-        return 60;
-      case TimelineItemType.departure:
-        return 60;
-      case TimelineItemType.start:
-        return 60;
-      case TimelineItemType.assembly:
-        return 60;
-      default:
-        return 0;
-    }
-  }
-
-  Color getContainerColor() {
-    switch (widget.itemType) {
-      case TimelineItemType.classEvent:
-        return MyDynamicColors.activeBlue.withOpacity(0.1);
-      case TimelineItemType.breakEvent:
-        return MyDynamicColors.activeOrange.withOpacity(0.1);
-      case TimelineItemType.departure:
-        return MyDynamicColors.activeRed.withOpacity(0.1);
-      case TimelineItemType.start:
-        return MyDynamicColors.activeGreen.withOpacity(0.1);
-      case TimelineItemType.assembly:
-        return MyDynamicColors.activeOrange.withOpacity(0.1);
-      default:
-        return Colors.black;
-    }
-  }
-
-  String getItemText() {
-    switch (widget.itemType) {
-      case TimelineItemType.classEvent:
-        return widget.subject ?? '';
+        return subject ?? '';
       case TimelineItemType.breakEvent:
         return 'Break';
       case TimelineItemType.departure:
@@ -323,21 +96,198 @@ class _TimelineItemState extends State<TimelineItem> {
         return '';
     }
   }
+}
 
-  Color getItemTextColor() {
-    switch (widget.itemType) {
-      case TimelineItemType.classEvent:
-        return MyDynamicColors.activeBlue;
-      case TimelineItemType.breakEvent:
-        return MyDynamicColors.activeOrange;
-      case TimelineItemType.departure:
-        return MyDynamicColors.activeRed;
-      case TimelineItemType.start:
-        return MyDynamicColors.activeGreen;
-      case TimelineItemType.assembly:
-        return MyDynamicColors.activeOrange;
-      default:
-        return Colors.black;
-    }
+class EventItem extends StatelessWidget {
+  final int? period;
+  final String? interval;
+  final bool isStudent;
+  final RxBool isWrite;
+  final String startsAt;
+  final String endsAt;
+  final String? subject;
+  final String? classTeacherName;
+  final String? className;
+  final String? sectionName;
+  final TimelineItemType itemType;
+  final VoidCallback? onDeletePressed;
+  final VoidCallback? onEditPressed;
+
+  const EventItem({
+    super.key,
+    this.period,
+    this.interval,
+    required this.isWrite,
+    required this.startsAt,
+    this.subject,
+    this.classTeacherName,
+    required this.itemType,
+    this.onEditPressed,
+    this.onDeletePressed,
+    this.className,
+    this.sectionName,
+    required this.isStudent,
+    required this.endsAt,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final stripColor = itemType.color;
+    final itemText = itemType.getText(subject);
+    final itemEmoji = itemType.emoji;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: MySizes.md),
+      child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: stripColor,
+            ),
+            padding: const EdgeInsets.all(MySizes.sm),
+            child: Text(
+              period?.toString() ?? '', // Handle null period
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: MySizes.md),
+          Expanded(
+            child: MyCard(
+              margin: EdgeInsets.zero,
+              padding: EdgeInsets.zero,
+              borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 12,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          width: Get.width * 0.1,
+                          height: Get.width * 0.1,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: MyColors.borderColor,
+                              width: 0.5,
+                            ),
+                            borderRadius:
+                                BorderRadius.circular(MySizes.cardRadiusXs),
+                          ),
+                          child: Text(
+                            itemEmoji,
+                            style: const TextStyle(fontSize: 28),
+                          ),
+                        ),
+                        const SizedBox(width: MySizes.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '$startsAt - $endsAt',
+                                overflow: TextOverflow.ellipsis,
+                                style: MyTextStyle.labelMedium
+                                    .copyWith(fontSize: 13),
+                              ),
+                              Text(
+                                itemText,
+                                overflow: TextOverflow.ellipsis,
+                                style: MyTextStyle.bodyLarge,
+                              ),
+                              if (itemType == TimelineItemType.classEvent &&
+                                  classTeacherName != null) ...[
+                                const SizedBox(height: MySizes.xs-2),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      isStudent
+                                          ? Icons.person
+                                          : Icons.home,
+                                      size: 14,
+                                      color: MyDynamicColors.subtitleTextColor
+                                          .withOpacity(0.5),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        isStudent
+                                            ? classTeacherName ?? ''
+                                            : '$className ${sectionName}',
+                                        style: MyTextStyle.labelMedium.copyWith(fontSize: 10),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        Obx(
+                          () => isWrite.value
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        MyConfirmationDialog.show(
+                                            DialogAction.Delete, onConfirm: () {
+                                          onDeletePressed?.call();
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.delete,
+                                        color: MyDynamicColors.activeRed,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: onEditPressed,
+                                      icon: Icon(
+                                        Icons.edit,
+                                        color: MyDynamicColors.activeBlue,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : SizedBox.shrink(),
+                        )
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    child: Container(
+                      width: 4,
+                      decoration: BoxDecoration(
+                        color: stripColor,
+                        borderRadius: const BorderRadius.horizontal(
+                          left: Radius.circular(MySizes.cardRadiusSm),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

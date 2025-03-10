@@ -25,7 +25,8 @@ class CreateRoutineScreen extends StatefulWidget {
 }
 
 class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
-  final CreateRoutineController controller = Get.put(CreateRoutineController());
+  final CreateRoutineController controller =
+      Get.find<CreateRoutineController>();
 
   @override
   void initState() {
@@ -34,163 +35,218 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
     // Load data after the widget is built and the controller is available.
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller
-          .fetchSchoolSectionsAndPrepareClassAndSectionOption(); // Call the data loading function from the controller.
+      controller.fetchSchoolSectionsAndPrepareClassAndSectionOption();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    print(controller.events.length);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Routine'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              if (controller.selectedClassName.value.isNotEmpty &&
-                  controller.selectedSectionName.value.isNotEmpty &&
-                  controller.selectedDay.value.isNotEmpty) {
-                Get.dialog(
-                  AddRoutineDialog(
-                    onSubmit: (Event event) {
-                      // Store the selected day with the event
-                      // Corrected: Create a *new* `Event` with the day included
-                      final updatedEvent = Event(
-                        subject: event.subject,
-                        eventType: event.eventType,
-                        startTime: event.startTime,
-                        endTime: event.endTime,
-                        teacher: event.teacher,
-                        location: event.location,
-                      );
-                      controller.addEvent(updatedEvent);
-                    },
-                  ),
-                  barrierDismissible: false, // Prevent closing by tapping outside
-                );
-              } else {
-                Get.snackbar('Error', 'Please select class, section, and day');
-              }
-            },
-            child: const Text('Add Event'),
-          ),        ],
       ),
       backgroundColor: MyColors.lightGrey,
       body: Obx(() {
         if (controller.isLoading.value) {
           return _buildShimmerList();
-        } else if (controller.classNameOptions == null ||
+        }
+
+        if (controller.classNameOptions == null ||
             controller.sectionNameOptions == null) {
-          // Handle the case where options are not loaded yet.
-          return const Center(child: Text("Loading data..."));
-        } else {
-          return Column(
-            children: [
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                    vertical: MySizes.md, horizontal: MySizes.md),
+          return const Center(
+              child:
+                  CircularProgressIndicator()); // More descriptive loading indicator
+        }
+
+        return Column(
+          children: [
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                vertical: MySizes.md,
+                horizontal: MySizes.md,
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.tune_rounded,
+                    color: MyColors.subtitleTextColor,
+                  ),
+                  const SizedBox(width: MySizes.md),
+                  MyBottomSheetDropdown(
+                    optionsForChips: controller.classNameOptions!,
+                    onSingleChanged: (value) {
+                      controller.selectedClassName.value = value!;
+                      controller.selectedSectionName.value = '';
+                      controller.selectedDay.value = '';
+                      controller.fetchClassData();
+                    },
+                    dropdownWidgetType: DropdownWidgetType.Filter,
+                    hintText: 'Class',
+                  ),
+                  const SizedBox(width: MySizes.md),
+                  MyBottomSheetDropdown(
+                    optionsForChips: controller.sectionNameOptions!,
+                    onSingleChanged: (value) {
+                      controller.selectedSectionName.value = value!;
+                      controller.selectedDay.value = 'Monday';
+                      controller.updateEventListForSelectedDay();
+                    },
+                    dropdownWidgetType: DropdownWidgetType.Filter,
+                    hintText: 'Section',
+                  ),
+                  const SizedBox(width: MySizes.md),
+                  MyBottomSheetDropdown(
+                    optionsForChips: controller.dayOptions.obs,
+                    onSingleChanged: (value) {
+                      controller.selectedDay.value = value!;
+                      controller.updateEventListForSelectedDay();
+                    },
+                    dropdownWidgetType: DropdownWidgetType.Filter,
+                    hintText: 'Day',
+                  ),
+                ],
+              ),
+            ),
+            Obx(
+                  () => controller.events.isNotEmpty
+                  ? Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: MySizes.md,
+                  vertical: controller.userRole.value=='Teacher' ? MySizes.sm : MySizes.md,
+                ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(
-                      Icons.tune_rounded,
-                      color: MyColors.subtitleTextColor,
+                    Text(
+                      '${controller.selectedDay} Routine',
+                      style: MyTextStyle.headlineSmall,
                     ),
-                    const SizedBox(
-                      width: MySizes.md,
-                    ),
-                    Expanded(
-                      child: MyBottomSheetDropdown(
-                        optionsForChips: controller.classNameOptions!,
-                        onSingleChanged: (value) {
-                          controller.selectedClassName.value = value!;
-                          controller.selectedSectionName.value = '';
-                          controller.selectedDay.value = '';
-                          controller.fetchClassData();
-                        },
-                        dropdownWidgetType: DropdownWidgetType.Filter,
-                        hintText: 'Class',
-                      ),
-                    ),
-                    const SizedBox(width: MySizes.md),
-                    Expanded(
-                      child: MyBottomSheetDropdown(
-                        optionsForChips: controller.sectionNameOptions!,
-                        onSingleChanged: (value) {
-                          controller.selectedSectionName.value = value!;
-                          controller.selectedDay.value = 'Mon';
-                        },
-                        dropdownWidgetType: DropdownWidgetType.Filter,
-                        hintText: 'Section',
-                      ),
-                    ),
-                    const SizedBox(width: MySizes.md),
-                    Expanded(
-                      child: MyBottomSheetDropdown(
-                        optionsForChips: controller.dayOptions.obs,
-                        onSingleChanged: (value) {
-                          controller.selectedDay.value = value!;
-                          controller.updateEventListForSelectedDay();
-                        },
-                        dropdownWidgetType: DropdownWidgetType.Filter,
-                        hintText: 'Day',
-                      ),
-                    ),
+                    if (controller.userRole.value == 'Teacher')
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Update Button (Orange)
+                          if (controller.isEditMode.value && controller.isUpdateMode.value)
+                            FilledButton(
+                              onPressed: () {
+                                controller.updateClassModel();
+                              },
+                              style: FilledButton.styleFrom(backgroundColor: MyColors.activeOrange),
+                              child: const Text('Update'),
+                            ),
+
+                          // Edit/Cancel Button (Blue/Red)
+                          FilledButton(
+                            onPressed: () {
+                              if (controller.isEditMode.value) {
+                                controller.isEditMode.value = false;
+                                controller.isUpdateMode.value = false;
+                              } else {
+                                controller.isEditMode.value = true;
+                              }
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: controller.isEditMode.value ? MyColors.activeRed : MyColors.activeBlue,
+                            ),
+                            child: Text(
+                              controller.isEditMode.value ? 'Cancel' : 'Edit',
+                            ),
+                          ),
+
+                          // Add Event Button (Green)
+                          if (controller.isEditMode.value && !controller.isUpdateMode.value)
+                            FilledButton(
+                              onPressed: () {
+                                if (controller.selectedClassName.value.isNotEmpty &&
+                                    controller.selectedSectionName.value.isNotEmpty &&
+                                    controller.selectedDay.value.isNotEmpty) {
+                                  Get.dialog(
+                                    AddRoutineDialog(
+                                      onSubmit: (Event event) {
+                                        controller.addEvent(Event(
+                                          subject: event.subject,
+                                          eventType: event.eventType,
+                                          startTime: event.startTime,
+                                          endTime: event.endTime,
+                                          teacher: event.teacher,
+                                          location: event.location,
+                                        ));
+                                      },
+                                    ),
+                                    barrierDismissible: false,
+                                  );
+                                } else {
+                                  Get.snackbar(
+                                    'Error',
+                                    'Please select class, section, and day',
+                                  );
+                                }
+                              },
+                              style: FilledButton.styleFrom(backgroundColor: MyColors.activeGreen),
+                              child: const Text('Add Event'),
+                            ),
+                        ],
+                      )
                   ],
                 ),
+              )
+                  : const SizedBox.shrink(),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Obx(
+                  () => controller.events.isNotEmpty
+                      ? ListView.builder(
+                          itemCount: controller.events.length,
+                          itemBuilder: (context, index) {
+                            final event = controller.events[index];
+                            return EventItem(
+                              key: ValueKey(event.startTime),
+                              period: index + 1,
+                              interval: controller.calculateTimeInterval(
+                                  event.startTime, event.endTime),
+                              startsAt: formatTimeOfDay(event.startTime),
+                              endsAt: formatTimeOfDay(event.endTime),
+                              subject: event.subject,
+                              classTeacherName:
+                                  controller.classModel.value?.className ?? '',
+                              className:
+                                  controller.classModel.value?.className ?? '',
+                              sectionName: controller.selectedSectionName.value,
+                              itemType: TimelineItemTypeExtension.fromString(
+                                  event.eventType ?? 'Class'),
+                              isWrite: controller.isEditMode,
+                              isStudent: controller.userRole.value=='Student',
+                              onDeletePressed: () {
+                                controller.deleteEvent(index);
+                              },
+                              onEditPressed: () {
+                                Get.dialog(
+                                  AddRoutineDialog(
+                                    event: event,
+                                    index: index,
+                                    onSubmit: (Event updatedEvent) {
+                                      controller.updateEvent(
+                                          updatedEvent, index);
+                                    },
+                                  ),
+                                  barrierDismissible: false,
+                                );
+                              },
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Text(
+                              'No Routine Found for ${controller.selectedDay}')),
+                ),
               ),
-              const SizedBox(width: MySizes.spaceBtwSections),
-              Expanded(
-                child: Obx(() => ListView.builder(
-                  itemCount: controller.events.length,
-                  itemBuilder: (context, index) {
-                    final event = controller.events[index];
-                    return TimelineItem(
-                      key: ValueKey(event.startTime),
-                      id: event.startTime.toString(),
-                      startsAt: formatTimeOfDay(event.startTime),
-                      endsAt: formatTimeOfDay(event.endTime),
-                      subject: event.subject,
-                      classTeacherName:
-                      controller.classModel.value?.className ?? '',
-                      className:
-                      controller.classModel.value?.className ?? '',
-                      sectionName: controller.selectedSectionName.value,
-                      itemType: TimelineItemTypeExtension.fromString(
-                          event.eventType ?? 'Class'),
-                      isMatch: true,
-                      isWrite: true,
-                      isStudent: false,
-                      onDeletePressed: () {
-                        controller.deleteEvent(index);
-                      },
-                      onEditPressed: () {
-                        Get.dialog(
-                          AddRoutineDialog(
-                            event: event,
-                            index: index,
-                            onSubmit: (Event updatedEvent) {
-                              controller.updateEvent(updatedEvent, index);
-                            },
-                          ),
-                          barrierDismissible: false,
-                        );
-                      },
-                    );
-                  },
-                )),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  controller.updateClassModel();
-                },
-                child: const Text('Update Routine'),
-              ),
-            ],
-          );
-        }
+            ),
+
+          ],
+        );
       }),
     );
   }
@@ -200,17 +256,29 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
       child: ListView.builder(
-        itemCount: 5, // Adjust the number of shimmer items as needed
+        itemCount: 5,
         itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.symmetric(
-                horizontal: MySizes.md, vertical: MySizes.sm),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8.0),
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+                vertical: 8.0, horizontal: MySizes.md),
+            child: Row(
+              children: [
+                const CircleAvatar(
+                  radius: MySizes.md,
+                  backgroundColor: Colors.white,
+                ),
+                const SizedBox(width: MySizes.md),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    height: Get.width * 0.16,
+                  ),
+                ),
+              ],
             ),
-            height: 100, // Adjust the height as needed
-            width: double.infinity,
           );
         },
       ),
@@ -223,23 +291,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
         now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
     return DateFormat('h:mm a').format(dateTime);
   }
-
-  String getItemType(String type) {
-    switch (type) {
-      case 'Class':
-        return 'Class';
-      case 'Break':
-        return 'Break';
-      case 'Assembly':
-        return 'Assembly';
-      case 'Departure':
-        return 'Departure';
-      default:
-        return 'Start';
-    }
-  }
 }
-
 
 class AddRoutineDialog extends StatefulWidget {
   final Function(Event) onSubmit;
@@ -247,11 +299,11 @@ class AddRoutineDialog extends StatefulWidget {
   final int? index;
 
   const AddRoutineDialog({
-    Key? key,
+    super.key,
     required this.onSubmit,
     this.event,
     this.index,
-  }) : super(key: key);
+  });
 
   @override
   State<AddRoutineDialog> createState() => _AddRoutineDialogState();
@@ -263,16 +315,15 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
   late final Rx<TimeOfDay?> _startTime;
   late final Rx<TimeOfDay?> _endTime;
   final RxString _eventType = 'Class'.obs;
+  RxBool isLoading = false.obs;
 
   @override
   void initState() {
     super.initState();
     _subjectController =
         TextEditingController(text: widget.event?.subject ?? '');
-    _startTime =
-        Rx<TimeOfDay?>(widget.event?.startTime); // Initialize Rx with value
-    _endTime =
-        Rx<TimeOfDay?>(widget.event?.endTime); // Initialize Rx with value
+    _startTime = Rx<TimeOfDay?>(widget.event?.startTime);
+    _endTime = Rx<TimeOfDay?>(widget.event?.endTime);
     _eventType.value = widget.event?.eventType ?? 'Class';
   }
 
@@ -282,18 +333,45 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final newEvent = Event(
-        subject: _subjectController.text,
-        eventType: _eventType.value,
-        startTime: _startTime.value ?? TimeOfDay.now(),
-        endTime: _endTime.value ?? TimeOfDay.now(),
-        teacher: '',
-      );
-      widget.onSubmit(newEvent);
-      Get.back();
+      final startTimeValue = _startTime.value;
+      final endTimeValue = _endTime.value;
 
+      if (startTimeValue == null || endTimeValue == null) {
+        Get.snackbar('Error', 'Please select both start and end times.');
+        return;
+      }
+      if (startTimeValue.hour > endTimeValue.hour) {
+        Get.snackbar('Error', 'Start time must be before end time');
+        return;
+      }
+      if (startTimeValue.hour == endTimeValue.hour &&
+          startTimeValue.minute >= endTimeValue.minute) {
+        Get.snackbar('Error', 'Start time must be before end time');
+        return;
+      }
+      isLoading.value = true;
+      try {
+        final newEvent = Event(
+          subject: _subjectController.text,
+          eventType: _eventType.value,
+          startTime: startTimeValue,
+          endTime: endTimeValue,
+          teacher: '',
+        );
+
+        // Await the onSubmit function.  This is crucial.
+        await widget.onSubmit(newEvent);
+
+        // Only close the dialog after onSubmit completes SUCCESSFULLY.
+        Get.back();
+      } catch (e) {
+        // Display the error message.  Important for debugging.
+        Get.snackbar('Error', 'Failed to submit event: $e');
+      } finally {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -321,7 +399,7 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
                       : null,
                 ),
                 const SizedBox(height: 16),
-                Obx(() => MyBottomSheetDropdown(
+                MyBottomSheetDropdown(
                   labelText: 'Event Type',
                   optionsForChips: const [
                     'Class',
@@ -332,19 +410,15 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
                   ],
                   onSingleChanged: (value) {
                     _eventType.value = value ?? 'Class';
-                    FocusScope.of(context).unfocus();
                   },
                   initialSelectedValues: [_eventType.value],
-                )),
+                ),
                 const SizedBox(height: 16),
                 MyTimePickerField(
                   labelText: 'Start Time',
                   selectedTime: _startTime,
                   onTimeChanged: (time) {
-                    if (time != null) {
-                      _startTime.value = time;
-                      FocusScope.of(context).unfocus();
-                    }
+                    _startTime.value = time;
                   },
                 ),
                 const SizedBox(height: 16),
@@ -352,10 +426,7 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
                   labelText: 'End Time',
                   selectedTime: _endTime,
                   onTimeChanged: (time) {
-                    if (time != null) {
-                      _endTime.value = time;
-                      FocusScope.of(context).unfocus();
-                    }
+                    _endTime.value = time;
                   },
                 )
               ],
@@ -373,12 +444,14 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
                 isOutlined: true,
               ),
             ),
-            SizedBox(width: MySizes.md),
+            const SizedBox(width: MySizes.md),
             Expanded(
-              child: MyButton(
-                onPressed: _submitForm,
-                text: widget.event != null ? 'Update' : 'Add',
-              ),
+              child: Obx(() => MyButton(
+                    // Wrap MyButton with Obx
+                    onPressed: _submitForm, // Remove Get.back() here
+                    text: widget.event != null ? 'Update' : 'Add',
+                    isLoading: isLoading.value,
+                  )),
             ),
           ],
         ),
