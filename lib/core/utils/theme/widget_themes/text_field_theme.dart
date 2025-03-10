@@ -41,7 +41,9 @@ class MyTextFormFieldTheme {
         fontSize: MySizes.fontSizeMd,
         color: textColor,
       ),
-      hintStyle: MyTextStyles.placeholder.copyWith(color: textColor),
+
+      hintStyle: MyTextStyle.placeholder.copyWith(color: textColor),
+      floatingLabelBehavior: FloatingLabelBehavior.never,
       floatingLabelStyle: const TextStyle().copyWith(color: textColor.withOpacity(0.8)),
       fillColor: fillColor,
       filled: true,

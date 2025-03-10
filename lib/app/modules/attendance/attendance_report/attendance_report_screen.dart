@@ -74,7 +74,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
             center: Text(
               '${value.toStringAsFixed(2)}%',
               style:
-              MyTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+              MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
             ),
             progressColor: color,
             backgroundColor: color.withOpacity(0.3),
@@ -85,7 +85,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
           const SizedBox(height: MySizes.md),
           Text(
             label,
-            style: MyTextStyles.bodyLarge,
+            style: MyTextStyle.bodyLarge,
             textAlign: TextAlign.center,
           ),
         ],
@@ -108,7 +108,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
             alignment: Alignment.centerLeft,
             child: Text(
               "Your Average vs Class Average",
-              style: MyTextStyles.headlineSmall,
+              style: MyTextStyle.headlineSmall,
             ),
           ),
           const SizedBox(height: MySizes.md),
@@ -175,7 +175,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
             alignment: Alignment.centerLeft,
             child: Text(
               "Rank Overview",
-              style: MyTextStyles.headlineSmall,
+              style: MyTextStyle.headlineSmall,
             ),
           ),
           const SizedBox(height: MySizes.md),
@@ -421,7 +421,7 @@ class StreakCard extends StatelessWidget {
         children: [
           Text(
             '🔥   $length Days',
-            style: MyTextStyles.bodyLarge,
+            style: MyTextStyle.bodyLarge,
           ),
           const SizedBox(
             width: MySizes.lg,
@@ -517,7 +517,7 @@ class AttendanceStatusCard extends StatelessWidget {
             center: Text(
               '${(percentage * 100).toStringAsFixed(1)}%',
               style:
-              MyTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+              MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
             ),
             progressColor: statusColor,
             backgroundColor: statusColor.withOpacity(0.3),
@@ -528,12 +528,12 @@ class AttendanceStatusCard extends StatelessWidget {
           const SizedBox(height: MySizes.sm),
           Text(
             '$count',
-            style: MyTextStyles.bodyLarge,
+            style: MyTextStyle.bodyLarge,
           ),
           const SizedBox(width: MySizes.xs,),
           Text(
             label,
-            style: MyTextStyles.bodyMedium,
+            style: MyTextStyle.bodyMedium,
             textAlign: TextAlign.center,
           ),
 
@@ -584,7 +584,7 @@ class AttendanceConsistencyIndicator extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 "${(100 - (controller.consistency)).toStringAsFixed(2)}%",
-                style: MyTextStyles.bodyLarge,
+                style: MyTextStyle.bodyLarge,
               ),
             ],
           ),
@@ -958,7 +958,7 @@ class AttendanceExplanationDialog extends StatelessWidget {
                 ),
                 child: Text('Close',
                     style:
-                    MyTextStyles.bodyLarge.copyWith(color: Colors.white)),
+                    MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
               ),
             ),
           ],
@@ -992,7 +992,7 @@ class AttendanceExplanationDialog extends StatelessWidget {
             ),
             child: Text(
               termLetter,
-              style: MyTextStyles.bodyLarge.copyWith(color: Colors.white),
+              style: MyTextStyle.bodyLarge.copyWith(color: Colors.white),
             ),
           ),
           const SizedBox(width: MySizes.md),
@@ -1001,7 +1001,7 @@ class AttendanceExplanationDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(term, style: Theme.of(context).textTheme.bodyLarge),
-                Text(description, style: MyTextStyles.bodyMedium),
+                Text(description, style: MyTextStyle.bodyMedium),
               ],
             ),
           ),
@@ -1035,7 +1035,7 @@ class AttendanceExplanationDialog extends StatelessWidget {
             ),
             child: Text(
               termLetter,
-              style: MyTextStyles.bodyLarge.copyWith(color: color),
+              style: MyTextStyle.bodyLarge.copyWith(color: color),
             ),
           ),
           const SizedBox(width: MySizes.md),
@@ -1052,10 +1052,10 @@ class AttendanceExplanationDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: MySizes.xs),
                 Text(calculation,
-                    style: MyTextStyles.bodyLarge
+                    style: MyTextStyle.bodyLarge
                         .copyWith(fontWeight: FontWeight.w600, fontSize: 13)),
                 const SizedBox(height: MySizes.sm),
-                Text(description, style: MyTextStyles.bodyMedium),
+                Text(description, style: MyTextStyle.bodyMedium),
               ],
             ),
           ),
@@ -1088,7 +1088,7 @@ class AttendanceExplanationDialog extends StatelessWidget {
             ),
             child: Text(
               termLetter,
-              style: MyTextStyles.bodyLarge.copyWith(color: Colors.white),
+              style: MyTextStyle.bodyLarge.copyWith(color: Colors.white),
             ),
           ),
           const SizedBox(width: MySizes.md),
@@ -1105,7 +1105,7 @@ class AttendanceExplanationDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: MySizes.xs),
                 Text(calculation,
-                    style: MyTextStyles.bodyLarge
+                    style: MyTextStyle.bodyLarge
                         .copyWith(fontWeight: FontWeight.w600, fontSize: 13)),
               ],
             ),

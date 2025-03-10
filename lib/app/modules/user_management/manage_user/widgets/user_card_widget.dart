@@ -61,11 +61,11 @@ class UserCardWidget extends StatelessWidget {
                   children: [
                     Text(
                       (rollNumber != null && rollNumber.isNotEmpty) ? '$rollNumber. $fullName' : fullName ?? "N/A", //Simplified conditional display and default
-                      style: MyTextStyles.titleLarge.copyWith(fontSize: 15),
+                      style: MyTextStyle.titleLarge.copyWith(fontSize: 15),
                     ),
                     Text(
                       userId,
-                      style: MyTextStyles.labelMedium.copyWith(fontSize: 11),
+                      style: MyTextStyle.labelMedium.copyWith(fontSize: 11),
                     ),
                   ],
                 ),
@@ -114,7 +114,7 @@ class UserCardWidget extends StatelessWidget {
                   ),
                   Text(
                     userProfile.fullName ?? "N/A",// Provide default value
-                    style: MyTextStyles.titleLarge.copyWith(fontSize: 18),
+                    style: MyTextStyle.titleLarge.copyWith(fontSize: 18),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -123,7 +123,7 @@ class UserCardWidget extends StatelessWidget {
                   ),
                   Text(
                     'User ID: ${userProfile.userId}',
-                    style: MyTextStyles.bodyMedium.copyWith(fontSize: 13),
+                    style: MyTextStyle.bodyMedium.copyWith(fontSize: 13),
                   ),
                   const SizedBox(
                     height: MySizes.md,
@@ -140,10 +140,10 @@ class UserCardWidget extends StatelessWidget {
                             child: Column(
                               children: [
                                 Text(className ?? 'N/A',
-                                    style: MyTextStyles.titleLarge),
+                                    style: MyTextStyle.titleLarge),
                                 Text(
                                   'Class',
-                                  style: MyTextStyles.bodyMedium
+                                  style: MyTextStyle.bodyMedium
                                       .copyWith(fontSize: 13),
                                 ),
                               ],
@@ -158,10 +158,10 @@ class UserCardWidget extends StatelessWidget {
                             child: Column(
                               children: [
                                 Text(sectionName ?? 'N/A',
-                                    style: MyTextStyles.titleLarge),
+                                    style: MyTextStyle.titleLarge),
                                 Text(
                                   'Section',
-                                  style: MyTextStyles.bodyMedium
+                                  style: MyTextStyle.bodyMedium
                                       .copyWith(fontSize: 13),
                                 ),
                               ],
@@ -176,10 +176,10 @@ class UserCardWidget extends StatelessWidget {
                             child: Column(
                               children: [
                                 Text(rollNumber ?? "N/A",
-                                    style: MyTextStyles.titleLarge),
+                                    style: MyTextStyle.titleLarge),
                                 Text(
                                   'Roll No',
-                                  style: MyTextStyles.bodyMedium
+                                  style: MyTextStyle.bodyMedium
                                       .copyWith(fontSize: 13),
                                 ),
                               ],

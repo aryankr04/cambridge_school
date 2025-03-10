@@ -118,7 +118,7 @@ class _MySearchableDropdownState extends State<MySearchableDropdown> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.labelText != null) ...[
-            Text(widget.labelText!, style: MyTextStyles.inputLabel),
+            Text(widget.labelText!, style: MyTextStyle.inputLabel),
             const SizedBox(height: 6),
           ],
           FocusScope(
@@ -131,10 +131,10 @@ class _MySearchableDropdownState extends State<MySearchableDropdown> {
               },
               child: TextField(
                 controller: _controller,
-                style: MyTextStyles.inputField,
+                style: MyTextStyle.inputField,
                 decoration: InputDecoration(
                   hintText: widget.hintText,
-                  hintStyle: MyTextStyles.placeholder,
+                  hintStyle: MyTextStyle.placeholder,
                   suffixIcon: Obx(() => Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

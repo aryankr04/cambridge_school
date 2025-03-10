@@ -73,7 +73,7 @@ class _NoticeTileState extends State<NoticeTile> {
               children: [
                 ReadMoreText(
                   widget.notice.description,
-                  style: MyTextStyles.labelMedium
+                  style: MyTextStyle.labelMedium
                       .copyWith(color: MyColors.iconColor),
                   trimLines: 3,
                   trimMode: TrimMode.Line,
@@ -88,7 +88,7 @@ class _NoticeTileState extends State<NoticeTile> {
                 if (widget.isEdit) ...[
                   const Text(
                     'Audience',
-                    style: MyTextStyles.bodyLarge,
+                    style: MyTextStyle.bodyLarge,
                   ),
                   SizedBox(
                     height: MySizes.sm,
@@ -109,7 +109,7 @@ class _NoticeTileState extends State<NoticeTile> {
                       widget.notice.targetClass!.isNotEmpty) ...[
                     const Text(
                       'Class',
-                      style: MyTextStyles.bodyLarge,
+                      style: MyTextStyle.bodyLarge,
                     ),
                     const SizedBox(
                       height: MySizes.sm,
@@ -162,14 +162,14 @@ class _NoticeTileState extends State<NoticeTile> {
             children: [
               Text(
                 title,
-                style: MyTextStyles.bodyLarge
+                style: MyTextStyle.bodyLarge
                     .copyWith(letterSpacing: 0, height: 1.25,fontSize: 13),
                 maxLines: 2, // Limit title to 2 lines
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
                 formattedCreatedTime,
-                style: MyTextStyles.labelSmall,
+                style: MyTextStyle.labelSmall,
                 maxLines: 1, // Limit time to 1 line
                 overflow: TextOverflow.ellipsis,
               ),

@@ -83,7 +83,7 @@ class _LeaveCardState extends State<LeaveCard> {
               children: [
                 ReadMoreText(
                   widget.leave.reason,
-                  style: MyTextStyles.labelMedium
+                  style: MyTextStyle.labelMedium
                       .copyWith(color: MyColors.iconColor),
                   trimLines: 3,
                   trimMode: TrimMode.Line,

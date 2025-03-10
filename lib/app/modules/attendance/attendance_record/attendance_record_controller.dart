@@ -1,3 +1,4 @@
+import 'package:cambridge_school/app/modules/class_management/class_management_repositories.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -23,6 +24,7 @@ class AttendanceRecordController extends GetxController {
   //----------------------------------------------------------------------------
   // Repositories
   final FirestoreSchoolRepository schoolRepository;
+  final ClassManagementRepository classManagementRepository;
   final FirestoreAttendanceRecordRepository attendanceRepository;
 
   //----------------------------------------------------------------------------
@@ -30,7 +32,9 @@ class AttendanceRecordController extends GetxController {
   AttendanceRecordController({
     FirestoreSchoolRepository? schoolRepo,
     FirestoreAttendanceRecordRepository? attendanceRepo,
+    ClassManagementRepository? classRepo
   })  : schoolRepository = schoolRepo ?? FirestoreSchoolRepository(),
+        classManagementRepository = classRepo ?? ClassManagementRepository(),
         attendanceRepository =
             attendanceRepo ?? FirestoreAttendanceRecordRepository();
 
@@ -55,44 +59,46 @@ class AttendanceRecordController extends GetxController {
     try {
       await _fetchSchoolSections();
       await _fetchDailyAttendanceRecord();
-    } catch (error) {
-      errorMessage(error.toString());
-      print('Error during fetchData: $error');
     } finally {
       isLoading(false);
     }
   }
 
   Future<void> _fetchSchoolSections() async {
+    isLoading.value = true;
     try {
-      final SchoolModel? school =
-      await schoolRepository.getSchoolById(schoolId);
-      if (school != null) {
-        sections.assignAll(school.sections);
-      } else {
-        errorMessage('School not found');
+      final List<ClassData> classData =
+      await classManagementRepository.fetchClassData(schoolId);
+
+      List<SectionData> allSections = [];
+      for (var classItem in classData) {
+        for (var sectionName in classItem.sectionName) {
+          allSections.add(SectionData(
+            classId: classItem.classId,
+            className: classItem.className,
+            sectionName: sectionName,
+          ));
+        }
       }
-    } catch (error) {
-      errorMessage('Failed to load school sections: $error');
+      sections.assignAll(allSections);  // Use assignAll for RxList
+        } catch (error) {
+      errorMessage.value = 'Failed to load school sections: $error';
       print('Error fetching school sections: $error');
+    } finally {
+      isLoading.value = false;
     }
   }
 
   Future<void> _fetchDailyAttendanceRecord() async {
-    try {
-      final DailyAttendanceRecord? dailyRecord =
-      await attendanceRepository.getDailyAttendanceRecord(
-        schoolId,
-        selectedDate.value,
-      );
+    final DailyAttendanceRecord? dailyRecord =
+    await attendanceRepository.getDailyAttendanceRecord(
+      schoolId,
+      selectedDate.value,
+    );
 
-      attendanceSummaries
-          .assignAll(dailyRecord?.classAttendanceSummaries ?? []);
-      employeeAttendanceSummary.value = dailyRecord?.employeeAttendanceSummary;
-    } catch (error) {
-      errorMessage('Failed to load attendance record: $error');
-      print('Error fetching daily attendance record: $error');
-    }
+    attendanceSummaries
+        .assignAll(dailyRecord?.classAttendanceSummaries ?? []);
+    employeeAttendanceSummary.value = dailyRecord?.employeeAttendanceSummary;
   }
 
   //----------------------------------------------------------------------------

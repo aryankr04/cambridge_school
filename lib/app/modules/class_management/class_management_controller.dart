@@ -24,8 +24,8 @@ class ClassManagementController extends GetxController {
   final RxBool isLoadingClassDetails =
   RxBool(false); // Loading Specific Class Doc.
   final RxList<String> availableClassNames = <String>[].obs;
-  final Rx<SchoolClassModel?> selectedClass =
-  Rx<SchoolClassModel?>(null); // Hold selected class details
+  final Rx<ClassModel?> selectedClass =
+  Rx<ClassModel?>(null); // Hold selected class details
   final Rxn<String> selectedClassValue = Rxn<String>();
 
   //----------------------------------------------------------------------------
@@ -127,7 +127,7 @@ class ClassManagementController extends GetxController {
       availableClassNames.add(className); //Optimistic Update
       await _repository.addClassName(schoolId, className);
 
-      SchoolClassModel newClass = SchoolClassModel(
+      ClassModel newClass = ClassModel(
           schoolId: schoolId,
           className: className,
           sections: [],
@@ -157,7 +157,7 @@ class ClassManagementController extends GetxController {
       AlertDialog(
         title: const Text(
           "Confirm Delete",
-          style: MyTextStyles.headlineSmall,
+          style: MyTextStyle.headlineSmall,
         ),
         content: Text("Are you sure you want to delete the class $className?"),
         actions: [
@@ -195,7 +195,7 @@ class ClassManagementController extends GetxController {
   Future<void> loadClassDetails(String className) async {
     try {
       isLoadingClassDetails.value = true;
-      final List<SchoolClassModel> fetchedClasses =
+      final List<ClassModel> fetchedClasses =
       await _repository.fetchClasses(schoolId); // Fetch again
 
       selectedClass.value = fetchedClasses.firstWhereOrNull(
@@ -211,7 +211,7 @@ class ClassManagementController extends GetxController {
   // Class Section Management
 
   /// Adds or updates a class (section).
-  Future<void> addOrUpdateClass(SchoolClassModel schoolClass) async {
+  Future<void> addOrUpdateClass(ClassModel schoolClass) async {
     if (selectedClassName.isEmpty) {
       Get.snackbar('Error', 'Please select a class name first.');
       return;
@@ -232,17 +232,17 @@ class ClassManagementController extends GetxController {
 
   /// Deletes a section from a class.
   Future<void> deleteSection(
-      SchoolClassModel schoolClass, SchoolSectionModel sectionToDelete) async {
+      ClassModel schoolClass, SectionModel sectionToDelete) async {
     if (selectedClassName.isEmpty) {
       Get.snackbar('Error', 'Please select a class name first.');
       return;
     }
 
     try {
-      List<SchoolSectionModel> updatedSections = schoolClass.sections!
+      List<SectionModel> updatedSections = schoolClass.sections!
           .where((section) => section != sectionToDelete)
           .toList();
-      SchoolClassModel updatedClass =
+      ClassModel updatedClass =
       schoolClass.copyWith(sections: updatedSections);
 
       await _repository.deleteSection(schoolClass.id!, updatedSections);
@@ -267,7 +267,7 @@ class ClassManagementController extends GetxController {
       List<String> updatedSubjects = List.from(classModel.subjects ?? []);
       updatedSubjects.removeWhere((element) => element == subjectId);
 
-      SchoolClassModel updatedClass =
+      ClassModel updatedClass =
       classModel.copyWith(subjects: updatedSubjects);
       await _repository.addOrUpdateClass(updatedClass);
 
@@ -287,7 +287,7 @@ class ClassManagementController extends GetxController {
       AlertDialog(
         title: const Text(
           'Add Class Name',
-          style: MyTextStyles.headlineSmall,
+          style: MyTextStyle.headlineSmall,
         ),
         content: SizedBox(
           width: Get.width,
@@ -330,7 +330,7 @@ class ClassManagementController extends GetxController {
 
   /// Shows the Add Subject dialog.
   void showAddSubjectDialog(
-      SchoolClassModel selectedClass, String? existingSubject) {
+      ClassModel selectedClass, String? existingSubject) {
     if (existingSubject != null) {
       subjectNameController.text = existingSubject ?? '';
     } else {
@@ -341,7 +341,7 @@ class ClassManagementController extends GetxController {
       AlertDialog(
         title: Text(
           (existingSubject == null) ? 'Add Subject' : 'Edit Subject',
-          style: MyTextStyles.headlineSmall,
+          style: MyTextStyle.headlineSmall,
         ),
         content: SizedBox(
           width: Get.width,
@@ -386,7 +386,7 @@ class ClassManagementController extends GetxController {
                   updatedSubjects[index] = subjectNameController.text;
                 }
               }
-              SchoolClassModel updatedClass =
+              ClassModel updatedClass =
               selectedClass.copyWith(subjects: updatedSubjects);
 
               addOrUpdateClass(updatedClass); // Update Class
@@ -402,12 +402,12 @@ class ClassManagementController extends GetxController {
   }
 
   /// Shows the Add Section dialog.
-  void showAddSectionDialog(SchoolClassModel selectedClassModel) {
+  void showAddSectionDialog(ClassModel selectedClassModel) {
     Get.dialog(
       AlertDialog(
         title: const Text(
           'Add Section',
-          style: MyTextStyles.headlineSmall,
+          style: MyTextStyle.headlineSmall,
         ),
         content: SingleChildScrollView(
           child: SizedBox(
@@ -482,7 +482,7 @@ class ClassManagementController extends GetxController {
                       return;
                     }
 
-                    SchoolSectionModel newSection = SchoolSectionModel(
+                    SectionModel newSection = SectionModel(
                       sectionName: sectionNameController.text,
                       classTeacherId: teacherIdController.text,
                       classTeacherName: classTeacherNameController.text,
@@ -491,12 +491,12 @@ class ClassManagementController extends GetxController {
                       description: descriptionController.text,
                     );
 
-                    List<SchoolSectionModel> updatedSections =
+                    List<SectionModel> updatedSections =
                     List.from(selectedClassModel.sections ?? []);
 
                     updatedSections.add(newSection);
 
-                    SchoolClassModel updatedClass =
+                    ClassModel updatedClass =
                     selectedClassModel.copyWith(sections: updatedSections);
 
                     await _repository.addOrUpdateClass(updatedClass);
@@ -519,7 +519,7 @@ class ClassManagementController extends GetxController {
 
   /// Shows the Add Section dialog for editing an existing section.
   void showAddSectionDialogForEdit(
-      SchoolClassModel selectedClass, SchoolSectionModel existingSection) {
+      ClassModel selectedClass, SectionModel existingSection) {
     sectionNameController.text = existingSection.sectionName ?? '';
     teacherIdController.text = existingSection.classTeacherId ?? '';
     classTeacherNameController.text = existingSection.classTeacherName ?? '';
@@ -531,7 +531,7 @@ class ClassManagementController extends GetxController {
       AlertDialog(
         title: const Text(
           'Edit Section',
-          style: MyTextStyles.headlineSmall,
+          style: MyTextStyle.headlineSmall,
         ),
         content: SingleChildScrollView(
           child: SizedBox(
@@ -603,7 +603,7 @@ class ClassManagementController extends GetxController {
                       return;
                     }
 
-                    SchoolSectionModel updatedSection = SchoolSectionModel(
+                    SectionModel updatedSection = SectionModel(
                       sectionName: sectionNameController.text,
                       classTeacherId: teacherIdController.text,
                       classTeacherName: classTeacherNameController.text,
@@ -612,14 +612,14 @@ class ClassManagementController extends GetxController {
                       description: descriptionController.text,
                     );
 
-                    List<SchoolSectionModel> updatedSections =
+                    List<SectionModel> updatedSections =
                     List.from(selectedClass.sections ?? []);
                     int index = updatedSections
                         .indexWhere((element) => element == existingSection);
                     if (index != -1) {
                       updatedSections[index] = updatedSection;
                     }
-                    SchoolClassModel updatedClass =
+                    ClassModel updatedClass =
                     selectedClass.copyWith(sections: updatedSections);
 
                     await _repository.addOrUpdateClass(updatedClass);

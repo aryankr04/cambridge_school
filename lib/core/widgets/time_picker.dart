@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../utils/constants/text_styles.dart';
+
 class MyTimePickerField extends StatelessWidget {
   final Rx<TimeOfDay?> selectedTime;
   final TimeOfDay? initialTime; // Make initialTime optional
@@ -34,42 +36,60 @@ class MyTimePickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: InkWell(
-        onTap: () => _selectTime(context),
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: labelText,
-            hintText: hintText,
-            border: border,
-            suffixIcon: suffixIcon ?? const Icon(Icons.access_time),
-            prefixIcon: prefixIcon,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (labelText != null) ...[
+          Text(
+            labelText!,
+            style: MyTextStyle.inputLabel,
           ),
-          child: Obx(() => Text(
-            selectedTime.value != null
-                ? formatTimeOfDay(selectedTime.value!) // Format the TimeOfDay
-                : hintText ?? 'Select Time',
-            style: selectedTime.value != null ? textStyle : hintStyle,
-            textAlign: textAlign,
-          )),
+          const SizedBox(height: 6),
+        ],
+        Padding(
+          padding: EdgeInsets.zero,
+          child: InkWell(
+            onTap: () => _selectTime(context),
+            child: InputDecorator(
+              decoration: InputDecoration(
+
+                labelText: labelText,
+                hintText: hintText,
+                border: border,
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                suffixIcon: suffixIcon ?? const Icon(Icons.access_time),
+                prefixIcon: prefixIcon,
+              ),
+              child: Obx(() => Text(
+                    selectedTime.value != null
+                        ? formatTimeOfDay(
+                            selectedTime.value!)
+                        : hintText ?? 'Select Time',
+                    style: selectedTime.value != null
+                        ? textStyle ?? MyTextStyle.inputField
+                        : hintStyle??MyTextStyle.placeholder,
+                    textAlign: textAlign,
+                  )),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
   String formatTimeOfDay(TimeOfDay tod) {
     final now = DateTime.now();
     final dt = DateTime(now.year, now.month, now.day, tod.hour, tod.minute);
-    final format = DateFormat.jm();  //"6:00 AM"
+    final format = DateFormat.jm(); //"6:00 AM"
     return format.format(dt);
   }
-
 
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: selectedTime.value ?? initialTime ?? TimeOfDay.now(), // Provide default if initialTime is null
+      initialTime: selectedTime.value ??
+          initialTime ??
+          TimeOfDay.now(), // Provide default if initialTime is null
     );
 
     if (picked != null && picked != selectedTime.value) {

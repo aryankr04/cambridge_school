@@ -131,7 +131,7 @@ class UserTabView extends GetView<UserManagementController> {
                             return 'Unknown';
                         }
                       }(),
-                      style: MyTextStyles.headlineSmall,
+                      style: MyTextStyle.headlineSmall,
                     ),
                   ),
                   TextButton(
@@ -251,7 +251,7 @@ class _FilterDialogState extends State<FilterDialog> {
     return AlertDialog(
       title: const Text(
         'Filter Options',
-        style: MyTextStyles.headlineSmall,
+        style: MyTextStyle.headlineSmall,
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -260,7 +260,7 @@ class _FilterDialogState extends State<FilterDialog> {
           // Sort By Options
           const Text(
             "Sort By",
-            style: MyTextStyles.titleLarge,
+            style: MyTextStyle.titleLarge,
           ),
           const SizedBox(
             height: MySizes.md,
@@ -301,7 +301,7 @@ class _FilterDialogState extends State<FilterDialog> {
           const SizedBox(height: MySizes.lg),
           const Text(
             "Order By",
-            style: MyTextStyles.titleLarge,
+            style: MyTextStyle.titleLarge,
           ),
           const SizedBox(
             height: MySizes.md,

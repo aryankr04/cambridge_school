@@ -3,7 +3,7 @@ import 'package:cambridge_school/app/modules/user_management/create_user/models/
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/widgets/button.dart';
-import 'package:cambridge_school/core/widgets/dialog_dropdown.dart';
+import 'package:cambridge_school/core/widgets/bottom_sheet_dropdown.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -65,7 +65,7 @@ class _CreateNoticeScreenState extends State<CreateNoticeScreen> {
               ),
               const SizedBox(height: MySizes.md,),
 
-              MyDialogDropdown(
+              MyBottomSheetDropdown(
                 optionsForChips: Roles().getAllRolesAsString(),
                 isMultipleSelection: true,
                 onMultipleChanged: (List<String>? values) {
@@ -83,7 +83,7 @@ class _CreateNoticeScreenState extends State<CreateNoticeScreen> {
 
               Obx(() => (controller.selectedTargetAudience?.contains('Student') ?? false) ||
                   (controller.selectedTargetAudience?.contains('All') ?? false)
-                  ? MyDialogDropdown(
+                  ? MyBottomSheetDropdown(
                 optionsForChips: MyLists.classOptions,
                 isMultipleSelection: true,
                 onMultipleChanged: (List<String>? values) {

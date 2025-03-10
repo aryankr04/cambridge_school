@@ -11,6 +11,9 @@ import 'package:cambridge_school/app/modules/leave/leave_dashboard/leave_dashboa
 import 'package:cambridge_school/app/modules/leave/leave_request/leave_request_binding.dart';
 import 'package:cambridge_school/app/modules/leave/leave_request/leave_request_screen.dart';
 import 'package:cambridge_school/app/modules/manage_school/screens/create_school_0.dart';
+import 'package:cambridge_school/app/modules/routine/create_routine/create_routine_binding.dart';
+import 'package:cambridge_school/app/modules/routine/create_routine/create_routine_controller.dart';
+import 'package:cambridge_school/app/modules/routine/create_routine/create_routine_screen.dart';
 import 'package:cambridge_school/app/modules/user_management/create_user/bindings/create_user_binding.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/bindings/user_management_binding.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/screens/user_management_screen.dart';
@@ -80,8 +83,11 @@ class AppRoutes {
   /// Route for the Leave Dashboard screen.
   static const String leaveDashboardRoute = '/leave-dashboard';
 
- /// Route for the Leave Dashboard screen.
+ /// Route for the Leave Leave Request screen.
   static const String leaveRequestRoute = '/leave-request';
+
+  /// Route for the Create Routine screen.
+  static const String createRoutineRoute = '/create-routine';
 
   //----------------------------------------------------------------------------
   // Route Definitions (Using GetX GetPage)
@@ -155,6 +161,11 @@ class AppRoutes {
       name: leaveRequestRoute,
       page: () =>   LeaveRequestScreen(),
       binding: LeaveRequestBinding(),
+    ),
+    GetPage(
+      name: createRoutineRoute,
+      page: () =>   const CreateRoutineScreen(schoolId: 'SCH00001'),
+      binding: CreateRoutineBinding(),
     ),
   ];
 }

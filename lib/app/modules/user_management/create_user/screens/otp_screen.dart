@@ -36,7 +36,7 @@ class OtpScreen extends GetView<OtpController> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text("Verification",
-            style: MyTextStyles.headlineSmall
+            style: MyTextStyle.headlineSmall
                 .copyWith(color: MyColors.headlineTextColor)),
         centerTitle: true,
       ),
@@ -57,7 +57,7 @@ class OtpScreen extends GetView<OtpController> {
               const SizedBox(height: MySizes.lg),
               Text(
                 "Enter Verification Code",
-                style: MyTextStyles.headlineSmall.copyWith(
+                style: MyTextStyle.headlineSmall.copyWith(
                     fontWeight: FontWeight.w700,
                     color: MyColors.headlineTextColor),
                 textAlign: TextAlign.center,
@@ -66,7 +66,7 @@ class OtpScreen extends GetView<OtpController> {
               Text(
                 textAlign: TextAlign.center,
                 "We've sent a 6-digit OTP to +91 $mobileNo. Enter it below to verify your account.",
-                style: MyTextStyles.bodySmall.copyWith(),
+                style: MyTextStyle.bodySmall.copyWith(),
               ),
               const SizedBox(height: MySizes.xl+16),
               Padding(
@@ -78,7 +78,7 @@ class OtpScreen extends GetView<OtpController> {
                   decoration: BoxLooseDecoration(
                     strokeWidth: 2,
                     gapSpace: 10,
-                    textStyle: MyTextStyles.headlineSmall
+                    textStyle: MyTextStyle.headlineSmall
                         .copyWith(color: MyColors.headlineTextColor),
                     strokeColorBuilder: FixedColorBuilder(
                         MyColors.subtitleTextColor.withOpacity(0.5)),
@@ -108,7 +108,7 @@ class OtpScreen extends GetView<OtpController> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("Didn't get the OTP?",
-                      style: MyTextStyles.bodyMedium.copyWith(fontSize: 14,color: MyColors.captionTextColor)),
+                      style: MyTextStyle.bodyMedium.copyWith(fontSize: 14,color: MyColors.captionTextColor)),
                   Obx(
                     () => TextButton(
                       onPressed: controller.isResendEnabled.value
@@ -118,7 +118,7 @@ class OtpScreen extends GetView<OtpController> {
                         controller.isResendEnabled.value
                             ? "Resend OTP"
                             : "Resend OTP in ${controller.resendTimer.value} seconds",
-                        style: MyTextStyles.bodyMedium.copyWith(
+                        style: MyTextStyle.bodyMedium.copyWith(
                           color: controller.isResendEnabled.value
                               ? MyColors.activeBlue
                               : MyColors.subtitleTextColor,

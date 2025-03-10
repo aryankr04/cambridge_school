@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 
 /// Custom Class for Individual Text Styles
-class MyTextStyles {
+class MyTextStyle {
   static const TextStyle headlineLarge = TextStyle(fontSize: 32.0, fontWeight: FontWeight.w600, color: MyColors.darkBackgroundColor);
   static const TextStyle headlineMedium = TextStyle(fontSize: 24.0, fontWeight: FontWeight.w600, color: MyColors.darkBackgroundColor);
-  static const TextStyle headlineSmall = TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600, color: MyColors.darkBackgroundColor);
+  static const TextStyle headlineSmall = TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600, color: MyColors.darkBackgroundColor);
 
   static const TextStyle titleLarge = TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500, color: MyColors.darkBackgroundColor);
   static const TextStyle titleMedium = TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500, color: MyColors.subtitleTextColor);

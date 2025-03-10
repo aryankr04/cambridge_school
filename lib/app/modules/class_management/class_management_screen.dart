@@ -109,7 +109,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
   }
 
   Widget _buildClassContent(
-      BuildContext context, SchoolClassModel selectedClass) {
+      BuildContext context, ClassModel selectedClass) {
     return MyCard(
       border: Border.all(width: 1, color: MyColors.borderColor),
       padding: EdgeInsets.zero,
@@ -148,7 +148,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
                 controller.selectedClassName.isNotEmpty
                     ? "Class - ${controller.selectedClassName.value}"
                     : 'Select a Class',
-                style: MyTextStyles.headlineSmall
+                style: MyTextStyle.headlineSmall
                     .copyWith(color: Colors.white, fontSize: 18),
               ),
             ),
@@ -173,7 +173,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
   }
 
   Widget _buildSectionList(
-      BuildContext context, SchoolClassModel selectedClass) {
+      BuildContext context, ClassModel selectedClass) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -202,7 +202,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
   }
 
   Widget _buildSectionHeader(
-      BuildContext context, SchoolClassModel selectedClass) {
+      BuildContext context, ClassModel selectedClass) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -221,7 +221,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
   }
 
   Widget _buildSubjectList(
-      BuildContext context, SchoolClassModel selectedClass) {
+      BuildContext context, ClassModel selectedClass) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -248,7 +248,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
   }
 
   Widget _buildSubjectHeader(
-      BuildContext context, SchoolClassModel selectedClass) {
+      BuildContext context, ClassModel selectedClass) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

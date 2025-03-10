@@ -81,7 +81,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
                 children: [
                   Text(
                     'Employee Attendance',
-                    style: MyTextStyles.titleLarge
+                    style: MyTextStyle.titleLarge
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: MySizes.sm),
@@ -91,7 +91,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
                       children: [
                         Text(
                           'Attendance Taken By: ${controller.employeeAttendanceSummary.value?.markedBy.name} (${controller.employeeAttendanceSummary.value?.markedBy.uid})',
-                          style: MyTextStyles.bodyMedium,
+                          style: MyTextStyle.bodyMedium,
                         ),
                         const SizedBox(height: MySizes.xs),
                         Row(
@@ -143,7 +143,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
                 alignment: Alignment.center,
                 child: Text(
                   buttonText,
-                  style: MyTextStyles.bodyLarge.copyWith(
+                  style: MyTextStyle.bodyLarge.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -164,7 +164,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
         children: [
           Text(
             controller.getFormattedSelectedDate(),
-            style: MyTextStyles.headlineSmall
+            style: MyTextStyle.headlineSmall
                 .copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(
@@ -263,7 +263,7 @@ class ClassAttendanceSummaryCard extends StatelessWidget {
                 children: [
                   Text(
                     'Class ${summary.className} - ${summary.sectionName}',
-                    style: MyTextStyles.titleLarge
+                    style: MyTextStyle.titleLarge
                         .copyWith(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -273,7 +273,7 @@ class ClassAttendanceSummaryCard extends StatelessWidget {
                       children: [
                         Text(
                           'By: ${summary.markedBy.name} (${summary.markedBy.uid})',
-                          style: MyTextStyles.labelMedium
+                          style: MyTextStyle.labelMedium
                               .copyWith(color: MyColors.captionTextColor),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -324,7 +324,7 @@ class ClassAttendanceSummaryCard extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   buttonText,
-                  style: MyTextStyles.bodyLarge.copyWith(
+                  style: MyTextStyle.bodyLarge.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),

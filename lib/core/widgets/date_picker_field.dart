@@ -42,30 +42,31 @@ class MyDatePickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (labelText != null)
-          ...[
-            Text(
-              labelText!,
-              style: MyTextStyles.inputLabel,
-            ),
-            const SizedBox(height: 6),
-          ],
+        if (labelText != null) ...[
+          Text(
+            labelText!,
+            style: MyTextStyle.inputLabel,
+          ),
+          const SizedBox(height: 6),
+        ],
         Padding(
-          padding: const EdgeInsets.only(bottom: MySizes.md),
+          // padding: const EdgeInsets.only(bottom: MySizes.md),
+          padding: EdgeInsets.zero,
+
           child: InkWell(
             onTap: () => _selectDate(context),
             child: InputDecorator(
               decoration: InputDecoration(
-
                 hintText: hintText,
                 border: border,
                 suffixIcon: suffixIcon ?? const Icon(Icons.calendar_month),
                 prefixIcon: prefixIcon,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
-                  borderSide:BorderSide.none,
+                  borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(MySizes.inputFieldRadius),
@@ -90,13 +91,14 @@ class MyDatePickerField extends StatelessWidget {
                 ),
               ),
               child: Obx(() => Text(
-                selectedDate.value != null
-                    ? DateFormat('yyyy-MM-dd').format(selectedDate.value!)
-                    : hintText ?? 'Select Date',
-                style: selectedDate.value != null ? textStyle??MyTextStyles.inputField : hintStyle??MyTextStyles.placeholder,
-                textAlign: textAlign,
-              )),
-
+                    selectedDate.value != null
+                        ? DateFormat('yyyy-MM-dd').format(selectedDate.value!)
+                        : hintText ?? 'Select Date',
+                    style: selectedDate.value != null
+                        ? textStyle ?? MyTextStyle.inputField
+                        : hintStyle ?? MyTextStyle.placeholder,
+                    textAlign: textAlign,
+                  )),
             ),
           ),
         ),

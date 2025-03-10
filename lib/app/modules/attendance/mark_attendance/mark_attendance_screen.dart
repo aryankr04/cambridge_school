@@ -109,7 +109,7 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
                 sectionData != null
                     ? "Class ${sectionData!.className}-${sectionData!.sectionName}"
                     : 'Attendance Details',
-                style: MyTextStyles.headlineSmall,
+                style: MyTextStyle.headlineSmall,
               ),
               Row(
                 children: [
@@ -121,7 +121,7 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
                   const SizedBox(width: MySizes.sm),
                   Text(
                     controller.getFormattedSelectedDate(),
-                    style: MyTextStyles.bodyMedium
+                    style: MyTextStyle.bodyMedium
                         .copyWith(fontWeight: FontWeight.w500),
                   ),
                 ],
@@ -214,7 +214,7 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
       AlertDialog(
         title: const Text(
           'Attendance Details',
-          style: MyTextStyles.headlineSmall,
+          style: MyTextStyle.headlineSmall,
         ),
         content: SizedBox(
           width: Get.width,
@@ -401,20 +401,20 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
             children: [
               Text(
                 "Roll No",
-                style: MyTextStyles.bodyLarge.copyWith(color: Colors.white),
+                style: MyTextStyle.bodyLarge.copyWith(color: Colors.white),
               ),
               const SizedBox(width: MySizes.md),
               Text("Students",
-                  style: MyTextStyles.bodyLarge.copyWith(color: Colors.white)),
+                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
             ],
           ),
           Row(
             children: [
               Text("Present",
-                  style: MyTextStyles.bodyLarge.copyWith(color: Colors.white)),
+                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
               const SizedBox(width: MySizes.md),
               Text("Absent",
-                  style: MyTextStyles.bodyLarge.copyWith(color: Colors.white)),
+                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
             ],
           ),
         ],
@@ -506,7 +506,7 @@ class MarkAllWidget extends GetView<MarkAttendanceController> {
                 SizedBox(width: MySizes.xl - 14),
                 Text(
                   "Mark All",
-                  style: MyTextStyles.bodyLarge,
+                  style: MyTextStyle.bodyLarge,
                 ),
               ],
             ),

@@ -30,18 +30,34 @@ class FirestoreAttendanceRecordRepository {
   Future<DailyAttendanceRecord?> getDailyAttendanceRecord(String schoolId, DateTime date) async {
     try {
       final String dailyAttendanceDocPath = _getDailyAttendanceDocPath(schoolId, date);
-      final snapshot = await _firestoreService.getDocumentById(dailyAttendanceDocPath, formatDate(date));
+      final String documentId = formatDate(date);
 
-      if (snapshot.data() == null) {
-        return null; // Document does not exist.
+      print('📂 Fetching document from path: $dailyAttendanceDocPath with ID: $documentId');
+
+      final snapshot = await _firestoreService.getDocumentById(dailyAttendanceDocPath, documentId);
+
+      if (!snapshot.exists || snapshot.data() == null) {
+        print('❌ Document not found: $documentId in $dailyAttendanceDocPath');
+        return null;
       }
 
-      return DailyAttendanceRecord.fromMap(snapshot.data() as Map<String, dynamic>);
+      final data = snapshot.data() as Map<String, dynamic>?;
+
+      if (data == null) {
+        print('⚠️ Snapshot data is null for document ID: $documentId');
+        return null;
+      }
+
+      print('✅ Document found: $documentId, parsing data...');
+      return DailyAttendanceRecord.fromMap(data);
     } catch (e) {
-      print("Error getting DailyAttendanceRecord: $e");
-      return null; // Return null if record doesn't exist or if an error occurs.
+      print("🚨 Error getting DailyAttendanceRecord: $e");
+      return null;
     }
   }
+
+
+
 
   /// Updates an existing daily attendance record in Firestore.
   Future<void> updateDailyAttendanceRecord(DailyAttendanceRecord record) async {

@@ -289,7 +289,7 @@ class CreateUserController extends GetxController {
             editingQualification.value == null
                 ? 'Add Qualification'
                 : 'Edit Qualification',
-            style: MyTextStyles.headlineSmall,
+            style: MyTextStyle.headlineSmall,
           ),
         ),
         content: SizedBox(

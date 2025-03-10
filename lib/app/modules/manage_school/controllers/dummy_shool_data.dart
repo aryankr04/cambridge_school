@@ -159,19 +159,11 @@ class SchoolDummyData {
     ClassData generateClassData() {
       return ClassData(
         classId: uuid.v4(),
-        className: (random.nextInt(12) + 1).toString(),
+        className: (random.nextInt(12) + 1).toString(), sectionName: [],
       );
     }
 
-    //Section Data
-    SectionData generateSectionData() {
-      return SectionData(
-        sectionId: uuid.v4(),
-        sectionName: String.fromCharCode(65 + random.nextInt(26)),
-        classId: uuid.v4(),
-        className: (random.nextInt(12) + 1).toString(),
-      );
-    }
+
 
     //Subject Data
     SubjectData generateSubjectData() {
@@ -212,7 +204,6 @@ class SchoolDummyData {
       extracurricularActivities: List.generate(
           3, (index) => faker.sport.name()),
       classes: List.generate(10, (index) => generateClassData()),
-      sections: List.generate(5, (index) => generateSectionData()),
       subjects: List.generate(8, (index) => generateSubjectData()),
       grades: ['A+', 'A', 'B+', 'B', 'C', 'D'],
       clubs: List.generate(3, (index) => 'Club ${index + 1}'),

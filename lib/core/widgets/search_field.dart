@@ -93,16 +93,16 @@ class _MySearchFieldState extends State<MySearchField> {
         if (widget.labelText != null) ...[
           Text(
             widget.labelText!,
-            style: MyTextStyles.inputLabel,
+            style: MyTextStyle.inputLabel,
           ),
           const SizedBox(height: 6),
         ],
         TextField(
           controller: _controller,
-          style: MyTextStyles.inputField,
+          style: MyTextStyle.inputField,
           decoration: InputDecoration(
             hintText: widget.hintText,
-            hintStyle: MyTextStyles.placeholder,
+            hintStyle: MyTextStyle.placeholder,
             suffixIcon: Obx(() {
               return Row(
                 mainAxisSize: MainAxisSize.min,

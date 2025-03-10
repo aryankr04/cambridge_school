@@ -4,7 +4,7 @@ import 'package:cambridge_school/core/utils/constants/gradients.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
-import 'package:cambridge_school/core/widgets/dialog_dropdown.dart';
+import 'package:cambridge_school/core/widgets/bottom_sheet_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -62,7 +62,7 @@ class NoticeScreen extends StatelessWidget {
                           children: [
                             Text(
                               'Filter',
-                              style: MyTextStyles.titleLarge,
+                              style: MyTextStyle.titleLarge,
                             ),
                             SizedBox(width: MySizes.xs),
                             Icon(
@@ -90,7 +90,7 @@ class NoticeScreen extends StatelessWidget {
                               (2 * MySizes.md)) /
                               (controller.selectedTargetAudience.contains('Student') ||
                                   controller.selectedTargetAudience.contains('All') ? 3 : 2),
-                          child: MyDialogDropdown(
+                          child: MyBottomSheetDropdown(
                             optionsForChips: Roles().getAllRolesAsString(),
                             isMultipleSelection: true,
                             onMultipleChanged: (List<String>? values) {
@@ -108,7 +108,7 @@ class NoticeScreen extends StatelessWidget {
                               (2 * MySizes.md)) /
                               (controller.selectedTargetAudience.contains('Student') ||
                                   controller.selectedTargetAudience.contains('All') ? 3 : 2),
-                          child: MyDialogDropdown(
+                          child: MyBottomSheetDropdown(
                             optionsForChips: MyLists.noticeCategories(),
                             isMultipleSelection: true,
                             onMultipleChanged: (List<String>? values) {
@@ -128,7 +128,7 @@ class NoticeScreen extends StatelessWidget {
                               (2 * MySizes.md)) /
                               (controller.selectedTargetAudience.contains('Student') ||
                                   controller.selectedTargetAudience.contains('All') ? 3 : 2),
-                          child: MyDialogDropdown(
+                          child: MyBottomSheetDropdown(
                             optionsForChips: MyLists.classOptions,
                             isMultipleSelection: true,
                             onMultipleChanged: (List<String>? values) {

@@ -4,7 +4,7 @@ import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/widgets/button.dart';
 import 'package:cambridge_school/core/widgets/date_picker_field.dart';
-import 'package:cambridge_school/core/widgets/dialog_dropdown.dart';
+import 'package:cambridge_school/core/widgets/bottom_sheet_dropdown.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
 import 'package:cambridge_school/core/widgets/searchable_dropdown.dart';
 import 'package:cambridge_school/core/widgets/text_field.dart';
@@ -291,7 +291,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Select Roles', style: MyTextStyles.headlineSmall),
+          title: const Text('Select Roles', style: MyTextStyle.headlineSmall),
           content: SizedBox(
             width: double.maxFinite,
             height: Get.height * .75,
@@ -311,7 +311,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                       padding: const EdgeInsets.only(bottom: MySizes.md), // Add some padding
                       child: Text(
                         category,
-                        style: MyTextStyles.headlineSmall.copyWith(fontSize: 18),
+                        style: MyTextStyle.headlineSmall.copyWith(fontSize: 18),
                       ),
                     ),
                     ListView.builder(
@@ -463,7 +463,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         ]).call,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Languages Spoken',
         optionsForChips: const ['English', 'Spanish', 'French', 'Hindi'],
         onMultipleChanged: (values) {
@@ -473,7 +473,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         isMultipleSelection: true,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Hobbies',
         optionsForChips: MyLists.hobbyOptions,
         onMultipleChanged: (values) {
@@ -482,7 +482,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         isMultipleSelection: true,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Nationality',
         optionsForChips: MyLists.nationalityOptions,
         onSingleChanged: (value) {
@@ -666,7 +666,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 .call,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Relationship to Student',
         optionsForChips: MyLists.relationshipOptions,
         onSingleChanged: (value) {
@@ -1009,13 +1009,13 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   List<Widget> _buildFavoritesFields() {
     return [
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Favorite Dish',
         optionsForChips: MyLists.dishOptions,
         onSingleChanged: (value) => controller.favoriteDish.value = value ?? '',
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Favorite Subject',
         optionsForChips: MyLists.subjectOptions,
         onSingleChanged: (value) =>
@@ -1036,7 +1036,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         hintText: "Select Favourite Book",
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Favorite Sport',
         optionsForChips: MyLists.favoriteSportOptions,
         onSingleChanged: (value) =>
@@ -1092,7 +1092,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         hintText: "Select Favourite Personality",
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Favorite Season',
         optionsForChips: MyLists.seasonOptions,
         onSingleChanged: (value) =>
@@ -1166,7 +1166,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.admissionNoController,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
           labelText: 'Class',
           optionsForChips: MyLists.classOptions,
           onSingleChanged: (value) {
@@ -1174,7 +1174,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           },
           isValid: true),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
           labelText: 'Section',
           optionsForChips: MyLists.sectionOptions,
           onSingleChanged: (value) {
@@ -1182,7 +1182,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           },
           isValid: true),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
           labelText: 'House',
           optionsForChips: MyLists.schoolHouseOptions,
           onSingleChanged: (value) {
@@ -1218,7 +1218,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
             children: [
               const Text(
                 'Guardian',
-                style: MyTextStyles.titleLarge,
+                style: MyTextStyle.titleLarge,
               ),
               Row(
                 children: [
@@ -1287,7 +1287,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
             children: [
               const Text(
                 'Guardian Details',
-                style: MyTextStyles.titleLarge,
+                style: MyTextStyle.titleLarge,
               ),
               const SizedBox(
                 height: MySizes.md,
@@ -1299,7 +1299,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                     RequiredValidator(errorText: 'Full Name is required').call,
               ),
               const SizedBox(height: MySizes.md),
-              MyDialogDropdown(
+              MyBottomSheetDropdown(
                 labelText: 'Relationship to Student',
                 optionsForChips: MyLists.relationshipOptions,
                 onSingleChanged: (value) {
@@ -1308,7 +1308,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 isValid: true,
               ),
               const SizedBox(height: MySizes.md),
-              MyDialogDropdown(
+              MyBottomSheetDropdown(
                 labelText: 'Occupation',
                 optionsForChips: MyLists.occupations,
                 onSingleChanged: (value) {
@@ -1366,7 +1366,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   List<Widget> _buildTeacherDetails() {
     return [
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Subjects Taught',
         optionsForChips: const ['Mathematics', 'Science', 'English', 'History'],
         onMultipleChanged: (values) {
@@ -1407,7 +1407,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
             RequiredValidator(errorText: 'License Number is required').call,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Routes Assigned',
         optionsForChips: const ['Route A', 'Route B', 'Route C', 'Route D'],
         onMultipleChanged: (values) {
@@ -1449,7 +1449,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   List<Widget> _buildMaintenanceStaffDetails() {
     return [
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Responsibilities',
         optionsForChips: const ['Cleaning', 'Repairing', 'Gardening', 'Plumbing'],
         onMultipleChanged: (values) {
@@ -1463,7 +1463,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   List<Widget> _buildAdminDetails() {
     return [
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Permissions',
         optionsForChips: const [
           'Create Users',
@@ -1478,7 +1478,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         isValid: true,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Assigned Modules',
         optionsForChips: const [
           'User Management',
@@ -1493,7 +1493,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         isValid: true,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Manageable Schools',
         optionsForChips: const ['School A', 'School B', 'School C', 'School D'],
         onMultipleChanged: (values) {
@@ -1507,7 +1507,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   List<Widget> _buildSchoolAdminDetails() {
     return [
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Permissions',
         optionsForChips: const ['Create Users', 'Edit Users', 'View Users'],
         onMultipleChanged: (values) {
@@ -1517,7 +1517,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         isValid: true,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Assigned Modules',
         optionsForChips: const ['User Management', 'Attendance Management'],
         onMultipleChanged: (values) {
@@ -1531,7 +1531,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   List<Widget> _buildDirectorDetails() {
     return [
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Schools',
         optionsForChips: const ['School A', 'School B', 'School C'],
         onMultipleChanged: (values) {
@@ -1551,7 +1551,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         ]).call,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Permissions',
         optionsForChips: const [
           'Create Schools',
@@ -1585,7 +1585,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
             .call,
       ),
       const SizedBox(height: MySizes.md),
-      MyDialogDropdown(
+      MyBottomSheetDropdown(
         labelText: 'Responsibilities',
         optionsForChips: const [
           'Curriculum Design',
@@ -1642,12 +1642,12 @@ Widget roleCard({
                 children: [
                   Text(
                     role,
-                    style: MyTextStyles.bodyLarge,
+                    style: MyTextStyle.bodyLarge,
                   ),
                   SizedBox(height: MySizes.xs,),
                   Text(
                     description,
-                    style: MyTextStyles.labelMedium,
+                    style: MyTextStyle.labelMedium,
                     maxLines: 2, // Limit to 2 lines
                     overflow:
                     TextOverflow.ellipsis, // Handle overflow with ellipsis

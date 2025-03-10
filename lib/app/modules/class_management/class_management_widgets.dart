@@ -83,7 +83,7 @@ class SubjectCard extends StatelessWidget {
 }
 
 class SectionCard extends StatelessWidget {
-  final SchoolSectionModel schoolClass;
+  final SectionModel schoolClass;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
 

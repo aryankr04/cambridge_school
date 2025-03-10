@@ -98,11 +98,12 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.labelText != null) ...[
-            Text(widget.labelText!, style: MyTextStyles.inputLabel),
+            Text(widget.labelText!, style: MyTextStyle.inputLabel),
             const SizedBox(height: 6),
           ],
           Padding(
-            padding: const EdgeInsets.only(bottom: MySizes.md),
+            // padding: const EdgeInsets.only(bottom: MySizes.md),
+            padding: EdgeInsets.zero,
             child: GestureDetector(
               onTap: () {
                 _toggleDropdown();
@@ -129,7 +130,7 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                             ? _selectedValue.value!
                             : widget.hintText ?? defaultHintText,
                         style: _selectedValue.value != null
-                            ? widget.selectedTextStyle ?? MyTextStyles.inputField
+                            ? widget.selectedTextStyle ?? MyTextStyle.inputField
                             : widget.hintTextStyle ??
                             Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: MyColors.placeholderColor,

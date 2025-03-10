@@ -1,6 +1,6 @@
 
 import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_screen.dart';
-import 'package:cambridge_school/demo.dart';
+import 'package:cambridge_school/navigation_screen.dart';
 import 'package:cambridge_school/router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';

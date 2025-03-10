@@ -200,7 +200,6 @@ class CreateSchool0Controller extends GetxController {
         mediumOfInstruction: '', //TODO  add the value from user input
         academicYear: AcademicYear(start: DateTime.now(), end: DateTime.now()), //TODO  Take from user or set dynamically
         classes: [], // TODO: Populate from user input
-        sections: [], // TODO: Populate from user input
         subjects: [],// TODO: Populate from user input
         grades: [], //TODO: Populate from user input
 

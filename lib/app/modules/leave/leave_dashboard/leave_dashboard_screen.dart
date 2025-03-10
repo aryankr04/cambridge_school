@@ -116,7 +116,7 @@ class LeaveDashboardScreen extends GetView<LeaveDashboardController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(kLeavesOverviewTitle,
-              style: MyTextStyles.headlineSmall.copyWith(fontSize: 18)),
+              style: MyTextStyle.headlineSmall.copyWith(fontSize: 18)),
           const SizedBox(height: MySizes.md),
           Row(
             children: [
@@ -196,18 +196,18 @@ class LeaveDashboardScreen extends GetView<LeaveDashboardController> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(value,
-                      style: MyTextStyles.titleLarge.copyWith(
+                      style: MyTextStyle.titleLarge.copyWith(
                           color: MyColors.headlineTextColor, fontSize: 15)),
                   if (subtitle != null) ...[
                     const SizedBox(width: MySizes.sm - 4),
                     Text(subtitle,
-                        style: MyTextStyles.bodyLarge.copyWith(
+                        style: MyTextStyle.bodyLarge.copyWith(
                             color: MyColors.subtitleTextColor, fontSize: 12)),
                   ]
                 ],
               ),
               Text(title,
-                  style: MyTextStyles.bodySmall.copyWith(
+                  style: MyTextStyle.bodySmall.copyWith(
                       color: MyColors.subtitleTextColor, fontSize: 13)),
             ],
           ),

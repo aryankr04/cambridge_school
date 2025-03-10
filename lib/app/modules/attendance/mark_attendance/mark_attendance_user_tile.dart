@@ -55,13 +55,13 @@ class AttendanceCard extends GetView<MarkAttendanceController> {
                     Text(
                       user.fullName??"N/A",
                       overflow: TextOverflow.ellipsis,
-                      style: MyTextStyles.titleLarge.copyWith(fontSize: 14),
+                      style: MyTextStyle.titleLarge.copyWith(fontSize: 14),
                       maxLines: 1,
                     ),
                     Text(
                       user.userId,
                       overflow: TextOverflow.ellipsis,
-                      style: MyTextStyles.labelMedium,
+                      style: MyTextStyle.labelMedium,
                       maxLines: 1,
                     ),
                   ],

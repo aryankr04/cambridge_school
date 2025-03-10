@@ -1,14 +1,16 @@
 
-class SchoolClassModel {
+import 'package:cambridge_school/app/modules/routine/routine_model.dart';
+
+class ClassModel {
   final String? id;
   final String? schoolId;
   final String? academicYear;
   final String? className;
-  final List<SchoolSectionModel>? sections;
+  final List<SectionModel>? sections;
   final List<String>? subjects;
   final List<ExamSyllabus> examSyllabus;
 
-  SchoolClassModel({
+  ClassModel({
     this.id,
     this.schoolId,
     this.academicYear,
@@ -18,15 +20,15 @@ class SchoolClassModel {
     required this.examSyllabus,
   });
 
-  factory SchoolClassModel.fromMap(Map<String, dynamic> map, String? documentId) {
-    return SchoolClassModel(
+  factory ClassModel.fromMap(Map<String, dynamic> map, String? documentId) {
+    return ClassModel(
       id: documentId, // Use documentId as id
       schoolId: map['schoolId'],
       academicYear: map['academicYear'],
       className: map['className'],
       sections: (map['sections'] as List<dynamic>?)
           ?.map((sectionData) =>
-          SchoolSectionModel.fromMap(sectionData as Map<String, dynamic>, null))
+          SectionModel.fromMap(sectionData as Map<String, dynamic>, null))
           .toList(),
       subjects: map['subjects'] != null
           ? List<String>.from(map['subjects'])
@@ -48,16 +50,16 @@ class SchoolClassModel {
     };
   }
 
-  SchoolClassModel copyWith({
+  ClassModel copyWith({
     String? id,
     String? schoolId,
     String? academicYear,
     String? className,
-    List<SchoolSectionModel>? sections,
+    List<SectionModel>? sections,
     List<String>? subjects,
     List<ExamSyllabus>? examSyllabus,
   }) {
-    return SchoolClassModel(
+    return ClassModel(
       id: id ?? this.id,
       schoolId: schoolId ?? this.schoolId,
       academicYear: academicYear ?? this.academicYear,
@@ -69,7 +71,7 @@ class SchoolClassModel {
   }
 }
 
-class SchoolSectionModel {
+class SectionModel {
   final String? sectionName;
   final String? classTeacherId;
   final String? classTeacherName;
@@ -79,9 +81,9 @@ class SchoolSectionModel {
   final int? capacity;
   final String? roomNumber;
   final List<Student>? students;
-  final Timetable? timetable;
+  final WeeklyRoutine? routine;
 
-  SchoolSectionModel({
+  SectionModel({
     this.sectionName,
     this.classTeacherId,
     this.classTeacherName,
@@ -91,12 +93,12 @@ class SchoolSectionModel {
     this.capacity,
     this.roomNumber,
     this.students,
-    this.timetable,
+    this.routine,
   });
 
-  factory SchoolSectionModel.fromMap(
+  factory SectionModel.fromMap(
       Map<String, dynamic> data, String? documentId) {
-    return SchoolSectionModel(
+    return SectionModel(
       sectionName: data['sectionName'],
       classTeacherId: data['classTeacherId'],
       classTeacherName: data['classTeacherName'],
@@ -109,8 +111,8 @@ class SchoolSectionModel {
           ?.map((studentData) =>
           Student.fromMap(studentData as Map<String, dynamic>))
           .toList(),
-      timetable: data['timetable'] != null
-          ? Timetable.fromMap(data['timetable'])
+      routine: data['routine'] != null
+          ? WeeklyRoutine.fromMap(data['routine'], documentId ?? '')
           : null,
     );
   }
@@ -126,11 +128,11 @@ class SchoolSectionModel {
       'capacity': capacity,
       'roomNumber': roomNumber,
       'students': students?.map((student) => student.toMap()).toList(),
-      if (timetable != null) 'timetable': timetable!.toMap(),
+      if (routine != null) 'routine': routine!.toMap(),
     };
   }
 
-  SchoolSectionModel copyWith({
+  SectionModel copyWith({
     String? sectionName,
     String? classTeacherId,
     String? classTeacherName,
@@ -140,9 +142,9 @@ class SchoolSectionModel {
     int? capacity,
     String? roomNumber,
     List<Student>? students,
-    Timetable? timetable,
+    WeeklyRoutine? routine,
   }) {
-    return SchoolSectionModel(
+    return SectionModel(
       sectionName: sectionName ?? this.sectionName,
       classTeacherId: classTeacherId ?? this.classTeacherId,
       classTeacherName: classTeacherName ?? this.classTeacherName,
@@ -152,7 +154,7 @@ class SchoolSectionModel {
       capacity: capacity ?? this.capacity,
       roomNumber: roomNumber ?? this.roomNumber,
       students: students ?? this.students,
-      timetable: timetable ?? this.timetable,
+      routine: routine ?? this.routine,
     );
   }
 }
@@ -189,93 +191,6 @@ class Student {
       id: id ?? this.id,
       name: name ?? this.name,
       roll: roll ?? this.roll,
-    );
-  }
-}
-
-class Timetable {
-  final Map<String, List<DayEvent>> days;
-
-  Timetable({
-    required this.days,
-  });
-
-  factory Timetable.fromMap(Map<String, dynamic> data) {
-    Map<String, List<DayEvent>> days = {};
-    if (data['days'] != null) {
-      (data['days'] as Map<String, dynamic>).forEach((day, events) {
-        days[day] =
-            (events as List).map((event) => DayEvent.fromMap(event)).toList();
-      });
-    }
-
-    return Timetable(
-      days: days,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'days': days.map((day, events) =>
-          MapEntry(day, events.map((event) => event.toMap()).toList())),
-    };
-  }
-
-  Timetable copyWith({
-    Map<String, List<DayEvent>>? days,
-  }) {
-    return Timetable(days: days ?? this.days);
-  }
-}
-
-class DayEvent {
-  final String period;
-  final String? subject;
-  final String? teacherId;
-  final String startTime;
-  final String endTime;
-
-  DayEvent({
-    required this.period,
-    this.subject,
-    this.teacherId,
-    required this.startTime,
-    required this.endTime,
-  });
-
-  factory DayEvent.fromMap(Map<String, dynamic> data) {
-    return DayEvent(
-      period: data['period'] ?? '',
-      subject: data['subject'],
-      teacherId: data['teacherId'],
-      startTime: data['start_time'] ?? '',
-      endTime: data['end_time'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'period': period,
-      if (subject != null) 'subject': subject,
-      if (teacherId != null) 'teacherId': teacherId,
-      'start_time': startTime,
-      'end_time': endTime,
-    };
-  }
-
-  DayEvent copyWith({
-    String? period,
-    String? subject,
-    String? teacherId,
-    String? startTime,
-    String? endTime,
-  }) {
-    return DayEvent(
-      period: period ?? this.period,
-      subject: subject ?? this.subject,
-      teacherId: teacherId ?? this.teacherId,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
     );
   }
 }

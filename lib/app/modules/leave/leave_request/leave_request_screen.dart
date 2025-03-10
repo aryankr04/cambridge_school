@@ -74,7 +74,7 @@ class LeaveRequestScreen extends StatelessWidget {
         children: [
           Text(
             'Leaves Overview',
-            style: MyTextStyles.headlineSmall.copyWith(fontSize: 18),
+            style: MyTextStyle.headlineSmall.copyWith(fontSize: 18),
           ),
           const SizedBox(height: MySizes.md),
           Row(
@@ -154,14 +154,14 @@ class LeaveRequestScreen extends StatelessWidget {
                 children: [
                   Text(
                     value,
-                    style: MyTextStyles.titleLarge
+                    style: MyTextStyle.titleLarge
                         .copyWith(color: MyColors.headlineTextColor, fontSize: 15),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(width: MySizes.sm - 4),
                     Text(
                       subtitle,
-                      style: MyTextStyles.bodyLarge
+                      style: MyTextStyle.bodyLarge
                           .copyWith(color: MyColors.subtitleTextColor, fontSize: 12),
                     )
                   ]
@@ -169,7 +169,7 @@ class LeaveRequestScreen extends StatelessWidget {
               ),
               Text(
                 title,
-                style: MyTextStyles.bodySmall
+                style: MyTextStyle.bodySmall
                     .copyWith(color: MyColors.subtitleTextColor, fontSize: 13),
               ),
             ],
@@ -247,7 +247,7 @@ class LeaveRequestScreen extends StatelessWidget {
             children: [
               Text(
                 'Filter List',
-                style: MyTextStyles.titleLarge,
+                style: MyTextStyle.titleLarge,
               ),
               SizedBox(width: MySizes.sm),
               Icon(
@@ -275,7 +275,7 @@ class LeaveRequestScreen extends StatelessWidget {
         return AlertDialog(
           title: const Text(
             'Filter & Sort',
-            style: MyTextStyles.headlineSmall,
+            style: MyTextStyle.headlineSmall,
           ),
           content: GetBuilder<SelectionController>(
             init: SelectionController(),
@@ -287,7 +287,7 @@ class LeaveRequestScreen extends StatelessWidget {
                   children: [
                     const Text(
                       'Filter',
-                      style: MyTextStyles.titleLarge,
+                      style: MyTextStyle.titleLarge,
                     ),
                     const SizedBox(height: MySizes.sm),
                     MySelectionWidget(
@@ -302,7 +302,7 @@ class LeaveRequestScreen extends StatelessWidget {
                     const SizedBox(height: MySizes.md),
                     const Text(
                       'Sort',
-                      style: MyTextStyles.titleLarge,
+                      style: MyTextStyle.titleLarge,
                     ),
                     const SizedBox(height: MySizes.sm),
                     MySelectionWidget(

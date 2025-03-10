@@ -41,7 +41,6 @@ class SchoolModel {
   final String mediumOfInstruction;
   final AcademicYear academicYear;
   final List<ClassData> classes;
-  final List<SectionData> sections;
   final List<SubjectData> subjects;
   final List<String> grades;
   final List<String> curriculumFrameworks;
@@ -155,7 +154,6 @@ class SchoolModel {
     required this.campusSize,
     required this.extracurricularActivities,
     required this.classes,
-    required this.sections,
     required this.subjects,
     required this.grades,
     required this.clubs,
@@ -253,9 +251,6 @@ class SchoolModel {
       List<String>.from(map['extracurricularActivities']),
       classes: (map['classes'] as List)
           .map((e) => ClassData.fromMap(e))
-          .toList(),
-      sections: (map['sections'] as List)
-          .map((e) => SectionData.fromMap(e))
           .toList(),
       subjects: (map['subjects'] as List)
           .map((e) => SubjectData.fromMap(e))
@@ -389,7 +384,6 @@ class SchoolModel {
       'campusSize': campusSize,
       'extracurricularActivities': extracurricularActivities,
       'classes': classes.map((e) => e.toMap()).toList(),
-      'sections': sections.map((e) => e.toMap()).toList(),
       'subjects': subjects.map((e) => e.toMap()).toList(),
       'grades': grades,
       'clubs': clubs,
@@ -774,20 +768,22 @@ class SchoolAddress {
     pinCode: data['pinCode'] as String?,
   );
 }
-
 class ClassData {
   final String classId;
   final String className;
+  final List<String> sectionName;
 
   ClassData({
     required this.classId,
     required this.className,
+    required this.sectionName,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'classId': classId,
       'className': className,
+      'sectionName': sectionName,
     };
   }
 
@@ -795,41 +791,38 @@ class ClassData {
     return ClassData(
       classId: map['classId'] as String,
       className: map['className'] as String,
+      sectionName: List<String>.from(map['sectionName'] ?? []),
     );
   }
 }
-
 class SectionData {
-  final String sectionId;
-  final String sectionName;
   final String classId;
   final String className;
+  final String sectionName;
 
   SectionData({
-    required this.sectionId,
-    required this.sectionName,
     required this.classId,
     required this.className,
+    required this.sectionName,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'sectionId': sectionId,
-      'sectionName': sectionName,
       'classId': classId,
       'className': className,
+      'sectionName': sectionName,
     };
   }
 
   factory SectionData.fromMap(Map<String, dynamic> map) {
     return SectionData(
-      sectionId: map['sectionId'] as String,
-      sectionName: map['sectionName'] as String,
       classId: map['classId'] as String,
       className: map['className'] as String,
+      sectionName: map['sectionName'] ,
     );
   }
 }
+
 
 class SubjectData {
   final String subjectId;

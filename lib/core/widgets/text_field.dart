@@ -96,12 +96,13 @@ class MyTextField extends StatelessWidget {
             Text(
               labelText!,
               style: labelStyle ??
-                  MyTextStyles.inputLabel,
+                  MyTextStyle.inputLabel,
             ),
             const SizedBox(height: 6),
           ],
         Padding(
-          padding: const EdgeInsets.only(bottom: MySizes.md),
+          // padding: const EdgeInsets.only(bottom: MySizes.md),
+          padding: EdgeInsets.zero,
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: height ?? 0,
@@ -119,7 +120,7 @@ class MyTextField extends StatelessWidget {
               textAlign: textAlign,
               readOnly: readOnly,
               enabled: enabled,
-              style: MyTextStyles.inputField,
+              style: MyTextStyle.inputField,
               onTap: onTap,
               onChanged: onChanged,
               onFieldSubmitted: (value) {
@@ -131,7 +132,7 @@ class MyTextField extends StatelessWidget {
               decoration: InputDecoration(
                 isDense: true, // Added to reduce extra padding
                 hintText: hintText ?? 'Enter $labelText',
-                hintStyle: hintStyle??MyTextStyles.placeholder ,
+                hintStyle: hintStyle??MyTextStyle.placeholder ,
                 fillColor: fillColor,
                 contentPadding: padding,
                 prefixIcon: prefixIcon,

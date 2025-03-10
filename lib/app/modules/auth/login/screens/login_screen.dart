@@ -120,7 +120,7 @@ class Login extends StatelessWidget {
                 MyTextField(
                   labelText: 'Mobile No',
                   prefixText: '+91  ',
-                  prefixTextStyle: MyTextStyles.inputField,
+                  prefixTextStyle: MyTextStyle.inputField,
                   keyboardType: TextInputType.phone,
                   prefixIcon: const Icon(Icons.phone),
                   controller: Get.find<LoginController>().usernameController,

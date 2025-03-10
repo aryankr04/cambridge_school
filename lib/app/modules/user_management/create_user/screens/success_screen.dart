@@ -61,13 +61,13 @@ class SuccessScreen extends GetView<SuccessScreenController> {
                         const SizedBox(height: MySizes.md),
                         Text(
                           'Great!',
-                          style: MyTextStyles.titleLarge
+                          style: MyTextStyle.titleLarge
                               .copyWith(color: Colors.green, fontSize: 16),
                           textAlign: TextAlign.center,
                         ),
                         Text(
                           'Account Created Successfully',
-                          style: MyTextStyles.headlineSmall
+                          style: MyTextStyle.headlineSmall
                               .copyWith(color: MyColors.headlineTextColor),
                           textAlign: TextAlign.center,
                         ),
@@ -97,7 +97,7 @@ class SuccessScreen extends GetView<SuccessScreenController> {
                               Text(
                                 controller.getStatusText(controller
                                     .dummyUser.value.accountStatus ?? "inactive"), // Provide default value
-                                style: MyTextStyles.bodySmall.copyWith(
+                                style: MyTextStyle.bodySmall.copyWith(
                                     color: controller.getStatusColor(
                                         controller.dummyUser.value
                                             .accountStatus ?? "inactive")), // Provide default value
@@ -171,12 +171,12 @@ class AccountDetailSection extends GetView<SuccessScreenController> {
                         children: [
                           Text(
                             user.fullName ?? "N/A", // Provide a default value
-                            style: MyTextStyles.titleLarge,
+                            style: MyTextStyle.titleLarge,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             user.userId,
-                            style: MyTextStyles.bodySmall
+                            style: MyTextStyle.bodySmall
                                 .copyWith(fontSize: 13),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -413,7 +413,7 @@ class _DetailTile extends StatelessWidget {
           const SizedBox(width: 4),
           Expanded(
             child: Text(value,
-                style: MyTextStyles.bodySmall.copyWith(color: Colors.black87)),
+                style: MyTextStyle.bodySmall.copyWith(color: Colors.black87)),
           ),
         ],
       ),
@@ -430,7 +430,7 @@ class _CategoryTitle extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: MySizes.xs),
       child: Text(title,
-          style: MyTextStyles.titleMedium.copyWith(
+          style: MyTextStyle.titleMedium.copyWith(
               color: MyColors.activeBlue, fontWeight: FontWeight.w600)),
     );
   }
