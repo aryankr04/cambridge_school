@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../utils/constants/colors.dart';
-import '../utils/constants/sizes.dart';
-import '../utils/constants/text_styles.dart';
+import '../../../../core/utils/constants/colors.dart';
+import '../../../../core/utils/constants/sizes.dart';
+import '../../../../core/utils/constants/text_styles.dart';
 
 enum DropdownOptionType {
   Chip,
@@ -31,6 +31,7 @@ class MyBottomSheetDropdownController extends GetxController {
   RxList<String> options = <String>[].obs;
   RxList<String> selectedValues = <String>[].obs;
   RxString errorText = RxString('');
+  Rx<String?> selectedValue = Rx<String?>(null);
 
   List<String>? _initialValues;
 
@@ -41,17 +42,23 @@ class MyBottomSheetDropdownController extends GetxController {
     this.onMultipleChanged,
     this.isMultipleSelection = true,
     this.showAllOption = false,
+    String? initialSelectedValue,
     List<String>? initialValues,
   }) : assert(
   (isMultipleSelection && onMultipleChanged != null) ||
       (!isMultipleSelection && onSingleChanged != null),
   "Provide onMultipleChanged for multiple selection, onSingleChanged otherwise.",
   ) {
+    selectedValue.value = initialSelectedValue;
+
     _initialValues = initialValues;
     this.options.addAll(options);
     selectedValues.clear();
     if (_initialValues != null) {
       selectedValues.addAll(_initialValues!);
+      if (!isMultipleSelection && _initialValues!.isNotEmpty) {
+        selectedValue.value = _initialValues!.first;
+      }
     }
 
     if (showAllOption && isMultipleSelection) {
@@ -65,6 +72,10 @@ class MyBottomSheetDropdownController extends GetxController {
     _initialValues = value;
     selectedValues.clear();
     selectedValues.addAll(_initialValues ?? []);
+
+    if (!isMultipleSelection && (value?.isNotEmpty ?? false)) {
+      selectedValue.value = value!.first;
+    }
   }
 
   void setSelectedValues(List<String> values) {
@@ -75,15 +86,11 @@ class MyBottomSheetDropdownController extends GetxController {
     selectedValues.assignAll(values);
 
     if (isMultipleSelection) {
-      // Simplify the "All" logic
-      if (selectedValues.contains('All')) {
-        onMultipleChanged?.call(['All']);
-      } else {
-        onMultipleChanged?.call(selectedValues.toList()); // Pass a copy
-      }
+      onMultipleChanged?.call(selectedValues.toList());
     } else {
-      onSingleChanged
-          ?.call(selectedValues.isNotEmpty ? selectedValues.first : null);
+      selectedValue.value =
+      selectedValues.isNotEmpty ? selectedValues.first : null;
+      onSingleChanged?.call(selectedValue.value);
     }
     validate();
   }
@@ -108,28 +115,25 @@ class MyBottomSheetDropdown extends StatefulWidget {
   final DropdownOptionType dropdownOptionType;
   final DropdownType dropdownType;
   final DropdownWidgetType dropdownWidgetType;
-
+  final String? initialSelectedValue;
+  final Rx<String?>? selectedValue;
   final List<String>? initialSelectedValues;
-
   final bool isMultipleSelection;
   final bool isValid;
-
   final String? labelText;
   final TextStyle? labelStyle;
   final String? hintText;
-
   final Function(String?)? onSingleChanged;
   final Function(List<String>?)? onMultipleChanged;
-
   final List<Map<String, dynamic>> optionsForIconWithDescription;
   final List<Map<String, IconData>> optionsForIcon;
   final List<String> optionsForChips;
-
   final bool showAllOption;
   final bool showMultiple;
 
   const MyBottomSheetDropdown({
     super.key,
+    this.initialSelectedValue,
     this.labelText,
     this.hintText,
     required this.optionsForChips,
@@ -143,10 +147,10 @@ class MyBottomSheetDropdown extends StatefulWidget {
     this.showAllOption = false,
     this.dropdownOptionType = DropdownOptionType.Chip,
     this.dropdownType = DropdownType.BottomSheetDropdown,
-    this.optionsForIcon = const [], // Initialize with an empty list
-    this.optionsForIconWithDescription =
-    const [], // Initialize with an empty list
+    this.optionsForIcon = const [],
+    this.optionsForIconWithDescription = const [],
     this.dropdownWidgetType = DropdownWidgetType.General,
+    this.selectedValue,
   });
 
   @override
@@ -163,16 +167,24 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
     controller = Get.put(
       MyBottomSheetDropdownController(
         hintText: widget.hintText ?? widget.labelText,
-// Use hintText if available, otherwise labelText
         options: widget.optionsForChips,
         onSingleChanged: widget.onSingleChanged,
         onMultipleChanged: widget.onMultipleChanged,
         initialValues: widget.initialSelectedValues,
         isMultipleSelection: widget.isMultipleSelection,
         showAllOption: widget.showAllOption,
+        initialSelectedValue: widget.initialSelectedValue,
       ),
       tag: uniqueTag,
     );
+
+    if (widget.selectedValue != null) {
+      ever<String?>(widget.selectedValue!, (newValue) {
+        if (newValue != controller.selectedValue.value) {
+          controller.setSelectedValues([newValue ?? '']);
+        }
+      });
+    }
 
     controller.validate();
   }
@@ -245,7 +257,6 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
     }
   }
 
-// Icon With Description BottomSheet
   Future<void> _showIconWithDescriptionBottomSheet(BuildContext context) async {
     showModalBottomSheet(
       showDragHandle: false,
@@ -301,7 +312,6 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
     );
   }
 
-// Filter Chip BottomSheet
   Future<void> _showFilterChipBottomSheet(BuildContext context) async {
     showModalBottomSheet(
       context: context,
@@ -312,6 +322,7 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
                 left: MySizes.md, right: MySizes.md, bottom: MySizes.md),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Align(
                     alignment: Alignment.centerLeft,
@@ -354,44 +365,22 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
                           checkmarkColor: MyColors.activeBlue,
                           selected: isSelected,
                           onSelected: (bool selected) {
-                            setState(() {
-                              if (selected) {
-                                if (!widget.isMultipleSelection) {
-                                  controller.selectedValues.clear();
-                                }
-                                if (option == 'All' &&
-                                    widget.isMultipleSelection) {
-                                  controller.selectedValues.clear();
-                                  controller.selectedValues.add('All');
-                                } else {
-                                  controller.selectedValues.add(option);
-                                }
-                              } else {
-                                if (option == 'All' &&
-                                    widget.isMultipleSelection) {
-                                  controller.selectedValues.clear();
-                                } else {
-                                  controller.selectedValues.remove(option);
-                                  controller.selectedValues.remove('All');
-                                }
-                              }
+                            if (selected) {
                               if (!widget.isMultipleSelection) {
-                                final selectedValues =
-                                controller.selectedValues.toList();
-                                if (widget.showAllOption &&
-                                    widget.isMultipleSelection) {
-                                  if (selectedValues.contains('All')) {
-                                    controller.setSelectedValues(['All']);
-                                  } else {
-                                    controller.setSelectedValues(
-                                        selectedValues);
-                                  }
-                                } else {
-                                  controller.setSelectedValues(selectedValues);
-                                }
-                                Navigator.of(context).pop();
+                                controller.selectedValues.clear();
                               }
-                            });
+                              controller.selectedValues.add(option);
+                            } else {
+                              controller.selectedValues.remove(option);
+                            }
+
+                            if (!widget.isMultipleSelection) {
+                              Navigator.of(context).pop();
+                            }
+
+                            final selectedValues =
+                            controller.selectedValues.toList();
+                            controller.setSelectedValues(selectedValues);
                           },
                         );
                       }).toList(),
@@ -404,17 +393,8 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
                     child: const Text('Done'),
                     onPressed: () {
                       final selectedValues =
-                      controller.selectedValues.toList(); // Create a copy
-
-                      if (widget.showAllOption && widget.isMultipleSelection) {
-                        if (selectedValues.contains('All')) {
-                          controller.setSelectedValues(['All']);
-                        } else {
-                          controller.setSelectedValues(selectedValues);
-                        }
-                      } else {
-                        controller.setSelectedValues(selectedValues);
-                      }
+                      controller.selectedValues.toList();
+                      controller.setSelectedValues(selectedValues);
 
                       Navigator.of(context).pop();
                     },
@@ -427,10 +407,8 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
     );
   }
 
-// Accordion BottomSheet
   Future<void> _showIconBottomSheet(BuildContext context) async {
     showModalBottomSheet(
-
       context: context,
       showDragHandle: false,
       builder: (BuildContext context) {
@@ -449,12 +427,7 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
                 const SizedBox(height: 16),
                 SingleChildScrollView(
                   child: ExpansionPanelList(
-                    expansionCallback: (int index, bool isExpanded) {
-                      setState(() {
-                        // You might want to manage expansion state per item
-                        // but for this simple example, we will always keep it open
-                      });
-                    },
+                    expansionCallback: (int index, bool isExpanded) {},
                     children: widget.optionsForChips.map((option) {
                       return ExpansionPanel(
                         headerBuilder: (BuildContext context, bool isExpanded) {
@@ -472,7 +445,7 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
                             }
                           },
                         ),
-                        isExpanded: true, // Always expanded for simplicity
+                        isExpanded: true,
                       );
                     }).toList(),
                   ),
@@ -530,10 +503,10 @@ class GeneralDropdownContainer extends StatelessWidget {
             children: [
               Expanded(
                 child: Obx(() => Text(
-                  controller.selectedValues.isEmpty
-                      ? hintText //show hint text
-                      : _getDisplayText(),
-                  style: controller.selectedValues.isEmpty
+                  controller.selectedValue.value == null
+                      ? hintText
+                      : _getDisplayText(controller),
+                  style: controller.selectedValue.value == null
                       ? MyTextStyle.placeholder
                       : MyTextStyle.inputField,
                   maxLines: null,
@@ -550,16 +523,15 @@ class GeneralDropdownContainer extends StatelessWidget {
     );
   }
 
-  String _getDisplayText() {
+  String _getDisplayText(MyBottomSheetDropdownController controller) {
     if (controller.selectedValues.contains('All')) {
       return 'All';
     }
     if (controller.selectedValues.length > 1) {
       return showMultiple ? 'Multiple' : controller.selectedValues.join(', ');
-    } else if (controller.selectedValues.isNotEmpty) {
-      return controller.selectedValues.first;
+    } else {
+      return controller.selectedValue.value ?? '';
     }
-    return ''; // Return an empty string if nothing is selected.
   }
 }
 
@@ -596,19 +568,18 @@ class FilterDropdownContainer extends StatelessWidget {
                 : null,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
-          child: IntrinsicWidth( // Use IntrinsicWidth to take only required width
+          child: IntrinsicWidth(
             child: Row(
-              mainAxisSize: MainAxisSize.min, // Ensure Row takes minimum space
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Expanded(
                   child: Obx(() => Text(
-                    controller.selectedValues.isEmpty
-                        ? hintText //show hint text
-                        : _getDisplayText(),
-                    style: controller.selectedValues.isEmpty
-                        ? MyTextStyle.inputField
-                        .copyWith(color: MyColors.subtitleTextColor)
-                        : MyTextStyle.inputField,
+                    (controller.selectedValue.value == null ||
+                        controller.selectedValue.value == '')
+                        ? hintText
+                        : _getDisplayText(controller),
+                    style: MyTextStyle.inputField
+                        .copyWith(color: MyColors.subtitleTextColor),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   )),
@@ -623,15 +594,14 @@ class FilterDropdownContainer extends StatelessWidget {
     );
   }
 
-  String _getDisplayText() {
+  String _getDisplayText(MyBottomSheetDropdownController controller) {
     if (controller.selectedValues.contains('All')) {
       return 'All';
     }
     if (controller.selectedValues.length > 1) {
       return showMultiple ? 'Multiple' : controller.selectedValues.join(', ');
-    } else if (controller.selectedValues.isNotEmpty) {
-      return controller.selectedValues.first;
+    } else {
+      return controller.selectedValue.value ?? '';
     }
-    return ''; // Return an empty string if nothing is selected.
   }
 }

@@ -136,31 +136,32 @@ class EventItem extends StatelessWidget {
     final itemText = itemType.getText(subject);
     final itemEmoji = itemType.emoji;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: MySizes.md),
+    return Container(
+      margin: const EdgeInsets.symmetric(
+          vertical: MySizes.sm, horizontal: MySizes.md),
       child: Row(
         children: [
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: stripColor,
+              color: period!=null?stripColor:Colors.transparent,
             ),
+            margin: const EdgeInsets.only(right: MySizes.md),
             padding: const EdgeInsets.all(MySizes.sm),
             child: Text(
-              period?.toString() ?? '', // Handle null period
-              style: const TextStyle(
-                color: Colors.white,
+              period?.toString() ?? ' ', // Handle null period
+              style: TextStyle(
+                color: period!=null?Colors.white:Colors.transparent,
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const SizedBox(width: MySizes.md),
           Expanded(
             child: MyCard(
               margin: EdgeInsets.zero,
               padding: EdgeInsets.zero,
-              borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+              borderRadius: BorderRadius.circular(MySizes.cardRadiusXs),
               child: Stack(
                 children: [
                   Padding(
@@ -188,7 +189,7 @@ class EventItem extends StatelessWidget {
                             style: const TextStyle(fontSize: 28),
                           ),
                         ),
-                        const SizedBox(width: MySizes.md),
+                        const SizedBox(width: MySizes.sm + 4),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,27 +208,53 @@ class EventItem extends StatelessWidget {
                               ),
                               if (itemType == TimelineItemType.classEvent &&
                                   classTeacherName != null) ...[
-                                const SizedBox(height: MySizes.xs-2),
+                                const SizedBox(height: MySizes.xs - 2),
                                 Row(
                                   children: [
-                                    Icon(
-                                      isStudent
-                                          ? Icons.person
-                                          : Icons.home,
-                                      size: 14,
-                                      color: MyDynamicColors.subtitleTextColor
-                                          .withOpacity(0.5),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          isStudent
+                                              ? Icons.person
+                                              : Icons.assignment,
+                                          size: 12,
+                                          color: MyDynamicColors
+                                              .subtitleTextColor
+                                              .withOpacity(0.5),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          isStudent
+                                              ? classTeacherName ?? ''
+                                              : '$className $sectionName',
+                                          style: MyTextStyle.labelMedium
+                                              .copyWith(fontSize: 10),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        isStudent
-                                            ? classTeacherName ?? ''
-                                            : '$className ${sectionName}',
-                                        style: MyTextStyle.labelMedium.copyWith(fontSize: 10),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
+                                    const SizedBox(
+                                      width: MySizes.xs,
+                                    ),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.timelapse,
+                                          size: 12,
+                                          color: MyDynamicColors
+                                              .subtitleTextColor
+                                              .withOpacity(0.5),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${interval?.trim()}',
+                                          style: MyTextStyle.labelMedium
+                                              .copyWith(fontSize: 10),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -263,7 +290,7 @@ class EventItem extends StatelessWidget {
                                     ),
                                   ],
                                 )
-                              : SizedBox.shrink(),
+                              : const SizedBox.shrink(),
                         )
                       ],
                     ),

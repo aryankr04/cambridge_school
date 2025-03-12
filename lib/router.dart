@@ -29,6 +29,7 @@ import 'app/modules/notice/notice/notice_binding.dart';
 import 'app/modules/notice/notice/notice_screen.dart';
 import 'app/modules/on_boarding/on_boarding_screen.dart';
 import 'app/modules/on_boarding/onboarding_binding.dart';
+import 'app/modules/routine0/routine_controller.dart';
 import 'app/modules/user_management/create_user/screens/create_user_screen.dart';
 
 class AppRoutes {
@@ -88,6 +89,7 @@ class AppRoutes {
 
   /// Route for the Create Routine screen.
   static const String createRoutineRoute = '/create-routine';
+  static const String createRoutineRoute0 = '/create-routine0';
 
   //----------------------------------------------------------------------------
   // Route Definitions (Using GetX GetPage)
@@ -167,5 +169,10 @@ class AppRoutes {
       page: () =>   const CreateRoutineScreen(schoolId: 'SCH00001'),
       binding: CreateRoutineBinding(),
     ),
+    // GetPage(
+    //   name: createRoutineRoute0,
+    //   page: () =>   const RoutineManagementScreen(),
+    //   binding: RoutineBinding(),
+    // ),
   ];
 }

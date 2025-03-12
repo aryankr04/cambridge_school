@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-
+import 'package:intl/intl.dart';
 import '../../class_management/class_management_repositories.dart';
 import '../../class_management/class_model.dart';
 import '../../manage_school/models/school_model.dart';
@@ -10,28 +10,35 @@ import '../routine_model.dart';
 class CreateRoutineController extends GetxController {
   // Dependencies
   final ClassManagementRepository _classManagementRepository =
-  ClassManagementRepository();
+      ClassManagementRepository();
 
-  // Rx Variables
-  final schoolId = RxString('SCH00001');
-  final userRole = RxString('Teacher');
+  // Observables - General
+  final RxString schoolId = RxString('SCH00001');
+  final RxString userRole = RxString('Teacher');
+  final RxBool isLoadingClassData = RxBool(false);
+  final RxBool isLoadingOptions = RxBool(false);
 
-  final selectedClassName = RxString('');
-  final selectedSectionName = RxString('');
-  final selectedDay = RxString('');
-  final isLoading = RxBool(false);
-  final isEditMode = RxBool(true);
-  final isUpdateMode = RxBool(false);
-  final selectedEventIndex = RxInt(-1);
-  final sectionList = RxList<SectionModel>([]);
-  Rx<ClassModel?> classModel = Rx<ClassModel?>(null);
-  RxList<Event> events = RxList<Event>([]); // Displayed events for selected day
-  RxList<String>? sectionNameOptions = RxList<String>();
-  RxList<String>? classNameOptions = RxList<String>();
-  RxList<SectionData>? sectionsData = RxList<SectionData>();
+  // Observables - Selection State
+  final RxString selectedClassName = RxString('');
+  final RxString selectedSectionName = RxString('');
+  final RxString selectedDay =
+      RxString(DateFormat('EEEE').format(DateTime.now()));
 
-  // Constants
-    List<String> dayOptions = [
+  // Observables - Edit State
+  final RxBool isEditMode = RxBool(false);
+  final RxBool isUpdateMode = RxBool(false);
+  final RxInt selectedEventIndex = RxInt(-1);
+
+  // Observables - Data
+  final Rx<ClassModel?> classModel = Rx<ClassModel?>(null);
+  final RxList<Event> events = RxList<Event>([]);
+  final RxList<SectionModel> sectionList = RxList<SectionModel>([]);
+  final RxList<String>? sectionNameOptions = RxList<String>();
+  final RxList<String>? classNameOptions = RxList<String>();
+  final RxList<SectionData>? sectionsData = RxList<SectionData>();
+
+  // Constants - Day Options
+  static const List<String> dayOptions = [
     'Sunday',
     'Monday',
     'Tuesday',
@@ -45,46 +52,55 @@ class CreateRoutineController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchSchoolSectionsAndPrepareClassAndSectionOption();
-    ever(selectedDay, (_) => updateEventListForSelectedDay());
-    ever(events, (_) => isUpdateMode(true));
+    _initializeData();
+    _setupReactions();
   }
 
-  // ---------------------------------------------------------------------------
-  // Data Fetching Methods
-  // ---------------------------------------------------------------------------
+  //----------------------------Private Method-----------------------------------
+  void _initializeData() {
+    fetchSchoolSectionsAndPrepareClassAndSectionOptions();
+  }
 
+  void _setupReactions() {
+    ever(selectedDay, (_) => updateEventListForSelectedDay());
+    ever(events, (_) => (isEditMode.value) ? isUpdateMode(true) : null);
+  }
+
+  //----------------------------------------------------------------------------
+  // Data Fetching Methods
+  //----------------------------------------------------------------------------
+
+  /// Fetches class data based on school ID and class name and updates the UI.
   Future<void> fetchClassData() async {
-    isUpdateMode(false);
-    isEditMode(false);
+    // isLoadingClassData(true);
+    _resetEditStates();
+
     if (schoolId.value.isEmpty || selectedClassName.value.isEmpty) {
       print("School ID or Class Name is empty. Skipping fetch.");
       return;
     }
-
-    // isLoading.value = true;
     try {
       final fetchedClassModel =
-      await _classManagementRepository.fetchClassByClassNameAndSchoolId(
-          schoolId.value, selectedClassName.value);
+          await _classManagementRepository.fetchClassByClassNameAndSchoolId(
+              schoolId.value, selectedClassName.value);
       classModel.value = fetchedClassModel;
       sectionList.value = classModel.value?.sections ?? [];
       printClassModelStructure();
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch class data: $e');
       print('Error fetching class data: $e');
-    } finally {
-      // isLoading.value = false;
     }
+    // isLoadingClassData(false);
   }
 
-  Future<void> fetchSchoolSectionsAndPrepareClassAndSectionOption() async {
-    isUpdateMode(false);
-    isEditMode(false);
-    isLoading.value = true;
+  /// Fetches school sections and prepares class and section options for dropdowns.
+  Future<void> fetchSchoolSectionsAndPrepareClassAndSectionOptions() async {
+    _resetEditStates();
+    isLoadingClassData.value = true;
+    isLoadingOptions.value = true;
     try {
       sectionsData?.value =
-      await _classManagementRepository.fetchSchoolSections(schoolId.value);
+          await _classManagementRepository.fetchSchoolSections(schoolId.value);
 
       classNameOptions?.clear();
       sectionNameOptions?.clear();
@@ -100,150 +116,173 @@ class CreateRoutineController extends GetxController {
     } catch (error) {
       print('Error fetching school sections: $error');
     } finally {
-      isLoading.value = false;
+      isLoadingClassData.value = false;
+      isLoadingOptions.value = false;
     }
   }
 
-  // ---------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   // UI Update Methods
-  // ---------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
 
+  /// Updates the event list based on the selected day.
   void updateEventListForSelectedDay() {
-    // isUpdateMode(false);
-    // isEditMode(false);
-   events.clear();
+    events.clear();
     final section = classModel.value?.sections?.firstWhereOrNull(
-            (section) => section.sectionName == selectedSectionName.value);
+        (section) => section.sectionName == selectedSectionName.value);
 
     if (section != null && section.routine != null) {
-      final dailyRoutine = section.routine!.dailyRoutines.firstWhereOrNull(
-              (routine) => routine.day == selectedDay.value);
+      final dailyRoutine = section.routine!.dailyRoutines
+          .firstWhereOrNull((routine) => routine.day == selectedDay.value);
       if (dailyRoutine != null) {
-        events.addAll(dailyRoutine.events);
+        List<Event> sortedEvents = List.from(dailyRoutine
+            .events); // Create a copy to avoid modifying the original list.
+        sortedEvents.sort((a, b) {
+          // Compare TimeOfDay objects
+          int hourComparison = a.startTime.hour.compareTo(b.startTime.hour);
+          if (hourComparison != 0) {
+            return hourComparison;
+          }
+          return a.startTime.minute.compareTo(b.startTime.minute);
+        });
+        events.addAll(sortedEvents);
       }
     }
   }
 
-  // ---------------------------------------------------------------------------
+  /// Resets the edit mode and update mode states to false.
+  void _resetEditStates() {
+    isUpdateMode(false);
+    isEditMode(false);
+  }
+
+  //----------------------------------------------------------------------------
   // CRUD Operations for Events
-  // ---------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
 
+  /// Adds a new event to the daily routine and updates the event list.
   void addEvent(Event event) {
-    addEventToDailyRoutine(event);
+    _addEventToDailyRoutine(event);
     updateEventListForSelectedDay();
   }
 
+  /// Updates an existing event in the daily routine and updates the event list.
   void updateEvent(Event updatedEvent, int index) {
-    updateEventInDailyRoutine(updatedEvent, index);
+    _updateEventInDailyRoutine(updatedEvent, index);
     updateEventListForSelectedDay();
   }
 
+  /// Deletes an event from the daily routine and updates the event list.
   void deleteEvent(int index) {
-    deleteEventInDailyRoutine(index);
+    _deleteEventInDailyRoutine(index);
     updateEventListForSelectedDay();
   }
 
-  // ---------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   // Helper Methods to Manage Events within the ClassModel
-  // ---------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
 
-  Future<void> addEventToDailyRoutine(Event newEvent) async {
-    if (!validateClassModelAndSection()) return;
+  /// Adds a new event to the daily routine.
+  Future<void> _addEventToDailyRoutine(Event newEvent) async {
+    if (!_validateClassModelAndSection()) return;
 
     try {
-      isLoading.value = true;
-      final sectionIndex = getSectionIndex();
+      isLoadingClassData.value = true;
+      final sectionIndex = _getSectionIndex();
       if (sectionIndex == -1) return;
 
-      WeeklyRoutine? weeklyRoutine = getWeeklyRoutine(sectionIndex);
-      weeklyRoutine ??= createNewWeeklyRoutine();
+      WeeklyRoutine? weeklyRoutine = _getWeeklyRoutine(sectionIndex);
+      weeklyRoutine ??= _createNewWeeklyRoutine();
 
-      DailyRoutine? dailyRoutine = getDailyRoutine(weeklyRoutine);
-      dailyRoutine ??= createNewDailyRoutine();
+      DailyRoutine? dailyRoutine = _getDailyRoutine(weeklyRoutine);
+      dailyRoutine ??= _createNewDailyRoutine();
 
       dailyRoutine.events.add(newEvent);
 
-      // await updateClassModel(sectionIndex, weeklyRoutine);
+      // await _updateClassModelInFirebase();
       Get.snackbar('Success', 'Event added successfully!');
     } catch (e) {
       Get.snackbar('Error', 'Failed to add event: $e');
     } finally {
-      isLoading.value = false;
+      isLoadingClassData.value = false;
     }
   }
 
-  Future<void> updateEventInDailyRoutine(
+  /// Updates an existing event in the daily routine.
+  Future<void> _updateEventInDailyRoutine(
       Event updatedEvent, int eventIndex) async {
-    if (!validateClassModelAndSection()) return;
+    if (!_validateClassModelAndSection()) return;
 
     try {
-      isLoading.value = true;
-      final sectionIndex = getSectionIndex();
+      isLoadingClassData.value = true;
+      final sectionIndex = _getSectionIndex();
       if (sectionIndex == -1) return;
 
-      WeeklyRoutine? weeklyRoutine = getWeeklyRoutine(sectionIndex);
+      WeeklyRoutine? weeklyRoutine = _getWeeklyRoutine(sectionIndex);
       if (weeklyRoutine == null) {
         Get.snackbar('Error', 'Routine does not exist in class model.');
         return;
       }
 
-      DailyRoutine? dailyRoutine = getDailyRoutine(weeklyRoutine);
+      DailyRoutine? dailyRoutine = _getDailyRoutine(weeklyRoutine);
       if (dailyRoutine == null) {
         Get.snackbar('Error', 'Daily routine does not exist in class model.');
         return;
       }
 
-      if (!isValidEventIndex(dailyRoutine, eventIndex)) return;
+      if (!_isValidEventIndex(dailyRoutine, eventIndex)) return;
 
       dailyRoutine.events[eventIndex] = updatedEvent;
 
-      // await updateClassModel(sectionIndex, weeklyRoutine);
+      //await _updateClassModelInFirebase();
       Get.snackbar('Success', 'Event updated successfully!');
     } catch (e) {
       Get.snackbar('Error', 'Failed to update event: $e');
     } finally {
-      isLoading.value = false;
+      isLoadingClassData.value = false;
     }
   }
 
-  Future<void> deleteEventInDailyRoutine(int eventIndex) async {
-    if (!validateClassModelAndSection()) return;
+  /// Deletes an event from the daily routine.
+  Future<void> _deleteEventInDailyRoutine(int eventIndex) async {
+    if (!_validateClassModelAndSection()) return;
 
     try {
-      isLoading.value = true;
-      final sectionIndex = getSectionIndex();
+      isLoadingClassData.value = true;
+      final sectionIndex = _getSectionIndex();
       if (sectionIndex == -1) return;
 
-      WeeklyRoutine? weeklyRoutine = getWeeklyRoutine(sectionIndex);
+      WeeklyRoutine? weeklyRoutine = _getWeeklyRoutine(sectionIndex);
       if (weeklyRoutine == null) {
         Get.snackbar('Error', 'Routine does not exist in class model.');
         return;
       }
 
-      DailyRoutine? dailyRoutine = getDailyRoutine(weeklyRoutine);
+      DailyRoutine? dailyRoutine = _getDailyRoutine(weeklyRoutine);
       if (dailyRoutine == null) {
         Get.snackbar('Error', 'Daily routine does not exist in class model.');
         return;
       }
 
-      if (!isValidEventIndex(dailyRoutine, eventIndex)) return;
+      if (!_isValidEventIndex(dailyRoutine, eventIndex)) return;
 
       dailyRoutine.events.removeAt(eventIndex);
+      // await _updateClassModelInFirebase();
 
-      // await updateClassModel(sectionIndex, weeklyRoutine);
       Get.snackbar('Success', 'Event deleted successfully!');
     } catch (e) {
       Get.snackbar('Error', 'Failed to delete event: $e');
     } finally {
-      isLoading.value = false;
+      isLoadingClassData.value = false;
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Utility/Helper Functions
-  // ---------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  // Validation and Index Retrieval Methods
+  //----------------------------------------------------------------------------
 
-  bool validateClassModelAndSection() {
+  /// Validates that the class model and selected section are not empty.
+  bool _validateClassModelAndSection() {
     if (classModel.value == null || selectedSectionName.isEmpty) {
       Get.snackbar('Error',
           'Class model or selected section is empty. Cannot update routine.');
@@ -252,9 +291,10 @@ class CreateRoutineController extends GetxController {
     return true;
   }
 
-  int getSectionIndex() {
+  /// Retrieves the index of the selected section in the class model.
+  int _getSectionIndex() {
     final sectionIndex = classModel.value!.sections?.indexWhere(
-            (section) => section.sectionName == selectedSectionName.value);
+        (section) => section.sectionName == selectedSectionName.value);
     if (sectionIndex == null || sectionIndex == -1) {
       Get.snackbar('Error', 'Selected section not found in class model.');
       return -1;
@@ -262,27 +302,8 @@ class CreateRoutineController extends GetxController {
     return sectionIndex;
   }
 
-  WeeklyRoutine? getWeeklyRoutine(int sectionIndex) {
-    return classModel.value!.sections![sectionIndex].routine;
-  }
-
-  DailyRoutine? getDailyRoutine(WeeklyRoutine weeklyRoutine) {
-    return weeklyRoutine.dailyRoutines.firstWhereOrNull(
-            (routine) => routine.day == selectedDay.value);
-  }
-
-  WeeklyRoutine createNewWeeklyRoutine() {
-    return WeeklyRoutine(
-      id: classModel.value!.id!,
-      dailyRoutines: [],
-    );
-  }
-
-  DailyRoutine createNewDailyRoutine() {
-    return DailyRoutine(day: selectedDay.value, events: []);
-  }
-
-  bool isValidEventIndex(DailyRoutine dailyRoutine, int eventIndex) {
+  /// Validates that the event index is within the bounds of the daily routine's event list.
+  bool _isValidEventIndex(DailyRoutine dailyRoutine, int eventIndex) {
     if (eventIndex < 0 || eventIndex >= dailyRoutine.events.length) {
       Get.snackbar('Error', 'Invalid event index.');
       return false;
@@ -290,13 +311,41 @@ class CreateRoutineController extends GetxController {
     return true;
   }
 
-  // ---------------------------------------------------------------------------
-  // Firebase Update Method
-  // ---------------------------------------------------------------------------
-  Future<void> updateClassModel() async {
-    try {
+  //----------------------------------------------------------------------------
+  // Object Creation Methods
+  //----------------------------------------------------------------------------
 
-      // Find the document ID to update
+  /// Retrieves the weekly routine for the given section index.
+  WeeklyRoutine? _getWeeklyRoutine(int sectionIndex) {
+    return classModel.value!.sections![sectionIndex].routine;
+  }
+
+  /// Retrieves the daily routine for the given weekly routine and selected day.
+  DailyRoutine? _getDailyRoutine(WeeklyRoutine weeklyRoutine) {
+    return weeklyRoutine.dailyRoutines
+        .firstWhereOrNull((routine) => routine.day == selectedDay.value);
+  }
+
+  /// Creates a new weekly routine.
+  WeeklyRoutine _createNewWeeklyRoutine() {
+    return WeeklyRoutine(
+      id: classModel.value!.id!,
+      dailyRoutines: [],
+    );
+  }
+
+  /// Creates a new daily routine.
+  DailyRoutine _createNewDailyRoutine() {
+    return DailyRoutine(day: selectedDay.value, events: []);
+  }
+
+  //----------------------------------------------------------------------------
+  // Firebase Update Method
+  //----------------------------------------------------------------------------
+
+  /// Updates the class model in Firebase.
+  Future<void> updateClassModelInFirebase() async {
+    try {
       final classDoc = await FirebaseFirestore.instance
           .collection('classes')
           .where('schoolId', isEqualTo: classModel.value!.schoolId)
@@ -305,10 +354,8 @@ class CreateRoutineController extends GetxController {
           .get();
 
       if (classDoc.docs.isNotEmpty) {
-        // Get the document ID
         final docId = classDoc.docs.first.id;
 
-        // Update the document in Firebase
         await FirebaseFirestore.instance
             .collection('classes')
             .doc(docId)
@@ -323,10 +370,63 @@ class CreateRoutineController extends GetxController {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Debugging Methods
-  // ---------------------------------------------------------------------------
+  /// Updates the class model in Firebase.
+  Future<void> updateClassModel() async {
+    try {
+      final classDoc = await FirebaseFirestore.instance
+          .collection('classes')
+          .where('schoolId', isEqualTo: classModel.value!.schoolId)
+          .where('className', isEqualTo: classModel.value!.className)
+          .limit(1)
+          .get();
 
+      if (classDoc.docs.isNotEmpty) {
+        final docId = classDoc.docs.first.id;
+
+        await FirebaseFirestore.instance
+            .collection('classes')
+            .doc(docId)
+            .update(classModel.value!.toMap());
+
+        Get.snackbar('Success', 'Class model updated in Firebase!');
+      } else {
+        Get.snackbar('Error', 'Class document not found in Firebase.');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update class model in Firebase: $e');
+    }
+  }
+
+  //----------------------------------------------------------------------------
+  // Utility Functions
+  //----------------------------------------------------------------------------
+
+  /// Calculates the time interval between two TimeOfDay objects and returns a formatted string.
+  String calculateTimeInterval(TimeOfDay startTime, TimeOfDay endTime) {
+    int startMinutes = startTime.hour * 60 + startTime.minute;
+    int endMinutes = endTime.hour * 60 + endTime.minute;
+
+    if (endMinutes < startMinutes) {
+      endMinutes += 24 * 60;
+    }
+
+    int totalMinutes = endMinutes - startMinutes;
+
+    int hours = totalMinutes ~/ 60;
+    int minutes = totalMinutes % 60;
+
+    if (hours > 0) {
+      return '$hours hr${hours > 1 ? 's' : ''} ${minutes > 0 ? '$minutes min' : ''}';
+    } else {
+      return '$minutes min';
+    }
+  }
+
+  //----------------------------------------------------------------------------
+  // Debugging Methods
+  //----------------------------------------------------------------------------
+
+  /// Prints the structure of the ClassModel to the console for debugging purposes.
   void printClassModelStructure() {
     if (classModel.value == null) {
       print("ClassModel is null. No data to print.");
@@ -373,8 +473,7 @@ class CreateRoutineController extends GetxController {
             print("          Event Type: ${event.eventType}");
             print(
                 "          Start Time: ${event.startTime.format(Get.context!)}");
-            print(
-                "          End Time: ${event.endTime.format(Get.context!)}");
+            print("          End Time: ${event.endTime.format(Get.context!)}");
             print("          Teacher: ${event.teacher}");
             print("          Location: ${event.location}");
           }
@@ -397,11 +496,9 @@ class CreateRoutineController extends GetxController {
         for (var topic in examSubject.topics) {
           print("        Topic Name: ${topic.topicName}");
           print("        Topic Marks: ${topic.topicMarks}");
-          print("        Difficulty Level: ${topic.difficultyLevel}");
-          print("        Is Optional: ${topic.isOptional}");
           print("        Subtopics:");
           for (var subtopic in topic.subtopics) {
-            print("          Subtopic Name: ${subtopic.subtopicName}");
+            print("          Subtopic Name: ${subtopic}");
           }
         }
       }
@@ -409,36 +506,9 @@ class CreateRoutineController extends GetxController {
     print("--------------------------------------------------");
   }
 
-
-  String calculateTimeInterval(TimeOfDay startTime, TimeOfDay endTime) {
-    // Convert TimeOfDay to minutes since midnight
-    int startMinutes = startTime.hour * 60 + startTime.minute;
-    int endMinutes = endTime.hour * 60 + endTime.minute;
-
-    // Handle cases where end time is past midnight (next day)
-    if (endMinutes < startMinutes) {
-      endMinutes += 24 * 60;
-    }
-
-    // Calculate the difference in minutes
-    int totalMinutes = endMinutes - startMinutes;
-
-    // Convert to hours and minutes
-    int hours = totalMinutes ~/ 60;
-    int minutes = totalMinutes % 60;
-
-    // Return formatted string
-    if (hours > 0) {
-      return '$hours hr${hours > 1 ? 's' : ''} ${minutes > 0 ? '$minutes min' : ''}';
-    } else {
-      return '$minutes min';
-    }
-  }
-
-
-  // ---------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   // Dummy Data Creation - KEEP for Testing Purposes
-  // ---------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
 
   Future<void> addDummyClassesToFirestore() async {
     final firestore = FirebaseFirestore.instance;
@@ -462,10 +532,11 @@ class CreateRoutineController extends GetxController {
           classTeacherId: 'teacher_${i + 1}_${j + 1}',
           classTeacherName: 'Teacher ${i + 1}-${j + 1}',
           description: 'Section ${sectionNames[j]} description',
-          startDate:
-          DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+          startDate: DateTime.now()
+              .subtract(const Duration(days: 30))
+              .toIso8601String(),
           endDate:
-          DateTime.now().add(const Duration(days: 365)).toIso8601String(),
+              DateTime.now().add(const Duration(days: 365)).toIso8601String(),
           capacity: 30,
           roomNumber: 'Room ${i + 1}${j + 1}',
           students: [
@@ -478,7 +549,8 @@ class CreateRoutineController extends GetxController {
                 name: 'Student 2-${i + 1}-${j + 1}',
                 roll: '11${i + 1}${j + 1}'),
           ],
-          routine: WeeklyRoutine(id: 'routine_${i + 1}_${j + 1}', dailyRoutines: [
+          routine:
+              WeeklyRoutine(id: 'routine_${i + 1}_${j + 1}', dailyRoutines: [
             DailyRoutine(day: 'Monday', events: [
               Event(
                   subject: 'Math',
@@ -528,10 +600,8 @@ class CreateRoutineController extends GetxController {
               topics: [
                 Topic(
                   topicName: 'Algebra',
-                  subtopics: [SubTopic(subtopicName: 'Linear Equations')],
+                  subtopics: [ 'Linear Equations'],
                   topicMarks: 20,
-                  difficultyLevel: 'Medium',
-                  isOptional: false,
                 ),
               ],
               examDate: DateTime.now().add(const Duration(days: 60)),
@@ -543,10 +613,8 @@ class CreateRoutineController extends GetxController {
               topics: [
                 Topic(
                   topicName: 'Physics',
-                  subtopics: [SubTopic(subtopicName: 'Motion')],
+                  subtopics: [ 'Motion'],
                   topicMarks: 25,
-                  difficultyLevel: 'Hard',
-                  isOptional: true,
                 ),
               ],
               examDate: DateTime.now().add(const Duration(days: 90)),

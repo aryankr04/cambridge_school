@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/widgets/banner_card.dart';
+import '../../../../roles_manager.dart';
 import '../../user_management/create_user/models/roles.dart';
 import '../create_notice/create_notice_screen.dart';
 import '../notice_model.dart';
@@ -91,7 +92,7 @@ class NoticeScreen extends StatelessWidget {
                               (controller.selectedTargetAudience.contains('Student') ||
                                   controller.selectedTargetAudience.contains('All') ? 3 : 2),
                           child: MyBottomSheetDropdown(
-                            optionsForChips: Roles().getAllRolesAsString(),
+                            optionsForChips: UserRole.values.map((e) => e.value).toList(),
                             isMultipleSelection: true,
                             onMultipleChanged: (List<String>? values) {
                               controller.setSelectedTargetAudience(values);

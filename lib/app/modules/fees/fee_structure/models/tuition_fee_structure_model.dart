@@ -2,6 +2,47 @@
 // Model to manage controllers for tuition fees
 import 'package:flutter/material.dart';
 
+// Model for tuition fee structure
+class TuitionFeeStructure {
+  String name;
+  String feeType;
+  String frequency;
+  bool isOptional;
+  List<ClassWiseTuitionFee> classWiseAmounts;
+
+  TuitionFeeStructure({
+    required this.name,
+    required this.feeType,
+    required this.frequency,
+    required this.isOptional,
+    required this.classWiseAmounts,
+  });
+
+  // Factory method to create an instance from a map
+  factory TuitionFeeStructure.fromMap(Map<String, dynamic> map) {
+    return TuitionFeeStructure(
+      name: map['name'] ?? '',
+      feeType: map['feeType'] ?? '',
+      frequency: map['frequency'] ?? '',
+      isOptional: map['isOptional'] ?? false,
+      classWiseAmounts: (map['classWiseAmounts'] as List<dynamic>? ?? [])
+          .map((item) => ClassWiseTuitionFee.fromMap(item))
+          .toList(),
+    );
+  }
+
+  // Convert instance to a map
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'feeType': feeType,
+      'frequency': frequency,
+      'isOptional': isOptional,
+      'classWiseAmounts': classWiseAmounts.map((e) => e.toMap()).toList(),
+    };
+  }
+}
+
 class ClassWiseTuitionFeeInput {
   String className;
   TextEditingController monthlyController;
@@ -45,44 +86,4 @@ class ClassWiseTuitionFee {
   }
 }
 
-// Model for tuition fee structure
-class TuitionFeeStructure {
-  String name;
-  String feeType;
-  String frequency;
-  bool isOptional;
-  List<ClassWiseTuitionFee> classWiseAmounts;
-
-  TuitionFeeStructure({
-    required this.name,
-    required this.feeType,
-    required this.frequency,
-    required this.isOptional,
-    required this.classWiseAmounts,
-  });
-
-  // Factory method to create an instance from a map
-  factory TuitionFeeStructure.fromMap(Map<String, dynamic> map) {
-    return TuitionFeeStructure(
-      name: map['name'] ?? '',
-      feeType: map['feeType'] ?? '',
-      frequency: map['frequency'] ?? '',
-      isOptional: map['isOptional'] ?? false,
-      classWiseAmounts: (map['classWiseAmounts'] as List<dynamic>? ?? [])
-          .map((item) => ClassWiseTuitionFee.fromMap(item))
-          .toList(),
-    );
-  }
-
-  // Convert instance to a map
-  Map<String, dynamic> toMap() {
-    return {
-      'name': name,
-      'feeType': feeType,
-      'frequency': frequency,
-      'isOptional': isOptional,
-      'classWiseAmounts': classWiseAmounts.map((e) => e.toMap()).toList(),
-    };
-  }
-}
 

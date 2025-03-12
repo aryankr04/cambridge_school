@@ -17,6 +17,9 @@ class MyColors {
   static const Color lightBackgroundColor = Color(0xFFFFFFFF);
   static const Color darkBackgroundColor = Color(0xFF1D1D27);
 
+  // Illustration Theme Color
+  static const Color illustrationThemeColor = Color(0xFFFFA726);
+
   // Background Accent Color
   static const Color backgroundAccentColor = Color(0xFFF2F2F7);
 

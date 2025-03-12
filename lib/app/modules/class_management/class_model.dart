@@ -19,7 +19,14 @@ class ClassModel {
     this.subjects,
     required this.examSyllabus,
   });
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ClassModel && other.id == id;
+  }
 
+  @override
+  int get hashCode => id.hashCode;
   factory ClassModel.fromMap(Map<String, dynamic> map, String? documentId) {
     return ClassModel(
       id: documentId, // Use documentId as id
@@ -301,26 +308,21 @@ class ExamSubject {
 
 class Topic {
   final String topicName;
-  final List<SubTopic> subtopics;
+  final List<String> subtopics;
   final double topicMarks;
-  final String difficultyLevel;
-  final bool isOptional;
 
   Topic({
     required this.topicName,
     required this.subtopics,
     required this.topicMarks,
-    required this.difficultyLevel,
-    required this.isOptional,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'topicName': topicName,
-      'subtopics': subtopics.map((e) => e.toMap()).toList(),
+      'subtopics': subtopics.toList(),
       'topicMarks': topicMarks,
-      'difficultyLevel': difficultyLevel,
-      'isOptional': isOptional,
+
     };
   }
 
@@ -328,47 +330,24 @@ class Topic {
     return Topic(
       topicName: map['topicName'],
       subtopics:
-      (map['subtopics'] as List).map((e) => SubTopic.fromMap(e)).toList(),
+      map['subtopics'].toList(),
       topicMarks: map['topicMarks'].toDouble(),
-      difficultyLevel: map['difficultyLevel'],
-      isOptional: map['isOptional'],
     );
   }
 
   Topic copyWith({
     String? topicName,
-    List<SubTopic>? subtopics,
+    List<String>? subtopics,
     double? topicMarks,
-    String? difficultyLevel,
-    bool? isOptional,
   }) {
     return Topic(
       topicName: topicName ?? this.topicName,
       subtopics: subtopics ?? this.subtopics,
       topicMarks: topicMarks ?? this.topicMarks,
-      difficultyLevel: difficultyLevel ?? this.difficultyLevel,
-      isOptional: isOptional ?? this.isOptional,
     );
   }
 }
 
-class SubTopic {
-  final String subtopicName;
-  SubTopic({required this.subtopicName});
-  Map<String, dynamic> toMap() {
-    return {'subtopicName': subtopicName};
-  }
-
-  factory SubTopic.fromMap(Map<String, dynamic> map) {
-    return SubTopic(subtopicName: map['subtopicName']);
-  }
-
-  SubTopic copyWith({
-    String? subtopicName,
-  }) {
-    return SubTopic(subtopicName: subtopicName ?? this.subtopicName);
-  }
-}
 
 class SubjectModel {
   final String? id;

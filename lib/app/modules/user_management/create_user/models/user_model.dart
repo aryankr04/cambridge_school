@@ -1,7 +1,7 @@
 // Main User Profile
 
-import 'package:cambridge_school/app/modules/user_management/create_user/models/roles.dart';
 
+import '../../../../../roles_manager.dart';
 import '../../../attendance/mark_attendance/user_attendance_model.dart';
 
 class UserModel {
@@ -54,7 +54,6 @@ class UserModel {
   final SecurityGuardDetails? securityGuardDetails;
   final MaintenanceStaffDetails? maintenanceStaffDetails;
   final DriverDetails? driverDetails;
-  final SchoolAdminDetails? schoolAdminDetails;
   final DepartmentHeadDetails? departmentHeadDetails;
 
   // 8️⃣ Emergency & Guardian Details
@@ -74,7 +73,9 @@ class UserModel {
   final DateTime? joiningDate;
 
   // 12 Added schoolId
-  final String? schoolId; // Making this nullable
+  final String? schoolId;
+
+  final List<AppPermission>? permissions;
 
   UserModel({
     required this.userId,
@@ -113,7 +114,6 @@ class UserModel {
     this.securityGuardDetails,
     this.maintenanceStaffDetails,
     this.driverDetails,
-    this.schoolAdminDetails,
     this.departmentHeadDetails,
     this.emergencyContact,
     this.fatherDetails,
@@ -124,6 +124,7 @@ class UserModel {
     this.qualifications,
     this.joiningDate,
     this.schoolId, // Adding schoolId to constructor
+    this.permissions ,
   });
 
   Map<String, dynamic> toMap() {
@@ -164,7 +165,6 @@ class UserModel {
       'securityGuardDetails': securityGuardDetails?.toMap(),
       'maintenanceStaffDetails': maintenanceStaffDetails?.toMap(),
       'driverDetails': driverDetails?.toMap(),
-      'schoolAdminDetails': schoolAdminDetails?.toMap(),
       'departmentHeadDetails': departmentHeadDetails?.toMap(),
       'emergencyContact': emergencyContact?.toMap(),
       'fatherDetails': fatherDetails?.toMap(),
@@ -266,10 +266,6 @@ class UserModel {
             ? DriverDetails.fromMap(
             data['driverDetails'] as Map<String, dynamic>)
             : null,
-        schoolAdminDetails: data['schoolAdminDetails'] != null
-            ? SchoolAdminDetails.fromMap(
-            data['schoolAdminDetails'] as Map<String, dynamic>)
-            : null,
         departmentHeadDetails: data['departmentHeadDetails'] != null
             ? DepartmentHeadDetails.fromMap(
             data['departmentHeadDetails'] as Map<String, dynamic>)
@@ -345,7 +341,6 @@ class UserModel {
     SecurityGuardDetails? securityGuardDetails,
     MaintenanceStaffDetails? maintenanceStaffDetails,
     DriverDetails? driverDetails,
-    SchoolAdminDetails? schoolAdminDetails,
     DepartmentHeadDetails? departmentHeadDetails,
     EmergencyContact? emergencyContact,
     GuardianDetails? fatherDetails,
@@ -395,7 +390,6 @@ class UserModel {
       maintenanceStaffDetails:
       maintenanceStaffDetails ?? this.maintenanceStaffDetails,
       driverDetails: driverDetails ?? this.driverDetails,
-      schoolAdminDetails: schoolAdminDetails ?? this.schoolAdminDetails,
       departmentHeadDetails:
       departmentHeadDetails ?? this.departmentHeadDetails,
       emergencyContact: emergencyContact ?? this.emergencyContact,
@@ -651,20 +645,14 @@ class DriverDetails {
 
 // Admin Details
 class AdminDetails {
-  final List<String>? permissions;
-  final List<String>? assignedModules;
   final List<String>? manageableSchools;
 
   AdminDetails({
-    this.permissions,
-    this.assignedModules,
     this.manageableSchools,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'permissions': permissions,
-      'assignedModules': assignedModules,
       'manageableSchools': manageableSchools,
     };
   }
@@ -672,9 +660,6 @@ class AdminDetails {
   static AdminDetails? fromMap(Map<String, dynamic> map) {
     try {
       return AdminDetails(
-        permissions: (map['permissions'] as List<dynamic>?)?.cast<String>(),
-        assignedModules:
-        (map['assignedModules'] as List<dynamic>?)?.cast<String>(),
         manageableSchools:
         (map['manageableSchools'] as List<dynamic>?)?.cast<String>(),
       );
@@ -685,54 +670,22 @@ class AdminDetails {
   }
 }
 
-// School Admin Details
-class SchoolAdminDetails {
-  final List<String>? permissions;
-  final List<String>? assignedModules;
 
-  SchoolAdminDetails({
-    this.permissions,
-    this.assignedModules,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'permissions': permissions,
-      'assignedModules': assignedModules,
-    };
-  }
-
-  static SchoolAdminDetails? fromMap(Map<String, dynamic> map) {
-    try {
-      return SchoolAdminDetails(
-        permissions: (map['permissions'] as List<dynamic>?)?.cast<String>(),
-        assignedModules:
-        (map['assignedModules'] as List<dynamic>?)?.cast<String>(),
-      );
-    } catch (e) {
-      print('Error creating SchoolAdminDetails from map: $e');
-      return null;
-    }
-  }
-}
 
 // Director Details
 class DirectorDetails {
   final List<String>? schools;
   final int? yearsInManagement;
-  final List<String>? permissions;
 
   DirectorDetails({
     this.schools,
     this.yearsInManagement,
-    this.permissions,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'schools': schools,
       'yearsInManagement': yearsInManagement,
-      'permissions': permissions,
     };
   }
 
@@ -741,7 +694,6 @@ class DirectorDetails {
       return DirectorDetails(
         schools: (map['schools'] as List<dynamic>?)?.cast<String>(),
         yearsInManagement: map['yearsInManagement'] as int?,
-        permissions: (map['permissions'] as List<dynamic>?)?.cast<String>(),
       );
     } catch (e) {
       print('Error creating DirectorDetails from map: $e');

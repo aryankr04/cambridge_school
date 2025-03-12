@@ -8,7 +8,7 @@ import '../../../../core/utils/helpers/date_and_time.dart';
 import '../../../../core/widgets/card_widget.dart';
 import '../../../../core/widgets/divider.dart';
 import '../controllers/create_school_step_7_controller.dart';
-import '../models/mixed.dart';
+import '../models/school_model.dart';
 
 class CreateSchoolStep4AccreditationAndAchievements extends StatelessWidget {
   final CreateSchoolStep7AccreditationAndAchievementsController controller;

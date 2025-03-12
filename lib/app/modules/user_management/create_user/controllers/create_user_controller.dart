@@ -14,6 +14,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../../core/services/firebase/auth_service.dart';
 import '../../../../../core/widgets/text_field.dart';
+import '../../../../../roles_manager.dart';
 import '../models/roles.dart';
 import '../models/user_model.dart';
 import '../screens/success_screen.dart';
@@ -100,8 +101,7 @@ class CreateUserController extends GetxController {
   final transportFareController = TextEditingController();
 
   // --- Roles ---
-  RxList<String> selectedRoles = <String>[].obs;
-  RxList<UserRole> selectedRoles1 = <UserRole>[].obs;
+  RxList<UserRole> selectedRoles = <UserRole>[].obs;
 
   // --- Role-Based Details ---
   // Student Details
@@ -552,7 +552,7 @@ class CreateUserController extends GetxController {
 
   /// Validates student details fields.
   bool _validateStudentDetailsFields() {
-    return !selectedRoles.contains(UserRole.Student.name) ||
+    return !selectedRoles.contains(UserRole.student) ||
         (rollNumberController.text.isNotEmpty &&
             admissionNoController.text.isNotEmpty &&
             className.value != null &&
@@ -563,31 +563,30 @@ class CreateUserController extends GetxController {
 
   /// Validates teacher details fields.
   bool _validateTeacherDetailsFields() {
-    return !selectedRoles.contains(UserRole.Teacher.name) ||
-        subjectsTaught.isNotEmpty;
+    return !selectedRoles.contains(UserRole.teacher) || subjectsTaught.isNotEmpty;
   }
 
   /// Validates driver details fields.
   bool _validateDriverDetailsFields() {
-    return !selectedRoles.contains(UserRole.BusDriver.name) ||
+    return !selectedRoles.contains(UserRole.busDriver) ||
         licenseNumberController.text.isNotEmpty;
   }
 
   /// Validates security guard details fields.
   bool _validateSecurityGuardDetailsFields() {
-    return !selectedRoles.contains(UserRole.SecurityGuard.name) ||
+    return !selectedRoles.contains(UserRole.securityGuard) ||
         assignedAreaController.text.isNotEmpty;
   }
 
   /// Validates maintenance staff details fields.
   bool _validateMaintenanceStaffDetailsFields() {
-    return !selectedRoles.contains(UserRole.Janitor.name) ||
+    return !selectedRoles.contains(UserRole.janitor) ||
         maintenanceResponsibilities.isNotEmpty;
   }
 
   /// Validates admin details fields.
   bool _validateAdminDetailsFields() {
-    return !selectedRoles.contains(UserRole.Admin.name) ||
+    return !selectedRoles.contains(UserRole.admin) ||
         (adminPermissions.isNotEmpty &&
             assignedModules.isNotEmpty &&
             manageableSchools.isNotEmpty);
@@ -595,14 +594,14 @@ class CreateUserController extends GetxController {
 
   /// Validates school admin details fields.
   bool _validateSchoolAdminDetailsFields() {
-    return !selectedRoles.contains(UserRole.SchoolAdmin.name) ||
+    return !selectedRoles.contains(UserRole.schoolAdmin) ||
         (schoolAdminPermissions.isNotEmpty &&
             schoolAdminAssignedModules.isNotEmpty);
   }
 
   /// Validates director details fields.
   bool _validateDirectorDetailsFields() {
-    return !selectedRoles.contains(UserRole.Director.name) ||
+    return !selectedRoles.contains(UserRole.director) ||
         (directorSchools.isNotEmpty &&
             yearsInManagementController.text.isNotEmpty &&
             directorPermissions.isNotEmpty);
@@ -610,7 +609,7 @@ class CreateUserController extends GetxController {
 
   /// Validates department head details fields.
   bool _validateDepartmentHeadDetailsFields() {
-    return !selectedRoles.contains(UserRole.DepartmentHead.name) ||
+    return !selectedRoles.contains(UserRole.departmentHead) ||
         (departmentController.text.isNotEmpty &&
             yearsAsHeadController.text.isNotEmpty &&
             departmentResponsibilities.isNotEmpty);
@@ -648,7 +647,7 @@ class CreateUserController extends GetxController {
                     String userId = const Uuid().v4();
                     UserModel newUser = buildUserModel(userId);
 
-                    await userRepository.createUser(newUser);
+                    await userRepository.addUserOrUpdate(newUser);
                     Get.offAll(() => SuccessScreen(user: newUser));
 
                     print(
@@ -669,7 +668,7 @@ class CreateUserController extends GetxController {
                       String userId = const Uuid().v4();
                       UserModel newUser = buildUserModel(userId);
 
-                      await userRepository.createUser(newUser);
+                      await userRepository.addUserOrUpdate(newUser);
                       Get.offAll(() => SuccessScreen(user: newUser));
                       print(
                           "NEW user created in Firebase Authenthication and Firestore");
@@ -769,7 +768,7 @@ class CreateUserController extends GetxController {
     );
 
     // --- Role-Based Details ---
-    final studentDetails = selectedRoles.contains(UserRole.Student.name)
+    final studentDetails = selectedRoles.contains(UserRole.student)
         ? StudentDetails(
       rollNumber: rollNumberController.text,
       admissionNo: admissionNoController.text,
@@ -783,59 +782,47 @@ class CreateUserController extends GetxController {
     )
         : null;
 
-    final teacherDetails = selectedRoles.contains(UserRole.Teacher.name)
+    final teacherDetails = selectedRoles.contains(UserRole.teacher)
         ? TeacherDetails(
       subjectsTaught: subjectsTaught.toList(),
       experience: experienceController.text,
     )
         : null;
 
-    final securityGuardDetails =
-    selectedRoles.contains(UserRole.SecurityGuard.name)
+    final securityGuardDetails = selectedRoles.contains(UserRole.securityGuard)
         ? SecurityGuardDetails(
       assignedArea: assignedAreaController.text,
     )
         : null;
 
-    final maintenanceStaffDetails =
-    selectedRoles.contains(UserRole.Janitor.name)
+    final maintenanceStaffDetails = selectedRoles.contains(UserRole.janitor)
         ? MaintenanceStaffDetails(
       responsibilities: maintenanceResponsibilities.toList(),
     )
         : null;
 
-    final driverDetails = selectedRoles.contains(UserRole.BusDriver.name)
+    final driverDetails = selectedRoles.contains(UserRole.busDriver)
         ? DriverDetails(
       licenseNumber: licenseNumberController.text,
       routesAssigned: routesAssigned.toList(),
     )
         : null;
 
-    final adminDetails = selectedRoles.contains(UserRole.Admin.name)
+    final adminDetails = selectedRoles.contains(UserRole.admin)
         ? AdminDetails(
-      permissions: adminPermissions.toList(),
-      assignedModules: assignedModules.toList(),
       manageableSchools: manageableSchools.toList(),
     )
         : null;
 
-    final schoolAdminDetails = selectedRoles.contains(UserRole.SchoolAdmin.name)
-        ? SchoolAdminDetails(
-      permissions: schoolAdminPermissions.toList(),
-      assignedModules: schoolAdminAssignedModules.toList(),
-    )
-        : null;
 
-    final directorDetails = selectedRoles.contains(UserRole.Director.name)
+    final directorDetails = selectedRoles.contains(UserRole.director)
         ? DirectorDetails(
       schools: directorSchools.toList(),
       yearsInManagement: int.tryParse(yearsInManagementController.text),
-      permissions: directorPermissions.toList(),
     )
         : null;
 
-    final departmentHeadDetails =
-    selectedRoles.contains(UserRole.DepartmentHead.name)
+    final departmentHeadDetails = selectedRoles.contains(UserRole.departmentHead)
         ? DepartmentHeadDetails(
       department: departmentController.text,
       yearsAsHead: int.tryParse(yearsAsHeadController.text),
@@ -875,28 +862,26 @@ class CreateUserController extends GetxController {
           UserRole.values.firstWhere((role) => role.name == roleName))
           .toList(),
       studentDetails:
-      selectedRoles.contains(UserRole.Student.name) ? studentDetails : null,
+      selectedRoles.contains(UserRole.student) ? studentDetails : null,
       teacherDetails:
-      selectedRoles.contains(UserRole.Teacher.name) ? teacherDetails : null,
-      directorDetails: selectedRoles.contains(UserRole.Director.name)
+      selectedRoles.contains(UserRole.teacher) ? teacherDetails : null,
+      directorDetails: selectedRoles.contains(UserRole.director)
           ? directorDetails
           : null,
       adminDetails:
-      selectedRoles.contains(UserRole.Admin.name) ? adminDetails : null,
-      securityGuardDetails: selectedRoles.contains(UserRole.SecurityGuard.name)
+      selectedRoles.contains(UserRole.admin) ? adminDetails : null,
+      securityGuardDetails: selectedRoles.contains(UserRole.securityGuard)
           ? securityGuardDetails
           : null,
       maintenanceStaffDetails:
-      selectedRoles.contains(UserRole.Janitor.name)
+      selectedRoles.contains(UserRole.janitor)
           ? maintenanceStaffDetails
           : null,
       driverDetails:
-      selectedRoles.contains(UserRole.BusDriver.name) ? driverDetails : null,
-      schoolAdminDetails: selectedRoles.contains(UserRole.SchoolAdmin.name)
-          ? schoolAdminDetails
-          : null,
+      selectedRoles.contains(UserRole.busDriver) ? driverDetails : null,
+
       departmentHeadDetails:
-      selectedRoles.contains(UserRole.DepartmentHead.name)
+      selectedRoles.contains(UserRole.departmentHead)
           ? departmentHeadDetails
           : null,
       emergencyContact: emergencyContact,
@@ -935,28 +920,77 @@ class CreateUserController extends GetxController {
 
   /// Checks if a role is selected.
   bool isRoleSelected(UserRole role) {
-    return selectedRoles1.contains(role);
+    return selectedRoles.contains(role);
   }
 
   /// Toggles the selection of a role.
   void toggleRoleSelection(UserRole role) {
     if (isRoleSelected(role)) {
-      selectedRoles1.remove(role);
+      selectedRoles.remove(role);
     } else {
-      selectedRoles1.add(role);
+      selectedRoles.add(role);
     }
   }
 
   /// Gets the asset path for a given `UserRole`.
   String getAssetPath(UserRole role) {
     switch (role) {
-      case UserRole.SuperAdmin:
-        return 'assets/icons/super_admin.svg'; // Replace with your actual path
-      case UserRole.Admin:
-        return 'assets/icons/admin.svg'; // Replace with your actual path
-      case UserRole.Teacher:
-        return 'assets/icons/teacher.svg'; // Replace with your actual path
+    case UserRole.superAdmin:
+    return 'assets/icons/super_admin.svg'; // Replace with your actual path
+    case UserRole.admin:
+    return 'assets/icons/admin.svg'; // Replace with your actual path
+    case UserRole.teacher:
+    return 'assets/icons/teacher.svg'; // Replace with your actual path
+    // Add cases for
     // Add cases for all other roles
+      case UserRole.specialEducator:
+        return 'assets/icons/special_educator.svg';
+      case UserRole.physicalEducationTeacher:
+        return 'assets/icons/physical_education_teacher.svg';
+      case UserRole.sportsCoach:
+        return 'assets/icons/sports_coach.svg';
+      case UserRole.musicTeacher:
+        return 'assets/icons/music_teacher.svg';
+      case UserRole.danceTeacher:
+        return 'assets/icons/dance_teacher.svg';
+      case UserRole.officeAdministrator:
+        return 'assets/icons/office_administrator.svg';
+      case UserRole.receptionist:
+        return 'assets/icons/receptionist.svg';
+      case UserRole.accountant:
+        return 'assets/icons/accountant.svg';
+      case UserRole.hrPersonnel:
+        return 'assets/icons/hr_personnel.svg';
+      case UserRole.examinationCoordinator:
+        return 'assets/icons/examination_coordinator.svg';
+      case UserRole.librarian:
+        return 'assets/icons/librarian.svg';
+      case UserRole.labAssistant:
+        return 'assets/icons/lab_assistant.svg';
+      case UserRole.itSupportStaff:
+        return 'assets/icons/it_support_staff.svg';
+      case UserRole.socialMediaManager:
+        return 'assets/icons/social_media_manager.svg';
+      case UserRole.counselor:
+        return 'assets/icons/counselor.svg';
+      case UserRole.nurse:
+        return 'assets/icons/nurse.svg';
+      case UserRole.busDriver:
+        return 'assets/icons/bus_driver.svg';
+      case UserRole.busConductor:
+        return 'assets/icons/bus_conductor.svg';
+      case UserRole.securityGuard:
+        return 'assets/icons/security_guard.svg';
+      case UserRole.janitor:
+        return 'assets/icons/janitor.svg';
+      case UserRole.electrician:
+        return 'assets/icons/electrician.svg';
+      case UserRole.gardener:
+        return 'assets/icons/gardener.svg';
+      case UserRole.student:
+        return 'assets/icons/student.svg';
+      case UserRole.parent:
+        return 'assets/icons/parent.svg';
       default:
         return 'assets/icons/default.svg'; // Default icon
     }

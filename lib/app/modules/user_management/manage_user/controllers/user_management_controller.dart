@@ -230,8 +230,8 @@ class UserManagementController extends GetxController {
         case 'permissions':
           if (a.adminDetails != null && b.adminDetails != null) {
             // Assuming permissions is a List<String>
-            final aPermissions = a.adminDetails?.permissions ?? [];
-            final bPermissions = b.adminDetails?.permissions ?? [];
+            final aPermissions = a.permissions ?? [];
+            final bPermissions = b.permissions ?? [];
             comparisonResult =
                 aPermissions.join(', ').compareTo(bPermissions.join(', '));
           }

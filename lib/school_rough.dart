@@ -1,6 +1,7 @@
-import 'dart:ui';
+import 'package:cambridge_school/roles_manager.dart';
+import 'package:flutter/material.dart';
 
-import '../../fees/models/fee_structure.dart';
+import 'app/modules/fees/models/fee_structure.dart';
 
 class SchoolModel {
   // **Identification and Branding**
@@ -50,7 +51,6 @@ class SchoolModel {
   final List<String> scholarshipPrograms;
   final String transportationDetails;
 
-
   // **Facilities and Infrastructure**
   final double campusSize;
   final List<String> facilitiesAvailable;
@@ -80,41 +80,28 @@ class SchoolModel {
   final List<Award> awards;
 
   // **Student Demographics**
+  final int totalStudents;
   final int totalBoys;
   final int totalGirls;
 
   // **Media and Resources**
   final List<String> schoolImagesUrl;
   final String? onlineLearningPlatform;
-  final List<String> featuredNews;
-  final List<String> importantNotices;
+  final List<FeaturedNews> featuredNews;
 
   // **Calendar and Scheduling**
-  final List<String> holidays;
+  final List<Holiday> holidays;
   final int noOfPeriodsPerDay;
 
   // **Fee**
-  final List<FeeStructure> feeStructure;
-  final String feePaymentMethods;
+  final FeeStructure feeStructure;
+  final List<String> feePaymentMethods;
   final DateTime feeDueDate;
   final String lateFeePolicy;
 
-
   // **Staff and Management**
-  final List<UserListDetails> principals;
-  final List<UserListDetails> vicePrincipals;
-  final List<UserListDetails> teachers;
-  final List<UserListDetails> maintenanceStaff;
-  final List<UserListDetails> drivers;
-  final List<UserListDetails> securityGuards;
-  final List<UserListDetails> directors;
-  final List<UserListDetails> sportsCoaches;
-  final List<UserListDetails> schoolNurses;
-  final List<UserListDetails> schoolAdministrators;
-  final List<UserListDetails> itSupportStaff;
-  final List<UserListDetails> librarians;
-  final List<UserListDetails> departmentHeads;
-  final List<UserListDetails> guidanceCounselors;
+  final List<UserListDetails> employees;
+
   final String emergencyContactName;
   final String emergencyContactPhone;
   final String firstAidFacilities;
@@ -125,6 +112,19 @@ class SchoolModel {
 
   // **Alumni Network**
   final List<Alumni> alumni;
+
+  // **Added Facilities**
+  final List<Vehicle> vehicles;
+  final List<Classroom> classroomsList;
+  final List<Library> libraries;
+  final List<ExamHall> examHalls;
+  final List<Auditorium> auditoriums;
+  final List<Hostel> hostels;
+  final List<StaffRoom> staffRooms;
+  final List<MedicalRoom> medicalRooms;
+  final List<Cafeteria> cafeterias;
+  final Parking parking;
+  final SecuritySystem securitySystem;
 
   SchoolModel({
     required this.schoolId,
@@ -144,6 +144,7 @@ class SchoolModel {
     required this.schoolingSystem,
     required this.schoolBoard,
     required this.schoolCode,
+    required this.employees,
     required this.schoolType,
     required this.affiliationNumber,
     required this.schoolManagementAuthority,
@@ -175,20 +176,6 @@ class SchoolModel {
     required this.schoolTimings,
     required this.academicYear,
     required this.feeStructure,
-    required this.principals,
-    required this.vicePrincipals,
-    required this.teachers,
-    required this.maintenanceStaff,
-    required this.drivers,
-    required this.securityGuards,
-    required this.directors,
-    required this.sportsCoaches,
-    required this.schoolNurses,
-    required this.schoolAdministrators,
-    required this.itSupportStaff,
-    required this.librarians,
-    required this.departmentHeads,
-    required this.guidanceCounselors,
     required this.emergencyContactName,
     required this.emergencyContactPhone,
     required this.firstAidFacilities,
@@ -215,9 +202,20 @@ class SchoolModel {
     required this.hasInternetAccess,
     required this.onlineLearningPlatform,
     required this.featuredNews,
-    required this.importantNotices,
     required this.alumni,
     required this.feeDueDate,
+    required this.totalStudents,
+    required this.vehicles,
+    required this.classroomsList,
+    required this.libraries,
+    required this.examHalls,
+    required this.auditoriums,
+    required this.hostels,
+    required this.staffRooms,
+    required this.medicalRooms,
+    required this.cafeterias,
+    required this.parking,
+    required this.securitySystem,
   });
 
   factory SchoolModel.fromMap(Map<String, dynamic> map) {
@@ -269,74 +267,33 @@ class SchoolModel {
       accreditations: (map['accreditations'] as List)
           .map((e) => Accreditation.fromMap(e))
           .toList(),
-      rankings: (map['rankings'] as List).map((e) => Ranking.fromMap(e)).toList(),
+      rankings:
+      (map['rankings'] as List).map((e) => Ranking.fromMap(e)).toList(),
       awards: (map['awards'] as List).map((e) => Award.fromMap(e)).toList(),
-      holidays: List<String>.from(map['holidays']),
+      holidays: (map['holidays'] as List)
+          .map((e) => Holiday.fromMap(e))
+          .toList(),
       numberOfBuildings: map['numberOfBuildings'],
       numberOfFloors: map['numberOfFloors'],
       numberOfClassrooms: map['numberOfClassrooms'],
       noOfPeriodsPerDay: map['noOfPeriodsPerDay'],
       schoolTimings: SchoolTimings.fromMap(map['schoolTimings']),
       academicYear: AcademicYear.fromMap(map['academicYear']),
-      feeStructure: (map['feeStructure'] as List)
-          .map((e) => FeeStructure.fromMap(e))
-          .toList(),
-      principals: (map['principals'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      vicePrincipals: (map['vicePrincipals'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      teachers: (map['teachers'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      maintenanceStaff: (map['maintenanceStaff'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      drivers: (map['drivers'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      securityGuards: (map['securityGuards'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      directors: (map['directors'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      sportsCoaches: (map['sportsCoaches'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      schoolNurses: (map['schoolNurses'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      schoolAdministrators: (map['schoolAdministrators'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      itSupportStaff: (map['itSupportStaff'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      librarians: (map['librarians'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      departmentHeads: (map['departmentHeads'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
-      guidanceCounselors: (map['guidanceCounselors'] as List)
-          .map((e) => UserListDetails.fromMap(e))
-          .toList(),
+      feeStructure: FeeStructure.fromMap(map['feeStructure']),
       emergencyContactName: map['emergencyContactName'],
       emergencyContactPhone: map['emergencyContactPhone'],
       firstAidFacilities: map['firstAidFacilities'],
       primaryColor: Color(map['primaryColor']),
-      secondaryColor:  Color(map['secondaryColor']),
+      secondaryColor: Color(map['secondaryColor']),
       managingTrustName: map['managingTrustName'],
       registeredAddress: map['registeredAddress'],
       registeredContactNumber: map['registeredContactNumber'],
       totalBoys: map['totalBoys'],
-      totalGirls:  map['totalGirls'],
+      totalGirls: map['totalGirls'],
       studentTeacherRatio: map['studentTeacherRatio'],
       scholarshipPrograms: List<String>.from(map['scholarshipPrograms']),
       transportationDetails: map['transportationDetails'],
-      feePaymentMethods: map['feePaymentMethods'],
+      feePaymentMethods: List<String>.from(map['feePaymentMethods']),
       lateFeePolicy: map['lateFeePolicy'],
       curriculumFrameworks: List<String>.from(map['curriculumFrameworks']),
       languagesOffered: List<String>.from(map['languagesOffered']),
@@ -348,10 +305,24 @@ class SchoolModel {
       numberOfComputers: map['numberOfComputers'],
       hasInternetAccess: map['hasInternetAccess'],
       onlineLearningPlatform: map['onlineLearningPlatform'],
-      featuredNews: List<String>.from(map['featuredNews']),
-      importantNotices: List<String>.from(map['importantNotices']),
+      featuredNews: (map['featuredNews'] as List)
+          .map((e) => FeaturedNews.fromMap(e))
+          .toList(),
       alumni: (map['alumni'] as List).map((e) => Alumni.fromMap(e)).toList(),
       feeDueDate: DateTime.parse(map['feeDueDate']),
+      employees: List<UserListDetails>.from(map['employees']),
+      totalStudents: map['totalStudents'],
+      vehicles: (map['vehicles'] as List?)?.map((e) => Vehicle.fromMap(e)).toList() ?? [],
+      classroomsList: (map['classroomsList'] as List?)?.map((e) => Classroom.fromMap(e)).toList() ?? [],
+      libraries: (map['libraries'] as List?)?.map((e) => Library.fromMap(e)).toList() ?? [],
+      examHalls: (map['examHalls'] as List?)?.map((e) => ExamHall.fromMap(e)).toList() ?? [],
+      auditoriums: (map['auditoriums'] as List?)?.map((e) => Auditorium.fromMap(e)).toList() ?? [],
+      hostels: (map['hostels'] as List?)?.map((e) => Hostel.fromMap(e)).toList() ?? [],
+      staffRooms: (map['staffRooms'] as List?)?.map((e) => StaffRoom.fromMap(e)).toList() ?? [],
+      medicalRooms: (map['medicalRooms'] as List?)?.map((e) => MedicalRoom.fromMap(e)).toList() ?? [],
+      cafeterias: (map['cafeterias'] as List?)?.map((e) => Cafeteria.fromMap(e)).toList() ?? [],
+      parking: Parking.fromMap(map['parking'] ?? {}),
+      securitySystem: SecuritySystem.fromMap(map['securitySystem'] ?? {}),
     );
   }
 
@@ -397,29 +368,14 @@ class SchoolModel {
       'accreditations': accreditations.map((e) => e.toMap()).toList(),
       'rankings': rankings.map((e) => e.toMap()).toList(),
       'awards': awards.map((e) => e.toMap()).toList(),
-      'holidays': holidays,
+      'holidays': holidays.map((e) => e.toMap()).toList(),
       'numberOfBuildings': numberOfBuildings,
       'numberOfFloors': numberOfFloors,
       'numberOfClassrooms': numberOfClassrooms,
       'noOfPeriodsPerDay': noOfPeriodsPerDay,
       'schoolTimings': schoolTimings.toMap(),
       'academicYear': academicYear.toMap(),
-      'feeStructure': feeStructure.map((e) => e.toMap()).toList(),
-      'principals': principals.map((e) => e.toMap()).toList(),
-      'vicePrincipals': vicePrincipals.map((e) => e.toMap()).toList(),
-      'teachers': teachers.map((e) => e.toMap()).toList(),
-      'maintenanceStaff': maintenanceStaff.map((e) => e.toMap()).toList(),
-      'drivers': drivers.map((e) => e.toMap()).toList(),
-      'securityGuards': securityGuards.map((e) => e.toMap()).toList(),
-      'directors': directors.map((e) => e.toMap()).toList(),
-      'sportsCoaches': sportsCoaches.map((e) => e.toMap()).toList(),
-      'schoolNurses': schoolNurses.map((e) => e.toMap()).toList(),
-      'schoolAdministrators':
-      schoolAdministrators.map((e) => e.toMap()).toList(),
-      'itSupportStaff': itSupportStaff.map((e) => e.toMap()).toList(),
-      'librarians': librarians.map((e) => e.toMap()).toList(),
-      'departmentHeads': departmentHeads.map((e) => e.toMap()).toList(),
-      'guidanceCounselors': guidanceCounselors.map((e) => e.toMap()).toList(),
+      'feeStructure': feeStructure.toMap(),
       'emergencyContactName': emergencyContactName,
       'emergencyContactPhone': emergencyContactPhone,
       'firstAidFacilities': firstAidFacilities,
@@ -445,13 +401,25 @@ class SchoolModel {
       'numberOfComputers': numberOfComputers,
       'hasInternetAccess': hasInternetAccess,
       'onlineLearningPlatform': onlineLearningPlatform,
-      'featuredNews': featuredNews,
-      'importantNotices': importantNotices,
+      'featuredNews': featuredNews.map((e) => e.toMap()).toList(),
       'alumni': alumni.map((e) => e.toMap()).toList(),
       'feeDueDate': feeDueDate.toIso8601String(),
+      'employees': employees.map((e) => e.toMap()).toList(),
+      'vehicles': vehicles.map((e) => e.toMap()).toList(),
+      'classroomsList': classroomsList.map((e) => e.toMap()).toList(),
+      'libraries': libraries.map((e) => e.toMap()).toList(),
+      'examHalls': examHalls.map((e) => e.toMap()).toList(),
+      'auditoriums': auditoriums.map((e) => e.toMap()).toList(),
+      'hostels': hostels.map((e) => e.toMap()).toList(),
+      'staffRooms': staffRooms.map((e) => e.toMap()).toList(),
+      'medicalRooms': medicalRooms.map((e) => e.toMap()).toList(),
+      'cafeterias': cafeterias.map((e) => e.toMap()).toList(),
+      'parking': parking.toMap(),
+      'securitySystem': securitySystem.toMap(),
     };
   }
 }
+
 class AcademicEvent {
   final String eventName;
   final DateTime eventDate;
@@ -479,6 +447,71 @@ class AcademicEvent {
     };
   }
 }
+
+class FeaturedNews {
+  final String title;
+  final String content;
+  final String imageUrl;
+  final DateTime datePublished;
+
+  FeaturedNews({
+    required this.title,
+    required this.content,
+    required this.imageUrl,
+    required this.datePublished,
+  });
+
+  factory FeaturedNews.fromMap(Map<String, dynamic> map) {
+    return FeaturedNews(
+      title: map['title'],
+      content: map['content'],
+      imageUrl: map['imageUrl'],
+      datePublished: DateTime.parse(map['datePublished']),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'content': content,
+      'imageUrl': imageUrl,
+      'datePublished': datePublished.toIso8601String(),
+    };
+  }
+}
+
+class Holiday {
+  final String holidayName;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String? description;
+
+  Holiday({
+    required this.holidayName,
+    required this.startDate,
+    required this.endDate,
+    this.description,
+  });
+
+  factory Holiday.fromMap(Map<String, dynamic> map) {
+    return Holiday(
+      holidayName: map['holidayName'],
+      startDate: DateTime.parse(map['startDate']),
+      endDate: DateTime.parse(map['endDate']),
+      description: map['description'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'holidayName': holidayName,
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String(),
+      'description': description,
+    };
+  }
+}
+
 class Alumni {
   final String alumniId;
   final String alumniName;
@@ -526,6 +559,7 @@ class Alumni {
     };
   }
 }
+
 class Accreditation {
   final String accreditingBody;
   final String description;
@@ -561,6 +595,7 @@ class Accreditation {
     };
   }
 }
+
 class Ranking {
   final String title;
   final int rank;
@@ -596,6 +631,7 @@ class Ranking {
     };
   }
 }
+
 class Award {
   final String name;
   final String description;
@@ -631,6 +667,7 @@ class Award {
     };
   }
 }
+
 class SchoolTimings {
   final DateTime openingTime;
   final DateTime closingTime;
@@ -652,10 +689,13 @@ class SchoolTimings {
     return SchoolTimings(
       openingTime: DateTime.parse(json['openingTime'] ?? ''),
       closingTime: DateTime.parse(json['closingTime'] ?? ''),
-      assemblyStart: json['assemblyStart'] != null ? DateTime.parse(json['assemblyStart']) : null,
-      assemblyEnd: json['assemblyEnd'] != null ? DateTime.parse(json['assemblyEnd']) : null,
-      breakStart: json['breakStart'] != null ? DateTime.parse(json['breakStart']) : null,
-      breakEnd:  json['breakEnd'] != null ? DateTime.parse(json['breakEnd']) : null,
+      assemblyStart:
+      json['assemblyStart'] != null ? DateTime.parse(json['assemblyStart']) : null,
+      assemblyEnd:
+      json['assemblyEnd'] != null ? DateTime.parse(json['assemblyEnd']) : null,
+      breakStart:
+      json['breakStart'] != null ? DateTime.parse(json['breakStart']) : null,
+      breakEnd: json['breakEnd'] != null ? DateTime.parse(json['breakEnd']) : null,
     );
   }
 
@@ -670,6 +710,7 @@ class SchoolTimings {
     };
   }
 }
+
 class AcademicYear {
   final DateTime start;
   final DateTime end;
@@ -693,15 +734,18 @@ class AcademicYear {
     };
   }
 }
+
 class UserListDetails {
   final String userId;
   final String userName;
   final String profilePictureUrl;
+  final List<UserRole> roles;
 
   UserListDetails({
     required this.userId,
     required this.userName,
     required this.profilePictureUrl,
+    required this.roles,
   });
 
   factory UserListDetails.fromMap(Map<String, dynamic> map) {
@@ -709,6 +753,19 @@ class UserListDetails {
       userId: map['userId'] ?? '',
       userName: map['userName'] ?? '',
       profilePictureUrl: map['profilePictureUrl'] ?? '',
+      roles: (map['roles'] as List<dynamic>?)
+          ?.map((roleName) {
+        try {
+          return UserRole.values
+              .firstWhere((element) => element.value == roleName);
+        } catch (e) {
+          print('Unknown role: $roleName');
+          return null;
+        }
+      })
+          .whereType<UserRole>()
+          .toList() ??
+          [],
     );
   }
 
@@ -717,9 +774,11 @@ class UserListDetails {
       'userId': userId,
       'userName': userName,
       'profilePictureUrl': profilePictureUrl,
+      'roles': roles.map((e) => e.value).toList(), // Store role value
     };
   }
 }
+
 class SchoolAddress {
   final String? streetAddress;
   final String? city;
@@ -759,6 +818,7 @@ class SchoolAddress {
     pinCode: data['pinCode'] as String?,
   );
 }
+
 class ClassData {
   final String classId;
   final String className;
@@ -786,6 +846,7 @@ class ClassData {
     );
   }
 }
+
 class SectionData {
   final String classId;
   final String className;
@@ -809,26 +870,24 @@ class SectionData {
     return SectionData(
       classId: map['classId'] as String,
       className: map['className'] as String,
-      sectionName: map['sectionName'] ,
+      sectionName: map['sectionName'],
     );
   }
 }
+
 class SubjectData {
   final String subjectId;
   final String subjectName;
-  final String? description;
 
   SubjectData({
     required this.subjectId,
     required this.subjectName,
-    this.description,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'subjectId': subjectId,
       'subjectName': subjectName,
-      'description': description,
     };
   }
 
@@ -836,8 +895,485 @@ class SubjectData {
     return SubjectData(
       subjectId: map['subjectId'] as String,
       subjectName: map['subjectName'] as String,
-      description: map['description'] as String?,
     );
   }
 }
 
+class Vehicle {
+  String vehicleType; // Bus, Van, Car, etc.
+  String registrationNumber;
+  int capacity;
+  String driverName;
+  String driverContact;
+  String route;
+  bool gpsEnabled;
+  DateTime lastMaintenanceDate;
+  String fuelType; // Petrol, Diesel, Electric
+  double mileage; // in km/l
+  String status; // Active, Under Maintenance, etc.
+
+  Vehicle({
+    required this.vehicleType,
+    required this.registrationNumber,
+    required this.capacity,
+    required this.driverName,
+    required this.driverContact,
+    required this.route,
+    required this.gpsEnabled,
+    required this.lastMaintenanceDate,
+    required this.fuelType,
+    required this.mileage,
+    required this.status,
+  });
+
+  factory Vehicle.fromMap(Map<String, dynamic> map) {
+    return Vehicle(
+      vehicleType: map['vehicleType'] ?? '',
+      registrationNumber: map['registrationNumber'] ?? '',
+      capacity: map['capacity'] ?? 0,
+      driverName: map['driverName'] ?? '',
+      driverContact: map['driverContact'] ?? '',
+      route: map['route'] ?? '',
+      gpsEnabled: map['gpsEnabled'] ?? false,
+      lastMaintenanceDate: DateTime.parse(map['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
+      fuelType: map['fuelType'] ?? '',
+      mileage: map['mileage'] ?? 0.0,
+      status: map['status'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'vehicleType': vehicleType,
+      'registrationNumber': registrationNumber,
+      'capacity': capacity,
+      'driverName': driverName,
+      'driverContact': driverContact,
+      'route': route,
+      'gpsEnabled': gpsEnabled,
+      'lastMaintenanceDate': lastMaintenanceDate.toIso8601String(),
+      'fuelType': fuelType,
+      'mileage': mileage,
+      'status': status,
+    };
+  }
+}
+
+class Classroom {
+  String classroomName;
+  int capacity;
+  String assignedGrade;
+  List<String> facilities; // Smartboard, Projector, AC, etc.
+  String seatingArrangement; // Rows,Circular, U-Shape
+  DateTime lastMaintenanceDate;
+
+  Classroom({
+    required this.classroomName,
+    required this.capacity,
+    required this.assignedGrade,
+    required this.facilities,
+    required this.seatingArrangement,
+    required this.lastMaintenanceDate,
+  });
+
+  factory Classroom.fromMap(Map<String, dynamic> map) {
+    return Classroom(
+      classroomName: map['classroomName'] ?? '',
+      capacity: map['capacity'] ?? 0,
+      assignedGrade: map['assignedGrade'] ?? '',
+      facilities: List<String>.from(map['facilities'] ?? []),
+      seatingArrangement: map['seatingArrangement'] ?? '',
+      lastMaintenanceDate: DateTime.parse(map['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'classroomName': classroomName,
+      'capacity': capacity,
+      'assignedGrade': assignedGrade,
+      'facilities': facilities,
+      'seatingArrangement': seatingArrangement,
+      'lastMaintenanceDate': lastMaintenanceDate.toIso8601String(),
+    };
+  }
+}
+
+class Library {
+  String libraryName;
+  int totalBooks;
+  List<String> sections; // Science, Fiction, History, etc.
+  int seatingCapacity;
+  String librarianName;
+  bool hasDigitalLibrary;
+
+  Library({
+    required this.libraryName,
+    required this.totalBooks,
+    required this.sections,
+    required this.seatingCapacity,
+    required this.librarianName,
+    required this.hasDigitalLibrary,
+  });
+
+  factory Library.fromMap(Map<String, dynamic> map) {
+    return Library(
+      libraryName: map['libraryName'] ?? '',
+      totalBooks: map['totalBooks'] ?? 0,
+      sections: List<String>.from(map['sections'] ?? []),
+      seatingCapacity: map['seatingCapacity'] ?? 0,
+      librarianName: map['librarianName'] ?? '',
+      hasDigitalLibrary: map['hasDigitalLibrary'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'libraryName': libraryName,
+      'totalBooks': totalBooks,
+      'sections': sections,
+      'seatingCapacity': seatingCapacity,
+      'librarianName': librarianName,
+      'hasDigitalLibrary': hasDigitalLibrary,
+    };
+  }
+}
+
+class ExamHall {
+  String examHallName;
+  int capacity;
+  List<String> assignedExams;
+  bool cctvInstalled;
+  String supervisorName;
+  DateTime lastUsageDate;
+
+  ExamHall({
+    required this.examHallName,
+    required this.capacity,
+    required this.assignedExams,
+    required this.cctvInstalled,
+    required this.supervisorName,
+    required this.lastUsageDate,
+  });
+
+  factory ExamHall.fromMap(Map<String, dynamic> map) {
+    return ExamHall(
+      examHallName: map['examHallName'] ?? '',
+      capacity: map['capacity'] ?? 0,
+      assignedExams: List<String>.from(map['assignedExams'] ?? []),
+      cctvInstalled: map['cctvInstalled'] ?? false,
+      supervisorName: map['supervisorName'] ?? '',
+      lastUsageDate: DateTime.parse(map['lastUsageDate'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'examHallName': examHallName,
+      'capacity': capacity,
+      'assignedExams': assignedExams,
+      'cctvInstalled': cctvInstalled,
+      'supervisorName': supervisorName,
+      'lastUsageDate': lastUsageDate.toIso8601String(),
+    };
+  }
+}
+
+class Auditorium {
+  String auditoriumName;
+  int seatingCapacity;
+  List<String> availableEquipment; // Mic, Projector, Speaker, etc.
+  bool bookingAvailable;
+  DateTime lastEventDate;
+
+  Auditorium({
+    required this.auditoriumName,
+    required this.seatingCapacity,
+    required this.availableEquipment,
+    required this.bookingAvailable,
+    required this.lastEventDate,
+  });
+
+  factory Auditorium.fromMap(Map<String, dynamic> map) {
+    return Auditorium(
+      auditoriumName: map['auditoriumName'] ?? '',
+      seatingCapacity: map['seatingCapacity'] ?? 0,
+      availableEquipment: List<String>.from(map['availableEquipment'] ?? []),
+      bookingAvailable: map['bookingAvailable'] ?? false,
+      lastEventDate: DateTime.parse(map['lastEventDate'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'auditoriumName': auditoriumName,
+      'seatingCapacity': seatingCapacity,
+      'availableEquipment': availableEquipment,
+      'bookingAvailable': bookingAvailable,
+      'lastEventDate': lastEventDate.toIso8601String(),
+    };
+  }
+}
+
+class Hostel {
+  String hostelName;
+  int totalRooms;
+  Map<String, int> roomCapacity; // {"Room101": 2, "Room102": 3}
+  String wardenName;
+  bool messAvailable;
+  List<String> rules;
+
+  Hostel({
+    required this.hostelName,
+    required this.totalRooms,
+    required this.roomCapacity,
+    required this.wardenName,
+    required this.messAvailable,
+    required this.rules,
+  });
+
+  factory Hostel.fromMap(Map<String, dynamic> map) {
+    // Handle nested map for roomCapacity
+    Map<String, int> parsedRoomCapacity = {};
+    if (map['roomCapacity'] != null && map['roomCapacity'] is Map) {
+      map['roomCapacity'].forEach((key, value) {
+        if (value is int) {
+          parsedRoomCapacity[key] = value;
+        }
+      });
+    }
+
+    return Hostel(
+      hostelName: map['hostelName'] ?? '',
+      totalRooms: map['totalRooms'] ?? 0,
+      roomCapacity: parsedRoomCapacity,
+      wardenName: map['wardenName'] ?? '',
+      messAvailable: map['messAvailable'] ?? false,
+      rules: List<String>.from(map['rules'] ?? []),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'hostelName': hostelName,
+      'totalRooms': totalRooms,
+      'roomCapacity': roomCapacity,
+      'wardenName': wardenName,
+      'messAvailable': messAvailable,
+      'rules': rules,
+    };
+  }
+}
+
+class StaffRoom {
+  String staffRoomName;
+  List<String> assignedStaff;
+  List<String> facilities; // Coffee Machine, Computers, etc.
+  DateTime lastMaintenanceDate;
+
+  StaffRoom({
+    required this.staffRoomName,
+    required this.assignedStaff,
+    required this.facilities,
+    required this.lastMaintenanceDate,
+  });
+
+  factory StaffRoom.fromMap(Map<String, dynamic> map) {
+    return StaffRoom(
+      staffRoomName: map['staffRoomName'] ?? '',
+      assignedStaff: List<String>.from(map['assignedStaff'] ?? []),
+      facilities: List<String>.from(map['facilities'] ?? []),
+      lastMaintenanceDate: DateTime.parse(map['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'staffRoomName': staffRoomName,
+      'assignedStaff': assignedStaff,
+      'facilities': facilities,
+      'lastMaintenanceDate': lastMaintenanceDate.toIso8601String(),
+    };
+  }
+}
+
+class MedicalRoom {
+  String medicalRoomName;
+  String doctorName;
+  String nurseName;
+  List<String> emergencyContacts;
+  List<String> availableMedicines;
+  bool firstAidAvailable;
+  DateTime lastInspectionDate;
+
+  MedicalRoom({
+    required this.medicalRoomName,
+    required this.doctorName,
+    required this.nurseName,
+    required this.emergencyContacts,
+    required this.availableMedicines,
+    required this.firstAidAvailable,
+    required this.lastInspectionDate,
+  });
+
+  factory MedicalRoom.fromMap(Map<String, dynamic> map) {
+    return MedicalRoom(
+      medicalRoomName: map['medicalRoomName'] ?? '',
+      doctorName: map['doctorName'] ?? '',
+      nurseName: map['nurseName'] ?? '',
+      emergencyContacts: List<String>.from(map['emergencyContacts'] ?? []),
+      availableMedicines: List<String>.from(map['availableMedicines'] ?? []),
+      firstAidAvailable: map['firstAidAvailable'] ?? false,
+      lastInspectionDate: DateTime.parse(map['lastInspectionDate'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'medicalRoomName': medicalRoomName,
+      'doctorName': doctorName,
+      'nurseName': nurseName,
+      'emergencyContacts': emergencyContacts,
+      'availableMedicines': availableMedicines,
+      'firstAidAvailable': firstAidAvailable,
+      'lastInspectionDate': lastInspectionDate.toIso8601String(),
+    };
+  }
+}
+
+class Cafeteria {
+  String cafeteriaName;
+  List<CafeteriaMenuItem> menu;  // List of menu items
+  int seatingCapacity;
+  bool hygieneCertified;
+  DateTime lastInspectionDate;
+
+  Cafeteria({
+    required this.cafeteriaName,
+    required this.menu,
+    required this.seatingCapacity,
+    required this.hygieneCertified,
+    required this.lastInspectionDate,
+  });
+
+  factory Cafeteria.fromMap(Map<String, dynamic> map) {
+    return Cafeteria(
+      cafeteriaName: map['cafeteriaName'] ?? '',
+      menu: (map['menu'] as List?)?.map((e) => CafeteriaMenuItem.fromMap(e)).toList() ?? [],
+      seatingCapacity: map['seatingCapacity'] ?? 0,
+      hygieneCertified: map['hygieneCertified'] ?? false,
+      lastInspectionDate: DateTime.parse(map['lastInspectionDate'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+  Map<String, dynamic> toMap() {
+    return {
+      'cafeteriaName': cafeteriaName,
+      'menu': menu.map((e) => e.toMap()).toList(),
+      'seatingCapacity': seatingCapacity,
+      'hygieneCertified': hygieneCertified,
+      'lastInspectionDate': lastInspectionDate.toIso8601String(),
+    };
+  }
+}
+class CafeteriaMenuItem {
+  String itemName;
+  double price;
+  String? description; // Optional
+  bool isVegetarian;
+  String? imageUrl;  // Optional image of the food
+
+  CafeteriaMenuItem({
+    required this.itemName,
+    required this.price,
+    this.description,
+    required this.isVegetarian,
+    this.imageUrl,
+  });
+
+  factory CafeteriaMenuItem.fromMap(Map<String, dynamic> map) {
+    return CafeteriaMenuItem(
+      itemName: map['itemName'] ?? '',
+      price: (map['price'] ?? 0.0).toDouble(), // Double
+      description: map['description'],
+      isVegetarian: map['isVegetarian'] ?? false,
+      imageUrl: map['imageUrl'],
+    );
+  }
+  Map<String, dynamic> toMap() {
+    return {
+      'itemName': itemName,
+      'price': price,
+      'description': description,
+      'isVegetarian': isVegetarian,
+      'imageUrl': imageUrl,
+    };
+  }
+}
+
+class SecuritySystem {
+  List<String> cctvLocations;
+  List<String> securityGuards;
+  String monitoringCenter;
+  bool realTimeMonitoring;
+
+  SecuritySystem({
+    required this.cctvLocations,
+    required this.securityGuards,
+    required this.monitoringCenter,
+    required this.realTimeMonitoring,
+  });
+
+  factory SecuritySystem.fromMap(Map<String, dynamic> map) {
+    return SecuritySystem(
+      cctvLocations: List<String>.from(map['cctvLocations'] ?? []),
+      securityGuards: List<String>.from(map['securityGuards'] ?? []),
+      monitoringCenter: map['monitoringCenter'] ?? '',
+      realTimeMonitoring: map['realTimeMonitoring'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'cctvLocations': cctvLocations,
+      'securityGuards': securityGuards,
+      'monitoringCenter': monitoringCenter,
+      'realTimeMonitoring': realTimeMonitoring,
+    };
+  }
+}
+
+class Parking {
+  String parkingName;
+  int totalSlots;
+  int reservedSlots; // For Staff, Visitors, etc.
+  bool cctvInstalled;
+  double parkingChargesPerHour;
+
+  Parking({
+    required this.parkingName,
+    required this.totalSlots,
+    required this.reservedSlots,
+    required this.cctvInstalled,
+    required this.parkingChargesPerHour,
+  });
+
+  factory Parking.fromMap(Map<String, dynamic> map) {
+    return Parking(
+      parkingName: map['parkingName'] ?? '',
+      totalSlots: map['totalSlots'] ?? 0,
+      reservedSlots: map['reservedSlots'] ?? 0,
+      cctvInstalled: map['cctvInstalled'] ?? false,
+      parkingChargesPerHour: (map['parkingChargesPerHour'] ?? 0.0).toDouble(), // Ensure it's a double
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'parkingName': parkingName,
+      'totalSlots': totalSlots,
+      'reservedSlots': reservedSlots,
+      'cctvInstalled': cctvInstalled,
+      'parkingChargesPerHour': parkingChargesPerHour,
+    };
+  }
+}

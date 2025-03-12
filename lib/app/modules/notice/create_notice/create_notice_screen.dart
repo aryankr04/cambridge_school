@@ -8,6 +8,7 @@ import 'package:cambridge_school/core/widgets/dropdown_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/widgets/text_field.dart';
+import '../../../../roles_manager.dart';
 import '../notice_model.dart';
 import 'create_notice_controller.dart';
 
@@ -66,7 +67,7 @@ class _CreateNoticeScreenState extends State<CreateNoticeScreen> {
               const SizedBox(height: MySizes.md,),
 
               MyBottomSheetDropdown(
-                optionsForChips: Roles().getAllRolesAsString(),
+                optionsForChips: UserRole.values.map((e) => e.value).toList(),
                 isMultipleSelection: true,
                 onMultipleChanged: (List<String>? values) {
                   controller.selectedTargetAudience?.clear();
