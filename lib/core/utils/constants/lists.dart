@@ -167,7 +167,7 @@ class MyLists {
     return noticeCategoriesWithEmojis[category] ?? '❓ Category not found';
   }
 
-  static  List<String> noticeCategories() {
+  static List<String> noticeCategories() {
     return noticeCategoriesWithEmojis.keys.toList();
   }
 
@@ -512,8 +512,56 @@ class MyLists {
     'Government Aided Private School',
     'Government'
   ];
-
-  static const List<String> schoolingSystemOptions = [
+  static const List<String> mediumOfInstructionOptions = [
+    'English',
+    'Hindi',
+    'Bilingual (English & Hindi)',
+    'Sanskrit',
+    'Urdu',
+    'Assamese',
+    'Bengali',
+    'Bodo',
+    'Dogri',
+    'Gujarati',
+    'Kannada',
+    'Kashmiri',
+    'Konkani',
+    'Maithili',
+    'Malayalam',
+    'Manipuri',
+    'Marathi',
+    'Nepali',
+    'Odia',
+    'Punjabi',
+    'Sindhi',
+    'Tamil',
+    'Telugu',
+    'Santali',
+    'Meitei (Manipuri)',
+    'Bhili',
+    'Gondi',
+    'Tulu',
+    'Khasi',
+    'Mizo',
+    'Bhil',
+    'Ho',
+    'Lepcha',
+    'Garhwali',
+    'Ladakhi',
+    'Marwari',
+    'Chhattisgarhi',
+    'Kumaoni',
+    'Magahi',
+    'Bundeli',
+    'Rajasthani',
+    'Brahui',
+    'French',
+    'Spanish',
+    'German',
+    'Arabic',
+    'Mandarin',
+  ];
+  static const List<String> academicLevelOptions = [
     'Play School',
     'Kindergarten (LKG - UKG)',
     'Primary School (LKG - 5th Class) ',
@@ -643,15 +691,73 @@ class MyLists {
     'Other',
   ];
 
-  static const List<String> extraCurricularActivityOptions = [
-    'Arts and Creativity',
-    'Sports',
-    'Technology and Robotics',
-    'Language and Literature',
-    'Entrepreneurship',
-    'Cultural and Language Clubs'
+  static const List<String> sportsFacilities = [
+    "Football", "Cricket", "Basketball", "Volleyball", "Badminton",
+    "Table Tennis", "Swimming", "Athletics", "Hockey", "Tennis",
+    "Kabaddi", "Kho Kho", "Chess", "Gymnastics", "Yoga",
+    "Cycling", "Martial Arts", "Archery", "Boxing", "Skating"
   ];
 
+  static const List<String> musicAndArtFacilities = [
+    "Vocal Music", "Instrumental Music", "Dance", "Drama",
+    "Painting", "Sculpture", "Photography", "Digital Art",
+    "Calligraphy", "Cultural Performances", "Theatre Club"
+  ];
+
+  static const List<String> studentClubs = [
+    "Science Club", "Math Club", "Debate Society", "Drama Club",
+    "Photography Club", "Music Band", "Robotics Club",
+    "Environmental Club", "Coding Club", "Chess Club",
+    "Astronomy Club", "Sports Club", "Literary Club", "Art Club"
+  ];
+
+  static const List<String> specialTrainingPrograms = [
+    "Robotics Workshop", "AI & Machine Learning", "Public Speaking",
+    "Entrepreneurship Bootcamp", "Cyber Security Training",
+    "Financial Literacy", "Coding & Programming", "Space Science",
+    "Personality Development", "Creative Writing", "Leadership Training"
+  ];
+
+  static const List<String> labsAvailable = [
+    "Physics Lab", "Chemistry Lab", "Biology Lab", "Computer Lab",
+    "Mathematics Lab", "Electronics Lab", "Language Lab",
+    "Robotics Lab", "AI & Data Science Lab", "3D Printing Lab",
+    "Environmental Science Lab", "Astronomy Lab"
+  ];
+  static const List<String> generalFacilities = [
+    "Spacious Classrooms", "Smart Classrooms", "Auditorium",
+    "Conference Hall", "Library", "Computer Lab", "Science Labs",
+    "Reading Room", "Activity Room", "Language Lab", "Art & Craft Room"
+  ];
+
+  static const List<String> transportFacilities = [
+    "School Buses", "Vans", "Transport Tracking System",
+    "Driver Attendance System", "GPS Tracking", "First Aid in Transport"
+  ];
+
+  static const List<String> sportsInfrastructure = [
+    "Football Ground", "Cricket Pitch", "Basketball Court",
+    "Tennis Court", "Volleyball Court", "Badminton Court",
+    "Swimming Pool", "Indoor Sports Arena", "Athletics Track",
+    "Gymnasium", "Yoga Hall", "Cycling Track", "Skating Rink"
+  ];
+
+  static const List<String> healthAndSafetyFacilities = [
+    "Medical Room", "First Aid Kits", "Emergency Exit Plan",
+    "Fire Safety Equipment", "CCTV Surveillance", "Security Guards",
+    "Sanitization Facilities", "Drinking Water Facility", "Washrooms",
+    "Separate Washrooms for Boys & Girls", "Handicap Accessibility"
+  ];
+
+  static const List<String> additionalFacilities = [
+    "Canteen", "Hostel Facility", "WiFi Connectivity",
+    "Book Store", "Stationery Shop", "Prayer Hall",
+    "Parents Waiting Area", "Student Counselling Room"
+  ];
+  static const List<String> streamAvailable = [
+    "Science", "Commerce", "Arts", "Humanities", "Vocational Studies",
+    "Technical Education", "Performing Arts", "Physical Education"
+  ];
   // **Transportation and Location Lists**
   static const List<String> modeOfTransportOptions = [
     'School Transport',
@@ -666,6 +772,204 @@ class MyLists {
     'Taxi/Cab',
     'Parent Drop-off',
   ];
+  static const List<String> countriesOptions = [
+    "India",
+    "Afghanistan",
+    "Albania",
+    "Algeria",
+    "Andorra",
+    "Angola",
+    "Antigua and Barbuda",
+    "Argentina",
+    "Armenia",
+    "Australia",
+    "Austria",
+    "Azerbaijan",
+    "Bahamas",
+    "Bahrain",
+    "Bangladesh",
+    "Barbados",
+    "Belarus",
+    "Belgium",
+    "Belize",
+    "Benin",
+    "Bhutan",
+    "Bolivia",
+    "Bosnia and Herzegovina",
+    "Botswana",
+    "Brazil",
+    "Brunei",
+    "Bulgaria",
+    "Burkina Faso",
+    "Burundi",
+    "Cabo Verde",
+    "Cambodia",
+    "Cameroon",
+    "Canada",
+    "Central African Republic",
+    "Chad",
+    "Chile",
+    "China",
+    "Colombia",
+    "Comoros",
+    "Congo, Democratic Republic of the",
+    "Congo, Republic of the",
+    "Costa Rica",
+    "Cote d'Ivoire",
+    "Croatia",
+    "Cuba",
+    "Cyprus",
+    "Czech Republic",
+    "Denmark",
+    "Djibouti",
+    "Dominica",
+    "Dominican Republic",
+    "Ecuador",
+    "Egypt",
+    "El Salvador",
+    "Equatorial Guinea",
+    "Eritrea",
+    "Estonia",
+    "Eswatini",
+    "Ethiopia",
+    "Fiji",
+    "Finland",
+    "France",
+    "Gabon",
+    "Gambia",
+    "Georgia",
+    "Germany",
+    "Ghana",
+    "Greece",
+    "Grenada",
+    "Guatemala",
+    "Guinea",
+    "Guinea-Bissau",
+    "Guyana",
+    "Haiti",
+    "Honduras",
+    "Hungary",
+    "Iceland",
+    "Indonesia",
+    "Iran",
+    "Iraq",
+    "Ireland",
+    "Israel",
+    "Italy",
+    "Jamaica",
+    "Japan",
+    "Jordan",
+    "Kazakhstan",
+    "Kenya",
+    "Kiribati",
+    "Korea, North",
+    "Korea, South",
+    "Kuwait",
+    "Kyrgyzstan",
+    "Laos",
+    "Latvia",
+    "Lebanon",
+    "Lesotho",
+    "Liberia",
+    "Libya",
+    "Liechtenstein",
+    "Lithuania",
+    "Luxembourg",
+    "Madagascar",
+    "Malawi",
+    "Malaysia",
+    "Maldives",
+    "Mali",
+    "Malta",
+    "Marshall Islands",
+    "Mauritania",
+    "Mauritius",
+    "Mexico",
+    "Micronesia, Federated States of",
+    "Moldova",
+    "Monaco",
+    "Mongolia",
+    "Montenegro",
+    "Morocco",
+    "Mozambique",
+    "Myanmar (Burma)",
+    "Namibia",
+    "Nauru",
+    "Nepal",
+    "Netherlands",
+    "New Zealand",
+    "Nicaragua",
+    "Niger",
+    "Nigeria",
+    "North Macedonia",
+    "Norway",
+    "Oman",
+    "Pakistan",
+    "Palau",
+    "Panama",
+    "Papua New Guinea",
+    "Paraguay",
+    "Peru",
+    "Philippines",
+    "Poland",
+    "Portugal",
+    "Qatar",
+    "Romania",
+    "Russia",
+    "Rwanda",
+    "Saint Kitts and Nevis",
+    "Saint Lucia",
+    "Saint Vincent and the Grenadines",
+    "Samoa",
+    "San Marino",
+    "Sao Tome and Principe",
+    "Saudi Arabia",
+    "Senegal",
+    "Serbia",
+    "Seychelles",
+    "Sierra Leone",
+    "Singapore",
+    "Slovakia",
+    "Slovenia",
+    "Solomon Islands",
+    "Somalia",
+    "South Africa",
+    "South Sudan",
+    "Spain",
+    "Sri Lanka",
+    "Sudan",
+    "Suriname",
+    "Sweden",
+    "Switzerland",
+    "Syria",
+    "Taiwan",
+    "Tajikistan",
+    "Tanzania",
+    "Thailand",
+    "Timor-Leste",
+    "Togo",
+    "Tonga",
+    "Trinidad and Tobago",
+    "Tunisia",
+    "Turkey",
+    "Turkmenistan",
+    "Tuvalu",
+    "Uganda",
+    "Ukraine",
+    "United Arab Emirates",
+    "United Kingdom",
+    "United States of America",
+    "Uruguay",
+    "Uzbekistan",
+    "Vanuatu",
+    "Vatican City",
+    "Venezuela",
+    "Vietnam",
+    "Yemen",
+    "Zambia",
+    "Zimbabwe"
+  ];
+
   static const List<String> nationalityOptions = [
     "Indian",
     "Afghan",
@@ -894,7 +1198,12 @@ class MyLists {
   ];
 
   // **Administrative and Miscellaneous Lists**
-  static const List<String> categoryOptions = ['General', 'OBC', 'ST/SC', 'EWS'];
+  static const List<String> categoryOptions = [
+    'General',
+    'OBC',
+    'ST/SC',
+    'EWS'
+  ];
 
   static const List<String> holidayTypeOptions = [
     'National',
@@ -1021,7 +1330,6 @@ class MyLists {
     'Heart Conditions',
     'Other Chronic Conditions',
   ];
-  static const List<String> positionOptions = ['Security Guard', 'Peon', 'Other'];
 
   // Staff Skills
 
@@ -1202,15 +1510,6 @@ class MyLists {
     'A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F' //Standard letter grades
   ];
 
-  static const List<String> academicHonorsOptions = [
-    'Honor Roll',
-    'Principal\'s List',
-    'National Honor Society',
-    'Perfect Attendance Award',
-    'Subject-Specific Award (e.g., Math, Science)',
-    'Academic Excellence Award'
-  ];
-
   static const List<String> extracurricularInvolvementOptions = [
     'Sports Team (e.g., Soccer, Basketball)',
     'Debate Club',
@@ -1240,7 +1539,6 @@ class MyLists {
     'Crisis Intervention'
   ];
 
-
   static const List<String> financialAidOptions = [
     'Scholarship',
     'Grant',
@@ -1259,17 +1557,11 @@ class MyLists {
     'Prefer not to say'
   ];
 
-
-
   static const List<String> siblingInformationOptions = [
     'Number of Siblings',
     'Birth Order (e.g., Firstborn, Middle Child)',
     'Educational Levels of Siblings'
   ];
-
-
-
-
 
   // School Environment and Safety
   static const List<String> safetyConcernsOptions = [
@@ -1308,7 +1600,6 @@ class MyLists {
     'Salad',
     'Ice Cream',
   ];
-
 
   static const List<String> teacherOptions = [
     'Mr. Smith',

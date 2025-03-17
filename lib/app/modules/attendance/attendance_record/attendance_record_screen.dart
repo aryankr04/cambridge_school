@@ -8,7 +8,7 @@ import '../../../../core/utils/constants/dynamic_colors.dart';
 import '../../../../core/utils/constants/sizes.dart';
 import '../../../../core/utils/constants/text_styles.dart';
 import '../../../../core/widgets/label_chip.dart';
-import '../../manage_school/models/school_model.dart';
+import '../../school_management/school_model.dart';
 import 'attendance_record_controller.dart';
 import 'attendance_record_models.dart';
 import '../mark_attendance/mark_attendance_screen.dart';

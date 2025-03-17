@@ -4,22 +4,18 @@ import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:cambridge_school/core/widgets/app_bar.dart';
 import 'package:cambridge_school/core/widgets/button.dart';
 import 'package:cambridge_school/core/widgets/date_picker_field.dart';
-import 'package:cambridge_school/core/widgets/full_screen_loading_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/constants/dynamic_colors.dart';
-import '../../../../core/utils/constants/gradients.dart';
 import '../../../../core/utils/constants/sizes.dart';
 import '../../../../core/utils/helpers/helper_functions.dart';
 import '../../../../core/widgets/dropdown_field.dart';
-import '../../manage_school/models/school_model.dart';
+import '../../school_management/school_model.dart';
 import 'mark_attendance_controller.dart';
 import 'mark_attendance_user_tile.dart';
 

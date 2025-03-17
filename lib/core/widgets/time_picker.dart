@@ -57,7 +57,7 @@ class MyTimePickerField extends StatelessWidget {
                 hintText: hintText,
                 border: border,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
-                suffixIcon: suffixIcon ?? const Icon(Icons.access_time),
+                suffixIcon: suffixIcon ?? const Icon(Icons.access_time,size: 20,),
                 prefixIcon: prefixIcon,
               ),
               child: Obx(() => Text(

@@ -10,15 +10,13 @@ import 'package:cambridge_school/app/modules/leave/leave_dashboard/leave_dashboa
 import 'package:cambridge_school/app/modules/leave/leave_dashboard/leave_dashboard_screen.dart';
 import 'package:cambridge_school/app/modules/leave/leave_request/leave_request_binding.dart';
 import 'package:cambridge_school/app/modules/leave/leave_request/leave_request_screen.dart';
-import 'package:cambridge_school/app/modules/manage_school/screens/create_school_0.dart';
+import 'package:cambridge_school/app/modules/school_management/create_school/create_school_screen.dart';
 import 'package:cambridge_school/app/modules/routine/create_routine/create_routine_binding.dart';
-import 'package:cambridge_school/app/modules/routine/create_routine/create_routine_controller.dart';
 import 'package:cambridge_school/app/modules/routine/create_routine/create_routine_screen.dart';
 import 'package:cambridge_school/app/modules/user_management/create_user/bindings/create_user_binding.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/bindings/user_management_binding.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/screens/user_management_screen.dart';
 import 'package:get/get.dart';
-
 import 'app/modules/attendance/attendance_record/attendance_record_screen.dart';
 import 'app/modules/attendance/mark_attendance/mark_attendance_binding.dart';
 import 'app/modules/auth/login/login_binding.dart';
@@ -29,7 +27,7 @@ import 'app/modules/notice/notice/notice_binding.dart';
 import 'app/modules/notice/notice/notice_screen.dart';
 import 'app/modules/on_boarding/on_boarding_screen.dart';
 import 'app/modules/on_boarding/onboarding_binding.dart';
-import 'app/modules/routine0/routine_controller.dart';
+import 'app/modules/school_management/create_school/create_school_binding.dart';
 import 'app/modules/user_management/create_user/screens/create_user_screen.dart';
 
 class AppRoutes {
@@ -55,7 +53,7 @@ class AppRoutes {
   static const String classManagementRoute = '/class-management';
 
   /// Route for the School Management screen.
-  static const String schoolManagementRoute = '/school-management';
+  static const String createSchoolRoute = '/create-school';
 
   /// Route for the Mark Attendance screen.
   static const String markAttendanceRoute = '/mark-attendance';
@@ -84,7 +82,7 @@ class AppRoutes {
   /// Route for the Leave Dashboard screen.
   static const String leaveDashboardRoute = '/leave-dashboard';
 
- /// Route for the Leave Leave Request screen.
+  /// Route for the Leave Leave Request screen.
   static const String leaveRequestRoute = '/leave-request';
 
   /// Route for the Create Routine screen.
@@ -116,8 +114,9 @@ class AppRoutes {
       binding: UserManagementBinding(),
     ),
     GetPage(
-      name: schoolManagementRoute,
-      page: () => const CreateSchool0(),
+      name: createSchoolRoute,
+      page: () => CreateSchoolScreen(),
+      binding: CreateSchoolBinding(),
     ),
     GetPage(
       name: classManagementRoute,
@@ -156,17 +155,17 @@ class AppRoutes {
     ),
     GetPage(
       name: leaveDashboardRoute,
-      page: () =>  const LeaveDashboardScreen(),
+      page: () => const LeaveDashboardScreen(),
       binding: LeaveDashboardBinding(),
     ),
     GetPage(
       name: leaveRequestRoute,
-      page: () =>   LeaveRequestScreen(),
+      page: () => LeaveRequestScreen(),
       binding: LeaveRequestBinding(),
     ),
     GetPage(
       name: createRoutineRoute,
-      page: () =>   const CreateRoutineScreen(schoolId: 'SCH00001'),
+      page: () => const CreateRoutineScreen(schoolId: 'SCH00001'),
       binding: CreateRoutineBinding(),
     ),
     // GetPage(

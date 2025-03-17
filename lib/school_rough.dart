@@ -4,15 +4,12 @@ import 'package:flutter/material.dart';
 import 'app/modules/fees/models/fee_structure.dart';
 
 class SchoolModel {
-  // **Identification and Branding**
+  // Basic Information
   final String schoolId;
-  final String logoUrl;
   final String schoolName;
   final String schoolSlogan;
   final String aboutSchool;
   final String status;
-
-  // **General Information**
   final DateTime establishedYear;
   final DateTime createdAt;
   final String schoolingSystem;
@@ -22,36 +19,20 @@ class SchoolModel {
   final String affiliationNumber;
   final String schoolManagementAuthority;
   final String managingTrustName;
+
+  // Contact Information
   final String registeredAddress;
   final String registeredContactNumber;
-
-  // **Location Details**
-  final SchoolAddress address;
-
-  // **Contact Information**
   final String primaryPhoneNo;
   final String secondaryPhoneNo;
   final String email;
   final String website;
   final String faxNumber;
+  final String emergencyContactName;
+  final String emergencyContactPhone;
 
-  // **Academic Information**
-  final String gradingSystem;
-  final String examPattern;
-  final String academicLevel;
-  final String mediumOfInstruction;
-  final AcademicYear academicYear;
-  final List<ClassData> classes;
-  final List<SubjectData> subjects;
-  final List<String> grades;
-  final List<String> curriculumFrameworks;
-  final List<String> languagesOffered;
-  final List<String> specializedPrograms;
-  final double studentTeacherRatio;
-  final List<String> scholarshipPrograms;
-  final String transportationDetails;
-
-  // **Facilities and Infrastructure**
+  // Location & Infrastructure
+  final SchoolAddress address;
   final double campusSize;
   final List<String> facilitiesAvailable;
   final List<String> laboratoriesAvailable;
@@ -66,55 +47,42 @@ class SchoolModel {
   final bool hasSmartClassrooms;
   final int numberOfComputers;
   final bool hasInternetAccess;
+  final String firstAidFacilities;
 
-  // **Activities and Engagement**
+  // Academics
+  final String gradingSystem;
+  final String examPattern;
+  final String academicLevel;
+  final String mediumOfInstruction;
+  final AcademicYear academicYear;
+  final List<ClassData> classes;
+  final List<SubjectData> subjects;
+  final List<String> grades;
+  final List<String> curriculumFrameworks;
+  final List<String> languagesOffered;
+  final List<String> specializedPrograms;
+  final double studentTeacherRatio;
+  final List<String> scholarshipPrograms;
   final List<String> extracurricularActivities;
   final List<String> clubs;
   final List<String> societies;
   final List<String> sportsTeams;
   final List<AcademicEvent> academicEvents;
+  final int noOfPeriodsPerDay;
 
-  // **Recognition and Achievements**
+  // Recognition & Achievements
   final List<Accreditation> accreditations;
   final List<Ranking> rankings;
   final List<Award> awards;
 
-  // **Student Demographics**
+  // Student & Staff Details
   final int totalStudents;
   final int totalBoys;
   final int totalGirls;
-
-  // **Media and Resources**
-  final List<String> schoolImagesUrl;
-  final String? onlineLearningPlatform;
-  final List<FeaturedNews> featuredNews;
-
-  // **Calendar and Scheduling**
-  final List<Holiday> holidays;
-  final int noOfPeriodsPerDay;
-
-  // **Fee**
-  final FeeStructure feeStructure;
-  final List<String> feePaymentMethods;
-  final DateTime feeDueDate;
-  final String lateFeePolicy;
-
-  // **Staff and Management**
   final List<UserListDetails> employees;
-
-  final String emergencyContactName;
-  final String emergencyContactPhone;
-  final String firstAidFacilities;
-
-  // **Branding Customization**
-  final Color primaryColor;
-  final Color secondaryColor;
-
-  // **Alumni Network**
   final List<Alumni> alumni;
 
-  // **Added Facilities**
-  final List<Vehicle> vehicles;
+  // Facilities & Infrastructure Details
   final List<Classroom> classroomsList;
   final List<Library> libraries;
   final List<ExamHall> examHalls;
@@ -125,6 +93,30 @@ class SchoolModel {
   final List<Cafeteria> cafeterias;
   final Parking parking;
   final SecuritySystem securitySystem;
+
+  // Transportation
+  final String transportationDetails;
+  final List<Vehicle> vehicles;
+
+  // Financial & Fee Details
+  final FeeStructure feeStructure;
+  final List<String> feePaymentMethods;
+  final DateTime feeDueDate;
+  final String lateFeePolicy;
+
+  // Technology & Digital Presence
+  final String? onlineLearningPlatform;
+  final List<FeaturedNews> featuredNews;
+
+  // Visual & Branding
+  final String logoUrl;
+  final List<String> schoolImagesUrl;
+  final List<SchoolImage> schoolGallery;
+  final Color primaryColor;
+  final Color secondaryColor;
+
+  final List<Holiday> holidays;
+
 
   SchoolModel({
     required this.schoolId,
@@ -246,13 +238,11 @@ class SchoolModel {
       mediumOfInstruction: map['mediumOfInstruction'],
       campusSize: map['campusSize'],
       extracurricularActivities:
-      List<String>.from(map['extracurricularActivities']),
-      classes: (map['classes'] as List)
-          .map((e) => ClassData.fromMap(e))
-          .toList(),
-      subjects: (map['subjects'] as List)
-          .map((e) => SubjectData.fromMap(e))
-          .toList(),
+          List<String>.from(map['extracurricularActivities']),
+      classes:
+          (map['classes'] as List).map((e) => ClassData.fromMap(e)).toList(),
+      subjects:
+          (map['subjects'] as List).map((e) => SubjectData.fromMap(e)).toList(),
       grades: List<String>.from(map['grades']),
       clubs: List<String>.from(map['clubs']),
       societies: List<String>.from(map['societies']),
@@ -268,11 +258,10 @@ class SchoolModel {
           .map((e) => Accreditation.fromMap(e))
           .toList(),
       rankings:
-      (map['rankings'] as List).map((e) => Ranking.fromMap(e)).toList(),
+          (map['rankings'] as List).map((e) => Ranking.fromMap(e)).toList(),
       awards: (map['awards'] as List).map((e) => Award.fromMap(e)).toList(),
-      holidays: (map['holidays'] as List)
-          .map((e) => Holiday.fromMap(e))
-          .toList(),
+      holidays:
+          (map['holidays'] as List).map((e) => Holiday.fromMap(e)).toList(),
       numberOfBuildings: map['numberOfBuildings'],
       numberOfFloors: map['numberOfFloors'],
       numberOfClassrooms: map['numberOfClassrooms'],
@@ -312,15 +301,40 @@ class SchoolModel {
       feeDueDate: DateTime.parse(map['feeDueDate']),
       employees: List<UserListDetails>.from(map['employees']),
       totalStudents: map['totalStudents'],
-      vehicles: (map['vehicles'] as List?)?.map((e) => Vehicle.fromMap(e)).toList() ?? [],
-      classroomsList: (map['classroomsList'] as List?)?.map((e) => Classroom.fromMap(e)).toList() ?? [],
-      libraries: (map['libraries'] as List?)?.map((e) => Library.fromMap(e)).toList() ?? [],
-      examHalls: (map['examHalls'] as List?)?.map((e) => ExamHall.fromMap(e)).toList() ?? [],
-      auditoriums: (map['auditoriums'] as List?)?.map((e) => Auditorium.fromMap(e)).toList() ?? [],
-      hostels: (map['hostels'] as List?)?.map((e) => Hostel.fromMap(e)).toList() ?? [],
-      staffRooms: (map['staffRooms'] as List?)?.map((e) => StaffRoom.fromMap(e)).toList() ?? [],
-      medicalRooms: (map['medicalRooms'] as List?)?.map((e) => MedicalRoom.fromMap(e)).toList() ?? [],
-      cafeterias: (map['cafeterias'] as List?)?.map((e) => Cafeteria.fromMap(e)).toList() ?? [],
+      vehicles:
+          (map['vehicles'] as List?)?.map((e) => Vehicle.fromMap(e)).toList() ??
+              [],
+      classroomsList: (map['classroomsList'] as List?)
+              ?.map((e) => Classroom.fromMap(e))
+              .toList() ??
+          [],
+      libraries: (map['libraries'] as List?)
+              ?.map((e) => Library.fromMap(e))
+              .toList() ??
+          [],
+      examHalls: (map['examHalls'] as List?)
+              ?.map((e) => ExamHall.fromMap(e))
+              .toList() ??
+          [],
+      auditoriums: (map['auditoriums'] as List?)
+              ?.map((e) => Auditorium.fromMap(e))
+              .toList() ??
+          [],
+      hostels:
+          (map['hostels'] as List?)?.map((e) => Hostel.fromMap(e)).toList() ??
+              [],
+      staffRooms: (map['staffRooms'] as List?)
+              ?.map((e) => StaffRoom.fromMap(e))
+              .toList() ??
+          [],
+      medicalRooms: (map['medicalRooms'] as List?)
+              ?.map((e) => MedicalRoom.fromMap(e))
+              .toList() ??
+          [],
+      cafeterias: (map['cafeterias'] as List?)
+              ?.map((e) => Cafeteria.fromMap(e))
+              .toList() ??
+          [],
       parking: Parking.fromMap(map['parking'] ?? {}),
       securitySystem: SecuritySystem.fromMap(map['securitySystem'] ?? {}),
     );
@@ -689,13 +703,17 @@ class SchoolTimings {
     return SchoolTimings(
       openingTime: DateTime.parse(json['openingTime'] ?? ''),
       closingTime: DateTime.parse(json['closingTime'] ?? ''),
-      assemblyStart:
-      json['assemblyStart'] != null ? DateTime.parse(json['assemblyStart']) : null,
-      assemblyEnd:
-      json['assemblyEnd'] != null ? DateTime.parse(json['assemblyEnd']) : null,
-      breakStart:
-      json['breakStart'] != null ? DateTime.parse(json['breakStart']) : null,
-      breakEnd: json['breakEnd'] != null ? DateTime.parse(json['breakEnd']) : null,
+      assemblyStart: json['assemblyStart'] != null
+          ? DateTime.parse(json['assemblyStart'])
+          : null,
+      assemblyEnd: json['assemblyEnd'] != null
+          ? DateTime.parse(json['assemblyEnd'])
+          : null,
+      breakStart: json['breakStart'] != null
+          ? DateTime.parse(json['breakStart'])
+          : null,
+      breakEnd:
+          json['breakEnd'] != null ? DateTime.parse(json['breakEnd']) : null,
     );
   }
 
@@ -754,17 +772,17 @@ class UserListDetails {
       userName: map['userName'] ?? '',
       profilePictureUrl: map['profilePictureUrl'] ?? '',
       roles: (map['roles'] as List<dynamic>?)
-          ?.map((roleName) {
-        try {
-          return UserRole.values
-              .firstWhere((element) => element.value == roleName);
-        } catch (e) {
-          print('Unknown role: $roleName');
-          return null;
-        }
-      })
-          .whereType<UserRole>()
-          .toList() ??
+              ?.map((roleName) {
+                try {
+                  return UserRole.values
+                      .firstWhere((element) => element.value == roleName);
+                } catch (e) {
+                  print('Unknown role: $roleName');
+                  return null;
+                }
+              })
+              .whereType<UserRole>()
+              .toList() ??
           [],
     );
   }
@@ -799,24 +817,24 @@ class SchoolAddress {
   });
 
   Map<String, dynamic> toMap() => {
-    'streetAddress': streetAddress,
-    'city': city,
-    'district': district,
-    'state': state,
-    'country': country,
-    'village': village,
-    'pinCode': pinCode,
-  };
+        'streetAddress': streetAddress,
+        'city': city,
+        'district': district,
+        'state': state,
+        'country': country,
+        'village': village,
+        'pinCode': pinCode,
+      };
 
   static SchoolAddress fromMap(Map<String, dynamic> data) => SchoolAddress(
-    streetAddress: data['streetAddress'] as String?,
-    city: data['city'] as String?,
-    district: data['district'] as String?,
-    state: data['state'] as String?,
-    country: data['country'] as String?,
-    village: data['village'] as String?,
-    pinCode: data['pinCode'] as String?,
-  );
+        streetAddress: data['streetAddress'] as String?,
+        city: data['city'] as String?,
+        district: data['district'] as String?,
+        state: data['state'] as String?,
+        country: data['country'] as String?,
+        village: data['village'] as String?,
+        pinCode: data['pinCode'] as String?,
+      );
 }
 
 class ClassData {
@@ -935,7 +953,8 @@ class Vehicle {
       driverContact: map['driverContact'] ?? '',
       route: map['route'] ?? '',
       gpsEnabled: map['gpsEnabled'] ?? false,
-      lastMaintenanceDate: DateTime.parse(map['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
+      lastMaintenanceDate: DateTime.parse(
+          map['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
       fuelType: map['fuelType'] ?? '',
       mileage: map['mileage'] ?? 0.0,
       status: map['status'] ?? '',
@@ -983,7 +1002,8 @@ class Classroom {
       assignedGrade: map['assignedGrade'] ?? '',
       facilities: List<String>.from(map['facilities'] ?? []),
       seatingArrangement: map['seatingArrangement'] ?? '',
-      lastMaintenanceDate: DateTime.parse(map['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
+      lastMaintenanceDate: DateTime.parse(
+          map['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -1063,7 +1083,8 @@ class ExamHall {
       assignedExams: List<String>.from(map['assignedExams'] ?? []),
       cctvInstalled: map['cctvInstalled'] ?? false,
       supervisorName: map['supervisorName'] ?? '',
-      lastUsageDate: DateTime.parse(map['lastUsageDate'] ?? DateTime.now().toIso8601String()),
+      lastUsageDate: DateTime.parse(
+          map['lastUsageDate'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -1100,7 +1121,8 @@ class Auditorium {
       seatingCapacity: map['seatingCapacity'] ?? 0,
       availableEquipment: List<String>.from(map['availableEquipment'] ?? []),
       bookingAvailable: map['bookingAvailable'] ?? false,
-      lastEventDate: DateTime.parse(map['lastEventDate'] ?? DateTime.now().toIso8601String()),
+      lastEventDate: DateTime.parse(
+          map['lastEventDate'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -1183,7 +1205,8 @@ class StaffRoom {
       staffRoomName: map['staffRoomName'] ?? '',
       assignedStaff: List<String>.from(map['assignedStaff'] ?? []),
       facilities: List<String>.from(map['facilities'] ?? []),
-      lastMaintenanceDate: DateTime.parse(map['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
+      lastMaintenanceDate: DateTime.parse(
+          map['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -1224,7 +1247,8 @@ class MedicalRoom {
       emergencyContacts: List<String>.from(map['emergencyContacts'] ?? []),
       availableMedicines: List<String>.from(map['availableMedicines'] ?? []),
       firstAidAvailable: map['firstAidAvailable'] ?? false,
-      lastInspectionDate: DateTime.parse(map['lastInspectionDate'] ?? DateTime.now().toIso8601String()),
+      lastInspectionDate: DateTime.parse(
+          map['lastInspectionDate'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -1243,7 +1267,7 @@ class MedicalRoom {
 
 class Cafeteria {
   String cafeteriaName;
-  List<CafeteriaMenuItem> menu;  // List of menu items
+  List<CafeteriaMenuItem> menu; // List of menu items
   int seatingCapacity;
   bool hygieneCertified;
   DateTime lastInspectionDate;
@@ -1259,10 +1283,14 @@ class Cafeteria {
   factory Cafeteria.fromMap(Map<String, dynamic> map) {
     return Cafeteria(
       cafeteriaName: map['cafeteriaName'] ?? '',
-      menu: (map['menu'] as List?)?.map((e) => CafeteriaMenuItem.fromMap(e)).toList() ?? [],
+      menu: (map['menu'] as List?)
+              ?.map((e) => CafeteriaMenuItem.fromMap(e))
+              .toList() ??
+          [],
       seatingCapacity: map['seatingCapacity'] ?? 0,
       hygieneCertified: map['hygieneCertified'] ?? false,
-      lastInspectionDate: DateTime.parse(map['lastInspectionDate'] ?? DateTime.now().toIso8601String()),
+      lastInspectionDate: DateTime.parse(
+          map['lastInspectionDate'] ?? DateTime.now().toIso8601String()),
     );
   }
   Map<String, dynamic> toMap() {
@@ -1275,12 +1303,13 @@ class Cafeteria {
     };
   }
 }
+
 class CafeteriaMenuItem {
   String itemName;
   double price;
   String? description; // Optional
   bool isVegetarian;
-  String? imageUrl;  // Optional image of the food
+  String? imageUrl; // Optional image of the food
 
   CafeteriaMenuItem({
     required this.itemName,
@@ -1363,7 +1392,8 @@ class Parking {
       totalSlots: map['totalSlots'] ?? 0,
       reservedSlots: map['reservedSlots'] ?? 0,
       cctvInstalled: map['cctvInstalled'] ?? false,
-      parkingChargesPerHour: (map['parkingChargesPerHour'] ?? 0.0).toDouble(), // Ensure it's a double
+      parkingChargesPerHour: (map['parkingChargesPerHour'] ?? 0.0)
+          .toDouble(), // Ensure it's a double
     );
   }
 
@@ -1375,5 +1405,27 @@ class Parking {
       'cctvInstalled': cctvInstalled,
       'parkingChargesPerHour': parkingChargesPerHour,
     };
+  }
+}
+class SchoolImage {
+  String placeName;
+  List<String> imageUrls;
+
+  SchoolImage({required this.placeName, required this.imageUrls});
+
+  // Convert to JSON (for Firestore or API storage)
+  Map<String, dynamic> toJson() {
+    return {
+      'placeName': placeName,
+      'imageUrls': imageUrls,
+    };
+  }
+
+  // Convert from JSON (for fetching data)
+  factory SchoolImage.fromJson(Map<String, dynamic> json) {
+    return SchoolImage(
+      placeName: json['placeName'] as String,
+      imageUrls: List<String>.from(json['imageUrls']),
+    );
   }
 }

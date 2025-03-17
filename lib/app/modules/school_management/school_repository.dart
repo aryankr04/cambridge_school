@@ -1,6 +1,6 @@
+import 'package:cambridge_school/app/modules/school_management/school_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../models/school_model.dart'; // Replace with your actual import path
 
 class FirestoreSchoolRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 
 import 'app/modules/attendance/mark_attendance/user_attendance_model.dart';
 import 'app/modules/leave/leave_request/leave_request_screen.dart';
+import 'app/modules/school_management/create_school/create_school_screen.dart';
 import 'app/modules/routine0/routine_controller.dart';
 import 'app/modules/user_management/create_user/models/user_model.dart';
 import 'core/utils/theme/theme.dart';
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _getAppTheme(context),
       getPages: AppRoutes.routes,
-      home: NavigationScreen(),
+      home: CreateSchoolScreen(),
       //home: RoutineManagementScreen(),
     );
   }

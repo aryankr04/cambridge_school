@@ -3,7 +3,7 @@
 // import 'package:get/get.dart';
 // import 'package:cambridge_school/app/modules/routine/routine_model.dart';
 // import '../class_management/class_model.dart';
-// import '../manage_school/models/school_model.dart';
+// import '../school_management/models/school_model.dart';
 //
 // class RoutineController extends GetxController {
 //   //----------------------------------------------------------------------------

@@ -1,4 +1,3 @@
-
 import 'package:cambridge_school/app/modules/routine/routine_model.dart';
 
 class ClassModel {
@@ -35,11 +34,10 @@ class ClassModel {
       className: map['className'],
       sections: (map['sections'] as List<dynamic>?)
           ?.map((sectionData) =>
-          SectionModel.fromMap(sectionData as Map<String, dynamic>, null))
+              SectionModel.fromMap(sectionData as Map<String, dynamic>, null))
           .toList(),
-      subjects: map['subjects'] != null
-          ? List<String>.from(map['subjects'])
-          : null,
+      subjects:
+          map['subjects'] != null ? List<String>.from(map['subjects']) : null,
       examSyllabus: (map['examSyllabus'] as List<dynamic>)
           .map((e) => ExamSyllabus.fromMap(e as Map<String, dynamic>))
           .toList(),
@@ -103,8 +101,7 @@ class SectionModel {
     this.routine,
   });
 
-  factory SectionModel.fromMap(
-      Map<String, dynamic> data, String? documentId) {
+  factory SectionModel.fromMap(Map<String, dynamic> data, String? documentId) {
     return SectionModel(
       sectionName: data['sectionName'],
       classTeacherId: data['classTeacherId'],
@@ -116,7 +113,7 @@ class SectionModel {
       roomNumber: data['roomNumber'],
       students: (data['students'] as List<dynamic>?)
           ?.map((studentData) =>
-          Student.fromMap(studentData as Map<String, dynamic>))
+              Student.fromMap(studentData as Map<String, dynamic>))
           .toList(),
       routine: data['routine'] != null
           ? WeeklyRoutine.fromMap(data['routine'], documentId ?? '')
@@ -231,11 +228,11 @@ class ExamSyllabus {
       id: map['id'],
       examName: map['examName'],
       subjects:
-      (map['subjects'] as List).map((s) => ExamSubject.fromMap(s)).toList(),
+          (map['subjects'] as List).map((s) => ExamSubject.fromMap(s)).toList(),
       createdAt:
-      map['createdAt'] != null ? DateTime.tryParse(map['createdAt']) : null,
+          map['createdAt'] != null ? DateTime.tryParse(map['createdAt']) : null,
       updatedAt:
-      map['updatedAt'] != null ? DateTime.tryParse(map['updatedAt']) : null,
+          map['updatedAt'] != null ? DateTime.tryParse(map['updatedAt']) : null,
     );
   }
   ExamSyllabus copyWith({
@@ -322,15 +319,13 @@ class Topic {
       'topicName': topicName,
       'subtopics': subtopics.toList(),
       'topicMarks': topicMarks,
-
     };
   }
 
   factory Topic.fromMap(Map<String, dynamic> map) {
     return Topic(
       topicName: map['topicName'],
-      subtopics:
-      map['subtopics'].toList(),
+      subtopics: map['subtopics'].toList(),
       topicMarks: map['topicMarks'].toDouble(),
     );
   }
@@ -347,7 +342,6 @@ class Topic {
     );
   }
 }
-
 
 class SubjectModel {
   final String? id;

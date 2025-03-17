@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/services/firebase/firestore_service.dart';
-import '../manage_school/models/school_model.dart';
+import '../school_management/school_model.dart';
 import 'class_model.dart';
 
 class ClassManagementRepository {

@@ -2,8 +2,8 @@ import 'package:cambridge_school/app/modules/class_management/class_management_r
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import '../../manage_school/models/school_model.dart';
-import '../../manage_school/repositories/school_repositorie.dart';
+import '../../school_management/school_model.dart';
+import '../../school_management/school_repository.dart';
 import 'attendance_record_models.dart';
 import 'attendance_record_repository.dart';
 

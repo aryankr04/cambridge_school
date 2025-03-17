@@ -130,6 +130,8 @@ class MyBottomSheetDropdown extends StatefulWidget {
   final List<String> optionsForChips;
   final bool showAllOption;
   final bool showMultiple;
+  final IconData? prefixIcon; // New field for prefix icon
+  final IconData? suffixIcon; // New field for suffix icon
 
   const MyBottomSheetDropdown({
     super.key,
@@ -151,6 +153,8 @@ class MyBottomSheetDropdown extends StatefulWidget {
     this.optionsForIconWithDescription = const [],
     this.dropdownWidgetType = DropdownWidgetType.General,
     this.selectedValue,
+    this.prefixIcon, // Initialize the prefixIcon
+    this.suffixIcon, // Initialize the suffixIcon
   });
 
   @override
@@ -226,15 +230,17 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
     switch (widget.dropdownWidgetType) {
       case DropdownWidgetType.General:
         return GeneralDropdownContainer(
-          hintText: widget.hintText ?? 'Select Option',
+          hintText: widget.hintText ?? 'Select ${widget.labelText}',
           controller: controller,
           onTap: () => _showOptionsBottomSheet(context),
           showMultiple: widget.showMultiple,
           isValid: widget.isValid,
+          prefixIcon: widget.prefixIcon,
+          suffixIcon: widget.suffixIcon,
         );
       case DropdownWidgetType.Filter:
         return FilterDropdownContainer(
-          hintText: widget.hintText ?? widget.labelText ?? 'Select',
+          hintText: widget.hintText ?? 'Select ${widget.labelText}',
           controller: controller,
           onTap: () => _showOptionsBottomSheet(context),
           showMultiple: widget.showMultiple,
@@ -392,8 +398,7 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
                   ElevatedButton(
                     child: const Text('Done'),
                     onPressed: () {
-                      final selectedValues =
-                      controller.selectedValues.toList();
+                      final selectedValues = controller.selectedValues.toList();
                       controller.setSelectedValues(selectedValues);
 
                       Navigator.of(context).pop();
@@ -475,6 +480,8 @@ class GeneralDropdownContainer extends StatelessWidget {
     required this.controller,
     required this.onTap,
     required this.showMultiple,
+    this.prefixIcon,
+    this.suffixIcon,
   });
 
   final bool isValid;
@@ -482,6 +489,8 @@ class GeneralDropdownContainer extends StatelessWidget {
   final MyBottomSheetDropdownController controller;
   final VoidCallback onTap;
   final bool showMultiple;
+  final IconData? prefixIcon;
+  final IconData? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -501,18 +510,28 @@ class GeneralDropdownContainer extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
           child: Row(
             children: [
+              if (prefixIcon != null) ...[
+                Icon(prefixIcon, color: MyColors.iconColor, size: 18),
+                const SizedBox(width: MySizes.sm),
+              ],
               Expanded(
-                child: Obx(() => Text(
-                  controller.selectedValue.value == null
-                      ? hintText
-                      : _getDisplayText(controller),
-                  style: controller.selectedValue.value == null
-                      ? MyTextStyle.placeholder
-                      : MyTextStyle.inputField,
-                  maxLines: null,
-                  overflow: TextOverflow.ellipsis,
-                )),
+                child: Obx(() {
+                  return Text(
+                    controller.selectedValues.isEmpty
+                        ? hintText
+                        : _getDisplayText(controller),
+                    style: controller.selectedValues.isEmpty
+                        ? MyTextStyle.placeholder
+                        : MyTextStyle.inputField,
+                    maxLines: null,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                }),
               ),
+              if (suffixIcon != null) ...[
+                const SizedBox(width: MySizes.sm),
+                Icon(suffixIcon, color: MyColors.iconColor, size: 18),
+              ],
               const SizedBox(width: MySizes.sm),
               const Icon(Icons.arrow_drop_down_outlined,
                   color: MyColors.iconColor),
@@ -529,7 +548,10 @@ class GeneralDropdownContainer extends StatelessWidget {
     }
     if (controller.selectedValues.length > 1) {
       return showMultiple ? 'Multiple' : controller.selectedValues.join(', ');
-    } else {
+    } else if (controller.selectedValues.isNotEmpty){
+      return controller.selectedValues.first;
+    }
+    else {
       return controller.selectedValue.value ?? '';
     }
   }
@@ -574,8 +596,7 @@ class FilterDropdownContainer extends StatelessWidget {
               children: [
                 Expanded(
                   child: Obx(() => Text(
-                    (controller.selectedValue.value == null ||
-                        controller.selectedValue.value == '')
+                    (controller.selectedValues.isEmpty)
                         ? hintText
                         : _getDisplayText(controller),
                     style: MyTextStyle.inputField
@@ -600,7 +621,10 @@ class FilterDropdownContainer extends StatelessWidget {
     }
     if (controller.selectedValues.length > 1) {
       return showMultiple ? 'Multiple' : controller.selectedValues.join(', ');
-    } else {
+    } else if (controller.selectedValues.isNotEmpty){
+      return controller.selectedValues.first;
+    }
+    else {
       return controller.selectedValue.value ?? '';
     }
   }

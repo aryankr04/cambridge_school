@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../class_management/class_management_repositories.dart';
 import '../../class_management/class_model.dart';
-import '../../manage_school/models/school_model.dart';
+import '../../school_management/school_model.dart';
 import '../routine_model.dart';
 
 class CreateRoutineController extends GetxController {

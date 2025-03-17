@@ -1,6 +1,7 @@
 import 'dart:ui';
 
-import '../../fees/models/fee_structure.dart';
+import '../fees/models/fee_structure.dart';
+
 
 class SchoolModel {
   // **Identification and Branding**

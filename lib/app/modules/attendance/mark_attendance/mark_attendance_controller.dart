@@ -1,6 +1,5 @@
 import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_models.dart';
 import 'package:cambridge_school/app/modules/attendance/mark_attendance/user_attendance_model.dart';
-import 'package:cambridge_school/app/modules/manage_school/controllers/dummy_shool_data.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/models/roster_model.dart';
 import 'package:cambridge_school/core/widgets/full_screen_loading_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -45,7 +44,6 @@ class MarkAttendanceController extends GetxController {
 
   final FirestoreRosterRepository rosterRepository = FirestoreRosterRepository();
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final SchoolDummyData dummySchoolData = SchoolDummyData(); // Dependency Injection
 
   //----------------------------------------------------------------------------
   // Lifecycle Methods

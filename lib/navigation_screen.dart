@@ -33,7 +33,7 @@ class NavigationScreen extends StatelessWidget {
             _buildNavButton('Class Management', AppRoutes.classManagementRoute,
                 Icons.class_),
             _buildNavButton('School Management',
-                AppRoutes.schoolManagementRoute, Icons.school),
+                AppRoutes.createSchoolRoute, Icons.school),
             _buildNavButton('Mark Attendance', AppRoutes.markAttendanceRoute,
                 Icons.check_circle),
             _buildNavButton('Attendance Record',
