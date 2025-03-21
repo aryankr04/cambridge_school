@@ -7,113 +7,10 @@ import '../school_management/school_model.dart';
 import 'class_model.dart';
 
 class ClassManagementRepository {
-  //----------------------------------------------------------------------------
-  // Instance Variables
-
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirestoreService _firestoreService = FirestoreService();
 
-  //----------------------------------------------------------------------------
-  // Helper Methods (Private)
-
-  // None currently. Could add helpers for constructing collection paths if needed.
-
-  //----------------------------------------------------------------------------
-  // School Class Name Operations (Managing the 'classes' array in the 'schools' document)
-
-  /// Fetches the list of class names for a given school.
-  Future<List<String>> fetchClassNames(String schoolId) async {
-    try {
-      final docSnapshot =
-          await _firestoreService.getDocumentById('schools', schoolId);
-
-      if (docSnapshot.exists && docSnapshot.data()!.containsKey('classes')) {
-        final classes = (docSnapshot['classes'] as List)
-            .map((e) => ClassData.fromMap(e as Map<String, dynamic>))
-            .toList();
-
-        return classes.map((classData) => classData.className).toList();
-      } else {
-        return [];
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch class names: $e');
-      print('Failed to fetch class names: $e');
-
-      return [];
-    }
-  }
-
-  Future<List<ClassData>> fetchClassData(String schoolId) async {
-    try {
-      final docSnapshot =
-          await _firestoreService.getDocumentById('schools', schoolId);
-
-      if (docSnapshot.exists && docSnapshot.data()!.containsKey('classes')) {
-        final classes = docSnapshot.data()!['classes'] as List;
-        return classes
-            .map((e) => ClassData.fromMap(e as Map<String, dynamic>))
-            .toList();
-      } else {
-        return [];
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch class data: $e');
-      print('Failed to fetch class data: $e');
-
-      return [];
-    }
-  }
-
-  /// Adds a new class name to the list of classes for a given school.
-  Future<void> addClassName(String schoolId, String className) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('schools')
-          .doc(schoolId)
-          .update({
-        'classes': FieldValue.arrayUnion([className]),
-      });
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to add class name: $e');
-      print('Failed to add class name: $e');
-      rethrow;
-    }
-  }
-
-  /// Deletes a class name from the list of classes for a given school.
-  Future<void> deleteClassName(String schoolId, String className) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('schools')
-          .doc(schoolId)
-          .update({
-        'classes': FieldValue.arrayRemove([className]),
-      });
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to delete class name: $e');
-      rethrow;
-    }
-  }
-
-  //----------------------------------------------------------------------------
-  // SchoolClassModel Operations (Managing 'classes' collection)
-
-  /// Fetches all classes (SchoolClassModel) for a given school.
-  Future<List<ClassModel>> fetchClasses(String schoolId) async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('classes')
-          .where('schoolId', isEqualTo: schoolId)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => ClassModel.fromMap(doc.data(), doc.id))
-          .toList();
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch classes: $e');
-      return [];
-    }
-  }
+  final String _collectionName = 'classes';
 
   /// Fetches a class (SchoolClassModel) by className and schoolId.
   Future<ClassModel?> fetchClassByClassNameAndSchoolId(
@@ -140,19 +37,6 @@ class ClassManagementRepository {
     }
   }
 
-  /// Adds or updates a SchoolClassModel.
-  Future<void> addOrUpdateClass(ClassModel schoolClass) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('classes')
-          .doc(schoolClass.id)
-          .set(schoolClass.toMap(), SetOptions(merge: true));
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to add/update class: $e');
-      rethrow;
-    }
-  }
-
   Future<List<SectionData>> fetchSchoolSections(String schoolId) async {
     try {
       final List<ClassData> classData = await fetchClassData(schoolId);
@@ -171,41 +55,118 @@ class ClassManagementRepository {
     }
   }
 
-  /// Deletes a section from a SchoolClassModel.
-  Future<void> deleteSection(
-      String classId, List<SectionModel> updatedSections) async {
+  Future<List<ClassData>> fetchClassData(String schoolId) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('classes')
-          .doc(classId)
-          .update({
-        'sections': updatedSections.map((section) => section.toMap()).toList(),
-      });
+      final docSnapshot =
+          await _firestoreService.getDocumentById('schools', schoolId);
+
+      if (docSnapshot.exists && docSnapshot.data()!.containsKey('classes')) {
+        final classes = docSnapshot.data()!['classes'] as List;
+        return classes
+            .map((e) => ClassData.fromMap(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        return [];
+      }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete section: $e');
-      rethrow;
+      Get.snackbar('Error', 'Failed to fetch class data: $e');
+      print('Failed to fetch class data: $e');
+
+      return [];
     }
   }
 
-  /// Deletes all classes under a specific class name for a given school.
-  Future<void> deleteClassesUnderClassName(
+  /// Fetches a class (SchoolClassModel) by className and schoolId.
+  Future<ClassModel?> getClassByClassName(
       String schoolId, String className) async {
     try {
-      final classesQuery = await FirebaseFirestore.instance
+      final snapshot = await FirebaseFirestore.instance
           .collection('classes')
           .where('schoolId', isEqualTo: schoolId)
           .where('className', isEqualTo: className)
+          .limit(
+              1) // Assuming class names are unique per school.  If not, remove the limit.
           .get();
 
-      WriteBatch batch = FirebaseFirestore.instance.batch();
-      for (var docSnapshot in classesQuery.docs) {
-        batch.delete(docSnapshot.reference);
+      if (snapshot.docs.isNotEmpty) {
+        return ClassModel.fromMap(
+            snapshot.docs.first.data(), snapshot.docs.first.id);
+      } else {
+        return null;
       }
-
-      await batch.commit();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete classes under class name: $e');
-      rethrow;
+      Get.snackbar('Error', 'Failed to fetch class by class name: $e');
+      print('Failed to fetch class by class name: $e');
+      return null;
     }
+  }
+
+  /// Retrieves all ClassModels for a specific school.
+  Future<List<ClassModel>> getClassesBySchoolId(String schoolId) async {
+    try {
+      final QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection(_collectionName)
+          .where('schoolId', isEqualTo: schoolId)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => ClassModel.fromMap(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      print('Error fetching classes by school ID: $e');
+      return []; // Handle error appropriately
+    }
+  }
+
+  /// Creates a new ClassModel in Firestore using the existing ID.
+  Future<String?> createClass(ClassModel classModel) async {
+    try {
+      final DocumentReference<Map<String, dynamic>> docRef =
+      _firestore.collection(_collectionName).doc(classModel.id); // Use existing ID
+
+      await docRef.set(classModel.toMap()); // Save data to Firestore
+
+      return classModel.id; // Return the existing ID
+    } catch (e) {
+      print('Error creating class: $e');
+      return null; // Handle error appropriately
+    }
+  }
+
+
+  /// Updates an existing ClassModel in Firestore.
+  Future<void> updateClass(ClassModel classModel) async {
+    try {
+      await _firestore
+          .collection(_collectionName)
+          .doc(classModel.id)
+          .update(classModel.toMap());
+    } catch (e) {
+      print('Error updating class: $e');
+      // Handle error appropriately (e.g., throw an exception)
+      rethrow; // Re-throw the error for the calling function to handle
+    }
+  }
+
+  /// Deletes a ClassModel from Firestore.
+  Future<void> deleteClass(String classId) async {
+    try {
+      await _firestore.collection(_collectionName).doc(classId).delete();
+    } catch (e) {
+      print('Error deleting class: $e');
+      // Handle error appropriately
+      rethrow; // Re-throw the error for the calling function to handle
+    }
+  }
+
+  /// Streams all ClassModels for a specific school (for real-time updates).
+  Stream<List<ClassModel>> streamClassesBySchoolId(String schoolId) {
+    return _firestore
+        .collection(_collectionName)
+        .where('schoolId', isEqualTo: schoolId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => ClassModel.fromMap(doc.data(), doc.id))
+            .toList());
   }
 }

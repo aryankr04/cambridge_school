@@ -13,6 +13,11 @@ import 'package:cambridge_school/app/modules/leave/leave_request/leave_request_s
 import 'package:cambridge_school/app/modules/school_management/create_school/create_school_screen.dart';
 import 'package:cambridge_school/app/modules/routine/create_routine/create_routine_binding.dart';
 import 'package:cambridge_school/app/modules/routine/create_routine/create_routine_screen.dart';
+import 'package:cambridge_school/app/modules/school_management/edit_school/edit_school_details_screen.dart';
+import 'package:cambridge_school/app/modules/school_management/manage_school/manage_school_binding.dart';
+import 'package:cambridge_school/app/modules/school_management/manage_school/manage_school_screen.dart';
+import 'package:cambridge_school/app/modules/school_management/school_list/school_list_binding.dart';
+import 'package:cambridge_school/app/modules/school_management/school_list/school_list_screen.dart';
 import 'package:cambridge_school/app/modules/user_management/create_user/bindings/create_user_binding.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/bindings/user_management_binding.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/screens/user_management_screen.dart';
@@ -28,6 +33,7 @@ import 'app/modules/notice/notice/notice_screen.dart';
 import 'app/modules/on_boarding/on_boarding_screen.dart';
 import 'app/modules/on_boarding/onboarding_binding.dart';
 import 'app/modules/school_management/create_school/create_school_binding.dart';
+import 'app/modules/school_management/edit_school/edit_school_details_binding.dart';
 import 'app/modules/user_management/create_user/screens/create_user_screen.dart';
 
 class AppRoutes {
@@ -88,6 +94,9 @@ class AppRoutes {
   /// Route for the Create Routine screen.
   static const String createRoutineRoute = '/create-routine';
   static const String createRoutineRoute0 = '/create-routine0';
+  static const String manageSchoolRoute = '/manage-school';
+  static const String schoolListRoute = '/school-list';
+  static const String editSchoolRoute = '/edit-school';
 
   //----------------------------------------------------------------------------
   // Route Definitions (Using GetX GetPage)
@@ -168,10 +177,21 @@ class AppRoutes {
       page: () => const CreateRoutineScreen(schoolId: 'SCH00001'),
       binding: CreateRoutineBinding(),
     ),
-    // GetPage(
-    //   name: createRoutineRoute0,
-    //   page: () =>   const RoutineManagementScreen(),
-    //   binding: RoutineBinding(),
-    // ),
+    GetPage(
+      name: schoolListRoute,
+      page: () =>   const SchoolListScreen(),
+      binding: SchoolListBinding(),
+    ),
+    GetPage(
+      name: manageSchoolRoute,
+      page: () =>   const ManageSchoolScreen(),
+      binding: ManageSchoolBinding(),
+    ),
+    GetPage(
+      name: editSchoolRoute,
+      page: () => EditSchoolDetailsScreen(schoolId: Get.parameters['schoolId'] ?? ''),
+      binding: EditSchoolDetailsBinding(schoolId: Get.parameters['schoolId'] ?? ''),
+    ),
+
   ];
 }

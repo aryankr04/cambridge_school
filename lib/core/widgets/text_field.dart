@@ -102,7 +102,7 @@ class MyTextField extends StatelessWidget {
           ],
         Padding(
           // padding: const EdgeInsets.only(bottom: MySizes.md),
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.only(bottom: MySizes.md),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: height ?? 0,

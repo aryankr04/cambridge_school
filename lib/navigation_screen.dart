@@ -22,7 +22,10 @@ class NavigationScreen extends StatelessWidget {
           mainAxisSpacing: 16,
           childAspectRatio: 1, // Make buttons more square-shaped
           children: [
-
+            _buildNavButton(
+                'School Management Dashboard', AppRoutes.manageSchoolRoute, Icons.settings),
+            _buildNavButton(
+                'School List', AppRoutes.schoolListRoute, Icons.list),
             _buildNavButton(
                 'Onboarding', AppRoutes.onboardingRoute, Icons.explore),
             _buildNavButton('Login', AppRoutes.loginRoute, Icons.login),

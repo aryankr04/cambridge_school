@@ -1,5 +1,3 @@
-
-import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_screen.dart';
 import 'package:cambridge_school/navigation_screen.dart';
 import 'package:cambridge_school/router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,10 +5,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'app/modules/attendance/mark_attendance/user_attendance_model.dart';
-import 'app/modules/leave/leave_request/leave_request_screen.dart';
-import 'app/modules/school_management/create_school/create_school_screen.dart';
-import 'app/modules/routine0/routine_controller.dart';
 import 'app/modules/user_management/create_user/models/user_model.dart';
 import 'core/utils/theme/theme.dart';
 import 'firebase_options.dart';
@@ -20,7 +14,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   debugPrint("🔥 Firebase initialized successfully!");
   runApp(const MyApp());
 }
@@ -34,8 +27,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _getAppTheme(context),
       getPages: AppRoutes.routes,
-      home: CreateSchoolScreen(),
-      //home: RoutineManagementScreen(),
+      // initialRoute: AppRoutes.classManagementRoute,
+      home: const NavigationScreen(),
     );
   }
 }

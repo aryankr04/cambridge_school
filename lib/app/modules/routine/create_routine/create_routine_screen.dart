@@ -1,7 +1,7 @@
+import 'package:cambridge_school/app/modules/class_management/class_management_controller.dart';
+import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:cambridge_school/core/widgets/button.dart';
-import 'package:cambridge_school/core/widgets/card_widget.dart';
-import 'package:cambridge_school/core/widgets/connection_check_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -19,8 +19,7 @@ import 'create_routine_controller.dart';
 class CreateRoutineScreen extends StatefulWidget {
   final String schoolId;
 
-  const CreateRoutineScreen({Key? key, required this.schoolId})
-      : super(key: key);
+  const CreateRoutineScreen({super.key, required this.schoolId});
 
   @override
   State<CreateRoutineScreen> createState() => _CreateRoutineScreenState();
@@ -156,13 +155,13 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
     return MyBottomSheetDropdown(
       optionsForChips: _controller.classNameOptions!,
       onSingleChanged: (value) async {
-        _controller.selectedClassName.value = value!;
+        _controller.selectedClassName.value = value;
         await _controller.fetchClassData();
         _controller.selectedSectionName.value =
             _controller.sectionNameOptions!.first;
         _controller.updateEventListForSelectedDay();
       },
-      dropdownWidgetType: DropdownWidgetType.Filter,
+      dropdownWidgetType: DropdownWidgetType.filter,
       hintText: 'Class',
       selectedValue: _controller.selectedClassName,
     );
@@ -173,10 +172,10 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       optionsForChips: _controller.sectionNameOptions!,
       selectedValue: _controller.selectedSectionName,
       onSingleChanged: (value) {
-        _controller.selectedSectionName.value = value!;
+        _controller.selectedSectionName.value = value;
         _controller.updateEventListForSelectedDay();
       },
-      dropdownWidgetType: DropdownWidgetType.Filter,
+      dropdownWidgetType: DropdownWidgetType.filter,
       hintText: 'Section',
     );
   }
@@ -186,12 +185,11 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       optionsForChips: CreateRoutineController.dayOptions.obs,
       selectedValue: _controller.selectedDay,
       onSingleChanged: (value) {
-        _controller.selectedDay.value = value!;
+        _controller.selectedDay.value = value;
         _controller.updateEventListForSelectedDay();
       },
-      dropdownWidgetType: DropdownWidgetType.Filter,
+      dropdownWidgetType: DropdownWidgetType.filter,
       hintText: 'Day',
-      initialSelectedValue: _controller.selectedDay.value,
     );
   }
 
@@ -333,8 +331,8 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
                 startsAt: formatTimeOfDay(event.startTime),
                 endsAt: formatTimeOfDay(event.endTime),
                 subject: event.subject,
-                classTeacherName: _controller.classModel.value?.className ?? '',
-                className: _controller.classModel.value?.className ?? '',
+                classTeacherName: _controller.classModel.value?.className.label,
+                className: _controller.classModel.value?.className.label,
                 sectionName: _controller.selectedSectionName.value,
                 itemType: TimelineItemTypeExtension.fromString(
                     event.eventType ?? 'Class'),
@@ -548,7 +546,7 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
                     'Start',
                   ],
                   onSingleChanged: (value) {
-                    _eventType.value = value ?? 'Class';
+                    _eventType.value = value;
                   },
                   initialSelectedValues: [_eventType.value],
                 ),

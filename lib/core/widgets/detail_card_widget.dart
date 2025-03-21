@@ -71,7 +71,7 @@ class _MyDetailCardState extends State<MyDetailCard> {
           children: [
             // Left indicator bar
             Container(
-              width: MySizes.sm - 2,
+              width: MySizes.xs,
               decoration: BoxDecoration(
                 color: widget.color ?? MyColors.activeBlue,
                 borderRadius: const BorderRadius.only(

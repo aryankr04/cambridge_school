@@ -11,7 +11,7 @@ import '../fee_structure/models/uniform_fee_structure_model.dart';
 
 class FeeStructure {
   String year;
-  TuitionFeeStructure tuitionFeeStructure;
+  TuitionFeeStructure? tuitionFeeStructure;
   TransportFeeStructure? transportFeeStructure;
   AdmissionFeeStructure? admissionFeeStructure;
   ReAdmissionFeeStructure? reAdmissionFeeStructure;
@@ -24,7 +24,7 @@ class FeeStructure {
 
   FeeStructure({
     required this.year,
-    required this.tuitionFeeStructure,
+    this.tuitionFeeStructure,
     this.transportFeeStructure,
     this.admissionFeeStructure,
     this.reAdmissionFeeStructure,
@@ -40,7 +40,7 @@ class FeeStructure {
   Map<String, dynamic> toMap() {
     return {
       'year': year,
-      'tuitionFeeStructure': tuitionFeeStructure.toMap(),
+      'tuitionFeeStructure': tuitionFeeStructure?.toMap(),
       'transportFeeStructure': transportFeeStructure?.toMap(),
       'admissionFeeStructure': admissionFeeStructure?.toMap(),
       'reAdmissionFeeStructure': reAdmissionFeeStructure?.toMap(),
@@ -54,54 +54,43 @@ class FeeStructure {
   }
 
   // Method to create FeeStructure from a Map
-  factory FeeStructure.fromMap(Map<String, dynamic> map) {
+  factory FeeStructure.fromMap(Map<String, dynamic>? map) {
+    if(map == null){
+      return FeeStructure(year: ''); // Or throw an exception, depending on your needs
+    }
     return FeeStructure(
-      year: map['year'],
+      year: map['year'] as String? ?? '',
       tuitionFeeStructure:
-          TuitionFeeStructure.fromMap(map['tuitionFeeStructure']),
+      TuitionFeeStructure.fromMap(map['tuitionFeeStructure'] as Map<String, dynamic>? ?? {}),
       transportFeeStructure: map['transportFeeStructure'] != null
-          ? TransportFeeStructure.fromMap(map['transportFeeStructure'])
+          ? TransportFeeStructure.fromMap(map['transportFeeStructure'] as Map<String, dynamic>? ?? {})
           : null,
       admissionFeeStructure: map['admissionFeeStructure'] != null
-          ? AdmissionFeeStructure.fromMap(map['admissionFeeStructure'])
+          ? AdmissionFeeStructure.fromMap(map['admissionFeeStructure']as Map<String, dynamic>? ?? {})
           : null,
       reAdmissionFeeStructure: map['reAdmissionFeeStructure'] != null
-          ? ReAdmissionFeeStructure.fromMap(map['reAdmissionFeeStructure'])
+          ? ReAdmissionFeeStructure.fromMap(map['reAdmissionFeeStructure']as Map<String, dynamic>? ?? {})
           : null,
       registrationFeeStructure: map['registrationFeeStructure'] != null
-          ? RegistrationFeeStructure.fromMap(map['registrationFeeStructure'])
+          ? RegistrationFeeStructure.fromMap(map['registrationFeeStructure']as Map<String, dynamic>? ?? {})
           : null,
       lateFeeStructure: map['lateFeeStructure'] != null
-          ? LateFeeStructure.fromMap(map['lateFeeStructure'])
+          ? LateFeeStructure.fromMap(map['lateFeeStructure']as Map<String, dynamic>? ?? {})
           : null,
       booksAndStationeryFeeStructure:
-          map['booksAndStationeryFeeStructure'] != null
-              ? BooksAndStationeryFeeStructure.fromMap(
-                  map['booksAndStationeryFeeStructure'])
-              : null,
+      map['booksAndStationeryFeeStructure'] != null
+          ? BooksAndStationeryFeeStructure.fromMap(
+          map['booksAndStationeryFeeStructure']as Map<String, dynamic>? ?? {})
+          : null,
       hostelFeeStructure: map['hostelFeeStructure'] != null
-          ? HostelFeeStructure.fromMap(map['hostelFeeStructure'])
+          ? HostelFeeStructure.fromMap(map['hostelFeeStructure']as Map<String, dynamic>? ?? {})
           : null,
       uniformFeeStructure: map['uniformFeeStructure'] != null
-          ? UniformFeeStructure.fromMap(map['uniformFeeStructure'])
+          ? UniformFeeStructure.fromMap(map['uniformFeeStructure']as Map<String, dynamic>? ?? {})
           : null,
       otherFeeStructure: map['otherFeeStructure'] != null
-          ? OtherFeeStructure.fromMap(map['otherFeeStructure'])
+          ? OtherFeeStructure.fromMap(map['otherFeeStructure']as Map<String, dynamic>? ?? {})
           : null,
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

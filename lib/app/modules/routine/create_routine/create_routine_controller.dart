@@ -1,3 +1,4 @@
+import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -472,8 +473,9 @@ class CreateRoutineController extends GetxController {
             print("          Subject: ${event.subject}");
             print("          Event Type: ${event.eventType}");
             print(
-                "          Start Time: ${event.startTime.format(Get.context!)}");
-            print("          End Time: ${event.endTime.format(Get.context!)}");
+                "          Start Time: ${event.arrivalTime.format(Get.context!)}");
+            print(
+                "          End Time: ${event.departureTime.format(Get.context!)}");
             print("          Teacher: ${event.teacher}");
             print("          Location: ${event.location}");
           }
@@ -531,12 +533,6 @@ class CreateRoutineController extends GetxController {
           sectionName: sectionNames[j],
           classTeacherId: 'teacher_${i + 1}_${j + 1}',
           classTeacherName: 'Teacher ${i + 1}-${j + 1}',
-          description: 'Section ${sectionNames[j]} description',
-          startDate: DateTime.now()
-              .subtract(const Duration(days: 30))
-              .toIso8601String(),
-          endDate:
-              DateTime.now().add(const Duration(days: 365)).toIso8601String(),
           capacity: 30,
           roomNumber: 'Room ${i + 1}${j + 1}',
           students: [
@@ -600,7 +596,7 @@ class CreateRoutineController extends GetxController {
               topics: [
                 Topic(
                   topicName: 'Algebra',
-                  subtopics: [ 'Linear Equations'],
+                  subtopics: ['Linear Equations'],
                   topicMarks: 20,
                 ),
               ],
@@ -613,7 +609,7 @@ class CreateRoutineController extends GetxController {
               topics: [
                 Topic(
                   topicName: 'Physics',
-                  subtopics: [ 'Motion'],
+                  subtopics: ['Motion'],
                   topicMarks: 25,
                 ),
               ],
@@ -631,7 +627,7 @@ class CreateRoutineController extends GetxController {
       final classModel = ClassModel(
         schoolId: schoolId,
         academicYear: academicYear,
-        className: className,
+        className: ClassName.first,
         sections: sections,
         subjects: ['Math', 'Science', 'English', 'History'],
         examSyllabus: examSyllabusList,

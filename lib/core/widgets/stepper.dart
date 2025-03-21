@@ -35,9 +35,8 @@ class MyStepper extends StatelessWidget {
       mainAxisSize: MainAxisSize.min, // Important: Use min size to avoid expanding unnecessary
       children: [
         // Use a ternary operator for concise conditional rendering.
-        isCompleted
-            ? Icon(Icons.check_circle, color: MyDynamicColors.activeGreen, size: 24)
-            : Container(
+
+             Container(
           width: MySizes.lg,
           height: MySizes.lg,
           decoration: BoxDecoration(

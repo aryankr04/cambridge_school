@@ -1,8 +1,13 @@
 import 'package:cambridge_school/app/modules/school_management/school_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+
+import '../../../core/services/firebase/firestore_service.dart';
 
 
 class FirestoreSchoolRepository {
+  final FirestoreService _firestoreService = FirestoreService();
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _collectionName = 'schools'; // Collection name in Firestore
 
@@ -82,6 +87,27 @@ class FirestoreSchoolRepository {
     }
   }
 
+  Future<List<String>> fetchClassNames(String schoolId) async {
+    try {
+      final docSnapshot =
+      await _firestoreService.getDocumentById('schools', schoolId);
+
+      if (docSnapshot.exists && docSnapshot.data()!.containsKey('classes')) {
+        final classes = (docSnapshot['classes'] as List)
+            .map((e) => ClassData.fromMap(e as Map<String, dynamic>))
+            .toList();
+
+        return classes.map((classData) => classData.className).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to fetch class names: $e');
+      print('Failed to fetch class names: $e');
+
+      return [];
+    }
+  }
 
   ///  Streams all school documents from Firestore.  This allows for real-time updates.
   Stream<List<SchoolModel>> streamAllSchools() {
@@ -124,5 +150,36 @@ class FirestoreSchoolRepository {
   }
 
 // Add more specific query methods as needed (e.g., schools by city, schools by type, etc.)
+
+  /// Adds a new class data to an existing school document in Firestore.
+  Future<void> addClassData(String schoolId, ClassData classData) async {
+    try {
+      final schoolDocRef = _firestore.collection(_collectionName).doc(schoolId);
+
+      // Get the current school document.
+      final schoolDoc = await schoolDocRef.get();
+
+      if (!schoolDoc.exists) {
+        throw Exception('School with ID: $schoolId does not exist.');
+      }
+
+      // Get the current list of classes (if any).
+      List<dynamic> currentClasses = [];
+      if (schoolDoc.data() != null && schoolDoc.data()!.containsKey('classes')) {
+        currentClasses = List.from(schoolDoc.data()!['classes']);
+      }
+
+      // Add the new class data to the list.
+      currentClasses.add(classData.toMap());
+
+      // Update the 'classes' field in the Firestore document with the updated list.
+      await schoolDocRef.update({'classes': currentClasses});
+
+      print('Class data added successfully to school with ID: $schoolId');
+    } catch (e) {
+      print('Error adding class data: $e');
+      rethrow; // Re-throw the error
+    }
+  }
 
 }
