@@ -1,148 +1,108 @@
-import 'package:cambridge_school/core/utils/constants/box_shadow.dart';
+import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../utils/constants/dynamic_colors.dart';
-import '../utils/constants/sizes.dart';
-import '../utils/constants/text_styles.dart';
-
-class MySearchField extends StatefulWidget {
-  final List<String>? options; // Make options optional
+class MySearchField extends StatelessWidget {
   final String hintText;
   final String? labelText;
   final ValueChanged<String> onSelected;
   final bool showClearIcon;
+  final List<String>? options;
+  final TextEditingController? controller;
 
-  const MySearchField({
+  MySearchField({
     super.key,
-    this.options, // Options is now optional
+    this.options,
     required this.onSelected,
     this.hintText = "Search...",
     this.labelText,
     this.showClearIcon = false,
+    this.controller, // Allow a pre-existing TextEditingController to be passed in
   });
 
-  @override
-  _MySearchFieldState createState() => _MySearchFieldState();
-}
-
-class _MySearchFieldState extends State<MySearchField> {
-  final TextEditingController _controller = TextEditingController();
   final RxList<String> _filteredOptions = <String>[].obs;
   final RxBool _isDropdownOpen = false.obs;
 
   @override
-  void initState() {
-    super.initState();
-    _filteredOptions.assignAll(widget.options ?? []); // Handle null case
-    _controller.addListener(_filterOptions);
-  }
-
-  @override
-  void dispose() {
-    _controller.removeListener(_filterOptions);
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _filterOptions() {
-    final query = _controller.text.toLowerCase();
-    List<String> filtered = (widget.options ?? []) // Handle null case
-        .where((option) => option.toLowerCase().contains(query))
-        .toList();
-
-    // Sort the filtered options based on the index of the query
-    filtered.sort((a, b) {
-      final aIndex = a.toLowerCase().indexOf(query);
-      final bIndex = b.toLowerCase().indexOf(query);
-
-      if (aIndex == bIndex) {
-        // If both start at the same index, sort alphabetically
-        return a.toLowerCase().compareTo(b.toLowerCase());
-      } else if (aIndex == -1) {
-        // If 'a' does not contain the query, put 'b' first
-        return 1;
-      } else if (bIndex == -1) {
-        // If 'b' does not contain the query, put 'a' first
-        return -1;
-      } else {
-        // Sort by the index of the query (lower index comes first)
-        return aIndex.compareTo(bIndex);
-      }
-    });
-
-    _filteredOptions.assignAll(filtered);
-  }
-
-  void _selectOption(String option) {
-    _controller.text = option;
-    widget.onSelected(option);
-    _isDropdownOpen.value = false;
-  }
-
-  void _clearText() {
-    _controller.clear();
-    _filterOptions(); // Refresh the filtered options after clearing
-  }
-
-  @override
   Widget build(BuildContext context) {
+    TextEditingController textController = controller ?? TextEditingController();
+    // Initialize filtered options using the passed options or an empty list.
+    _filteredOptions.assignAll(options ?? []);
+
+
+    void filterOptions() {
+      final query = textController.text.toLowerCase();
+      List<String> filtered = (options ?? [])
+          .where((option) => option.toLowerCase().contains(query))
+          .toList();
+
+      // Sort results based on query match
+      filtered.sort((a, b) {
+        final aIndex = a.toLowerCase().indexOf(query);
+        final bIndex = b.toLowerCase().indexOf(query);
+        return aIndex.compareTo(bIndex);
+      });
+
+      _filteredOptions.assignAll(filtered);
+      _isDropdownOpen.value = filtered.isNotEmpty;
+    }
+
+    void selectOption(String option) {
+      textController.text = option;
+      onSelected(option);
+      _isDropdownOpen.value = false;
+    }
+
+    void clearText() {
+      textController.clear();
+      filterOptions();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.labelText != null) ...[
-          Text(
-            widget.labelText!,
-            style: MyTextStyle.inputLabel,
-          ),
+        if (labelText != null) ...[
+          Text(labelText!, style: MyTextStyle.labelLarge),
           const SizedBox(height: 6),
         ],
         TextField(
-          controller: _controller,
-          style: MyTextStyle.inputField,
+          controller: textController,
           decoration: InputDecoration(
-            hintText: widget.hintText,
-            hintStyle: MyTextStyle.placeholder,
-            suffixIcon: Obx(() {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (widget.showClearIcon && _controller.text.isNotEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: _clearText,
-                    ),
-                ],
-              );
-            }),
+            hintText: hintText,
+            suffixIcon: showClearIcon && textController.text.isNotEmpty
+                ? IconButton(
+                icon: const Icon(Icons.clear), onPressed: clearText)
+                : const SizedBox.shrink(),
           ),
-          onChanged: (value) {
-            _isDropdownOpen.value = true;
-            _filterOptions();
+          onChanged: (_) => filterOptions(),
+          onSubmitted: (value) {
+            onSelected(value);
           },
         ),
         Obx(() {
-          if (!_isDropdownOpen.value || _filteredOptions.isEmpty) {
-            return const SizedBox.shrink();
-          }
+          if (!_isDropdownOpen.value) return const SizedBox.shrink();
           return Container(
-            constraints: BoxConstraints(maxHeight: Get.width),
             margin: const EdgeInsets.only(top: 4),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),
               color: Colors.white,
-              boxShadow: MyBoxShadows.kMediumShadow,
+              boxShadow: [
+                BoxShadow(color: Colors.grey.withOpacity(0.3), blurRadius: 4)
+              ],
+            ),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.3,
             ),
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: _filteredOptions.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(_filteredOptions[index]),
-                  onTap: () {
-                    _selectOption(_filteredOptions[index]);
-                    widget.onSelected(_filteredOptions[index]);
-                  },
+                  title: Text(
+                    _filteredOptions[index],
+                    style: MyTextStyle.bodyMedium,
+                  ),
+                  onTap: () => selectOption(_filteredOptions[index]),
                 );
               },
             ),
@@ -150,5 +110,12 @@ class _MySearchFieldState extends State<MySearchField> {
         }),
       ],
     );
+  }
+  void dispose() {
+    // Dispose of the controller only if it was created internally.
+    if (controller == null) {
+      controller?.dispose(); // Dispose if created in build
+    }
+
   }
 }

@@ -1,3 +1,4 @@
+import 'package:cambridge_school/app/modules/subject_management/subject_model.dart';
 import 'package:cambridge_school/core/utils/constants/colors.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
@@ -5,13 +6,13 @@ import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:cambridge_school/core/widgets/bottom_sheet_dropdown.dart';
 import 'package:cambridge_school/core/widgets/card_widget.dart';
 import 'package:cambridge_school/core/widgets/confirmation_dialog.dart';
-import 'package:cambridge_school/core/widgets/divider.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
+import 'package:cambridge_school/core/widgets/search_field.dart';
 import 'package:cambridge_school/core/widgets/text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-
 import '../class_management/class_model.dart';
 import 'class_management_controller.dart';
 
@@ -22,28 +23,46 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Class Management')),
-      body: Obx(() {
-        return controller.isLoading.value
-            ? _buildShimmerLoading()
-            : Padding(
-                padding: const EdgeInsets.all(MySizes.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildClassSelectionHeader(),
-                    const SizedBox(height: MySizes.sm),
-                    MyBottomSheetDropdown(
-                      optionsForChips: controller.classNames,
-                      onSingleChanged: controller.fetchClassDetails,
-                      dropdownWidgetType: DropdownWidgetType.choiceChip,
-                      selectedValue: controller.selectedClassName,
-                    ),
-                    const SizedBox(height: MySizes.spaceBtwSections),
-                    Expanded(child: _buildClassDetailsSection(context)),
-                  ],
+      backgroundColor: MyColors.lightGrey,
+      body: Obx(_buildBody),
+    );
+  }
+
+  Widget _buildBody() {
+    return controller.isLoading.value
+        ? _buildShimmerLoading()
+        : _buildContent();
+  }
+
+  Widget _buildContent() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(MySizes.md),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              // borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildClassSelectionHeader(),
+                const SizedBox(height: MySizes.sm),
+                MyBottomSheetDropdown(
+                  optionsForChips: controller.availableClassNames,
+                  onSingleChanged: controller.fetchClassDetails,
+                  dropdownWidgetType: DropdownWidgetType.choiceChip,
+                  selectedValue: controller.selectedClassName,
                 ),
-              );
-      }),
+              ],
+            ),
+          ),
+          const SizedBox(height: MySizes.sm),
+          _buildClassDetailsSection(),
+        ],
+      ),
     );
   }
 
@@ -52,482 +71,526 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text("Select a Class", style: MyTextStyle.headlineSmall),
-        FilledButton.icon(
+        const SizedBox(
+          height: MySizes.sm,
+        ),
+        TextButton.icon(
           onPressed: _showAddClassDialog,
-          icon: const Icon(Icons.add, color: Colors.white, size: 12),
           label: const Text('Add Class'),
-          style: FilledButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          ),
+          icon: const Icon(Icons.add),
         ),
       ],
     );
   }
 
-  Widget _buildClassDetailsSection(BuildContext context) {
+  Widget _buildClassDetailsSection() {
     return Obx(() {
       final selectedClass = controller.selectedClass.value;
-      if (selectedClass != null) {
-        return SingleChildScrollView(
-          // Added SingleChildScrollView
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildClassTitleAndActions(context),
-              const SizedBox(height: MySizes.md),
-              _buildSectionsList(context),
-              const SizedBox(height: MySizes.md),
-              _buildSubjectsList(context),
-            ],
-          ),
-        );
-      } else {
-        return const Center(child: Text('No class selected'));
-      }
+      return (controller.isLoadingClass.value &&
+              controller.selectedClassName.value.isNotEmpty)
+          ? Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Padding(
+                padding: const EdgeInsets.all(MySizes.md),
+                child: _buildShimmerClassDetails(),
+              ),
+            )
+          : selectedClass != null
+              ? MyCard(
+                  margin: const EdgeInsets.all(MySizes.md),
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildClassTitleAndActions(),
+                      const Divider(
+                        height: 1,
+                        color: MyColors.dividerColor,
+                        thickness: 0.5,
+                      ),
+                      _buildSectionsList(),
+                      const Divider(
+                        height: 1,
+                        color: MyColors.dividerColor,
+                        thickness: 0.5,
+                      ),
+                      _buildSubjectsList(),
+                    ],
+                  ),
+                )
+              : Center(
+                  child: Column(
+                  children: [
+                    SvgPicture.asset(
+                        'assets/images/illustrations/empty_state_illustration/e_commerce_3.svg'),
+                    const Text(
+                      'Please select a class',
+                      style: MyTextStyle.titleMedium,
+                    ),
+                  ],
+                ));
     });
   }
 
-  Widget _buildClassTitleAndActions(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          controller.selectedClassName.value,
-          style: MyTextStyle.headlineSmall,
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Row(
+  Widget _buildClassTitleAndActions() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: MySizes.md),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             children: [
-              FilledButton.icon(
-                onPressed: () {
-                  //Todo: Implement Edit Action
+              Obx(() => Text(
+                    controller.selectedClassName.value,
+                    style: MyTextStyle.headlineSmall,
+                  )),
+              if (controller.isEditing.value)
+                IconButton(
+                    onPressed: _showEditClassNameDialog,
+                    icon: const Icon(
+                      Icons.edit,
+                      size: 18,
+                    ))
+            ],
+          ),
+          controller.isEditing.value
+              ? _buildEditingActions()
+              : TextButton.icon(
+                  onPressed: () => controller.isEditing(true),
+                  label: const Text('Edit Class'),
+                  icon: const Icon(
+                    Icons.edit,
+                    size: 18,
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditingActions() {
+    return Row(
+      children: [
+        _buildIconButton(
+          icon: Icons.save,
+          color: MyColors.activeGreen,
+          onPressed: controller.updateClassToFirebase,
+        ),
+        const SizedBox(width: MySizes.sm),
+        _buildIconButton(
+          icon: Icons.delete,
+          color: MyColors.activeRed,
+          onPressed: _showDeleteConfirmationDialog,
+        ),
+        const SizedBox(width: MySizes.sm),
+        _buildIconButton(
+          icon: Icons.close,
+          color: MyColors.activeRed,
+          onPressed: () => controller.isEditing(false),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionsList() {
+    final sections = controller.selectedClass.value?.sections ?? [];
+
+    if (sections.isNotEmpty ?? false) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Sections', style: MyTextStyle.titleLarge),
+                if (controller.isEditing.value)
+                  TextButton.icon(
+                    onPressed: _showAddSectionDialog,
+                    label: const Text('Add Section'),
+                    icon: const Icon(Icons.add),
+                  ),
+              ],
+            ),
+            const SizedBox(height: MySizes.sm),
+            if (sections.isNotEmpty)
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: sections.length,
+                itemBuilder: (context, index) {
+                  final section = sections[index];
+                  return SectionTile(
+                    section: section,
+                    onEdit: () => _showEditSectionDialog(index, section),
+                    onDelete: () =>
+                        controller.deleteSection(section.sectionName ?? ''),
+                    isEdit: controller.isEditing.value,
+                  );
                 },
-                icon: const Icon(Icons.edit, color: Colors.white, size: 12),
-                label: const Text('Edit'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeBlue,
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
               ),
-              const SizedBox(width: MySizes.md),
-              FilledButton.icon(
-                onPressed: _showDeleteConfirmationDialog,
-                icon: const Icon(Icons.delete, color: Colors.white, size: 12),
-                label: const Text('Delete'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
+          ],
+        ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(MySizes.md),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Sections', style: MyTextStyle.titleLarge)),
+              SvgPicture.asset(
+                'assets/images/illustrations/empty_state_illustration/e_commerce_5.svg',
+                width: Get.width * 0.25,
+                height: Get.width * 0.25,
               ),
-              const SizedBox(width: MySizes.md),
-              FilledButton.icon(
-                onPressed: controller.updateClassToFirebase,
-                icon: const Icon(Icons.save, color: Colors.white, size: 12),
-                label: const Text('Update'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeOrange,
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
+              const Text(
+                'No subjects found',
+                style: MyTextStyle.bodyMedium,
               ),
             ],
           ),
         ),
-      ],
-    );
+      );
+    }
   }
 
-  Widget _buildSectionsList(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildSubjectsList() {
+    if (controller.selectedClass.value?.sections.isNotEmpty ?? false) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Sections:', style: MyTextStyle.titleLarge),
-            TextButton.icon(
-              onPressed: () => _showAddSectionDialog(context),
-              label: const Text('Add Section'),
-              icon: const Icon(Icons.add),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Subjects', style: MyTextStyle.titleLarge),
+                if (controller.isEditing.value)
+                  TextButton.icon(
+                    onPressed: _showAddSubjectDialog,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Subject'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: MySizes.sm),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: controller.selectedClass.value?.subjects.length ?? 0,
+              itemBuilder: (context, index) {
+                final subject = controller.selectedClass.value!.subjects[index];
+                return SubjectTile(
+                  subjectName: subject,
+                  isEdit: controller.isEditing.value,
+                  onEdit: () => _showEditSubjectDialog(subject),
+                  onDelete: () => controller.deleteSubject(subject),
+                );
+              },
             ),
           ],
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics:
-              const NeverScrollableScrollPhysics(), // Important to disable scrolling
-          itemCount: controller.selectedClass.value!.sections.length,
-          itemBuilder: (context, index) {
-            final section = controller.selectedClass.value!.sections[index];
-            return SectionTile(
-              section: section,
-              onEdit: () => _showEditSectionDialog(context, section),
-              onDelete: () =>
-                  controller.deleteSection(section.sectionName ?? ''),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSubjectsList(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Subjects:',
-              style: MyTextStyle.titleLarge,
-            ),
-            TextButton.icon(
-              onPressed: () => _showAddSubjectDialog(context),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Subject'),
-            ),
-          ],
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics:
-              const NeverScrollableScrollPhysics(), // Important to disable scrolling
-          itemCount: controller.selectedClass.value!.subjects.length,
-          itemBuilder: (context, index) {
-            final subject = controller.selectedClass.value!.subjects[index];
-            return Card(
-              child: ListTile(
-                title: Text(subject),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    controller.deleteSubject(subject);
-                  },
-                ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(MySizes.md),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Subjects', style: MyTextStyle.titleLarge)),
+              SvgPicture.asset(
+                'assets/images/illustrations/empty_state_illustration/e_commerce_5.svg',
+                width: Get.width * 0.25,
+                height: Get.width * 0.25,
               ),
-            );
-          },
+              const Text(
+                'No subjects found',
+                style: MyTextStyle.bodyMedium,
+              ),
+            ],
+          ),
         ),
-      ],
-    );
+      );
+    }
   }
 
   void _showAddClassDialog() {
-    String selectedClassName = ClassNameExtension.displayNamesList.first; // Default selection
-
     Get.dialog(
-      AlertDialog(
-        title: const Text(
-          'Add New Class',
-          style: MyTextStyle.headlineSmall,
-        ),
-        content: SizedBox(
-          width: Get.width,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                MyDropdownField(
-                  labelText: 'Class Name',
-                  options: ClassNameExtension.displayNamesList,
-                  onSelected: (value) {
-                    if (value != null) {
-                      selectedClassName = value;
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          Row(
-            children: [
-              FilledButton(
-                onPressed: () {
-                  if (selectedClassName.isNotEmpty) {
-                    controller.onAddClassButtonPressed(selectedClassName);
-                  }
-                  Get.back();
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeGreen,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Add'),
-              ),
-              const SizedBox(width: MySizes.md),
-              FilledButton(
-                onPressed: () => Get.back(),
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeRed,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Cancel'),
-              ),
-            ],
-          ),
-        ],
+      _buildClassDialog(
+        title: 'Add New Class',
+        onAdd: (className) {
+          if (className.isNotEmpty) {
+            controller.onAddClassButtonPressed(className);
+          }
+          Get.back();
+        },
       ),
+    );
+  }
+
+  void _showEditClassNameDialog() {
+    Get.dialog(
+      _buildClassDialog(
+        title: 'Edit Class Name',
+        initialClassName: controller.selectedClassName.value,
+        isUpdate: true,
+        onAdd: (className) {
+          if (className.isNotEmpty) {
+            controller.updateClassName(className);
+          }
+          Get.back();
+        },
+      ),
+    );
+  }
+
+  Widget _buildClassDialog({
+    required String title,
+    String initialClassName = '',
+    required Function(String) onAdd,
+    bool isUpdate = false,
+  }) {
+    final selectedClassName = RxString(initialClassName);
+
+    return AlertDialog(
+      title: Text(title, style: MyTextStyle.headlineSmall),
+      content: SizedBox(
+        width: Get.width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            MyDropdownField(
+              labelText: 'Class Name',
+              options: ClassNameExtension.displayNamesList
+                  .where((name) =>
+                      !controller.availableClassNames.contains(name) ||
+                      name == initialClassName)
+                  .toList(),
+              onSelected: (value) {
+                if (value != null) {
+                  selectedClassName.value = value;
+                }
+              },
+              selectedValue: selectedClassName,
+            )
+          ],
+        ),
+      ),
+      actions: [
+        _buildDialogActions(
+          isUpdate: isUpdate,
+          onAdd: () => onAdd(selectedClassName.value),
+          onCancel: () => Get.back(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDialogActions({
+    required VoidCallback onAdd,
+    required VoidCallback onCancel,
+    bool isUpdate = false,
+  }) {
+    return Row(
+      children: [
+        FilledButton(
+          onPressed: onAdd,
+          style: FilledButton.styleFrom(
+            backgroundColor: MyColors.activeGreen,
+            foregroundColor: Colors.white,
+          ),
+          child: Text(isUpdate ? 'Update' : 'Add'),
+        ),
+        const SizedBox(width: MySizes.md),
+        FilledButton(
+          onPressed: onCancel,
+          style: FilledButton.styleFrom(
+            backgroundColor: MyColors.activeRed,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text('Cancel'),
+        ),
+      ],
     );
   }
 
   void _showDeleteConfirmationDialog() {
     if (controller.selectedClass.value != null) {
       MyConfirmationDialog.show(DialogAction.Delete, onConfirm: () {
-        controller.deleteClass(controller.selectedClass.value!.className.label);
+        controller.deleteClassFromFirebase(controller.selectedClass.value!);
       });
     } else {
       Get.snackbar('Warning', 'No class selected to delete.');
     }
   }
 
-  void _showAddSectionDialog(BuildContext context) {
-    final sectionNameController = TextEditingController();
-    final classTeacherNameController = TextEditingController();
-    final classTeacherIdController = TextEditingController();
-    final roomNumberController = TextEditingController();
-    final capacityController = TextEditingController();
+  void _showAddSectionDialog() {
+    Get.dialog(_buildSectionDialog(
+        title: 'Add New Section', onSave: controller.addSection));
+  }
 
+  void _showEditSectionDialog(int index, SectionModel section) {
+    // Added index parameter
     Get.dialog(
-      AlertDialog(
-        title: const Text(
-          'Add New Section',
-          style: MyTextStyle.headlineSmall,
-        ),
-        content: SizedBox(
-          width: Get.width,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                MyTextField(
-                  labelText: 'Section Name',
-                  controller: sectionNameController,
-                ),
-                MyTextField(
-                  labelText: 'Class Teacher Name',
-                  controller: classTeacherNameController,
-                ),
-                MyTextField(
-                  labelText: 'Class Teacher ID',
-                  controller: classTeacherIdController,
-                ),
-                MyTextField(
-                  labelText: 'Room Number',
-                  controller: roomNumberController,
-                ),
-                MyTextField(
-                  labelText: 'Capacity',
-                  controller: capacityController,
-                  keyboardType: TextInputType.number,
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          Row(
-            children: [
-              FilledButton(
-                onPressed: () {
-                  if (sectionNameController.text.isNotEmpty) {
-                    final newSection = SectionModel(
-                      sectionName: sectionNameController.text,
-                      classTeacherName: classTeacherNameController.text,
-                      classTeacherId: classTeacherIdController.text,
-                      roomNumber: roomNumberController.text,
-                      capacity: int.tryParse(capacityController.text) ?? 0,
-                    );
-                    controller.addSection(newSection);
-                    Get.back();
-                  }
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeGreen,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Add'),
-              ),
-              const SizedBox(
-                width: MySizes.md,
-              ),
-              FilledButton(
-                onPressed: () {
-                  Get.back();
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeRed,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Cancel'),
-              ),
-            ],
-          )
-        ],
+      _buildSectionDialog(
+        title: 'Edit Section',
+        section: section,
+        onSave: (updatedSection) {
+          // The type is now explicitly SectionModel
+          controller.updateSectionAtIndex(
+              index, updatedSection); // Use the index!
+        },
+        isUpdate: true,
       ),
     );
   }
 
-  void _showEditSectionDialog(BuildContext context, SectionModel section) {
-    final sectionNameController =
-        TextEditingController(text: section.sectionName ?? '');
+  Widget _buildSectionDialog({
+    required String title,
+    SectionModel? section,
+    required Function(SectionModel) onSave,
+    bool isUpdate = false,
+  }) {
+    final selectedSectionName = RxString(section?.sectionName ?? '');
     final classTeacherNameController =
-        TextEditingController(text: section.classTeacherName ?? '');
+        TextEditingController(text: section?.classTeacherName ?? '');
     final classTeacherIdController =
-        TextEditingController(text: section.classTeacherId ?? '');
+        TextEditingController(text: section?.classTeacherId ?? '');
     final roomNumberController =
-        TextEditingController(text: section.roomNumber ?? '');
+        TextEditingController(text: section?.roomNumber ?? '');
     final capacityController =
-        TextEditingController(text: (section.capacity ?? 0).toString());
+        TextEditingController(text: (section?.capacity ?? '').toString());
 
-    Get.dialog(
-      AlertDialog(
-        title: const Text(
-          'Edit Section',
-          style: MyTextStyle.headlineSmall,
-        ),
-        content: SizedBox(
-          width: Get.width,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                MyTextField(
-                  labelText: 'Section Name',
-                  controller: sectionNameController,
-                ),
-                MyTextField(
-                  labelText: 'Class Teacher Name',
-                  controller: classTeacherNameController,
-                ),
-                MyTextField(
-                  labelText: 'Class Teacher ID',
-                  controller: classTeacherIdController,
-                ),
-                MyTextField(
-                  labelText: 'Room Number',
-                  controller: roomNumberController,
-                ),
-                MyTextField(
-                  labelText: 'Capacity',
-                  controller: capacityController,
-                  keyboardType: TextInputType.number,
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          Row(
+    return AlertDialog(
+      title: Text(title, style: MyTextStyle.headlineSmall),
+      content: SizedBox(
+        width: Get.width,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              FilledButton(
-                onPressed: () {
-                  final updatedSection = SectionModel(
-                    sectionName: sectionNameController.text,
-                    classTeacherName: classTeacherNameController.text,
-                    classTeacherId: classTeacherIdController.text,
-                    roomNumber: roomNumberController.text,
-                    capacity: int.tryParse(capacityController.text) ?? 0,
-                  );
-                  controller.updateSection(updatedSection);
-                  Get.back();
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeBlue,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Update'),
-              ),
-              const SizedBox(
-                width: MySizes.md,
-              ),
-              FilledButton(
-                onPressed: () {
-                  Get.back();
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeRed,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Cancel'),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
-  void _showAddSubjectDialog(BuildContext context) {
-    final subjectNameController = TextEditingController();
-
-    Get.dialog(
-      AlertDialog(
-        title: const Text(
-          'Add New Subject',
-          style: MyTextStyle.headlineSmall,
-        ),
-        content: SizedBox(
-          width: Get.width,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                MyTextField(
-                  labelText: 'Subject Name',
-                  controller: subjectNameController,
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          Row(
-            children: [
-              FilledButton(
-                onPressed: () {
-                  if (subjectNameController.text.isNotEmpty) {
-                    controller.addSubject(subjectNameController.text);
-                    Get.back();
+              MyDropdownField(
+                labelText: 'Section Name',
+                options: List.generate(
+                    26, (index) => String.fromCharCode(65 + index)),
+                onSelected: (value) {
+                  if (value != null) {
+                    selectedSectionName.value = value;
                   }
                 },
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeGreen,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Add'),
+                selectedValue: selectedSectionName,
               ),
-              const SizedBox(
-                width: MySizes.md,
+              MyTextField(
+                labelText: 'Class Teacher Name',
+                controller: classTeacherNameController,
               ),
-              FilledButton(
-                onPressed: () {
-                  Get.back();
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: MyColors.activeRed,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Cancel'),
+              MyTextField(
+                labelText: 'Class Teacher ID',
+                controller: classTeacherIdController,
+              ),
+              MyTextField(
+                labelText: 'Room Number',
+                controller: roomNumberController,
+              ),
+              MyTextField(
+                labelText: 'Capacity',
+                controller: capacityController,
+                keyboardType: TextInputType.number,
               ),
             ],
-          )
-        ],
+          ),
+        ),
+      ),
+      actions: [
+        _buildDialogActions(
+          isUpdate: isUpdate,
+          onAdd: () {
+            final newSection = SectionModel(
+              sectionName: selectedSectionName.value,
+              classTeacherName: classTeacherNameController.text,
+              classTeacherId: classTeacherIdController.text,
+              roomNumber: roomNumberController.text,
+              capacity: int.tryParse(capacityController.text) ?? 0,
+              students: section?.students ?? [],
+            );
+            onSave(newSection);
+            Get.back();
+          },
+          onCancel: () => Get.back(),
+        ),
+      ],
+    );
+  }
+
+  void _showAddSubjectDialog() {
+    Get.dialog(_buildSubjectDialog(onSave: controller.addSubject));
+  }
+
+  void _showEditSubjectDialog(String subject) {
+    Get.dialog(
+      _buildSubjectDialog(
+        initialSubject: subject,
+        onSave: (newSubject) {
+          controller.updateSubject(subject, newSubject);
+        },
+        isUpdate: true,
       ),
     );
   }
 
-  // Shimmer Loading Widget
+  Widget _buildSubjectDialog({
+    String initialSubject = '',
+    required Function(String) onSave,
+    bool isUpdate = false,
+  }) {
+    final subjectNameController = TextEditingController(text: initialSubject);
+
+    return AlertDialog(
+      title: Text(
+        '${isUpdate ? 'Edit' : 'Add New'} Subject',
+        style: MyTextStyle.headlineSmall,
+      ),
+      content: SizedBox(
+        width: Get.width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            MySearchField(
+              onSelected: (val) {
+                subjectNameController.text = val;
+              },
+              controller: subjectNameController,
+              options: SchoolSubjects.getSubjects(),
+              labelText: 'Subject',
+              showClearIcon: true,
+            )
+          ],
+        ),
+      ),
+      actions: [
+        _buildDialogActions(
+          isUpdate: isUpdate,
+          onAdd: () {
+            if (subjectNameController.text.isNotEmpty) {
+              onSave(subjectNameController.text);
+              Get.back();
+            }
+          },
+          onCancel: () => Get.back(),
+        ),
+      ],
+    );
+  }
+
   Widget _buildShimmerLoading() {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
@@ -552,16 +615,26 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(width: 150, height: 28, color: Colors.white),
-        Container(width: 100, height: 28, color: Colors.white),
+        Text(
+          'Select a Class',
+          style: MyTextStyle.headlineSmall.copyWith(color: Colors.white),
+        ),
+        TextButton.icon(
+          onPressed: () {},
+          label: const Text(
+            'Add Class',
+            style: TextStyle(color: Colors.white),
+          ),
+          icon: const Icon(Icons.add),
+        )
       ],
     );
   }
 
   Widget _buildShimmerDropdown() {
     return Wrap(
-      spacing: MySizes.md, // Adds spacing between elements
-      runSpacing: 8.0, // Adds spacing when items wrap to the next line
+      spacing: MySizes.md,
+      runSpacing: 8.0,
       children: List.generate(
         8,
         (index) => Container(
@@ -569,118 +642,147 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
           height: 28,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(6), // Optional rounded corners
+            borderRadius: BorderRadius.circular(MySizes.lg),
           ),
         ),
       ),
     );
   }
-}
 
-Widget _buildShimmerClassDetails() {
-  return SingleChildScrollView(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildShimmerClassTitleAndActions(),
-        const SizedBox(height: MySizes.spaceBtwSections),
-        _buildShimmerSectionsList(),
-        const SizedBox(height: MySizes.md),
-        _buildShimmerSubjectsList(),
-      ],
-    ),
-  );
-}
-
-Widget _buildShimmerClassTitleAndActions() {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Expanded(flex: 1, child: Container(height: 28, color: Colors.white)),
-      Expanded(
-        flex: 1,
-        child: Row(
+  Widget _buildShimmerClassDetails() {
+    return SingleChildScrollView(
+      child: Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+            border: Border.all(color: MyColors.dividerColor)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-                flex: 1,
-                child: Container(
-                  height: 28,
-                  color: Colors.white,
-                )),
-            const SizedBox(width: MySizes.md),
-            Expanded(
-                flex: 1, child: Container(height: 28, color: Colors.white)),
-            const SizedBox(width: MySizes.md),
-            Expanded(
-                flex: 1, child: Container(height: 28, color: Colors.white)),
+            _buildShimmerClassTitleAndActions(),
+            _buildShimmerSectionsList(),
+            const SizedBox(height: MySizes.md),
+            _buildShimmerSubjectsList(),
           ],
         ),
       ),
-    ],
-  );
-}
+    );
+  }
 
-Widget _buildShimmerSectionsList() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
+  Widget _buildShimmerClassTitleAndActions() {
+    return Padding(
+      padding: const EdgeInsets.all(MySizes.md),
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(width: 100, height: 20, color: Colors.white),
-          Container(width: 80, height: 20, color: Colors.white),
+          Text(
+            'No Class',
+            style: MyTextStyle.headlineSmall.copyWith(color: Colors.white),
+          ),
+          const Row(
+            children: [
+              Icon(Icons.edit, color: Colors.white),
+              SizedBox(
+                width: MySizes.md,
+              ),
+              Icon(Icons.delete, color: Colors.white),
+              SizedBox(
+                width: MySizes.md,
+              ),
+              Icon(Icons.close, color: Colors.white),
+            ],
+          ),
         ],
       ),
-      const SizedBox(height: MySizes.md),
-      ...List.generate(
-        2,
-        (index) => Container(
-            width: Get.width,
-            height: 80,
-            margin: const EdgeInsets.only(bottom: MySizes.md),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(MySizes.cardRadiusSm))),
-      ),
-    ],
-  );
-}
+    );
+  }
 
-Widget _buildShimmerSubjectsList() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildShimmerSectionsList() {
+    return Padding(
+      padding: const EdgeInsets.all(MySizes.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(width: 100, height: 20, color: Colors.white),
-          Container(width: 80, height: 20, color: Colors.white),
+          Text(
+            'Sections:',
+            style: MyTextStyle.headlineSmall.copyWith(color: Colors.white),
+          ),
+          const SizedBox(
+            height: MySizes.sm,
+          ),
+          ...List.generate(
+            2,
+            (index) => Container(
+              width: double.infinity,
+              height: Get.width * 0.16,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+              ),
+              margin: const EdgeInsets.only(bottom: MySizes.sm),
+            ),
+          ),
         ],
       ),
-      const SizedBox(height: MySizes.sm),
-      ...List.generate(
-        2,
-        (index) => Container(
-            width: Get.width,
-            height: 80,
-            margin: const EdgeInsets.only(bottom: MySizes.md),
-            decoration: BoxDecoration(
+    );
+  }
+
+  Widget _buildShimmerSubjectsList() {
+    return Padding(
+      padding: const EdgeInsets.all(MySizes.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Subjects:',
+            style: MyTextStyle.headlineSmall.copyWith(color: Colors.white),
+          ),
+          const SizedBox(
+            height: MySizes.sm,
+          ),
+          ...List.generate(
+            2,
+            (index) => Container(
+              width: double.infinity,
+              height: Get.width * 0.16,
+              decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(MySizes.cardRadiusSm))),
+                borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+              ),
+              margin: const EdgeInsets.only(bottom: MySizes.sm),
+            ),
+          ),
+        ],
       ),
-    ],
-  );
+    );
+  }
+
+  Widget _buildIconButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(
+        icon,
+        color: color,
+        // size: 20,
+      ),
+    );
+  }
 }
 
 class SectionTile extends StatelessWidget {
   const SectionTile({
     super.key,
     required this.section,
+    required this.isEdit,
     required this.onEdit,
     required this.onDelete,
   });
 
   final SectionModel section;
+  final bool isEdit;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -688,133 +790,191 @@ class SectionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
 
-    return MyCard(
+    return Container(
       padding: EdgeInsets.zero,
       margin: const EdgeInsets.only(bottom: MySizes.md),
-      borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
-      child: Column(
-        children: [
-          _buildTitle(deviceWidth),
-          const MyDottedLine(dashColor: MyColors.grey),
-          Padding(
-            padding: const EdgeInsets.all(MySizes.md),
-            child: ExpansionTile(
-              minTileHeight: 24,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
-                side: BorderSide.none,
-              ),
-              collapsedShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0.0),
-                side: BorderSide.none,
-              ),
-              tilePadding: EdgeInsets.zero,
-              title: const Text(
-                'Students',
-                style: MyTextStyle.bodyLarge,
-              ),
-              children: [
-                ...section.students.map((student) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: MySizes.sm),
-                      child: _buildStudentInfoRow(
-                          student.name ?? '', student.id ?? ''),
-                    )),
-              ],
-            ),
-          ),
-        ],
+      decoration: BoxDecoration(
+        color: MyColors.activeBlue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
       ),
-    );
-  }
-
-  Widget _buildTitle(double deviceWidth) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          vertical: MySizes.sm, horizontal: MySizes.md),
-      child: Row(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            width: deviceWidth * 0.1,
-            height: deviceWidth * 0.1,
-            decoration: BoxDecoration(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            vertical: MySizes.sm, horizontal: MySizes.md),
+        child: Row(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              width: deviceWidth * 0.1,
+              height: deviceWidth * 0.1,
+              decoration: const BoxDecoration(
                 shape: BoxShape.rectangle,
-                borderRadius: const BorderRadius.all(
-                    Radius.circular(MySizes.cardRadiusXs)),
-                color: MyColors.activeBlue.withOpacity(.1)),
-            child: Text(
-              section.sectionName ?? '',
-              style: MyTextStyle.headlineMedium
-                  .copyWith(color: MyColors.activeBlue),
-            ),
-          ),
-          const SizedBox(width: MySizes.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  section.classTeacherName ?? '',
-                  style: MyTextStyle.bodyLarge.copyWith(fontSize: 13),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  section.classTeacherId ?? '',
-                  style: MyTextStyle.labelSmall,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: MySizes.sm),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.edit,
-                  color: MyColors.activeBlue,
-                ),
-                onPressed: onEdit,
+                borderRadius:
+                    BorderRadius.all(Radius.circular(MySizes.cardRadiusXs)),
+                color: MyColors.white,
               ),
-              IconButton(
-                icon: const Icon(
-                  Icons.delete,
-                  color: MyColors.activeRed,
-                ),
-                onPressed: onDelete,
+              child: Text(
+                section.sectionName ?? '',
+                style: MyTextStyle.headlineMedium
+                    .copyWith(color: MyColors.activeBlue),
               ),
-            ],
-          )
-        ],
+            ),
+            const SizedBox(width: MySizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    section.classTeacherName ?? '',
+                    style: MyTextStyle.bodyLarge.copyWith(fontSize: 13),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    section.classTeacherId ?? '',
+                    style: MyTextStyle.labelSmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: MySizes.sm),
+            if (isEdit)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildIconButton(
+                    icon: Icons.edit,
+                    color: MyColors.activeBlue,
+                    onPressed: onEdit,
+                  ),
+                  _buildIconButton(
+                    icon: Icons.delete,
+                    color: MyColors.activeRed,
+                    onPressed: () {
+                      MyConfirmationDialog.show(DialogAction.Delete,
+                          onConfirm: onDelete);
+                    },
+                  ),
+                ],
+              )
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStudentInfoRow(String name, String id) {
-    return Row(
-      children: [
-        const Icon(
-          Icons.person,
-          color: MyColors.iconColor,
-          size: 18,
-        ),
-        const SizedBox(width: MySizes.md),
-        Expanded(
-          child: Text(
-            '$name ($id)',
-            style: const TextStyle(
-              fontSize: 12,
-              color: MyColors.subtitleTextColor,
-              fontWeight: FontWeight.w500,
+  Widget _buildIconButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(
+        icon,
+        color: color,
+        size: 20,
+      ),
+      color: color,
+    );
+  }
+}
+
+class SubjectTile extends StatelessWidget {
+  const SubjectTile({
+    super.key,
+    required this.subjectName,
+    required this.isEdit,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final String subjectName;
+  final bool isEdit;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final deviceWidth = MediaQuery.of(context).size.width;
+
+    return Container(
+      padding: EdgeInsets.zero,
+      margin: const EdgeInsets.only(bottom: MySizes.md),
+      decoration: BoxDecoration(
+        color: MyColors.activeBlue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            vertical: MySizes.sm, horizontal: MySizes.md),
+        child: Row(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              width: deviceWidth * 0.1,
+              height: deviceWidth * 0.1,
+              decoration: const BoxDecoration(
+                shape: BoxShape.rectangle,
+                borderRadius:
+                    BorderRadius.all(Radius.circular(MySizes.cardRadiusXs)),
+                color: MyColors.white,
+              ),
+              child: Text(
+                SchoolSubjects.getEmoji(subjectName),
+                style: MyTextStyle.headlineMedium
+                    .copyWith(color: MyColors.activeBlue),
+              ),
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+            const SizedBox(width: MySizes.md),
+            Expanded(
+              child: Text(
+                subjectName,
+                style: MyTextStyle.bodyLarge.copyWith(fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: MySizes.sm),
+            if (isEdit)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildIconButton(
+                    icon: Icons.edit,
+                    color: MyColors.activeBlue,
+                    onPressed: onEdit,
+                  ),
+                  _buildIconButton(
+                    icon: Icons.delete,
+                    color: MyColors.activeRed,
+                    onPressed: () {
+                      MyConfirmationDialog.show(DialogAction.Delete,
+                          onConfirm: onDelete);
+                    },
+                  ),
+                ],
+              )
+          ],
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildIconButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(
+        icon,
+        color: color,
+        size: 20,
+      ),
+      color: color,
     );
   }
 }

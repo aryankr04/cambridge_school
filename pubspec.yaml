@@ -90,7 +90,7 @@ flutter:
   #--------------- LOCAL ASSETS ------------------#
   assets:
     - assets/images/illustrations/
-    - assets/images/illustrations/state_illustration/
+    - assets/images/illustrations/empty_state_illustration/
     - assets/logos/
     - assets/animations/
 

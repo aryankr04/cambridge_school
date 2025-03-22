@@ -2,8 +2,8 @@ import 'package:cambridge_school/app/modules/routine/routine_model.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 
 class ClassModel {
-  final String? id;
-  final String? schoolId;
+  final String id;
+  final String schoolId;
   final String? academicYear;
   final ClassName className;
   late final List<SectionModel> sections;
@@ -11,8 +11,8 @@ class ClassModel {
   final List<ExamSyllabus> examSyllabus;
 
   ClassModel({
-    this.id,
-    this.schoolId,
+    required this.id,
+    required this.schoolId,
     this.academicYear,
     required this.className,
     List<SectionModel>? sections,
@@ -31,10 +31,10 @@ class ClassModel {
 
   factory ClassModel.fromMap(Map<String, dynamic> map, String? documentId) {
     return ClassModel(
-      id: map['id']as String?,
-      schoolId: map['schoolId'] as String?,
+      id: map['id']as String,
+      schoolId: map['schoolId'] as String,
       academicYear: map['academicYear'] as String?,
-      className: ClassNameExtension.fromValue(map['className'] as String),
+      className: ClassNameExtension.fromString(map['className'] as String),
       sections: (map['sections'] as List<dynamic>?)
           ?.map((dynamic sectionData) => SectionModel.fromMap(
           sectionData as Map<String, dynamic>, null))
@@ -78,6 +78,13 @@ class ClassModel {
       subjects: subjects ?? this.subjects,
       examSyllabus: examSyllabus ?? this.examSyllabus,
     );
+  }
+  void sortSections() {
+    sections.sort((a, b) {
+      String nameA = a.sectionName ?? "";
+      String nameB = b.sectionName ?? "";
+      return nameA.compareTo(nameB);
+    });
   }
 }
 

@@ -27,7 +27,7 @@ class MyDropdownField extends StatefulWidget {
   final Color? arrowColor;
 
   const MyDropdownField({
-    super.key,
+    Key? key,
     this.labelText,
     this.hintText,
     this.height,
@@ -46,7 +46,7 @@ class MyDropdownField extends StatefulWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.arrowColor,
-  });
+  }) : super(key: key);
 
   @override
   State<MyDropdownField> createState() => _MyDropdownFieldState();
@@ -94,20 +94,21 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
 
     return Focus(
       focusNode: _focusNode,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (widget.labelText != null) ...[
-            Text(widget.labelText!, style: MyTextStyle.inputLabel),
-            const SizedBox(height: 6),
-          ],
-          Padding(
-            // padding: const EdgeInsets.only(bottom: MySizes.md),
-            padding: EdgeInsets.zero,
-            child: GestureDetector(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: MySizes.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.labelText != null) ...[
+              Text(widget.labelText!, style: MyTextStyle.inputLabel),
+              const SizedBox(height: 6),
+            ],
+            GestureDetector(
               onTap: () {
-                _toggleDropdown();
-                _focusNode.requestFocus(); // Request focus when tapped
+                if (widget.enabled) {
+                  _toggleDropdown();
+                  _focusNode.requestFocus();
+                }
               },
               behavior: HitTestBehavior.translucent,
               child: Container(
@@ -129,7 +130,7 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                         (_selectedValue.value != null && _selectedValue.value!.isNotEmpty)
                             ? _selectedValue.value!
                             : widget.hintText ?? defaultHintText,
-                        style: _selectedValue.value != null
+                        style: (_selectedValue.value != null && _selectedValue.value!.isNotEmpty)
                             ? widget.selectedTextStyle ?? MyTextStyle.inputField
                             : widget.hintTextStyle ??
                             Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -152,18 +153,15 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                 ),
               ),
             ),
-          ),
-          Obx(() {
-            if (!_isDropdownOpen.value) {
-              return const SizedBox.shrink();
-            }
-            return Material(
-              color: Colors.transparent,
-              child: Container(
+            Obx(() {
+              if (!_isDropdownOpen.value) {
+                return const SizedBox.shrink();
+              }
+              return Container(
                 constraints: BoxConstraints(
                   maxHeight: MediaQuery.of(context).size.height * 0.3,
                 ),
-                margin: const EdgeInsets.only(top: 4),
+                margin: const EdgeInsets.all(4),
                 padding: widget.dropdownPadding,
                 decoration: BoxDecoration(
                   color: widget.dropdownBackgroundColor ?? Colors.white,
@@ -181,7 +179,8 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                         color: _selectedValue.value == option
                             ? Colors.lightBlue.withOpacity(0.3)
                             : Colors.transparent,
-                        child: InkWell( // Use InkWell for better ripple effect
+                        child: InkWell(
+                          // Use InkWell for better ripple effect
                           onTap: () {
                             _selectedValue.value = option;
                             widget.onSelected?.call(option);
@@ -189,32 +188,34 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                             _focusNode.unfocus(); //remove the focus from the field after selection
                           },
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16), // Adjust padding as needed
-                            child: Text(option),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 16),
+                            // Adjust padding as needed
+                            child: Text(option,style: MyTextStyle.bodyMedium,),
                           ),
                         ),
                       );
                     },
                   ),
                 ),
-              ),
-            );
-          }),
-          if (widget.isValidate) ...[
-            Obx(() {
-              if (_selectedValue.value == null && !_isDropdownOpen.value) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(
-                    'Please select a value',
-                    style: TextStyle(color: Colors.red[700]),
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
+              );
             }),
+            if (widget.isValidate) ...[
+              Obx(() {
+                if (_selectedValue.value == null && !_isDropdownOpen.value) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      'Please select a value',
+                      style: TextStyle(color: Colors.red[700]),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

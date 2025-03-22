@@ -17,9 +17,7 @@ import '../routine_model.dart';
 import 'create_routine_controller.dart';
 
 class CreateRoutineScreen extends StatefulWidget {
-  final String schoolId;
-
-  const CreateRoutineScreen({super.key, required this.schoolId});
+  const CreateRoutineScreen({super.key});
 
   @override
   State<CreateRoutineScreen> createState() => _CreateRoutineScreenState();
@@ -32,7 +30,6 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
   @override
   void initState() {
     super.initState();
-    _controller.schoolId.value = widget.schoolId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.fetchSchoolSectionsAndPrepareClassAndSectionOptions();
     });
@@ -134,19 +131,24 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
         vertical: MySizes.md,
         horizontal: MySizes.md,
       ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.tune_rounded,
-            color: MyColors.subtitleTextColor,
+      child: Expanded(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              const Icon(
+                Icons.tune_rounded,
+                color: MyColors.subtitleTextColor,
+              ),
+              const SizedBox(width: MySizes.md),
+              _buildClassDropdown(),
+              const SizedBox(width: MySizes.md),
+              _buildSectionDropdown(),
+              const SizedBox(width: MySizes.md),
+              _buildDayDropdown(),
+            ],
           ),
-          const SizedBox(width: MySizes.md),
-          _buildClassDropdown(),
-          const SizedBox(width: MySizes.md),
-          _buildSectionDropdown(),
-          const SizedBox(width: MySizes.md),
-          _buildDayDropdown(),
-        ],
+        ),
       ),
     );
   }

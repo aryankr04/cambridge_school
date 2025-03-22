@@ -1,4 +1,4 @@
-
+import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -42,31 +42,46 @@ class MyHelperFunctions {
     }
   }
 
-  static void showSnackBar(String message, {Color? backgroundColor}) {
+  static void showSnackBar(String message,
+      {Color? backgroundColor, IconData? icon}) {
     ScaffoldMessenger.of(Get.context!).showSnackBar(
       SnackBar(
-
+        behavior: SnackBarBehavior.floating,
         backgroundColor: backgroundColor ?? MyDynamicColors.activeBlue,
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white),
+        content: Row(
+          children: [
+            Icon(icon ?? Icons.info_outline, color: Colors.white),
+            const SizedBox(
+              width: MySizes.md,
+            ),
+            Text(
+              message,
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
-        duration: const Duration(milliseconds: 2500),
+        duration: const Duration(milliseconds: 5000),
       ),
     );
   }
 
   static void showSuccessSnackBar(String message) {
-    showSnackBar(message, backgroundColor: MyDynamicColors.activeGreen);
+    showSnackBar(message, backgroundColor: MyDynamicColors.activeGreen,icon: Icons.check_circle);
   }
 
   static void showErrorSnackBar(String errorMessage) {
     print(errorMessage);
-    showSnackBar('Error: $errorMessage', backgroundColor: MyDynamicColors.activeRed);
+    showSnackBar('Error: $errorMessage',
+        backgroundColor: MyDynamicColors.activeRed,icon: Icons.error);
   }
 
   static void showAlertSnackBar(String message) {
-    showSnackBar(message, backgroundColor: MyDynamicColors.activeOrange);
+    showSnackBar(message, backgroundColor: MyDynamicColors.activeOrange,icon: Icons.warning);
+  }
+
+  static void showInfoSnackBar(String message) {
+    showSnackBar(message, backgroundColor: MyDynamicColors.activeBlue,icon: Icons.light_mode);
   }
 
   static void showAlert(String title, String message) {
@@ -86,9 +101,10 @@ class MyHelperFunctions {
       },
     );
   }
+
   static void showLoadingSnackBar(String message) {
     ScaffoldMessenger.of(Get.context!).showSnackBar(
-       const SnackBar(
+      const SnackBar(
         content: Row(
           children: [
             CircularProgressIndicator(),
@@ -100,7 +116,6 @@ class MyHelperFunctions {
       ),
     );
   }
-
 
   static void showLoadingOverlay() {
     if (!(Get.isDialogOpen ?? false)) {
@@ -114,7 +129,8 @@ class MyHelperFunctions {
             color: Colors.black.withOpacity(0.1),
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 50),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 50),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10.0),
@@ -148,6 +164,7 @@ class MyHelperFunctions {
       Get.back();
     }
   }
+
   static String extractValueInBrackets(String input) {
     RegExp regex = RegExp(r'\((.*?)\)');
     RegExpMatch? match = regex.firstMatch(input);
@@ -162,6 +179,7 @@ class MyHelperFunctions {
   static void hideSnackBar(BuildContext context) {
     Get.back();
   }
+
   static void navigateToScreen(BuildContext context, Widget screen) {
     Navigator.push(
       context,
@@ -197,6 +215,7 @@ class MyHelperFunctions {
       {String format = 'dd MMM yyyy'}) {
     return DateFormat(format).format(date);
   }
+
   static String formatDate(int day, int month, int year) {
     DateTime date = DateTime(year, month, day);
     DateFormat formatter = DateFormat('dd-MM-yyyy');
@@ -207,13 +226,11 @@ class MyHelperFunctions {
     return list.toSet().toList();
   }
 
-
   static String getTodayDate() {
     DateTime now = DateTime.now();
     DateFormat formatter = DateFormat('dd-MM-yyyy');
     return formatter.format(now);
   }
-
 
   static List<Widget> wrapWidgets(List<Widget> widgets, int rowSize) {
     final wrappedList = <Widget>[];
@@ -224,15 +241,20 @@ class MyHelperFunctions {
     }
     return wrappedList;
   }
+
   static double convertFeetInchesToCm(String feetStr, String inchesStr) {
     // Parse feet and inches from the input strings
-    final feet = int.tryParse(feetStr) ?? 0; // Convert feet string to integer, default to 0
-    final inches = int.tryParse(inchesStr) ?? 0; // Convert inches string to integer, default to 0
+    final feet = int.tryParse(feetStr) ??
+        0; // Convert feet string to integer, default to 0
+    final inches = int.tryParse(inchesStr) ??
+        0; // Convert inches string to integer, default to 0
 
     // Convert height to centimeters
-    final cm = (feet * 30.48) + (inches * 2.54); // 1 foot = 30.48 cm, 1 inch = 2.54 cm
+    final cm =
+        (feet * 30.48) + (inches * 2.54); // 1 foot = 30.48 cm, 1 inch = 2.54 cm
     return cm;
   }
+
   static String convertCmToFeetInches(double cm) {
     if (cm <= 0) {
       throw ArgumentError("Height in cm must be greater than 0.");

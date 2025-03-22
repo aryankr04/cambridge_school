@@ -152,33 +152,39 @@ class FirestoreSchoolRepository {
 // Add more specific query methods as needed (e.g., schools by city, schools by type, etc.)
 
   /// Adds a new class data to an existing school document in Firestore.
-  Future<void> addClassData(String schoolId, ClassData classData) async {
+  Future<void> addOrUpdateClassData(String schoolId, ClassData classData) async {
     try {
       final schoolDocRef = _firestore.collection(_collectionName).doc(schoolId);
 
-      // Get the current school document.
+      // Fetch the school document
       final schoolDoc = await schoolDocRef.get();
 
       if (!schoolDoc.exists) {
         throw Exception('School with ID: $schoolId does not exist.');
       }
 
-      // Get the current list of classes (if any).
-      List<dynamic> currentClasses = [];
-      if (schoolDoc.data() != null && schoolDoc.data()!.containsKey('classes')) {
-        currentClasses = List.from(schoolDoc.data()!['classes']);
+      // Get current classes
+      List<Map<String, dynamic>> classList =
+          (schoolDoc.data()?['classes'] as List<dynamic>?)
+              ?.map((c) => Map<String, dynamic>.from(c))
+              .toList() ?? [];
+
+      // Find existing class index
+      int existingIndex = classList.indexWhere((c) => c['classId'] == classData.classId);
+
+      if (existingIndex != -1) {
+        classList[existingIndex] = classData.toMap(); // Update existing class
+      } else {
+        classList.add(classData.toMap()); // Add new class
       }
 
-      // Add the new class data to the list.
-      currentClasses.add(classData.toMap());
+      // Update Firestore document
+      await schoolDocRef.update({'classes': classList});
 
-      // Update the 'classes' field in the Firestore document with the updated list.
-      await schoolDocRef.update({'classes': currentClasses});
-
-      print('Class data added successfully to school with ID: $schoolId');
+      print('Class data successfully added/updated for school ID: $schoolId');
     } catch (e) {
-      print('Error adding class data: $e');
-      rethrow; // Re-throw the error
+      print('Error in addOrUpdateClassData: $e');
+      rethrow;
     }
   }
 

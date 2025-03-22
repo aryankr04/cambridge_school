@@ -1,8 +1,8 @@
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
+import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:cambridge_school/router.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 
 class NavigationScreen extends StatelessWidget {
   const NavigationScreen({super.key});
@@ -16,48 +16,73 @@ class NavigationScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(MySizes.md),
-        child: GridView.count(
-          crossAxisCount: 3, // Three buttons per row
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1, // Make buttons more square-shaped
-          children: [
-            _buildNavButton(
-                'School Management Dashboard', AppRoutes.manageSchoolRoute, Icons.settings),
-            _buildNavButton(
-                'School List', AppRoutes.schoolListRoute, Icons.list),
-            _buildNavButton(
-                'Onboarding', AppRoutes.onboardingRoute, Icons.explore),
-            _buildNavButton('Login', AppRoutes.loginRoute, Icons.login),
-            _buildNavButton(
-                'Create User', AppRoutes.createUserRoute, Icons.person_add),
-            _buildNavButton(
-                'User Management', AppRoutes.userManagementRoute, Icons.group),
-            _buildNavButton('Class Management', AppRoutes.classManagementRoute,
-                Icons.class_),
-            _buildNavButton('School Management',
-                AppRoutes.createSchoolRoute, Icons.school),
-            _buildNavButton('Mark Attendance', AppRoutes.markAttendanceRoute,
-                Icons.check_circle),
-            _buildNavButton('Attendance Record',
-                AppRoutes.attendanceRecordRoute, Icons.list_alt),
-            _buildNavButton('Attendance Report',
-                AppRoutes.attendanceReportRoute, Icons.report),
-            _buildNavButton(
-                'Apply Leave', AppRoutes.applyLeaveRoute, Icons.event_note),
-            _buildNavButton('Leave Dashboard', AppRoutes.leaveDashboardRoute,
-                Icons.dashboard),
-            _buildNavButton('Leave Request', AppRoutes.leaveRequestRoute,
-                Icons.pending_actions),
-            _buildNavButton('Create Routine', AppRoutes.createRoutineRoute,
-                Icons.pending_actions),
-            _buildNavButton(
-                'Create Notice', AppRoutes.createNoticeRoute, Icons.add_alert),
-            _buildNavButton(
-                'Notice', AppRoutes.noticeScreenRoute, Icons.notifications),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildCategoryHeader("School Management"),
+              _buildButtonGrid([
+                _buildNavButton('School Management', AppRoutes.manageSchoolRoute, Icons.settings),
+                _buildNavButton('School List', AppRoutes.schoolListRoute, Icons.list),
+                _buildNavButton('Create School', AppRoutes.createSchoolRoute, Icons.school),
+              ]),
+              _buildCategoryHeader("User Management"),
+              _buildButtonGrid([
+                _buildNavButton('Login', AppRoutes.loginRoute, Icons.login),
+                _buildNavButton('Create User', AppRoutes.createUserRoute, Icons.person_add),
+                _buildNavButton('User Management', AppRoutes.userManagementRoute, Icons.group),
+              ]),
+              _buildCategoryHeader("Attendance Management"),
+              _buildButtonGrid([
+                _buildNavButton('Mark Attendance', AppRoutes.markAttendanceRoute, Icons.check_circle),
+                _buildNavButton('Attendance Record', AppRoutes.attendanceRecordRoute, Icons.list_alt),
+                _buildNavButton('Attendance Report', AppRoutes.attendanceReportRoute, Icons.report),
+              ]),
+              _buildCategoryHeader("Leave Management"),
+              _buildButtonGrid([
+                _buildNavButton('Apply Leave', AppRoutes.applyLeaveRoute, Icons.event_note),
+                _buildNavButton('Leave Dashboard', AppRoutes.leaveDashboardRoute, Icons.dashboard),
+                _buildNavButton('Leave Request', AppRoutes.leaveRequestRoute, Icons.pending_actions),
+              ]),
+              _buildCategoryHeader("Other"),
+              _buildButtonGrid([
+                _buildNavButton('Onboarding', AppRoutes.onboardingRoute, Icons.explore),
+                _buildNavButton('Class Management', AppRoutes.classManagementRoute, Icons.class_),
+                _buildNavButton('Create Routine', AppRoutes.createRoutineRoute, Icons.pending_actions),
+                _buildNavButton('Create Notice', AppRoutes.createNoticeRoute, Icons.add_alert),
+                _buildNavButton('Notice', AppRoutes.noticeScreenRoute, Icons.notifications),
+              ]),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCategoryHeader(String title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: MyTextStyle.titleLarge),
+        const SizedBox(height: MySizes.xs),
+      ],
+    );
+  }
+
+  Widget _buildButtonGrid(List<Widget> buttons) {
+    return Column(
+      children: [
+        GridView.count(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          crossAxisCount: 4,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1,
+          children: buttons,
+        ),
+        SizedBox(height: MySizes.lg,)
+      ],
     );
   }
 
@@ -75,14 +100,14 @@ class NavigationScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 30, color: Colors.white),
+          Icon(icon, size: 24, color: Colors.white),
           const SizedBox(height: MySizes.sm),
           Text(
             label,
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),

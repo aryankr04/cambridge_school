@@ -174,7 +174,7 @@ class AppRoutes {
     ),
     GetPage(
       name: createRoutineRoute,
-      page: () => const CreateRoutineScreen(schoolId: 'SCH00001'),
+      page: () => const CreateRoutineScreen(),
       binding: CreateRoutineBinding(),
     ),
     GetPage(

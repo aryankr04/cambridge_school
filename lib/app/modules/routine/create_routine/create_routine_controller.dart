@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:nanoid/nanoid.dart';
 import '../../class_management/class_management_repositories.dart';
 import '../../class_management/class_model.dart';
 import '../../school_management/school_model.dart';
@@ -14,7 +15,7 @@ class CreateRoutineController extends GetxController {
       ClassManagementRepository();
 
   // Observables - General
-  final RxString schoolId = RxString('SCH00001');
+  final RxString schoolId = RxString('dummy_school_1');
   final RxString userRole = RxString('Teacher');
   final RxBool isLoadingClassData = RxBool(false);
   final RxBool isLoadingOptions = RxBool(false);
@@ -129,7 +130,7 @@ class CreateRoutineController extends GetxController {
   /// Updates the event list based on the selected day.
   void updateEventListForSelectedDay() {
     events.clear();
-    final section = classModel.value?.sections?.firstWhereOrNull(
+    final section = classModel.value?.sections.firstWhereOrNull(
         (section) => section.sectionName == selectedSectionName.value);
 
     if (section != null && section.routine != null) {
@@ -294,7 +295,7 @@ class CreateRoutineController extends GetxController {
 
   /// Retrieves the index of the selected section in the class model.
   int _getSectionIndex() {
-    final sectionIndex = classModel.value!.sections?.indexWhere(
+    final sectionIndex = classModel.value!.sections.indexWhere(
         (section) => section.sectionName == selectedSectionName.value);
     if (sectionIndex == null || sectionIndex == -1) {
       Get.snackbar('Error', 'Selected section not found in class model.');
@@ -318,7 +319,7 @@ class CreateRoutineController extends GetxController {
 
   /// Retrieves the weekly routine for the given section index.
   WeeklyRoutine? _getWeeklyRoutine(int sectionIndex) {
-    return classModel.value!.sections![sectionIndex].routine;
+    return classModel.value!.sections[sectionIndex].routine;
   }
 
   /// Retrieves the daily routine for the given weekly routine and selected day.
@@ -500,7 +501,7 @@ class CreateRoutineController extends GetxController {
           print("        Topic Marks: ${topic.topicMarks}");
           print("        Subtopics:");
           for (var subtopic in topic.subtopics) {
-            print("          Subtopic Name: ${subtopic}");
+            print("          Subtopic Name: $subtopic");
           }
         }
       }
@@ -631,6 +632,7 @@ class CreateRoutineController extends GetxController {
         sections: sections,
         subjects: ['Math', 'Science', 'English', 'History'],
         examSyllabus: examSyllabusList,
+        id: nanoid(12).toString(),
       );
 
       // Add to Firestore
