@@ -81,7 +81,7 @@ class NavigationScreen extends StatelessWidget {
           childAspectRatio: 1,
           children: buttons,
         ),
-        SizedBox(height: MySizes.lg,)
+        const SizedBox(height: MySizes.lg,)
       ],
     );
   }

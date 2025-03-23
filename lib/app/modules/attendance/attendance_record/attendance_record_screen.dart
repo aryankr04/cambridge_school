@@ -1,3 +1,5 @@
+import 'package:cambridge_school/app/modules/class_management/class_management_controller.dart';
+import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/widgets/divider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -192,10 +194,10 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
       itemBuilder: (context, index) {
         final SectionData section = controller.sections[index];
         final bool isTaken = controller.isAttendanceTakenForSection(
-            section.className, section.sectionName);
+            section.className.label, section.sectionName);
         final ClassAttendanceSummary summary =
         controller.getClassAttendanceSummary(
-            section.className, section.sectionName);
+            section.className.label, section.sectionName);
 
         return ClassAttendanceSummaryCard(
           summary: summary,

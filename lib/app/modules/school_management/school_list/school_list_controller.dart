@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';  // Import for Get.snackbar
 
 
 class SchoolListController extends GetxController {
-  final FirestoreSchoolRepository schoolRepository = FirestoreSchoolRepository();
+  final SchoolRepository schoolRepository = SchoolRepository();
 
   final schools = <SchoolModel>[].obs;
   final isLoading = false.obs;

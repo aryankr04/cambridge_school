@@ -1,5 +1,6 @@
 import 'package:cambridge_school/core/utils/constants/enums/academic_level.dart';
 import 'package:cambridge_school/core/utils/constants/enums/campus_area.dart';
+import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/enums/classroom_facilities.dart';
 import 'package:cambridge_school/core/utils/constants/enums/classroom_seating_arrangement.dart';
 import 'package:cambridge_school/core/utils/constants/enums/exam_pattern.dart';
@@ -19,27 +20,40 @@ import '../../../core/utils/constants/enums/vehicle_type.dart';
 import '../fees/models/fee_structure.dart';
 
 class SchoolModel {
+  // ************************ Core School Information ************************
   final String schoolId;
   final String schoolName;
   final String schoolSlogan;
   final String aboutSchool;
+  final String schoolCode;
+  final String affiliationNumber;
+
+  // ************************ Status and Meta Information ************************
   final AccountStatus status;
   final String establishedYear;
   final DateTime createdAt;
   final String createdById;
   final String createdByName;
-  final String schoolCode;
-  final String affiliationNumber;
+
+  // ************************ Categorical/Policy Information ************************
   final SchoolBoard schoolBoard;
   final SchoolOwnership schoolOwnership;
   final SchoolSpecialization schoolSpecialization;
   final SchoolGenderPolicy schoolGenderPolicy;
+  final GradingSystem gradingSystem;
+  final ExaminationPattern examPattern;
+  final AcademicLevel academicLevel;
+  final MediumOfInstruction mediumOfInstruction;
+
+  // ************************ Contact Information ************************
   final SchoolAddress address;
   final String primaryPhoneNo;
   final String secondaryPhoneNo;
   final String email;
   final String website;
   final String faxNumber;
+
+  // ************************ Facilities and Infrastructure ************************
   final double campusSize;
   final int numberOfBuildings;
   final List<String> generalFacilities;
@@ -47,35 +61,44 @@ class SchoolModel {
   final List<String> sportsInfrastructure;
   final List<String> healthAndSafetyFacilities;
   final List<String> additionalFacilities;
-  final GradingSystem gradingSystem;
-  final ExaminationPattern examPattern;
-  final AcademicLevel academicLevel;
-  final MediumOfInstruction mediumOfInstruction;
+  final List<String> sportsFacilities;
+  final List<String> musicAndArtFacilities;
+  final List<String> labsAvailable;
+
+  // ************************ Academic Information ************************
   final String academicYear;
   final List<ClassData> classes;
-  final List<SubjectData> subjects;
   final double studentTeacherRatio;
   final List<AcademicEvent> academicEvents;
   final int noOfPeriodsPerDay;
   final SchoolTimings schoolTimings;
+
+  // ************************ Student and Staff Demographics ************************
   final int totalStudents;
   final int totalBoys;
   final int totalGirls;
   final List<UserListDetails> employees;
   final List<Alumni> alumni;
+
+  // ************************ Fee Information ************************
   final FeeStructure feeStructure;
   final List<FeePaymentMethod> feePaymentMethods;
   final String lateFeePolicy;
   final DateTime feeDueDate;
-  final List<String> sportsFacilities;
-  final List<String> musicAndArtFacilities;
+
+  // ************************ Extracurriculars ************************
   final List<String> studentClubs;
   final List<String> specialTrainingPrograms;
+
+  // ************************ Achievements & Recognition ************************
   final List<Accreditation> accreditations;
   final List<Ranking> rankings;
   final List<Award> awards;
+
+  // ************************ School Calendar ************************
   final List<Holiday> holidays;
-  final List<String> labsAvailable;
+
+  // ************************ Infrastructure Details (Specific) ************************
   final List<Classroom> classroomsList;
   final List<Library> libraries;
   final List<ExamHall> examHalls;
@@ -87,6 +110,8 @@ class SchoolModel {
   final Parking parking;
   final SecuritySystem securitySystem;
   final List<Vehicle> vehicles;
+
+  // ************************ Media and Branding ************************
   final String schoolLogoUrl;
   final String schoolCoverImageUrl;
   final List<SchoolImage> schoolImages;
@@ -127,7 +152,6 @@ class SchoolModel {
     required this.mediumOfInstruction,
     required this.academicYear,
     required this.classes,
-    required this.subjects,
     required this.studentTeacherRatio,
     required this.academicEvents,
     required this.noOfPeriodsPerDay,
@@ -203,7 +227,6 @@ class SchoolModel {
       'mediumOfInstruction': mediumOfInstruction.name,
       'academicYear': academicYear,
       'classes': classes.map((e) => e.toMap()).toList(),
-      'subjects': subjects.map((e) => e.toMap()).toList(),
       'studentTeacherRatio': studentTeacherRatio,
       'academicEvents': academicEvents.map((e) => e.toMap()).toList(),
       'noOfPeriodsPerDay': noOfPeriodsPerDay,
@@ -244,7 +267,6 @@ class SchoolModel {
     };
   }
 
-
   factory SchoolModel.fromMap(Map<String, dynamic> map) {
     return SchoolModel(
       schoolId: map['schoolId'] ?? '',
@@ -258,67 +280,161 @@ class SchoolModel {
       createdByName: map['createdByName'] ?? '',
       schoolCode: map['schoolCode'] ?? '',
       affiliationNumber: map['affiliationNumber'] ?? '',
-      schoolBoard: SchoolBoardExtension.fromString(map['schoolBoard'] ?? 'state'),
-      schoolOwnership: SchoolOwnershipExtension.fromString(map['schoolOwnership'] ?? 'private'),
-      schoolSpecialization: SchoolSpecializationExtension.fromString(map['schoolSpecialization'] ?? 'coEd'),
-      schoolGenderPolicy: SchoolGenderPolicyExtension.fromString(map['schoolGenderPolicy'] ?? 'coEd'),
+      schoolBoard:
+          SchoolBoardExtension.fromString(map['schoolBoard'] ?? 'state'),
+      schoolOwnership: SchoolOwnershipExtension.fromString(
+          map['schoolOwnership'] ?? 'private'),
+      schoolSpecialization: SchoolSpecializationExtension.fromString(
+          map['schoolSpecialization'] ?? 'coEd'),
+      schoolGenderPolicy: SchoolGenderPolicyExtension.fromString(
+          map['schoolGenderPolicy'] ?? 'coEd'),
       address: SchoolAddress.fromMap(map['address'] ?? const {}),
       primaryPhoneNo: map['primaryPhoneNo'] ?? '',
       secondaryPhoneNo: map['secondaryPhoneNo'] ?? '',
       email: map['email'] ?? '',
       website: map['website'] ?? '',
       faxNumber: map['faxNumber'] ?? '',
-      campusSize: (map['campusSize'] is int ? (map['campusSize'] as int).toDouble() : map['campusSize'] as double) ,
+      campusSize: (map['campusSize'] is int
+          ? (map['campusSize'] as int).toDouble()
+          : map['campusSize'] as double),
       numberOfBuildings: map['numberOfBuildings'] ?? 0,
-      generalFacilities: (map['generalFacilities'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      transportFacilities: (map['transportFacilities'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      sportsInfrastructure: (map['sportsInfrastructure'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      healthAndSafetyFacilities: (map['healthAndSafetyFacilities'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      additionalFacilities: (map['additionalFacilities'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      gradingSystem: GradingSystemExtension.fromString(map['gradingSystem'] ?? 'percentage'),
-      examPattern: ExaminationPatternExtension.fromString(map['examPattern'] ?? 'semester'),
-      academicLevel: AcademicLevelExtension.fromString(map['academicLevel'] ?? 'higherSecondary'),
-      mediumOfInstruction: MediumOfInstructionExtension.fromString(map['mediumOfInstruction'] ?? 'english'),
+      generalFacilities: (map['generalFacilities'] as List<dynamic>?)
+              ?.cast<String>()
+              .toList() ??
+          [],
+      transportFacilities: (map['transportFacilities'] as List<dynamic>?)
+              ?.cast<String>()
+              .toList() ??
+          [],
+      sportsInfrastructure: (map['sportsInfrastructure'] as List<dynamic>?)
+              ?.cast<String>()
+              .toList() ??
+          [],
+      healthAndSafetyFacilities:
+          (map['healthAndSafetyFacilities'] as List<dynamic>?)
+                  ?.cast<String>()
+                  .toList() ??
+              [],
+      additionalFacilities: (map['additionalFacilities'] as List<dynamic>?)
+              ?.cast<String>()
+              .toList() ??
+          [],
+      gradingSystem: GradingSystemExtension.fromString(
+          map['gradingSystem'] ?? 'percentage'),
+      examPattern: ExaminationPatternExtension.fromString(
+          map['examPattern'] ?? 'semester'),
+      academicLevel: AcademicLevelExtension.fromString(
+          map['academicLevel'] ?? 'higherSecondary'),
+      mediumOfInstruction: MediumOfInstructionExtension.fromString(
+          map['mediumOfInstruction'] ?? 'english'),
       academicYear: map['academicYear'] ?? '',
-      classes: (map['classes'] as List?)?.map((e) => ClassData.fromMap(e)).toList() ?? [],
-      subjects: (map['subjects'] as List?)?.map((e) => SubjectData.fromMap(e)).toList() ?? [],
-      studentTeacherRatio: (map['studentTeacherRatio'] is int ? (map['studentTeacherRatio'] as int).toDouble() : map['studentTeacherRatio'] as double) ,
-      academicEvents: (map['academicEvents'] as List?)?.map((e) => AcademicEvent.fromMap(e)).toList() ?? [],
+      classes: (map['classes'] as List?)
+              ?.map((e) => ClassData.fromMap(e))
+              .toList() ??
+          [],
+      studentTeacherRatio: (map['studentTeacherRatio'] is int
+          ? (map['studentTeacherRatio'] as int).toDouble()
+          : map['studentTeacherRatio'] as double),
+      academicEvents: (map['academicEvents'] as List?)
+              ?.map((e) => AcademicEvent.fromMap(e))
+              .toList() ??
+          [],
       noOfPeriodsPerDay: map['noOfPeriodsPerDay'] ?? 0,
       schoolTimings: SchoolTimings.fromMap(map['schoolTimings'] ?? const {}),
       totalStudents: map['totalStudents'] ?? 0,
       totalBoys: map['totalBoys'] ?? 0,
       totalGirls: map['totalGirls'] ?? 0,
-      employees: (map['employees'] as List?)?.map((e) => UserListDetails.fromMap(e)).toList() ?? [],
-      alumni: (map['alumni'] as List?)?.map((e) => Alumni.fromMap(e)).toList() ?? [],
+      employees: (map['employees'] as List?)
+              ?.map((e) => UserListDetails.fromMap(e))
+              .toList() ??
+          [],
+      alumni:
+          (map['alumni'] as List?)?.map((e) => Alumni.fromMap(e)).toList() ??
+              [],
       feeStructure: FeeStructure.fromMap(map['feeStructure'] ?? const {}),
-      feePaymentMethods: (map['feePaymentMethods'] as List?)?.map((e) => FeePaymentMethodExtension.fromString(e)).toList() ?? [],
+      feePaymentMethods: (map['feePaymentMethods'] as List?)
+              ?.map((e) => FeePaymentMethodExtension.fromString(e))
+              .toList() ??
+          [],
       lateFeePolicy: map['lateFeePolicy'] ?? '',
       feeDueDate: DateTime.tryParse(map['feeDueDate'] ?? '') ?? DateTime.now(),
-      sportsFacilities: (map['sportsFacilities'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      musicAndArtFacilities: (map['musicAndArtFacilities'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      studentClubs: (map['studentClubs'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      specialTrainingPrograms: (map['specialTrainingPrograms'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      accreditations: (map['accreditations'] as List?)?.map((e) => Accreditation.fromMap(e)).toList() ?? [],
-      rankings: (map['rankings'] as List?)?.map((e) => Ranking.fromMap(e)).toList() ?? [],
-      awards: (map['awards'] as List?)?.map((e) => Award.fromMap(e)).toList() ?? [],
-      holidays: (map['holidays'] as List?)?.map((e) => Holiday.fromMap(e)).toList() ?? [],
-      labsAvailable: (map['labsAvailable'] as List<dynamic>?)?.cast<String>().toList() ?? [],
-      classroomsList: (map['classroomsList'] as List?)?.map((e) => Classroom.fromMap(e)).toList() ?? [],
-      libraries: (map['libraries'] as List?)?.map((e) => Library.fromMap(e)).toList() ?? [],
-      examHalls: (map['examHalls'] as List?)?.map((e) => ExamHall.fromMap(e)).toList() ?? [],
-      auditoriums: (map['auditoriums'] as List?)?.map((e) => Auditorium.fromMap(e)).toList() ?? [],
-      hostels: (map['hostels'] as List?)?.map((e) => Hostel.fromMap(e)).toList() ?? [],
-      staffRooms: (map['staffRooms'] as List?)?.map((e) => StaffRoom.fromMap(e)).toList() ?? [],
-      medicalRooms: (map['medicalRooms'] as List?)?.map((e) => MedicalRoom.fromMap(e)).toList() ?? [],
-      cafeterias: (map['cafeterias'] as List?)?.map((e) => Cafeteria.fromMap(e)).toList() ?? [],
+      sportsFacilities: (map['sportsFacilities'] as List<dynamic>?)
+              ?.cast<String>()
+              .toList() ??
+          [],
+      musicAndArtFacilities: (map['musicAndArtFacilities'] as List<dynamic>?)
+              ?.cast<String>()
+              .toList() ??
+          [],
+      studentClubs:
+          (map['studentClubs'] as List<dynamic>?)?.cast<String>().toList() ??
+              [],
+      specialTrainingPrograms:
+          (map['specialTrainingPrograms'] as List<dynamic>?)
+                  ?.cast<String>()
+                  .toList() ??
+              [],
+      accreditations: (map['accreditations'] as List?)
+              ?.map((e) => Accreditation.fromMap(e))
+              .toList() ??
+          [],
+      rankings:
+          (map['rankings'] as List?)?.map((e) => Ranking.fromMap(e)).toList() ??
+              [],
+      awards:
+          (map['awards'] as List?)?.map((e) => Award.fromMap(e)).toList() ?? [],
+      holidays:
+          (map['holidays'] as List?)?.map((e) => Holiday.fromMap(e)).toList() ??
+              [],
+      labsAvailable:
+          (map['labsAvailable'] as List<dynamic>?)?.cast<String>().toList() ??
+              [],
+      classroomsList: (map['classroomsList'] as List?)
+              ?.map((e) => Classroom.fromMap(e))
+              .toList() ??
+          [],
+      libraries: (map['libraries'] as List?)
+              ?.map((e) => Library.fromMap(e))
+              .toList() ??
+          [],
+      examHalls: (map['examHalls'] as List?)
+              ?.map((e) => ExamHall.fromMap(e))
+              .toList() ??
+          [],
+      auditoriums: (map['auditoriums'] as List?)
+              ?.map((e) => Auditorium.fromMap(e))
+              .toList() ??
+          [],
+      hostels:
+          (map['hostels'] as List?)?.map((e) => Hostel.fromMap(e)).toList() ??
+              [],
+      staffRooms: (map['staffRooms'] as List?)
+              ?.map((e) => StaffRoom.fromMap(e))
+              .toList() ??
+          [],
+      medicalRooms: (map['medicalRooms'] as List?)
+              ?.map((e) => MedicalRoom.fromMap(e))
+              .toList() ??
+          [],
+      cafeterias: (map['cafeterias'] as List?)
+              ?.map((e) => Cafeteria.fromMap(e))
+              .toList() ??
+          [],
       parking: Parking.fromMap(map['parking'] ?? const {}),
       securitySystem: SecuritySystem.fromMap(map['securitySystem'] ?? const {}),
-      vehicles: (map['vehicles'] as List?)?.map((e) => Vehicle.fromMap(e)).toList() ?? [],
+      vehicles:
+          (map['vehicles'] as List?)?.map((e) => Vehicle.fromMap(e)).toList() ??
+              [],
       schoolLogoUrl: map['schoolLogoUrl'] ?? '',
       schoolCoverImageUrl: map['schoolCoverImageUrl'] ?? '',
-      schoolImages: (map['schoolImages'] as List?)?.map((e) => SchoolImage.fromMap(e)).toList() ?? [],
-      featuredNews: (map['featuredNews'] as List?)?.map((e) => FeaturedNews.fromMap(e)).toList() ?? [],
+      schoolImages: (map['schoolImages'] as List?)
+              ?.map((e) => SchoolImage.fromMap(e))
+              .toList() ??
+          [],
+      featuredNews: (map['featuredNews'] as List?)
+              ?.map((e) => FeaturedNews.fromMap(e))
+              .toList() ??
+          [],
     );
   }
 
@@ -357,7 +473,6 @@ class SchoolModel {
     MediumOfInstruction? mediumOfInstruction,
     String? academicYear,
     List<ClassData>? classes,
-    List<SubjectData>? subjects,
     double? studentTeacherRatio,
     List<AcademicEvent>? academicEvents,
     int? noOfPeriodsPerDay,
@@ -423,7 +538,8 @@ class SchoolModel {
       generalFacilities: generalFacilities ?? this.generalFacilities,
       transportFacilities: transportFacilities ?? this.transportFacilities,
       sportsInfrastructure: sportsInfrastructure ?? this.sportsInfrastructure,
-      healthAndSafetyFacilities: healthAndSafetyFacilities ?? this.healthAndSafetyFacilities,
+      healthAndSafetyFacilities:
+          healthAndSafetyFacilities ?? this.healthAndSafetyFacilities,
       additionalFacilities: additionalFacilities ?? this.additionalFacilities,
       gradingSystem: gradingSystem ?? this.gradingSystem,
       examPattern: examPattern ?? this.examPattern,
@@ -431,7 +547,6 @@ class SchoolModel {
       mediumOfInstruction: mediumOfInstruction ?? this.mediumOfInstruction,
       academicYear: academicYear ?? this.academicYear,
       classes: classes ?? this.classes,
-      subjects: subjects ?? this.subjects,
       studentTeacherRatio: studentTeacherRatio ?? this.studentTeacherRatio,
       academicEvents: academicEvents ?? this.academicEvents,
       noOfPeriodsPerDay: noOfPeriodsPerDay ?? this.noOfPeriodsPerDay,
@@ -446,9 +561,11 @@ class SchoolModel {
       lateFeePolicy: lateFeePolicy ?? this.lateFeePolicy,
       feeDueDate: feeDueDate ?? this.feeDueDate,
       sportsFacilities: sportsFacilities ?? this.sportsFacilities,
-      musicAndArtFacilities: musicAndArtFacilities ?? this.musicAndArtFacilities,
+      musicAndArtFacilities:
+          musicAndArtFacilities ?? this.musicAndArtFacilities,
       studentClubs: studentClubs ?? this.studentClubs,
-      specialTrainingPrograms: specialTrainingPrograms ?? this.specialTrainingPrograms,
+      specialTrainingPrograms:
+          specialTrainingPrograms ?? this.specialTrainingPrograms,
       accreditations: accreditations ?? this.accreditations,
       rankings: rankings ?? this.rankings,
       awards: awards ?? this.awards,
@@ -472,6 +589,7 @@ class SchoolModel {
     );
   }
 }
+
 class AcademicEvent {
   final String eventName;
   final DateTime eventDate;
@@ -486,7 +604,8 @@ class AcademicEvent {
   factory AcademicEvent.fromMap(Map<String, dynamic>? map) {
     return AcademicEvent(
       eventName: map?['eventName'] ?? '',
-      eventDate: DateTime.parse(map?['eventDate'] ?? DateTime.now().toIso8601String()),
+      eventDate:
+          DateTime.parse(map?['eventDate'] ?? DateTime.now().toIso8601String()),
       description: map?['description'],
     );
   }
@@ -530,7 +649,8 @@ class FeaturedNews {
       title: map?['title'] ?? '',
       content: map?['content'] ?? '',
       imageUrl: map?['imageUrl'] ?? '',
-      datePublished: DateTime.parse(map?['datePublished'] ?? DateTime.now().toIso8601String()),
+      datePublished: DateTime.parse(
+          map?['datePublished'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -574,8 +694,10 @@ class Holiday {
   factory Holiday.fromMap(Map<String, dynamic>? map) {
     return Holiday(
       holidayName: map?['holidayName'] ?? '',
-      startDate: DateTime.parse(map?['startDate'] ?? DateTime.now().toIso8601String()),
-      endDate: DateTime.parse(map?['endDate'] ?? DateTime.now().toIso8601String()),
+      startDate:
+          DateTime.parse(map?['startDate'] ?? DateTime.now().toIso8601String()),
+      endDate:
+          DateTime.parse(map?['endDate'] ?? DateTime.now().toIso8601String()),
       description: map?['description'],
     );
   }
@@ -650,6 +772,7 @@ class Alumni {
       'passingYear': passingYear,
     };
   }
+
   Alumni copyWith({
     String? alumniId,
     String? alumniName,
@@ -692,7 +815,8 @@ class Accreditation {
     return Accreditation(
       accreditingBody: json?['accreditingBody'] ?? '',
       description: json?['description'] ?? '',
-      dateOfAccreditation: DateTime.parse(json?['dateOfAccreditation'] ?? DateTime.now().toIso8601String()),
+      dateOfAccreditation: DateTime.parse(
+          json?['dateOfAccreditation'] ?? DateTime.now().toIso8601String()),
       validityPeriod: json?['validityPeriod'] ?? '',
       standardsMet: json?['standardsMet'] ?? '',
     );
@@ -707,6 +831,7 @@ class Accreditation {
       'standardsMet': standardsMet,
     };
   }
+
   Accreditation copyWith({
     String? accreditingBody,
     String? description,
@@ -758,6 +883,7 @@ class Ranking {
       'level': level,
     };
   }
+
   Ranking copyWith({
     String? title,
     int? rank,
@@ -795,7 +921,8 @@ class Award {
       name: json?['name'] ?? '',
       description: json?['description'] ?? '',
       issuedBy: json?['issuedBy'] ?? '',
-      receivedDate: DateTime.parse(json?['receivedDate'] ?? DateTime.now().toIso8601String()),
+      receivedDate: DateTime.parse(
+          json?['receivedDate'] ?? DateTime.now().toIso8601String()),
       level: json?['level'] ?? '',
     );
   }
@@ -809,6 +936,7 @@ class Award {
       'level': level,
     };
   }
+
   Award copyWith({
     String? name,
     String? description,
@@ -868,8 +996,10 @@ class SchoolTimings {
     }
 
     return SchoolTimings(
-      arrivalTime: parseTimeOfDay(json?['arrivalTime']) ?? const TimeOfDay(hour: 0, minute: 0),
-      departureTime: parseTimeOfDay(json?['departureTime']) ?? const TimeOfDay(hour: 0, minute: 0),
+      arrivalTime: parseTimeOfDay(json?['arrivalTime']) ??
+          const TimeOfDay(hour: 0, minute: 0),
+      departureTime: parseTimeOfDay(json?['departureTime']) ??
+          const TimeOfDay(hour: 0, minute: 0),
       assemblyStart: parseTimeOfDay(json?['assemblyStart']),
       assemblyEnd: parseTimeOfDay(json?['assemblyEnd']),
       breakStart: parseTimeOfDay(json?['breakStart']),
@@ -894,6 +1024,7 @@ class SchoolTimings {
       'breakEnd': timeOfDayToString(breakEnd),
     };
   }
+
   SchoolTimings copyWith({
     TimeOfDay? arrivalTime,
     TimeOfDay? departureTime,
@@ -903,8 +1034,8 @@ class SchoolTimings {
     TimeOfDay? breakEnd,
   }) {
     return SchoolTimings(
-        arrivalTime: arrivalTime ?? this.arrivalTime,
-        departureTime: departureTime ?? this.departureTime,
+      arrivalTime: arrivalTime ?? this.arrivalTime,
+      departureTime: departureTime ?? this.departureTime,
       assemblyStart: assemblyStart ?? this.assemblyStart,
       assemblyEnd: assemblyEnd ?? this.assemblyEnd,
       breakStart: breakStart ?? this.breakStart,
@@ -932,22 +1063,22 @@ class UserListDetails {
       userName: map?['userName'] ?? '',
       profilePictureUrl: map?['profilePictureUrl'] ?? '',
       roles: (map?['roles'] as List<dynamic>?)
-          ?.map((roleName) {
-        if (roleName is! String) {
-          print('Invalid role type: $roleName. Skipping.');
-          return null;
-        }
+              ?.map((roleName) {
+                if (roleName is! String) {
+                  print('Invalid role type: $roleName. Skipping.');
+                  return null;
+                }
 
-        try {
-          return UserRole.values
-              .firstWhere((element) => element.value == roleName);
-        } catch (e) {
-          print('Unknown role: $roleName');
-          return null;
-        }
-      })
-          .whereType<UserRole>()
-          .toList() ??
+                try {
+                  return UserRole.values
+                      .firstWhere((element) => element.value == roleName);
+                } catch (e) {
+                  print('Unknown role: $roleName');
+                  return null;
+                }
+              })
+              .whereType<UserRole>()
+              .toList() ??
           [],
     );
   }
@@ -960,6 +1091,7 @@ class UserListDetails {
       'roles': roles.map((e) => e.value).toList(),
     };
   }
+
   UserListDetails copyWith({
     String? userId,
     String? userName,
@@ -997,15 +1129,15 @@ class SchoolAddress {
   });
 
   Map<String, dynamic> toMap() => {
-    'streetAddress': streetAddress,
-    'city': city,
-    'district': district,
-    'state': state,
-    'country': country,
-    'village': village,
-    'landmark': landmark,
-    'pinCode': pinCode,
-  };
+        'streetAddress': streetAddress,
+        'city': city,
+        'district': district,
+        'state': state,
+        'country': country,
+        'village': village,
+        'landmark': landmark,
+        'pinCode': pinCode,
+      };
 
   static SchoolAddress fromMap(Map<String, dynamic>? data) {
     return SchoolAddress(
@@ -1019,6 +1151,7 @@ class SchoolAddress {
       pinCode: data?['pinCode'],
     );
   }
+
   SchoolAddress copyWith({
     String? streetAddress,
     String? city,
@@ -1044,7 +1177,7 @@ class SchoolAddress {
 
 class ClassData {
   final String classId;
-  final String className;
+  final ClassName className;
   final List<String> sectionName;
 
   ClassData({
@@ -1056,7 +1189,7 @@ class ClassData {
   Map<String, dynamic> toMap() {
     return {
       'classId': classId,
-      'className': className,
+      'className': className.name, // Store enum name as string
       'sectionName': sectionName,
     };
   }
@@ -1064,13 +1197,15 @@ class ClassData {
   factory ClassData.fromMap(Map<String, dynamic>? map) {
     return ClassData(
       classId: map?['classId'] ?? '',
-      className: map?['className'] ?? '',
+      className: ClassNameExtension.fromString(
+          map?['className'] ?? ''), // Retrieve enum from stored name
       sectionName: List<String>.from(map?['sectionName'] ?? const []),
     );
   }
+
   ClassData copyWith({
     String? classId,
-    String? className,
+    ClassName? className,
     List<String>? sectionName,
   }) {
     return ClassData(
@@ -1083,7 +1218,7 @@ class ClassData {
 
 class SectionData {
   final String classId;
-  final String className;
+  final ClassName className;
   final String sectionName;
 
   SectionData({
@@ -1095,62 +1230,23 @@ class SectionData {
   Map<String, dynamic> toMap() {
     return {
       'classId': classId,
-      'className': className,
+      'className': className.name, // Store enum name as string
       'sectionName': sectionName,
     };
   }
 
-  factory SectionData.fromMap(Map<String, dynamic>? map) {
-    return SectionData(
-      classId: map?['classId'] ?? '',
-      className: map?['className'] ?? '',
-      sectionName: map?['sectionName'] ?? '',
-    );
-  }
-  SectionData copyWith({
-    String? classId,
-    String? className,
-    String? sectionName,
-  }) {
-    return SectionData(
-      classId: classId ?? this.classId,
-      className: className ?? this.className,
-      sectionName: sectionName ?? this.sectionName,
-    );
-  }
-}
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SectionData &&
+          runtimeType == other.runtimeType &&
+          classId == other.classId &&
+          className == other.className &&
+          sectionName == other.sectionName;
 
-class SubjectData {
-  final String subjectId;
-  final String subjectName;
-
-  SubjectData({
-    required this.subjectId,
-    required this.subjectName,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'subjectId': subjectId,
-      'subjectName': subjectName,
-    };
-  }
-
-  factory SubjectData.fromMap(Map<String, dynamic>? map) {
-    return SubjectData(
-      subjectId: map?['subjectId'] ?? '',
-      subjectName: map?['subjectName'] ?? '',
-    );
-  }
-  SubjectData copyWith({
-    String? subjectId,
-    String? subjectName,
-  }) {
-    return SubjectData(
-      subjectId: subjectId ?? this.subjectId,
-      subjectName: subjectName ?? this.subjectName,
-    );
-  }
+  @override
+  int get hashCode =>
+      classId.hashCode ^ className.hashCode ^ sectionName.hashCode;
 }
 
 class Vehicle {
@@ -1178,7 +1274,8 @@ class Vehicle {
 
   factory Vehicle.fromMap(Map<String, dynamic>? map) {
     return Vehicle(
-      vehicleType: VehicleTypeExtension.fromString(map?['vehicleType'] ?? 'bus'),
+      vehicleType:
+          VehicleTypeExtension.fromString(map?['vehicleType'] ?? 'bus'),
       registrationNumber: map?['registrationNumber'] ?? '',
       capacity: map?['capacity'] ?? 0,
       driverName: map?['driverName'] ?? '',
@@ -1203,6 +1300,7 @@ class Vehicle {
       'status': status,
     };
   }
+
   Vehicle copyWith({
     VehicleType? vehicleType,
     String? registrationNumber,
@@ -1231,7 +1329,7 @@ class Vehicle {
 class Classroom {
   String classroomName;
   int capacity;
-  List<ClassroomFacility>facilities;
+  List<ClassroomFacility> facilities;
   ClassroomSeatingArrangement seatingArrangement;
 
   Classroom({
@@ -1249,7 +1347,8 @@ class Classroom {
           .map((e) => ClassroomFacilityExtension.fromString(e as String))
           .whereType<ClassroomFacility>()
           .toList(),
-      seatingArrangement: ClassroomSeatingArrangementExtension.fromString(map?['seatingArrangement'] ?? 'rows'),
+      seatingArrangement: ClassroomSeatingArrangementExtension.fromString(
+          map?['seatingArrangement'] ?? 'rows'),
     );
   }
 
@@ -1261,6 +1360,7 @@ class Classroom {
       'seatingArrangement': seatingArrangement.label,
     };
   }
+
   Classroom copyWith({
     String? classroomName,
     int? capacity,
@@ -1314,6 +1414,7 @@ class Library {
       'hasDigitalLibrary': hasDigitalLibrary,
     };
   }
+
   Library copyWith({
     String? libraryName,
     int? totalBooks,
@@ -1363,6 +1464,7 @@ class ExamHall {
       'cctvInstalled': cctvInstalled,
     };
   }
+
   ExamHall copyWith({
     String? examHallName,
     int? capacity,
@@ -1407,6 +1509,7 @@ class Auditorium {
       'availableEquipment': availableEquipment.map((e) => e.label).toList(),
     };
   }
+
   Auditorium copyWith({
     String? auditoriumName,
     int? seatingCapacity,
@@ -1470,6 +1573,7 @@ class Hostel {
       'rules': rules.map((e) => e.label).toList(),
     };
   }
+
   Hostel copyWith({
     String? hostelName,
     int? totalRooms,
@@ -1507,7 +1611,8 @@ class StaffRoom {
       staffRoomName: map?['staffRoomName'] ?? '',
       assignedStaff: List<String>.from(map?['assignedStaff'] ?? const []),
       facilities: List<String>.from(map?['facilities'] ?? const []),
-      lastMaintenanceDate: DateTime.parse(map?['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
+      lastMaintenanceDate: DateTime.parse(
+          map?['lastMaintenanceDate'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -1519,6 +1624,7 @@ class StaffRoom {
       'lastMaintenanceDate': lastMaintenanceDate.toIso8601String(),
     };
   }
+
   StaffRoom copyWith({
     String? staffRoomName,
     List<String>? assignedStaff,
@@ -1556,8 +1662,10 @@ class MedicalRoom {
       medicalRoomName: map?['medicalRoomName'] ?? '',
       doctorName: map?['doctorName'] ?? '',
       nurseName: map?['nurseName'] ?? '',
-      emergencyContacts: List<String>.from(map?['emergencyContacts'] ?? const []),
-      availableMedicines: List<String>.from(map?['availableMedicines'] ?? const []),
+      emergencyContacts:
+          List<String>.from(map?['emergencyContacts'] ?? const []),
+      availableMedicines:
+          List<String>.from(map?['availableMedicines'] ?? const []),
       firstAidAvailable: map?['firstAidAvailable'] ?? false,
     );
   }
@@ -1572,6 +1680,7 @@ class MedicalRoom {
       'firstAidAvailable': firstAidAvailable,
     };
   }
+
   MedicalRoom copyWith({
     String? medicalRoomName,
     String? doctorName,
@@ -1610,12 +1719,13 @@ class Cafeteria {
     return Cafeteria(
       cafeteriaName: map?['cafeteriaName'] ?? '',
       menu: (map?['menu'] as List?)
-          ?.map((e) => CafeteriaMenuItem.fromMap(e))
-          .toList() ??
+              ?.map((e) => CafeteriaMenuItem.fromMap(e))
+              .toList() ??
           [],
       seatingCapacity: map?['seatingCapacity'] ?? 0,
       hygieneCertified: map?['hygieneCertified'] ?? false,
-      lastInspectionDate: DateTime.parse(map?['lastInspectionDate'] ?? DateTime.now().toIso8601String()),
+      lastInspectionDate: DateTime.parse(
+          map?['lastInspectionDate'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -1628,6 +1738,7 @@ class Cafeteria {
       'lastInspectionDate': lastInspectionDate.toIso8601String(),
     };
   }
+
   Cafeteria copyWith({
     String? cafeteriaName,
     List<CafeteriaMenuItem>? menu,
@@ -1679,6 +1790,7 @@ class CafeteriaMenuItem {
       'imageUrl': imageUrl,
     };
   }
+
   CafeteriaMenuItem copyWith({
     String? itemName,
     double? price,
@@ -1726,6 +1838,7 @@ class SecuritySystem {
       'realTimeMonitoring': realTimeMonitoring,
     };
   }
+
   SecuritySystem copyWith({
     List<String>? cctvLocations,
     List<String>? securityGuards,
@@ -1762,7 +1875,8 @@ class Parking {
       totalSlots: map?['totalSlots'] ?? 0,
       reservedSlots: map?['reservedSlots'] ?? 0,
       cctvInstalled: map?['cctvInstalled'] ?? false,
-      parkingChargesPerHour: (map?['parkingChargesPerHour'] as num? ?? 0.0).toDouble(),
+      parkingChargesPerHour:
+          (map?['parkingChargesPerHour'] as num? ?? 0.0).toDouble(),
     );
   }
 
@@ -1775,6 +1889,7 @@ class Parking {
       'parkingChargesPerHour': parkingChargesPerHour,
     };
   }
+
   Parking copyWith({
     String? parkingName,
     int? totalSlots,
@@ -1787,7 +1902,8 @@ class Parking {
       totalSlots: totalSlots ?? this.totalSlots,
       reservedSlots: reservedSlots ?? this.reservedSlots,
       cctvInstalled: cctvInstalled ?? this.cctvInstalled,
-      parkingChargesPerHour: parkingChargesPerHour ?? this.parkingChargesPerHour,
+      parkingChargesPerHour:
+          parkingChargesPerHour ?? this.parkingChargesPerHour,
     );
   }
 }
@@ -1807,7 +1923,9 @@ class SchoolImage {
 
   factory SchoolImage.fromMap(Map<String, dynamic>? map) {
     return SchoolImage(
-      campusArea: CampusAreaExtension.fromString(map?['campusArea'] as String)??CampusArea.classroom,
+      campusArea:
+          CampusAreaExtension.fromString(map?['campusArea'] as String) ??
+              CampusArea.classroom,
       imageUrls: List<String>.from(map?['imageUrls'] ?? const []),
     );
   }

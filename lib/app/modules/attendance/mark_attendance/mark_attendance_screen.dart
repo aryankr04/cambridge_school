@@ -1,4 +1,6 @@
+import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_screen.dart';
 import 'package:cambridge_school/core/utils/constants/box_shadow.dart';
+import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:cambridge_school/core/widgets/app_bar.dart';
@@ -70,7 +72,7 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
         shouldFetch: sectionData != null || initialDate != null || initialAttendanceType != null);
 
     if (sectionData != null) {
-      controller.selectedClass.value = sectionData!.className;
+      controller.selectedClass.value = sectionData!.className.label;
       controller.selectedSection.value = sectionData!.sectionName;
     }
     if (initialDate != null) {

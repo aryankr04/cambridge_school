@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cambridge_school/app/modules/user_management/create_user/repositories/user_repository.dart';
 import 'package:cambridge_school/core/services/firebase/firestore_service.dart';
@@ -12,7 +11,6 @@ import 'package:cambridge_school/core/utils/constants/enums/school_gender_policy
 import 'package:cambridge_school/core/utils/constants/enums/school_specialization.dart';
 import 'package:cambridge_school/core/utils/helpers/helper_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,16 +21,15 @@ import '../../../../core/utils/constants/enums/exam_pattern.dart';
 import '../../../../core/utils/constants/enums/grading_system.dart';
 import '../../../../core/utils/constants/enums/medium_of_instruction.dart';
 import '../../../../core/utils/constants/enums/school_ownership.dart';
-import '../../exam/models/exam_pattern_model.dart';
+import '../../../../core/widgets/snack_bar.dart';
 import '../../fees/models/fee_structure.dart';
 import '../school_model.dart';
-import '../school_repository.dart';
 import 'create_school_screen.dart';
 
 class CreateSchoolController extends GetxController {
   final UserRepository firebaseFunction = UserRepository();
   final FirebaseStorageService firebaseStorageService =
-      FirebaseStorageService();
+  FirebaseStorageService();
   final FirestoreService firestoreService = FirestoreService();
 
   String schoolId = 'SCH00001';
@@ -118,7 +115,7 @@ class CreateSchoolController extends GetxController {
   // Overall Controller State
   RxInt activeStep = 0.obs;
   late final PageController pageController =
-      PageController(initialPage: activeStep.value);
+  PageController(initialPage: activeStep.value);
 
   String getStepName() => stepNamesForCreateSchool[activeStep.value];
 
@@ -129,10 +126,6 @@ class CreateSchoolController extends GetxController {
       if (_validateStep(activeStep.value) || true) {
         activeStep.value++;
         pageController.jumpToPage(activeStep.value);
-      } else {
-        // Show an error message or prevent the step from incrementing
-        MyHelperFunctions.showAlertSnackBar(
-            "Please fill in all the required fields in this step.");
       }
     }
   }
@@ -201,7 +194,7 @@ class CreateSchoolController extends GetxController {
 
   bool isImageSelected() {
     if (schoolLogoImage.value == null) {
-      MyHelperFunctions.showAlertSnackBar('Please select a school logo.');
+      MySnackBar.showAlertSnackBar('Please select a school logo.');
       return false;
     }
     return true;
@@ -213,7 +206,7 @@ class CreateSchoolController extends GetxController {
 
       if (!isImageSelected() || !isFormValid()) {
         Get.back();
-        MyHelperFunctions.showErrorSnackBar(
+        MySnackBar.showErrorSnackBar(
             'Please fill in all required details and select an image.');
         return;
       }
@@ -221,7 +214,7 @@ class CreateSchoolController extends GetxController {
       final SchoolModel? school = await _buildSchoolData();
       if (school == null) {
         Get.back();
-        MyHelperFunctions.showErrorSnackBar(
+        MySnackBar.showErrorSnackBar(
             'There was an error while building the school. Please try again');
         return;
       }
@@ -234,13 +227,12 @@ class CreateSchoolController extends GetxController {
           'school_logo_images',
         );
         if (schoolLogoImageUrl == null || schoolLogoImageUrl.isEmpty) {
-          MyHelperFunctions.showErrorSnackBar(
+          MySnackBar.showErrorSnackBar(
               'Error uploading school logo. Please check your network connection.');
           return;
         }
       } catch (imageUploadError) {
-        print('Error uploading image: $imageUploadError');
-        MyHelperFunctions.showErrorSnackBar(
+        MySnackBar.showErrorSnackBar(
             'Failed to upload school logo. Please try again.');
         return;
       }
@@ -249,19 +241,17 @@ class CreateSchoolController extends GetxController {
         FirebaseFirestore firestore = FirebaseFirestore.instance;
         await firestore.collection('schools').doc(schoolId).set(school.toMap());
       } catch (firestoreError) {
-        print('Firestore Error: $firestoreError');
-        MyHelperFunctions.showErrorSnackBar(
+        MySnackBar.showErrorSnackBar(
             'Failed to add school to Firestore: ${firestoreError.toString()}');
         return;
       }
 
       clearForm();
       Get.back();
-      MyHelperFunctions.showSuccessSnackBar(
+      MySnackBar.showSuccessSnackBar(
           '${schoolNameController.text} added successfully!');
     } catch (e) {
-      print('Unexpected Error adding school: $e');
-      MyHelperFunctions.showErrorSnackBar(
+      MySnackBar.showErrorSnackBar(
           'An unexpected error occurred. Please try again.');
     } finally {
       Get.back();
@@ -292,7 +282,7 @@ class CreateSchoolController extends GetxController {
         schoolBoard: SchoolBoardExtension.fromString(selectedSchoolBoard.value),
         schoolCode: schoolCodeController.text.trim(),
         schoolOwnership:
-            SchoolOwnershipExtension.fromString(selectedSchoolOwnership.value),
+        SchoolOwnershipExtension.fromString(selectedSchoolOwnership.value),
         affiliationNumber: affiliationRegistrationNumberController.text,
         address: address,
         primaryPhoneNo: primaryPhoneNumberController.text,
@@ -301,22 +291,22 @@ class CreateSchoolController extends GetxController {
         website: websiteController.text,
         faxNumber: faxNumberController.text,
         gradingSystem:
-            GradingSystemExtension.fromString(selectedGradingSystem.value),
+        GradingSystemExtension.fromString(selectedGradingSystem.value),
         examPattern: ExaminationPatternExtension.fromString(
             selectedExaminationPattern.value),
         academicLevel:
-            AcademicLevelExtension.fromString(selectedAcademicLevel.value),
+        AcademicLevelExtension.fromString(selectedAcademicLevel.value),
         mediumOfInstruction: MediumOfInstructionExtension.fromString(
             selectedMediumOfInstruction.value),
         academicYear:
-            '${selectedAcademicYearStart.value} - ${selectedAcademicYearEnd.value}',
+        '${selectedAcademicYearStart.value} - ${selectedAcademicYearEnd.value}',
         campusSize: double.tryParse(campusSizeController.text) ?? 0.0,
         sportsFacilities: selectedSportsFacilities,
         numberOfBuildings: int.tryParse(selectedNumberOfBuildings.value) ?? 1,
         schoolTimings: SchoolTimings(
           arrivalTime: arrivalTime.value ?? const TimeOfDay(hour: 8, minute: 0),
           departureTime:
-              departureTime.value ?? const TimeOfDay(hour: 15, minute: 0),
+          departureTime.value ?? const TimeOfDay(hour: 15, minute: 0),
         ),
         noOfPeriodsPerDay: int.tryParse(periodsPerDayController.text) ?? 0,
         feePaymentMethods: [FeePaymentMethod.cash], // Assuming a single default
@@ -372,14 +362,16 @@ class CreateSchoolController extends GetxController {
         ),
         lateFeePolicy: '',
         feeDueDate: DateTime.now(),
-        totalStudents: 0, createdById: '', createdByName: '', classes: [],
-        subjects: [], academicEvents: [],
+        totalStudents: 0,
+        createdById: '',
+        createdByName: '',
+        classes: [],
+        academicEvents: [],
       );
 
       return schoolData;
     } catch (dataError) {
-      print('Error while building school data: $dataError');
-      MyHelperFunctions.showErrorSnackBar(
+      MySnackBar.showErrorSnackBar(
           'Failed to collect school data. Please check your input.');
       return null;
     }
@@ -429,32 +421,31 @@ class CreateSchoolController extends GetxController {
 
   Future<void> pickLogoImage() async {
     final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
+    await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       schoolLogoImage.value = File(pickedFile.path);
-      print("School Logo Path: ${schoolLogoImage.value!.path}");
+      MySnackBar.showInfoSnackBar("School Logo Picked");
     }
   }
 
   Future<void> pickCoverImage() async {
     final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
+    await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       schoolCoverImage.value = File(pickedFile.path);
-      print("School Cover Path: ${schoolCoverImage.value!.path}");
+      MySnackBar.showInfoSnackBar("School Cover Image Picked");
     }
   }
 
   Future<void> pickImages(CampusArea campusArea) async {
-    final List<XFile>? pickedFiles = await picker.pickMultiImage();
-    if (pickedFiles != null) {
-      MyHelperFunctions.showLoadingOverlay();
-      List<String> imageUrls = await uploadImagesToFirebase(pickedFiles);
-      Get.back();
-      schoolImages.addAll(imageUrls
-          .map((url) => SchoolImage(campusArea: campusArea, imageUrls: [url])));
-      print("School Gallery images count: ${schoolImages.length}");
-    }
+    final List<XFile> pickedFiles = await picker.pickMultiImage();
+    MyHelperFunctions.showLoadingOverlay();
+    List<String> imageUrls = await uploadImagesToFirebase(pickedFiles);
+    Get.back();
+    schoolImages.addAll(imageUrls
+        .map((url) => SchoolImage(campusArea: campusArea, imageUrls: [url])));
+    MySnackBar.showInfoSnackBar(
+        "School Gallery images count: ${schoolImages.length}");
   }
 
   Future<List<String>> uploadImagesToFirebase(List<XFile> pickedFiles) async {
@@ -471,8 +462,7 @@ class CreateSchoolController extends GetxController {
         uploadedUrls.add(imageUrl);
       }
     } catch (e) {
-      print("Error uploading images: $e");
-      MyHelperFunctions.showErrorSnackBar(
+      MySnackBar.showErrorSnackBar(
           "Error uploading images, please try again");
     }
 
@@ -510,7 +500,7 @@ class CreateSchoolController extends GetxController {
 
   Future<void> sendDummySchoolsToFirebase() async {
     final CollectionReference schoolsCollection =
-        FirebaseFirestore.instance.collection('schools');
+    FirebaseFirestore.instance.collection('schools');
 
     // Dummy School 1
     final SchoolModel school1 = SchoolModel(
@@ -549,7 +539,6 @@ class CreateSchoolController extends GetxController {
       mediumOfInstruction: MediumOfInstruction.english,
       campusSize: 10.5,
       classes: [],
-      subjects: [],
       academicEvents: [],
       sportsFacilities: [],
       musicAndArtFacilities: [],
@@ -569,8 +558,8 @@ class CreateSchoolController extends GetxController {
       numberOfBuildings: 3,
       noOfPeriodsPerDay: 8,
       schoolTimings: SchoolTimings(
-        arrivalTime: TimeOfDay(hour: 8, minute: 0),
-        departureTime: TimeOfDay(hour: 15, minute: 0),
+        arrivalTime: const TimeOfDay(hour: 8, minute: 0),
+        departureTime: const TimeOfDay(hour: 15, minute: 0),
       ),
       academicYear: '2023-2024',
       feeStructure: FeeStructure(year: "2025"),
@@ -655,7 +644,6 @@ class CreateSchoolController extends GetxController {
       mediumOfInstruction: MediumOfInstruction.english,
       campusSize: 8.2,
       classes: [],
-      subjects: [],
       academicEvents: [],
       sportsFacilities: [],
       musicAndArtFacilities: [],
@@ -675,8 +663,8 @@ class CreateSchoolController extends GetxController {
       numberOfBuildings: 4,
       noOfPeriodsPerDay: 7,
       schoolTimings: SchoolTimings(
-        arrivalTime: TimeOfDay(hour: 7, minute: 45),
-        departureTime: TimeOfDay(hour: 14, minute: 45),
+        arrivalTime: const TimeOfDay(hour: 7, minute: 45),
+        departureTime: const TimeOfDay(hour: 14, minute: 45),
       ),
       academicYear: '2023-2024',
       feeStructure: FeeStructure(year: "2025"),
@@ -690,7 +678,7 @@ class CreateSchoolController extends GetxController {
       lateFeePolicy: '2% per month after due date.',
       featuredNews: [],
       alumni: [],
-      feeDueDate: DateTime.now().add(Duration(days: 25)),
+      feeDueDate: DateTime.now().add(const Duration(days: 25)),
       totalStudents: 350,
       vehicles: [],
       classroomsList: [],
@@ -764,7 +752,6 @@ class CreateSchoolController extends GetxController {
       mediumOfInstruction: MediumOfInstruction.english,
       campusSize: 2.5,
       classes: [],
-      subjects: [],
       academicEvents: [],
       sportsFacilities: [],
       musicAndArtFacilities: [],
@@ -784,8 +771,8 @@ class CreateSchoolController extends GetxController {
       numberOfBuildings: 1,
       noOfPeriodsPerDay: 6,
       schoolTimings: SchoolTimings(
-        arrivalTime: TimeOfDay(hour: 9, minute: 0),
-        departureTime: TimeOfDay(hour: 13, minute: 0),
+        arrivalTime: const TimeOfDay(hour: 9, minute: 0),
+        departureTime: const TimeOfDay(hour: 13, minute: 0),
       ),
       academicYear: '2023-2024',
       feeStructure: FeeStructure(year: "2025"),
@@ -796,7 +783,7 @@ class CreateSchoolController extends GetxController {
       lateFeePolicy: 'Rs. 50 per week after due date.',
       featuredNews: [],
       alumni: [],
-      feeDueDate: DateTime.now().add(Duration(days: 20)),
+      feeDueDate: DateTime.now().add(const Duration(days: 20)),
       totalStudents: 150,
       vehicles: [],
       classroomsList: [],
@@ -835,15 +822,22 @@ class CreateSchoolController extends GetxController {
 
     try {
       await schoolsCollection.doc(school1.schoolId).set(school1.toMap());
-      print('School 1 sent to Firebase');
-
-      await schoolsCollection.doc(school2.schoolId).set(school2.toMap());
-      print('School 2 sent to Firebase');
-
-      await schoolsCollection.doc(school3.schoolId).set(school3.toMap());
-      print('School 3 sent to Firebase');
+      MySnackBar.showSuccessSnackBar('School 1 sent to Firebase');
     } catch (e) {
-      print('Error sending schools to Firebase: $e');
+      MySnackBar.showErrorSnackBar('Error sending schools to Firebase: $e');
+    }
+
+    try {
+      await schoolsCollection.doc(school2.schoolId).set(school2.toMap());
+      MySnackBar.showSuccessSnackBar('School 2 sent to Firebase');
+    } catch (e) {
+      MySnackBar.showErrorSnackBar('Error sending schools to Firebase: $e');
+    }
+    try {
+      await schoolsCollection.doc(school3.schoolId).set(school3.toMap());
+      MySnackBar.showSuccessSnackBar('School 3 sent to Firebase');
+    } catch (e) {
+      MySnackBar.showErrorSnackBar('Error sending schools to Firebase: $e');
     }
   }
 }

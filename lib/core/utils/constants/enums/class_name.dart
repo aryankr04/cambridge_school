@@ -41,12 +41,9 @@ extension ClassNameExtension on ClassName {
   /// Converts a string value to the corresponding `ClassName` enum.
   static ClassName fromString(String value) {
     String lowerValue = value.toLowerCase();
-    if (_labelToEnum.containsKey(lowerValue)) {
-      return _labelToEnum[lowerValue]!; // Use the non-null assertion operator !
-    } else {
-      return ClassName.other;
-    }
+    return _labelToEnum[lowerValue] ?? ClassName.other;
   }
+
 
 
   /// Returns a list of all display names.

@@ -1,3 +1,4 @@
+import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -47,7 +48,7 @@ class MyTimePickerField extends StatelessWidget {
           const SizedBox(height: 6),
         ],
         Padding(
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.only(bottom: MySizes.md),
           child: InkWell(
             onTap: () => _selectTime(context),
             child: InputDecorator(

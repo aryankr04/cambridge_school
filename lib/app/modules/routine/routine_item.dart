@@ -7,96 +7,8 @@ import 'package:cambridge_school/core/widgets/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-enum TimelineItemType {
-  classEvent,
-  breakEvent,
-  departure,
-  assembly,
-  start,
-}
+import '../../../core/utils/constants/enums/schedule_event_type.dart';
 
-extension TimelineItemTypeExtension on TimelineItemType {
-  static TimelineItemType fromString(String type) {
-    switch (type) {
-      case 'Class':
-        return TimelineItemType.classEvent;
-      case 'Break':
-        return TimelineItemType.breakEvent;
-      case 'Assembly':
-        return TimelineItemType.assembly;
-      case 'Departure':
-        return TimelineItemType.departure;
-      default:
-        return TimelineItemType.start;
-    }
-  }
-
-  String get displayName {
-    switch (this) {
-      case TimelineItemType.classEvent:
-        return 'Class';
-      case TimelineItemType.breakEvent:
-        return 'Break';
-      case TimelineItemType.assembly:
-        return 'Assembly';
-      case TimelineItemType.departure:
-        return 'Departure';
-      case TimelineItemType.start:
-        return 'Start';
-    }
-  }
-
-  String get emoji {
-    switch (this) {
-      case TimelineItemType.classEvent:
-        return '📝'; // Class
-      case TimelineItemType.breakEvent:
-        return '🍔'; // Break
-      case TimelineItemType.departure:
-        return '🚌'; // Departure
-      case TimelineItemType.start:
-        return '🛎️'; // School Start
-      case TimelineItemType.assembly:
-        return '🥁'; // Assembly
-      default:
-        return '❓'; // Default/Unknown
-    }
-  }
-
-  Color get color {
-    switch (this) {
-      case TimelineItemType.classEvent:
-        return MyDynamicColors.activeBlue;
-      case TimelineItemType.breakEvent:
-        return MyDynamicColors.activeOrange;
-      case TimelineItemType.departure:
-        return MyDynamicColors.activeRed;
-      case TimelineItemType.start:
-        return MyDynamicColors.activeGreen;
-      case TimelineItemType.assembly:
-        return MyDynamicColors.activeOrange;
-      default:
-        return Colors.black;
-    }
-  }
-
-  String getText(String? subject) {
-    switch (this) {
-      case TimelineItemType.classEvent:
-        return subject ?? '';
-      case TimelineItemType.breakEvent:
-        return 'Break';
-      case TimelineItemType.departure:
-        return 'Departure';
-      case TimelineItemType.start:
-        return 'Start';
-      case TimelineItemType.assembly:
-        return 'Assembly';
-      default:
-        return '';
-    }
-  }
-}
 
 class EventItem extends StatelessWidget {
   final int? period;
@@ -109,7 +21,7 @@ class EventItem extends StatelessWidget {
   final String? classTeacherName;
   final String? className;
   final String? sectionName;
-  final TimelineItemType itemType;
+  final ScheduleEventType itemType;
   final VoidCallback? onDeletePressed;
   final VoidCallback? onEditPressed;
 
@@ -133,7 +45,7 @@ class EventItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stripColor = itemType.color;
-    final itemText = itemType.getText(subject);
+    final itemText = itemType.displayName;
     final itemEmoji = itemType.emoji;
 
     return Container(
@@ -206,7 +118,7 @@ class EventItem extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: MyTextStyle.bodyLarge,
                               ),
-                              if (itemType == TimelineItemType.classEvent &&
+                              if (itemType == ScheduleEventType.classSession &&
                                   classTeacherName != null) ...[
                                 const SizedBox(height: MySizes.xs - 2),
                                 Row(

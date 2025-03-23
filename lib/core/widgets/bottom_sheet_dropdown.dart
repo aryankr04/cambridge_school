@@ -14,19 +14,19 @@ enum DropdownWidgetType { general, filter, choiceChip }
 
 class MyBottomSheetDropdownController extends GetxController {
   final String? hintText;
-  final Function(String)? onSingleChanged; // Changed to non-nullable String
+  final Function(String)? onSingleChanged;
   final Function(List<String>?)? onMultipleChanged;
   final bool isMultipleSelection;
   final bool showAllOption;
   final String tag;
 
-  RxList<String> options = <String>[].obs;
+  RxList<String> options = <String>[].obs; // Make this an RxList
   RxList<String> selectedValues = <String>[].obs;
   RxString errorText = RxString('');
-  Rx<String> selectedValue = Rx<String>(''); // Changed to non-nullable String
+  Rx<String> selectedValue = Rx<String>('');
 
   List<String>? _initialValues;
-  final Rx<String> initialSelectedValue; // Changed to non-nullable String
+  final Rx<String> initialSelectedValue;
 
   MyBottomSheetDropdownController({
     this.hintText,
@@ -38,8 +38,7 @@ class MyBottomSheetDropdownController extends GetxController {
     String? initialSelectedValuePassed,
     List<String>? initialValues,
     required this.tag,
-  })  : initialSelectedValue = Rx<String>(
-            initialSelectedValuePassed ?? ''), // Provide default empty string
+  })  : initialSelectedValue = Rx<String>(initialSelectedValuePassed ?? ''),
         assert(
           (isMultipleSelection && onMultipleChanged != null) ||
               (!isMultipleSelection && onSingleChanged != null),
@@ -51,7 +50,6 @@ class MyBottomSheetDropdownController extends GetxController {
     selectedValues.clear();
 
     if (initialSelectedValue.value.isNotEmpty) {
-      // Check if initialSelectedValuePassed is not null or empty
       selectedValue.value = initialSelectedValue.value;
       selectedValues.add(initialSelectedValue.value);
     } else if (_initialValues != null) {
@@ -70,7 +68,6 @@ class MyBottomSheetDropdownController extends GetxController {
       if (!isMultipleSelection) {
         selectedValues.clear();
         if (newValue.isNotEmpty) {
-          // Only add if new value is not empty
           selectedValues.add(newValue);
         }
       }
@@ -84,7 +81,6 @@ class MyBottomSheetDropdownController extends GetxController {
     selectedValues.clear();
 
     if (initialSelectedValue.value.isNotEmpty) {
-      // Check if initialSelectedValuePassed is not null or empty
       selectedValue.value = initialSelectedValue.value;
       selectedValues.add(initialSelectedValue.value);
     } else {
@@ -94,8 +90,7 @@ class MyBottomSheetDropdownController extends GetxController {
         if (value != null && value.isNotEmpty) {
           selectedValue.value = value.first;
         } else {
-          selectedValue.value =
-              ''; // Set to empty string when there is no initial value
+          selectedValue.value = '';
         }
       }
     }
@@ -111,9 +106,8 @@ class MyBottomSheetDropdownController extends GetxController {
     if (isMultipleSelection) {
       onMultipleChanged?.call(selectedValues.toList());
     } else {
-      selectedValue.value = selectedValues.isNotEmpty
-          ? selectedValues.first
-          : ''; // Set to empty string when selected values is empty
+      selectedValue.value =
+          selectedValues.isNotEmpty ? selectedValues.first : '';
       onSingleChanged?.call(selectedValue.value);
     }
     validate();
@@ -124,9 +118,7 @@ class MyBottomSheetDropdownController extends GetxController {
   void validate() {
     if (options.isNotEmpty) {
       final isValid = selectedValues.isNotEmpty ||
-          (!isMultipleSelection &&
-              selectedValue
-                  .value.isNotEmpty); //validate for empty string as value
+          (!isMultipleSelection && selectedValue.value.isNotEmpty);
       errorText.value = isValid
           ? ''
           : isMultipleSelection
@@ -155,7 +147,7 @@ class MyBottomSheetDropdown extends StatefulWidget {
   final String? labelText;
   final TextStyle? labelStyle;
   final String? hintText;
-  final Function(String)? onSingleChanged; // Changed to non-nullable String
+  final Function(String)? onSingleChanged;
   final Function(List<String>?)? onMultipleChanged;
   final List<Map<String, dynamic>> optionsForIconWithDescription;
   final List<Map<String, IconData>> optionsForIcon;
@@ -222,10 +214,24 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
   void didUpdateWidget(covariant MyBottomSheetDropdown oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (widget.optionsForChips != oldWidget.optionsForChips) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.options.assignAll(widget.optionsForChips);
+
+        // Filter selectedValues to remove invalid options
+        controller.selectedValues
+            .removeWhere((value) => !controller.options.contains(value));
+
+        controller.validate(); // Revalidate after filtering
+      });
+    }
+
     if (widget.selectedValue != null &&
         oldWidget.selectedValue != widget.selectedValue) {
-      controller.initialSelectedValue.value =
-          widget.selectedValue?.value ?? ''; // Provide default empty string
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.initialSelectedValue.value =
+            widget.selectedValue?.value ?? '';
+      });
     }
   }
 
@@ -269,7 +275,10 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
         return GeneralDropdownContainer(
           hintText: widget.hintText ?? 'Select ${widget.labelText}',
           controller: controller,
-          onTap: () => _showOptionsBottomSheet(context),
+          onTap: () {
+            // Show the bottom sheet using Obx
+            _showOptionsBottomSheet(context);
+          },
           showMultiple: widget.showMultiple,
           isValid: widget.isValid,
           prefixIcon: widget.prefixIcon,
@@ -279,7 +288,10 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
         return FilterDropdownContainer(
           hintText: widget.hintText ?? 'Select ${widget.labelText}',
           controller: controller,
-          onTap: () => _showOptionsBottomSheet(context),
+          onTap: () {
+            // Show the bottom sheet using Obx
+            _showOptionsBottomSheet(context);
+          },
           showMultiple: widget.showMultiple,
           isValid: widget.isValid,
         );
@@ -291,6 +303,7 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
     }
   }
 
+  // Helper method to show the bottom sheet with options
   Future<void> _showOptionsBottomSheet(BuildContext context) async {
     switch (widget.dropdownOptionType) {
       case DropdownOptionType.chip:
@@ -303,161 +316,6 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
         _showIconWithDescriptionBottomSheet(context);
         break;
     }
-  }
-
-  Future<void> _showIconWithDescriptionBottomSheet(BuildContext context) async {
-    showModalBottomSheet(
-      showDragHandle: false,
-      context: context,
-      builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Select ${widget.labelText}',
-                    style: MyTextStyle.headlineSmall.copyWith(fontSize: 18),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SingleChildScrollView(
-                  child: Column(
-                    children: widget.optionsForIconWithDescription.map((item) {
-                      final title = item['title'] as String;
-                      final description = item['description'] as String;
-                      final icon = item['icon'] as IconData;
-
-                      return ListTile(
-                        leading: Icon(icon),
-                        title: Text(title),
-                        subtitle: Text(description),
-                        onTap: () {
-                          controller.setSelectedValues([title]);
-                          Navigator.of(context).pop();
-                          if (!widget.isMultipleSelection) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (widget.isMultipleSelection)
-                  ElevatedButton(
-                    child: const Text('Close'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _showFilterChipBottomSheet(BuildContext context) async {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.only(
-                left: MySizes.md, right: MySizes.md, bottom: MySizes.md),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Select ${widget.labelText ?? widget.hintText}',
-                    style: MyTextStyle.headlineSmall.copyWith(fontSize: 18),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Obx(
-                  () => SingleChildScrollView(
-                    child: Wrap(
-                      spacing: 8.0,
-                      children: controller.options.map((option) {
-                        final isSelected = controller.isOptionSelected(option);
-                        return FilterChip(
-                          side: BorderSide(
-                            width: 1,
-                            color: isSelected
-                                ? MyColors.activeBlue
-                                : Colors.transparent,
-                          ),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24)),
-                          label: Text(
-                            option,
-                            style: isSelected
-                                ? const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13)
-                                : const TextStyle(
-                                    color: MyColors.subtitleTextColor,
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 13),
-                          ),
-                          showCheckmark: false,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: MySizes.sm, vertical: MySizes.sm - 4),
-                          selectedColor: MyColors.activeBlue,
-                          backgroundColor: isSelected
-                              ? MyColors.activeBlue
-                              : Colors.grey[200],
-                          checkmarkColor: MyColors.activeBlue,
-                          selected: isSelected,
-                          onSelected: (bool selected) {
-                            if (selected) {
-                              if (!widget.isMultipleSelection) {
-                                controller.selectedValues.clear();
-                              }
-                              controller.selectedValues.add(option);
-                            } else {
-                              controller.selectedValues.remove(option);
-                            }
-
-                            if (!widget.isMultipleSelection) {
-                              Navigator.of(context).pop();
-                            }
-
-                            final selectedValues =
-                                controller.selectedValues.toList();
-                            controller.setSelectedValues(selectedValues);
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (widget.isMultipleSelection)
-                  ElevatedButton(
-                    child: const Text('Done'),
-                    onPressed: () {
-                      final selectedValues = controller.selectedValues.toList();
-                      controller.setSelectedValues(selectedValues);
-
-                      Navigator.of(context).pop();
-                    },
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Future<void> _showIconBottomSheet(BuildContext context) async {
@@ -520,6 +378,164 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
       },
     );
   }
+
+  Future<void> _showIconWithDescriptionBottomSheet(BuildContext context) async {
+    showModalBottomSheet(
+      showDragHandle: false,
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Select ${widget.labelText}',
+                    style: MyTextStyle.headlineSmall.copyWith(fontSize: 18),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SingleChildScrollView(
+                  child: Column(
+                    children: widget.optionsForIconWithDescription.map((item) {
+                      final title = item['title'] as String;
+                      final description = item['description'] as String;
+                      final icon = item['icon'] as IconData;
+
+                      return ListTile(
+                        leading: Icon(icon),
+                        title: Text(title),
+                        subtitle: Text(description),
+                        onTap: () {
+                          controller.setSelectedValues([title]);
+                          Navigator.of(context).pop();
+                          if (!widget.isMultipleSelection) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (widget.isMultipleSelection)
+                  ElevatedButton(
+                    child: const Text('Close'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showFilterChipBottomSheet(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return Obx(() => SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.only(
+                    left: MySizes.md, right: MySizes.md, bottom: MySizes.md),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Select ${widget.labelText ?? widget.hintText}',
+                        style: MyTextStyle.headlineSmall.copyWith(fontSize: 18),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SingleChildScrollView(
+                      child: Wrap(
+                        spacing: 8.0 + 4,
+                        runSpacing: 8 + 4,
+                        children: controller.options.map((option) {
+                          final isSelected =
+                              controller.isOptionSelected(option);
+                          return GestureDetector(
+                            onTap: () {
+                              if (!widget.isMultipleSelection) {
+                                controller.selectedValues.clear();
+                              }
+                              isSelected
+                                  ? controller.selectedValues.remove(option)
+                                  : controller.selectedValues.add(option);
+
+                              controller.setSelectedValues(
+                                  List.of(controller.selectedValues));
+
+                              if (!widget.isMultipleSelection) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            child: Container(
+                              constraints:
+                                  BoxConstraints(minWidth: Get.width * 0.12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: MySizes.sm + 4,
+                                  vertical: MySizes.sm),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? MyColors.activeBlue.withOpacity(0.1)
+                                    : MyDynamicColors
+                                        .backgroundColorGreyLightGrey,
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  width: 1,
+                                  color: isSelected
+                                      ? MyColors.activeBlue
+                                      : Colors.transparent,
+                                ),
+                              ),
+                              child: Text(
+                                textAlign: TextAlign.center,
+                                option,
+                                style: MyTextStyle.labelLarge.copyWith(
+                                  color:
+                                      isSelected ? MyColors.activeBlue : null,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (widget.isMultipleSelection)
+                      ElevatedButton(
+                        child: const Text('Done'),
+                        onPressed: () {
+                          final selectedValues =
+                              controller.selectedValues.toList();
+                          controller.setSelectedValues(selectedValues);
+
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            ));
+      },
+    );
+  }
 }
 
 class GeneralDropdownContainer extends StatelessWidget {
@@ -568,13 +584,11 @@ class GeneralDropdownContainer extends StatelessWidget {
                 child: Obx(() {
                   return Text(
                     controller.selectedValues.isEmpty &&
-                            controller.selectedValue.value
-                                .isEmpty //Validate for empty string value
+                            controller.selectedValue.value.isEmpty
                         ? hintText
                         : _getDisplayText(controller),
                     style: controller.selectedValues.isEmpty &&
-                            controller.selectedValue.value
-                                .isEmpty //Validate for empty string value
+                            controller.selectedValue.value.isEmpty
                         ? MyTextStyle.placeholder
                         : MyTextStyle.inputField,
                     maxLines: null,
@@ -651,8 +665,7 @@ class FilterDropdownContainer extends StatelessWidget {
                   child: Obx(() {
                     return Text(
                       (controller.selectedValues.isEmpty &&
-                              controller.selectedValue.value
-                                  .isEmpty) //Validate for empty string value
+                              controller.selectedValue.value.isEmpty)
                           ? hintText
                           : _getDisplayText(controller),
                       style: MyTextStyle.inputField
@@ -720,7 +733,7 @@ class ChoiceChipDropdownContainer extends StatelessWidget {
               child: Container(
                 constraints: BoxConstraints(minWidth: Get.width * 0.12),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: MySizes.sm+4, vertical: MySizes.sm),
+                    horizontal: MySizes.sm + 4, vertical: MySizes.sm),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? MyColors.activeBlue.withOpacity(0.1)

@@ -370,8 +370,10 @@ class MyLists {
 
   static const List<String> examOptions = [
     'FA1',
+    'FA2',
     'Half Yearly',
     'FA2',
+    'FA3',
     'Final Exam'
   ];
 

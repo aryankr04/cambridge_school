@@ -1,13 +1,15 @@
-import 'package:cambridge_school/app/modules/routine/routine_model.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
+import 'package:cambridge_school/core/widgets/snack_bar.dart';
+
+import '../routine/routine_model.dart';
 
 class ClassModel {
   final String id;
   final String schoolId;
   final String? academicYear;
   final ClassName className;
-  late final List<SectionModel> sections;
-  late final List<String> subjects;
+  final List<SectionModel> sections;
+  final List<String> subjects;
   final List<ExamSyllabus> examSyllabus;
 
   ClassModel({
@@ -15,48 +17,40 @@ class ClassModel {
     required this.schoolId,
     this.academicYear,
     required this.className,
-    List<SectionModel>? sections,
-    List<String>? subjects,
+    this.sections = const [],
+    this.subjects = const [],
     required this.examSyllabus,
-  })  : sections = sections ?? [],
-        subjects = subjects ?? [];
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is ClassModel && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  });
 
   factory ClassModel.fromMap(Map<String, dynamic> map, String? documentId) {
     return ClassModel(
-      id: map['id']as String,
+      id: map['id'] as String,
       schoolId: map['schoolId'] as String,
       academicYear: map['academicYear'] as String?,
       className: ClassNameExtension.fromString(map['className'] as String),
       sections: (map['sections'] as List<dynamic>?)
-          ?.map((dynamic sectionData) => SectionModel.fromMap(
-          sectionData as Map<String, dynamic>, null))
-          .toList(),
-      subjects: (map['subjects'] as List<dynamic>?)?.cast<String>() ?? [],
+              ?.map((dynamic sectionData) => SectionModel.fromMap(
+                  sectionData as Map<String, dynamic>, null))
+              .toList() ??
+          const [],
+      subjects: (map['subjects'] as List<dynamic>?)?.cast<String>() ?? const [],
       examSyllabus: (map['examSyllabus'] as List<dynamic>?)
-          ?.map((dynamic e) =>
-          ExamSyllabus.fromMap(e as Map<String, dynamic>))
-          .toList() ??
-          [],
+              ?.map((dynamic e) =>
+                  ExamSyllabus.fromMap(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id':id,
+      'id': id,
       'schoolId': schoolId,
       'academicYear': academicYear,
-      'className': className.label, // Store the enum name, not the label
-      'sections': sections.map((SectionModel section) => section.toMap()).toList(),
+      'className': className.label,
+      'sections': sections.map((section) => section.toMap()).toList(),
       'subjects': subjects,
-      'examSyllabus': examSyllabus.map((ExamSyllabus e) => e.toMap()).toList(),
+      'examSyllabus': examSyllabus.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -79,66 +73,151 @@ class ClassModel {
       examSyllabus: examSyllabus ?? this.examSyllabus,
     );
   }
+
   void sortSections() {
-    sections.sort((a, b) {
-      String nameA = a.sectionName ?? "";
-      String nameB = b.sectionName ?? "";
-      return nameA.compareTo(nameB);
-    });
+    sections.sort((a, b) => (a.sectionName).compareTo(b.sectionName));
+  }
+
+  // Add a Section
+  void addSection(SectionModel section) {
+    sections.add(section);
+  }
+
+  // Update a Section
+  void updateSection(String sectionName, SectionModel updatedSection) {
+    final index = sections.indexWhere((s) => s.sectionName == sectionName);
+    if (index != -1) {
+      sections[index] = updatedSection;
+    } else {
+      print(
+          'Section $sectionName not found for updating.'); // Optional: Handle the case where the section doesn't exist.  Perhaps throw an exception or return a boolean indicating success/failure.
+    }
+  }
+
+  // Delete a Section
+  void deleteSection(String sectionName) {
+    sections.removeWhere((s) => s.sectionName == sectionName);
+  }
+
+  void addEventToRoutine(String sectionName, String day, Event event) {
+    try {
+
+      final section = sections.firstWhere(
+        (s) => s.sectionName == sectionName,
+      );
+
+      final dailyRoutine = section.routine.firstWhere(
+        (dr) => dr.day == day,
+        orElse: () {
+          final newDailyRoutine = DailyRoutine(day: day, events: []);
+          section.routine.add(newDailyRoutine);
+          return newDailyRoutine;
+        },
+      );
+
+      dailyRoutine.events.add(event);
+      MySnackBar.showSuccessSnackBar('Event added successfully.');
+    } catch (e) {
+      print(
+          'Error adding event: $e'); // More informative error message.  Consider re-throwing or handling appropriately.
+    }
+  }
+
+  void updateEventInRoutine(
+      String sectionName, String day, int index, Event updatedEvent) {
+    try {
+      final section = sections.firstWhere(
+        (s) => s.sectionName == sectionName,
+      );
+
+      final dailyRoutine = section.routine.firstWhere(
+        (dr) => dr.day == day,
+      );
+
+      if (index >= 0 && index < dailyRoutine.events.length) {
+        dailyRoutine.events[index] = updatedEvent;
+      } else {
+        print(
+            'Event not found at index $index on day $day for section $sectionName.');
+      }
+    } catch (e) {
+      print(
+          'Error updating event: $e'); //More informative.  Consider re-throwing or handling appropriately.
+    }
+  }
+
+  void deleteEventInRoutine(String sectionName, String day, int index) {
+    try {
+      final section = sections.firstWhere(
+        (s) => s.sectionName == sectionName,
+      );
+
+      final dailyRoutine = section.routine.firstWhere(
+        (dr) => dr.day == day,
+      );
+
+      if (index >= 0 && index < dailyRoutine.events.length) {
+        dailyRoutine.events.removeAt(index);
+      } else {
+        print(
+            'Event not found at index $index on day $day for section $sectionName.');
+      }
+    } catch (e) {
+      print(
+          'Error deleting event: $e'); //More informative.  Consider re-throwing or handling appropriately.
+    }
   }
 }
 
 class SectionModel {
-  final String? sectionName;
-  final String? classTeacherId;
-  final String? classTeacherName;
-  final int? capacity;
-  final String? roomNumber;
+  final String sectionName;
+  final String classTeacherId;
+  final String classTeacherName;
+  final int capacity;
+  final String roomNumber;
   final List<Student> students;
-  final WeeklyRoutine? routine;
+  final List<DailyRoutine> routine;
 
   SectionModel({
-    this.sectionName,
-    this.classTeacherId,
-    this.classTeacherName,
-    this.capacity,
-    this.roomNumber,
-    List<Student>? students,
-    this.routine,
-  }) : students = students ?? [];
+    required this.sectionName,
+    required this.classTeacherId,
+    required this.classTeacherName,
+    required this.capacity,
+    required this.roomNumber,
+    required this.students,
+    this.routine = const [],
+  });
 
   factory SectionModel.fromMap(Map<String, dynamic> data, String? documentId) {
     return SectionModel(
-      sectionName: data['sectionName'] as String?,
-      classTeacherId: data['classTeacherId'] as String?,
-      classTeacherName: data['classTeacherName'] as String?,
-      capacity: data['capacity'] as int?,
-      roomNumber: data['roomNumber'] as String?,
+      sectionName: data['sectionName'] as String,
+      classTeacherId: data['classTeacherId'] as String,
+      classTeacherName: data['classTeacherName'] as String,
+      capacity: data['capacity'] as int,
+      roomNumber: data['roomNumber'] as String,
       students: (data['students'] as List<dynamic>?)
-          ?.map((dynamic studentData) =>
-          Student.fromMap(studentData as Map<String, dynamic>))
-          .toList() ??
-          [],
-      routine: data['routine'] != null
-          ? WeeklyRoutine.fromMap(
-          data['routine'] as Map<String, dynamic>, documentId ?? '')
-          : null,
+              ?.map((dynamic studentData) =>
+                  Student.fromMap(studentData as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      routine: (data['routine'] as List<dynamic>?)
+              ?.map((dynamic routineData) =>
+                  DailyRoutine.fromMap(routineData as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
   Map<String, dynamic> toMap() {
-    final map = <String, dynamic>{
+    return {
       'sectionName': sectionName,
       'classTeacherId': classTeacherId,
       'classTeacherName': classTeacherName,
       'capacity': capacity,
       'roomNumber': roomNumber,
-      'students': students.map((Student student) => student.toMap()).toList(),
+      'students': students.map((student) => student.toMap()).toList(),
+      'routine': routine.map((dailyRoutine) => dailyRoutine.toMap()).toList(),
     };
-    if (routine != null) {
-      map['routine'] = routine!.toMap();
-    }
-    return map;
   }
 
   SectionModel copyWith({
@@ -148,7 +227,7 @@ class SectionModel {
     int? capacity,
     String? roomNumber,
     List<Student>? students,
-    WeeklyRoutine? routine,
+    List<DailyRoutine>? routine,
   }) {
     return SectionModel(
       sectionName: sectionName ?? this.sectionName,
@@ -163,17 +242,17 @@ class SectionModel {
 }
 
 class Student {
-  final String? id;
-  final String? name;
-  final String? roll;
+  final String id;
+  final String name;
+  final String roll;
 
-  Student({this.id, this.name, this.roll});
+  Student({required this.id, required this.name, required this.roll});
 
   factory Student.fromMap(Map<String, dynamic> map) {
     return Student(
-      id: map['id'] as String?,
-      name: map['name'] as String?,
-      roll: map['roll'] as String?,
+      id: map['id'] as String,
+      name: map['name'] as String,
+      roll: map['roll'] as String,
     );
   }
 
@@ -199,60 +278,56 @@ class Student {
 }
 
 class ExamSyllabus {
-  final String? id;
-  final String? examName;
+  final String examName;
   final List<ExamSubject> subjects;
-  final DateTime? createdAt;
+  final DateTime createdAt;
   final DateTime? updatedAt;
 
   ExamSyllabus({
-    this.id,
-    this.examName,
+    required this.examName,
     required this.subjects,
-    this.createdAt,
+    required this.createdAt,
     this.updatedAt,
   });
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is ExamSyllabus && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  String toString() {
+    return 'ExamSyllabus{examName: $examName, subjects: $subjects, createdAt: $createdAt, updatedAt: $updatedAt}';
+  }
 
   factory ExamSyllabus.fromMap(Map<String, dynamic> map) {
     return ExamSyllabus(
-      id: map['id'] as String?,
-      examName: map['examName'] as String?,
+      examName: map['examName'] as String,
       subjects: (map['subjects'] as List<dynamic>?)
-          ?.map((dynamic s) =>
-          ExamSubject.fromMap(s as Map<String, dynamic>))
-          .toList() ??
-          [],
-      createdAt: DateTime.tryParse(map['createdAt'] as String? ?? ''),
-      updatedAt: DateTime.tryParse(map['updatedAt'] as String? ?? ''),
+              ?.map(
+                  (dynamic s) => ExamSubject.fromMap(s as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      createdAt: map['createdAt'] != null
+          ? DateTime.parse(map['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.tryParse(map['updatedAt'] as String)
+          : null,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'examName': examName,
-      'subjects': subjects.map((ExamSubject s) => s.toMap()).toList(),
-      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      'subjects': subjects.map((s) => s.toMap()).toList(),
+      'createdAt': createdAt.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
     };
   }
 
   ExamSyllabus copyWith({
-    String? id,
     String? examName,
     List<ExamSubject>? subjects,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return ExamSyllabus(
-      id: id ?? this.id,
       examName: examName ?? this.examName,
       subjects: subjects ?? this.subjects,
       createdAt: createdAt ?? this.createdAt,
@@ -279,13 +354,13 @@ class ExamSubject {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is ExamSubject &&
-              runtimeType == other.runtimeType &&
-              subjectName == other.subjectName &&
-              topics == other.topics &&
-              examDate == other.examDate &&
-              totalMarks == other.totalMarks &&
-              examType == other.examType;
+      other is ExamSubject &&
+          runtimeType == other.runtimeType &&
+          subjectName == other.subjectName &&
+          topics == other.topics &&
+          examDate == other.examDate &&
+          totalMarks == other.totalMarks &&
+          examType == other.examType;
 
   @override
   int get hashCode =>
@@ -298,7 +373,7 @@ class ExamSubject {
   Map<String, dynamic> toMap() {
     return {
       'subjectName': subjectName,
-      'topics': topics.map((Topic t) => t.toMap()).toList(),
+      'topics': topics.map((t) => t.toMap()).toList(),
       'examDate': examDate.toIso8601String(),
       'totalMarks': totalMarks,
       'examType': examType,
@@ -348,14 +423,15 @@ class Topic {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is Topic &&
-              runtimeType == other.runtimeType &&
-              topicName == other.topicName &&
-              subtopics == other.subtopics &&
-              topicMarks == other.topicMarks;
+      other is Topic &&
+          runtimeType == other.runtimeType &&
+          topicName == other.topicName &&
+          subtopics == other.subtopics &&
+          topicMarks == other.topicMarks;
 
   @override
-  int get hashCode => topicName.hashCode ^ subtopics.hashCode ^ topicMarks.hashCode;
+  int get hashCode =>
+      topicName.hashCode ^ subtopics.hashCode ^ topicMarks.hashCode;
 
   Map<String, dynamic> toMap() {
     return {
@@ -396,11 +472,11 @@ class SubjectModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is SubjectModel &&
-              runtimeType == other.runtimeType &&
-              id == other.id &&
-              name == other.name &&
-              teacherId == other.teacherId;
+      other is SubjectModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          teacherId == other.teacherId;
 
   @override
   int get hashCode => id.hashCode ^ name.hashCode ^ teacherId.hashCode;

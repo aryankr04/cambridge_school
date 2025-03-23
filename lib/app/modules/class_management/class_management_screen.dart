@@ -13,8 +13,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-import '../class_management/class_model.dart';
+
+import '../../../../core/widgets/snack_bar.dart';
 import 'class_management_controller.dart';
+import 'class_model.dart';
 
 class ClassManagementScreen extends GetView<ClassManagementController> {
   const ClassManagementScreen({super.key});
@@ -43,11 +45,15 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
             padding: const EdgeInsets.all(MySizes.md),
             decoration: const BoxDecoration(
               color: Colors.white,
-              // borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                FilledButton(
+                    onPressed: () {
+                      controller.generateAndUploadDummyClasses();
+                    },
+                    child: const Text('Create Dummy Classes')),
                 _buildClassSelectionHeader(),
                 const SizedBox(height: MySizes.sm),
                 MyBottomSheetDropdown(
@@ -71,9 +77,6 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text("Select a Class", style: MyTextStyle.headlineSmall),
-        const SizedBox(
-          height: MySizes.sm,
-        ),
         TextButton.icon(
           onPressed: _showAddClassDialog,
           label: const Text('Add Class'),
@@ -196,7 +199,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
   Widget _buildSectionsList() {
     final sections = controller.selectedClass.value?.sections ?? [];
 
-    if (sections.isNotEmpty ?? false) {
+    if (sections.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
         child: Column(
@@ -331,7 +334,8 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
           if (className.isNotEmpty) {
             controller.onAddClassButtonPressed(className);
           }
-          Get.back();
+          Navigator.of(Get.context!)
+              .pop(); // Use Navigator instead of Get.back()
         },
       ),
     );
@@ -347,7 +351,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
           if (className.isNotEmpty) {
             controller.updateClassName(className);
           }
-          Get.back();
+          Navigator.of(Get.context!).pop();
         },
       ),
     );
@@ -389,7 +393,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
         _buildDialogActions(
           isUpdate: isUpdate,
           onAdd: () => onAdd(selectedClassName.value),
-          onCancel: () => Get.back(),
+          onCancel: () => Navigator.of(Get.context!).pop(),
         ),
       ],
     );
@@ -429,7 +433,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
         controller.deleteClassFromFirebase(controller.selectedClass.value!);
       });
     } else {
-      Get.snackbar('Warning', 'No class selected to delete.');
+      MySnackBar.showAlertSnackBar('No class selected to delete.');
     }
   }
 
@@ -439,15 +443,12 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
   }
 
   void _showEditSectionDialog(int index, SectionModel section) {
-    // Added index parameter
     Get.dialog(
       _buildSectionDialog(
         title: 'Edit Section',
         section: section,
         onSave: (updatedSection) {
-          // The type is now explicitly SectionModel
-          controller.updateSectionAtIndex(
-              index, updatedSection); // Use the index!
+          controller.updateSectionAtIndex(index, updatedSection);
         },
         isUpdate: true,
       ),
@@ -523,9 +524,9 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
               students: section?.students ?? [],
             );
             onSave(newSection);
-            Get.back();
+            Navigator.of(Get.context!).pop();
           },
-          onCancel: () => Get.back(),
+          onCancel: () => Navigator.of(Get.context!).pop(),
         ),
       ],
     );
@@ -582,10 +583,10 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
           onAdd: () {
             if (subjectNameController.text.isNotEmpty) {
               onSave(subjectNameController.text);
-              Get.back();
+              Navigator.of(Get.context!).pop();
             }
           },
-          onCancel: () => Get.back(),
+          onCancel: () => Navigator.of(Get.context!).pop(),
         ),
       ],
     );
@@ -766,7 +767,6 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
       icon: Icon(
         icon,
         color: color,
-        // size: 20,
       ),
     );
   }

@@ -24,7 +24,7 @@ import 'package:cambridge_school/core/utils/constants/enums/school_specializatio
 
 class EditSchoolController extends GetxController
     with GetTickerProviderStateMixin {
-  final FirestoreSchoolRepository schoolRepository;
+  final SchoolRepository schoolRepository;
   final UserRepository firebaseFunction;
   final FirebaseStorageService firebaseStorageService;
   final FirestoreService firestoreService;
@@ -34,11 +34,11 @@ class EditSchoolController extends GetxController
 
   EditSchoolController({
     required String initialSchoolId, // Pass initialSchoolId to the constructor
-    FirestoreSchoolRepository? schoolRepository,
+    SchoolRepository? schoolRepository,
     UserRepository? firebaseFunction,
     FirebaseStorageService? firebaseStorageService,
     FirestoreService? firestoreService,
-  })  : schoolRepository = schoolRepository ?? FirestoreSchoolRepository(),
+  })  : schoolRepository = schoolRepository ?? SchoolRepository(),
         firebaseFunction = firebaseFunction ?? UserRepository(),
         firebaseStorageService =
             firebaseStorageService ?? FirebaseStorageService(),
@@ -155,7 +155,7 @@ class EditSchoolController extends GetxController
   Future<void> fetchSchoolData() async {
     isLoading.value = true;
     try {
-      final school = await schoolRepository.getSchoolById(schoolId.value);
+      final school = await schoolRepository.getSchool(schoolId.value);
       // MyHelperFunctions.showErrorSnackBar('School found!');
 
       if (school != null) {
@@ -394,7 +394,6 @@ class EditSchoolController extends GetxController
       staffRooms: [],
       status: AccountStatus.active,
       studentTeacherRatio: 0,
-      subjects: [],
       totalBoys: 0,
       totalGirls: 0,
       totalStudents: 0,

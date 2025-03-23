@@ -1,6 +1,7 @@
-import 'package:cambridge_school/app/modules/class_management/class_management_repositories.dart';
+import 'package:cambridge_school/app/modules/class_management/class_repository.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:nanoid/nanoid.dart';
 
 import '../../school_management/school_model.dart';
 import '../../school_management/school_repository.dart';
@@ -23,18 +24,18 @@ class AttendanceRecordController extends GetxController {
 
   //----------------------------------------------------------------------------
   // Repositories
-  final FirestoreSchoolRepository schoolRepository;
-  final ClassManagementRepository classManagementRepository;
+  final SchoolRepository schoolRepository;
+  final ClassRepository classRepository;
   final FirestoreAttendanceRecordRepository attendanceRepository;
 
   //----------------------------------------------------------------------------
   // Constructor
   AttendanceRecordController({
-    FirestoreSchoolRepository? schoolRepo,
+    SchoolRepository? schoolRepo,
     FirestoreAttendanceRecordRepository? attendanceRepo,
-    ClassManagementRepository? classRepo
-  })  : schoolRepository = schoolRepo ?? FirestoreSchoolRepository(),
-        classManagementRepository = classRepo ?? ClassManagementRepository(),
+    ClassRepository? classRepo
+  })  : schoolRepository = schoolRepo ?? SchoolRepository(),
+        classRepository = classRepo ?? ClassRepository(),
         attendanceRepository =
             attendanceRepo ?? FirestoreAttendanceRecordRepository();
 
@@ -67,20 +68,7 @@ class AttendanceRecordController extends GetxController {
   Future<void> _fetchSchoolSections() async {
     isLoading.value = true;
     try {
-      final List<ClassData> classData =
-      await classManagementRepository.fetchClassData(schoolId);
-
-      List<SectionData> allSections = [];
-      for (var classItem in classData) {
-        for (var sectionName in classItem.sectionName) {
-          allSections.add(SectionData(
-            classId: classItem.classId,
-            className: classItem.className,
-            sectionName: sectionName,
-          ));
-        }
-      }
-      sections.assignAll(allSections);  // Use assignAll for RxList
+     sections.value = await schoolRepository.getSections(schoolId);
         } catch (error) {
       errorMessage.value = 'Failed to load school sections: $error';
       print('Error fetching school sections: $error');

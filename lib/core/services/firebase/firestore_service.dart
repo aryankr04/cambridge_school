@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../widgets/snack_bar.dart';
+
 
 class FirestoreService {
   //----------------------------------------------------------------------------
   // Singleton Instance
   static final FirestoreService _instance = FirestoreService._internal();
+
   factory FirestoreService() => _instance;
 
   //----------------------------------------------------------------------------
@@ -14,17 +17,26 @@ class FirestoreService {
   // Constructor (Private)
   FirestoreService._internal() {
     // Enable offline persistence and cache size
-    _firestore.settings = const Settings(
-      persistenceEnabled: true,
-      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-    );
+    _configureFirestoreSettings();
+  }
+
+  //----------------------------------------------------------------------------
+  void _configureFirestoreSettings() async {
+    try {
+      _firestore.settings = const Settings(
+        persistenceEnabled: true,
+        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+      );
+    } catch (e) {
+      // Handle the exception during settings configuration (e.g., during initialization)
+      MySnackBar.showErrorSnackBar('Error configuring Firestore settings: $e');
+    }
   }
 
   //----------------------------------------------------------------------------
   // CRUD Operations (Basic)
 
   /// Adds a new document to the specified collection.
-
   Future<DocumentReference<Map<String, dynamic>>> addDocument(
       String collectionPath, Map<String, dynamic> data, {String? documentId}) async {
     try {
@@ -39,11 +51,10 @@ class FirestoreService {
         return await _firestore.collection(collectionPath).add(data);
       }
     } catch (e) {
-      print('Add Document Error: $e');
+      MySnackBar.showErrorSnackBar('Add Document Error: $e');
       rethrow;
     }
   }
-
 
   /// Retrieves a document from the specified collection by its ID.
   Future<DocumentSnapshot<Map<String, dynamic>>> getDocumentById(
@@ -55,7 +66,7 @@ class FirestoreService {
       }
       return doc;
     } catch (e) {
-      print('Get Document Error: $e');
+      MySnackBar.showErrorSnackBar('Get Document Error: $e');
       rethrow;
     }
   }
@@ -69,7 +80,7 @@ class FirestoreService {
       batch.update(docRef, data);
       await batch.commit();
     } catch (e) {
-      print('Update Document Error: $e');
+      MySnackBar.showErrorSnackBar('Update Document Error: $e');
       rethrow;
     }
   }
@@ -82,7 +93,7 @@ class FirestoreService {
       batch.delete(docRef);
       await batch.commit();
     } catch (e) {
-      print('Delete Document Error: $e');
+      MySnackBar.showErrorSnackBar('Delete Document Error: $e');
       rethrow;
     }
   }
@@ -98,7 +109,7 @@ class FirestoreService {
       await _firestore.collection(collectionPath).get();
       return snapshot.docs;
     } catch (e) {
-      print('Get All Documents Error: $e');
+      MySnackBar.showErrorSnackBar('Get All Documents Error: $e');
       rethrow;
     }
   }
@@ -113,7 +124,7 @@ class FirestoreService {
           .get();
       return snapshot.docs;
     } catch (e) {
-      print('Query Documents Error: $e');
+      MySnackBar.showErrorSnackBar('Query Documents Error: $e');
       rethrow;
     }
   }
@@ -124,13 +135,24 @@ class FirestoreService {
   /// Returns a real-time stream of a single document in the specified collection.
   Stream<DocumentSnapshot<Map<String, dynamic>>> getDocumentStream(
       String collectionPath, String documentId) {
-    return _firestore.collection(collectionPath).doc(documentId).snapshots();
+    try {
+      return _firestore.collection(collectionPath).doc(documentId).snapshots();
+    } catch (e) {
+      // Handle the error more gracefully, perhaps by returning an empty stream or a stream with an error.
+      MySnackBar.showErrorSnackBar('Error getting document stream: $e');
+      return Stream.empty(); // Or use Stream.error(e) if you want to propagate the error.
+    }
   }
 
   /// Returns a real-time stream of all documents in the specified collection.
   Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>> getCollectionStream(
       String collectionPath) {
-    return _firestore.collection(collectionPath).snapshots().map((snapshot) => snapshot.docs);
+    try {
+      return _firestore.collection(collectionPath).snapshots().map((snapshot) => snapshot.docs);
+    } catch (e) {
+      MySnackBar.showErrorSnackBar('Error getting collection stream: $e');
+      return Stream.empty();
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -155,7 +177,7 @@ class FirestoreService {
 
       return '$prefix${newNumericPart.toString().padLeft(10, '0')}';
     } catch (e) {
-      print('Error generating new ID with prefix: $e');
+      MySnackBar.showErrorSnackBar('Error generating new ID with prefix: $e');
       rethrow;
     }
   }
