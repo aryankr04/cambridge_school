@@ -1,6 +1,7 @@
 import 'package:cambridge_school/app/modules/class_management/class_management_controller.dart';
 import 'package:cambridge_school/app/modules/school_management/school_repository.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
+import 'package:cambridge_school/core/widgets/full_screen_loading_widget.dart';
 import 'package:cambridge_school/core/widgets/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -95,7 +96,7 @@ class CreateRoutineController extends GetxController {
       sectionsData?.value = await schoolRepository.getSections(schoolId.value);
 
       classNameOptions.value = await extractClassNames(sectionsData);
-      if(!classNameOptions.contains(selectedClassName.value)){
+      if (!classNameOptions.contains(selectedClassName.value)) {
         selectedClassName.value = classNameOptions.first;
       }
       sectionNameOptions.value =
@@ -163,8 +164,10 @@ class CreateRoutineController extends GetxController {
   Future<void> updateClassModelInFirebase() async {
     try {
       if (classModel.value != null) {
+        MyFullScreenLoading.show(loadingText: 'Saving');
         await _classManagementRepository.updateClass(classModel.value!);
         MySnackBar.showSuccessSnackBar('Class model updated in Firebase!');
+        MyFullScreenLoading.hide();
       } else {
         MySnackBar.showErrorSnackBar('Class document not found in Firebase.');
       }

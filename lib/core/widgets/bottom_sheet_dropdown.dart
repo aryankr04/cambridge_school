@@ -162,7 +162,7 @@ class MyBottomSheetDropdown extends StatefulWidget {
     this.selectedValue,
     this.labelText,
     this.hintText,
-    required this.optionsForChips,
+    this.optionsForChips = const [],
     this.onSingleChanged,
     this.onMultipleChanged,
     this.initialSelectedValues,
@@ -252,7 +252,10 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
           ),
           const SizedBox(height: 6),
         ],
-        _buildDropdownContainer(),
+        Padding(
+          padding: const EdgeInsets.only(bottom: MySizes.md),
+          child: _buildDropdownContainer(),
+        ),
         Obx(
           () => Visibility(
             visible: widget.isValid && controller.errorText.isNotEmpty,
@@ -381,11 +384,10 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
 
   Future<void> _showIconWithDescriptionBottomSheet(BuildContext context) async {
     showModalBottomSheet(
-      showDragHandle: false,
       context: context,
       builder: (BuildContext context) {
         return SingleChildScrollView(
-          child: Container(
+          child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -398,35 +400,83 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                SingleChildScrollView(
-                  child: Column(
-                    children: widget.optionsForIconWithDescription.map((item) {
-                      final title = item['title'] as String;
-                      final description = item['description'] as String;
-                      final icon = item['icon'] as IconData;
+                ...widget.optionsForIconWithDescription.map((item) {
+                  final title = item['title'] as String;
+                  final description = item['description'] as String;
+                  final icon = item['icon'] as IconData;
+                  final isSelected = controller.isOptionSelected(title);
 
-                      return ListTile(
-                        leading: Icon(icon),
-                        title: Text(title),
-                        subtitle: Text(description),
-                        onTap: () {
-                          controller.setSelectedValues([title]);
-                          Navigator.of(context).pop();
-                          if (!widget.isMultipleSelection) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (widget.isMultipleSelection)
-                  ElevatedButton(
-                    child: const Text('Close'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
+                  return GestureDetector(
+                    onTap: () {
+                      if (!widget.isMultipleSelection) {
+                        controller.selectedValues.clear();
+                      }
+                      isSelected
+                          ? controller.selectedValues.remove(title)
+                          : controller.selectedValues.add(title);
+
+                      controller.setSelectedValues(
+                          List.of(controller.selectedValues));
+                      if (!widget.isMultipleSelection)
+                        Navigator.of(context).pop();
                     },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: MySizes.sm + 4, vertical: MySizes.sm),
+                      margin: const EdgeInsets.only(bottom: MySizes.md),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? MyColors.activeBlue.withOpacity(0.1)
+                            : MyDynamicColors.backgroundColorGreyLightGrey,
+                        borderRadius:
+                            BorderRadius.circular(MySizes.cardRadiusSm),
+                        border: Border.all(
+                          width: 1,
+                          color: isSelected
+                              ? MyColors.activeBlue
+                              : Colors.transparent,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(icon,
+                              color: isSelected
+                                  ? MyColors.activeBlue
+                                  : MyColors.iconColor),
+                          const SizedBox(width: MySizes.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: MyTextStyle.bodyLarge.copyWith(
+                                    color:
+                                        isSelected ? MyColors.activeBlue : null,
+                                  ),
+                                ),
+                                Text(
+                                  description,
+                                  style: MyTextStyle.labelSmall.copyWith(
+                                    color:
+                                        isSelected ? MyColors.activeBlue : null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+                if (widget.isMultipleSelection)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Close'),
+                    ),
                   ),
               ],
             ),

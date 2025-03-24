@@ -1,3 +1,5 @@
+import 'package:cambridge_school/core/utils/constants/box_shadow.dart';
+import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,18 +19,20 @@ class MySearchField extends StatelessWidget {
     this.hintText = "Search...",
     this.labelText,
     this.showClearIcon = false,
-    this.controller, // Allow a pre-existing TextEditingController to be passed in
+    this.controller,
   });
 
   final RxList<String> _filteredOptions = <String>[].obs;
   final RxBool _isDropdownOpen = false.obs;
+  final RxString _textValue = "".obs; // Observable for text value
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController textController = controller ?? TextEditingController();
-    // Initialize filtered options using the passed options or an empty list.
-    _filteredOptions.assignAll(options ?? []);
+    TextEditingController textController =
+        controller ?? TextEditingController();
 
+    // Initialize filtered options
+    _filteredOptions.assignAll(options ?? []);
 
     void filterOptions() {
       final query = textController.text.toLowerCase();
@@ -49,14 +53,20 @@ class MySearchField extends StatelessWidget {
 
     void selectOption(String option) {
       textController.text = option;
+      _textValue.value = option;
       onSelected(option);
       _isDropdownOpen.value = false;
     }
 
     void clearText() {
       textController.clear();
+      _textValue.value = "";
       filterOptions();
     }
+
+    textController.addListener(() {
+      _textValue.value = textController.text;
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,57 +75,62 @@ class MySearchField extends StatelessWidget {
           Text(labelText!, style: MyTextStyle.labelLarge),
           const SizedBox(height: 6),
         ],
-        TextField(
-          controller: textController,
-          decoration: InputDecoration(
-            hintText: hintText,
-            suffixIcon: showClearIcon && textController.text.isNotEmpty
-                ? IconButton(
-                icon: const Icon(Icons.clear), onPressed: clearText)
-                : const SizedBox.shrink(),
-          ),
-          onChanged: (_) => filterOptions(),
-          onSubmitted: (value) {
-            onSelected(value);
-          },
-        ),
-        Obx(() {
-          if (!_isDropdownOpen.value) return const SizedBox.shrink();
-          return Container(
-            margin: const EdgeInsets.only(top: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(color: Colors.grey.withOpacity(0.3), blurRadius: 4)
-              ],
-            ),
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.3,
-            ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _filteredOptions.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                    _filteredOptions[index],
-                    style: MyTextStyle.bodyMedium,
+        Padding(
+          padding: const EdgeInsets.only(bottom: MySizes.md),
+          child: Column(
+            children: [
+              Obx(() => TextField(
+                    onTap: () => _isDropdownOpen.value = true,
+                    controller: textController,
+                    decoration: InputDecoration(
+                      hintText: hintText,
+                      suffixIcon: showClearIcon && _textValue.value.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: clearText,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    onChanged: (_) => filterOptions(),
+                    onSubmitted: (value) {
+                      onSelected(value);
+                    },
+                  )),
+              Obx(() {
+                if (!_isDropdownOpen.value) return const SizedBox.shrink();
+                return Container(
+                  margin: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.white,
+                    boxShadow: MyBoxShadows.kLightShadow,
                   ),
-                  onTap: () => selectOption(_filteredOptions[index]),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.3,
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _filteredOptions.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () => selectOption(_filteredOptions[index]),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: MySizes.sm + 4, horizontal: MySizes.md),
+                          child: Text(
+                            _filteredOptions[index],
+                            style: MyTextStyle.bodyMedium,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 );
-              },
-            ),
-          );
-        }),
+              }),
+            ],
+          ),
+        ),
       ],
     );
-  }
-  void dispose() {
-    // Dispose of the controller only if it was created internally.
-    if (controller == null) {
-      controller?.dispose(); // Dispose if created in build
-    }
-
   }
 }

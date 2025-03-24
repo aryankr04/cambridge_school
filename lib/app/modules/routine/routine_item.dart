@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 
 import '../../../core/utils/constants/enums/schedule_event_type.dart';
 
-
 class EventItem extends StatelessWidget {
   final int? period;
   final String? interval;
@@ -56,14 +55,14 @@ class EventItem extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: period!=null?stripColor:Colors.transparent,
+              color: period != null ? stripColor : Colors.transparent,
             ),
             margin: const EdgeInsets.only(right: MySizes.md),
             padding: const EdgeInsets.all(MySizes.sm),
             child: Text(
               period?.toString() ?? ' ', // Handle null period
               style: TextStyle(
-                color: period!=null?Colors.white:Colors.transparent,
+                color: period != null ? Colors.white : Colors.transparent,
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
@@ -121,9 +120,14 @@ class EventItem extends StatelessWidget {
                               if (itemType == ScheduleEventType.classSession &&
                                   classTeacherName != null) ...[
                                 const SizedBox(height: MySizes.xs - 2),
-                                Row(
+                                Wrap(
+                                  // Use Wrap instead of Row for teacher/class and interval
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: MySizes.xs,
                                   children: [
                                     Row(
+                                      mainAxisSize: MainAxisSize
+                                          .min, // Added to fit content
                                       children: [
                                         Icon(
                                           isStudent
@@ -135,21 +139,23 @@ class EventItem extends StatelessWidget {
                                               .withOpacity(0.5),
                                         ),
                                         const SizedBox(width: 4),
-                                        Text(
-                                          isStudent
-                                              ? classTeacherName ?? ''
-                                              : '$className $sectionName',
-                                          style: MyTextStyle.labelMedium
-                                              .copyWith(fontSize: 10),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
+                                        Flexible(
+                                          // Wrap the Text in Flexible to avoid overflow
+                                          child: Text(
+                                            isStudent
+                                                ? classTeacherName ?? ''
+                                                : '$className $sectionName',
+                                            style: MyTextStyle.labelMedium
+                                                .copyWith(fontSize: 10),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(
-                                      width: MySizes.xs,
-                                    ),
                                     Row(
+                                      mainAxisSize: MainAxisSize
+                                          .min, // Added to fit content
                                       children: [
                                         Icon(
                                           Icons.timelapse,
@@ -159,12 +165,15 @@ class EventItem extends StatelessWidget {
                                               .withOpacity(0.5),
                                         ),
                                         const SizedBox(width: 4),
-                                        Text(
-                                          '${interval?.trim()}',
-                                          style: MyTextStyle.labelMedium
-                                              .copyWith(fontSize: 10),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
+                                        Flexible(
+                                          // Wrap the Text in Flexible to avoid overflow
+                                          child: Text(
+                                            '${interval?.trim()}',
+                                            style: MyTextStyle.labelMedium
+                                                .copyWith(fontSize: 10),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
                                         ),
                                       ],
                                     ),

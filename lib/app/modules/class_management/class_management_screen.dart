@@ -533,11 +533,13 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
   }
 
   void _showAddSubjectDialog() {
-    Get.dialog(_buildSubjectDialog(onSave: controller.addSubject));
+    Get.dialog(      barrierDismissible: false,
+        _buildSubjectDialog(onSave: controller.addSubject));
   }
 
   void _showEditSubjectDialog(String subject) {
     Get.dialog(
+      barrierDismissible: false,
       _buildSubjectDialog(
         initialSubject: subject,
         onSave: (newSubject) {

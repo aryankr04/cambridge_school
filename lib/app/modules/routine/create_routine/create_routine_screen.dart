@@ -1,7 +1,6 @@
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/enums/schedule_event_type.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
-import 'package:cambridge_school/core/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -11,10 +10,12 @@ import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/constants/sizes.dart';
 import '../../../../core/widgets/bottom_sheet_dropdown.dart';
 import '../../../../core/widgets/dropdown_field.dart';
+import '../../../../core/widgets/search_field.dart';
 import '../../../../core/widgets/snack_bar.dart';
 import '../../../../core/widgets/text_field.dart';
 import '../../../../core/widgets/time_picker.dart';
 import '../../class_management/class_model.dart';
+import '../../subject_management/subject_model.dart';
 import '../routine_item.dart';
 import '../routine_model.dart';
 import 'create_routine_controller.dart';
@@ -295,6 +296,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
     int? index,
   ) async {
     Get.dialog(
+      barrierDismissible: false,
       AddRoutineDialog(
         onSubmit: (Event newEvent) async {
           try {
@@ -313,7 +315,6 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
               );
             }
             controller.classModel.refresh();
-            Get.back(); // Close the dialog
           } catch (e) {
             MySnackBar.showErrorSnackBar('Failed to update routine: $e');
           }
@@ -367,15 +368,27 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       final DailyRoutine? dailyRoutine = weeklyRoutine.firstWhereOrNull(
         (routine) => routine.day == currentSelectedDay,
       );
-
+      if (controller.selectedDay.value.isEmpty) {
+        return _buildEmptyState('No Day selected.');
+      }
       if (dailyRoutine == null) {
-        return _buildEmptyState('No routine found for this day.');
+        return _buildEmptyState(
+            'No routine found for  ${controller.selectedDay.value}');
       }
 
       if (dailyRoutine.events.isEmpty) {
         return _buildEmptyState(
             'No Routine Found for ${controller.selectedDay.value}');
       }
+
+      dailyRoutine.events.sort((a, b) {
+        // Compare hours first
+        if (a.startTime.hour != b.startTime.hour) {
+          return a.startTime.hour.compareTo(b.startTime.hour);
+        }
+        // If hours are the same, compare minutes
+        return a.startTime.minute.compareTo(b.startTime.minute);
+      });
 
       return ListView.builder(
         shrinkWrap: true,
@@ -554,7 +567,7 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
         );
 
         await widget.onSubmit(newEvent);
-        Navigator.of(context).pop();
+        Get.back();
       } catch (e) {
         MySnackBar.showErrorSnackBar('Failed to submit event: $e');
       } finally {
@@ -574,10 +587,15 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
     return startDateTime.isBefore(endDateTime);
   }
 
+  List<Map<String, dynamic>> teachers = [
+    {'description': '1', 'title': 'Mr. Smith', 'icon': Icons.person},
+    {'description': '2', 'title': 'Ms. Johnson', 'icon': Icons.person},
+    {'description': '3', 'title': 'Dr. Williams', 'icon': Icons.person},
+    {'description': '4', 'title': 'Prof. Davis', 'icon': Icons.person},
+  ];
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      insetPadding: const EdgeInsets.all(16.0),
       title: Text(
         widget.event != null ? 'Edit Event' : 'Add Event',
         style: MyTextStyle.headlineSmall,
@@ -601,6 +619,11 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
                       ],
                       onSelected: (value) {
                         _eventType.value = value!;
+                        if (value != 'Class') {
+                          _subjectController.text = '';
+                          _teacherNameController.text = '';
+                          _teacherIdController.text = '';
+                        }
                       },
                       selectedValue: _eventType,
                     ),
@@ -619,18 +642,29 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
                       },
                     ),
                     if (_eventType.value == 'Class') ...[
-                      MyTextField(
+                      MySearchField(
+                        onSelected: (val) {
+                          _subjectController.text = val;
+                        },
                         controller: _subjectController,
+                        options: SchoolSubjects.getSubjects(),
                         labelText: 'Subject',
-                        validator: _validateSubject,
+                        showClearIcon: true,
                       ),
-                      MyTextField(
-                        controller: _teacherNameController,
-                        labelText: 'Teacher Name',
-                      ),
-                      MyTextField(
-                        controller: _teacherIdController,
-                        labelText: 'Teacher Id',
+                      MyBottomSheetDropdown(
+                        labelText: 'Select Teacher',
+                        hintText: 'Choose a teacher',
+                        dropdownOptionType: DropdownOptionType
+                            .iconWithDescription, // Correct Option type
+                        optionsForIconWithDescription:
+                            teachers, // Use the list of maps
+                        onSingleChanged: (value) {
+                          _teacherNameController.text = value = value;
+                          // Find the teacher ID based on the selected name:
+                          String teacherId = teachers.firstWhere((teacher) =>
+                              teacher['title'] == value)['description'];
+                          _teacherIdController.text = teacherId;
+                        },
                       ),
                     ],
                     MyTextField(
@@ -645,20 +679,22 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
       actions: [
         Row(
           children: [
-            Expanded(
-              child: MyButton(
-                onPressed: () => Navigator.of(context).pop(),
-                text: 'Cancel',
-                isOutlined: true,
+            FilledButton(
+              onPressed: _submitForm,
+              style: FilledButton.styleFrom(
+                backgroundColor: MyColors.activeGreen,
+                foregroundColor: Colors.white,
               ),
+              child: Text(widget.event != null ? 'Update' : 'Add'),
             ),
             const SizedBox(width: MySizes.md),
-            Expanded(
-              child: Obx(() => MyButton(
-                    onPressed: _submitForm,
-                    text: widget.event != null ? 'Update' : 'Add',
-                    isLoading: _isLoading.value,
-                  )),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: FilledButton.styleFrom(
+                backgroundColor: MyColors.activeRed,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Cancel'),
             ),
           ],
         ),
