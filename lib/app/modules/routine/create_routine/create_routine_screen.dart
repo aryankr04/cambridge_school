@@ -68,6 +68,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       child: Column(
         children: [
           _buildFilterSection(),
+
           Column(
             children: [
               _buildRoutineDisplaySection(),
@@ -174,15 +175,9 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       optionsForChips: controller.classNameOptions,
       onSingleChanged: (value) async {
         controller.selectedClassName.value = value;
-        try {
-          await controller.fetchClassData();
-          controller.schoolRepository.extractSectionNames(
-              controller.sectionsData, controller.selectedClassName.value);
-          controller.selectedSectionName.value =
-              controller.sectionNameOptions.first;
-        } catch (e) {
-          MySnackBar.showErrorSnackBar('Failed to update data: $e');
-        }
+        await controller.fetchClassData();
+
+
       },
       dropdownWidgetType: DropdownWidgetType.filter,
       hintText: 'Class',
@@ -331,7 +326,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgPicture.asset(
-            'assets/images/illustrations/empty_state_illustration/e_commerce_2.svg',
+            'assets/images/illustrations/empty_state_illustration/e_commerce_3.svg',
           ),
           const SizedBox(height: MySizes.sm),
           Text(
@@ -408,7 +403,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
             classTeacherName: selectedSection.classTeacherName,
             className: controller.classModel.value?.className.label,
             sectionName: selectedSection.sectionName,
-            itemType: event.eventType,
+            eventType: event.eventType,
             isStudent: true,
             onDeletePressed: () {
               _deleteEvent(

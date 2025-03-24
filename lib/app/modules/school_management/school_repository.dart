@@ -126,7 +126,7 @@ class SchoolRepository {
     }
   }
 
-  Future<List<String>> getAllClassNames(String schoolId) async {
+  Future<List<String>> getClassNames(String schoolId) async {
     try {
       final docSnapshot =
           await _firestoreService.getDocumentById(_schoolsCollection, schoolId);
@@ -245,7 +245,7 @@ class SchoolRepository {
     try {
       final List<ClassData> classData = await getClasses(schoolId);
       List<SectionData> allSections = [];
-print('Length ${classData.length}');
+      print('Length ${classData.length}');
       for (var classItem in classData) {
         if (classItem.sectionName.isEmpty) {
           SectionData section = SectionData(
@@ -253,7 +253,8 @@ print('Length ${classData.length}');
             className: classItem.className,
             sectionName: '',
           );
-          print("Created SectionData: ${classItem.className}"); // Print SectionData
+          print(
+              "Created SectionData: ${classItem.className}"); // Print SectionData
           allSections.add(section);
         } else {
           for (var sectionName in classItem.sectionName) {
@@ -262,7 +263,8 @@ print('Length ${classData.length}');
               className: classItem.className,
               sectionName: sectionName,
             );
-            print("Created SectionData: ${section.toMap()}"); // Print SectionData
+            print(
+                "Created SectionData: ${section.toMap()}"); // Print SectionData
             allSections.add(section);
           }
         }
@@ -279,7 +281,8 @@ print('Length ${classData.length}');
     }
   }
 
-  Future<List<String>> extractClassNames(List<SectionData>? sectionsData) async {
+  Future<List<String>> extractClassNames(
+      List<SectionData>? sectionsData) async {
     if (sectionsData == null) return [];
     Set<String> uniqueClassNames = {};
     for (var section in sectionsData) {
@@ -288,7 +291,8 @@ print('Length ${classData.length}');
     return uniqueClassNames.toList();
   }
 
-  Future<List<String>> extractSectionNames(List<SectionData>? sectionsData, String className) async {
+  Future<List<String>> extractSectionNames(
+      List<SectionData>? sectionsData, String className) async {
     if (sectionsData == null) return [];
     List<String> sectionNames = [];
     for (var section in sectionsData) {
@@ -298,5 +302,4 @@ print('Length ${classData.length}');
     }
     return sectionNames;
   }
-
 }

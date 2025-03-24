@@ -44,8 +44,6 @@ extension ClassNameExtension on ClassName {
     return _labelToEnum[lowerValue] ?? ClassName.other;
   }
 
-
-
   /// Returns a list of all display names.
   static List<String> get displayNamesList => _labels.values.toList();
 
@@ -116,18 +114,41 @@ extension ClassNameExtension on ClassName {
 
   /// Sorts a list of class name strings according to class sequence.
   static List<String> sortClassList(List<String> classList) {
+    // Create a map of class string to its enum index.
+    final Map<String, int> classIndexMap = {};
+    for (final className in ClassName.values) {
+      classIndexMap[className.label.toLowerCase()] = ClassName.values.indexOf(className);
+      classIndexMap[className.name.toLowerCase()] = ClassName.values.indexOf(className);
+    }
+
     classList.sort((a, b) {
-      final ClassName classA = ClassNameExtension.fromString(a);
-      final ClassName classB = ClassNameExtension.fromString(b);
+      final String lowerA = a.toLowerCase();
+      final String lowerB = b.toLowerCase();
+
+      final bool aIsOther = lowerA == 'other';
+      final bool bIsOther = lowerB == 'other';
 
       // Prioritize valid class names over "Other"
-      if (classA == ClassName.other && classB != ClassName.other) {
+      if (aIsOther && !bIsOther) {
         return 1; // Move 'a' to the end
-      } else if (classA != ClassName.other && classB == ClassName.other) {
+      } else if (!aIsOther && bIsOther) {
         return -1; // Move 'b' to the end
       }
 
-      return ClassName.values.indexOf(classA).compareTo(ClassName.values.indexOf(classB));
+      final int? indexA = classIndexMap[lowerA];
+      final int? indexB = classIndexMap[lowerB];
+
+
+      // Handle cases where the string doesn't match any class
+      if (indexA == null && indexB == null) {
+        return a.compareTo(b); // Sort alphabetically if both are unknown
+      } else if (indexA == null) {
+        return 1; // Move unknown 'a' to the end
+      } else if (indexB == null) {
+        return -1; // Move unknown 'b' to the end
+      }
+
+      return indexA.compareTo(indexB);
     });
     return classList;
   }

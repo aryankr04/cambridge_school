@@ -40,9 +40,9 @@ class MyBottomSheetDropdownController extends GetxController {
     required this.tag,
   })  : initialSelectedValue = Rx<String>(initialSelectedValuePassed ?? ''),
         assert(
-          (isMultipleSelection && onMultipleChanged != null) ||
-              (!isMultipleSelection && onSingleChanged != null),
-          "Provide onMultipleChanged for multiple selection, onSingleChanged otherwise.",
+        (isMultipleSelection && onMultipleChanged != null) ||
+            (!isMultipleSelection && onSingleChanged != null),
+        "Provide onMultipleChanged for multiple selection, onSingleChanged otherwise.",
         ) {
     selectedValue.value = initialSelectedValue.value;
     _initialValues = initialValues;
@@ -107,7 +107,7 @@ class MyBottomSheetDropdownController extends GetxController {
       onMultipleChanged?.call(selectedValues.toList());
     } else {
       selectedValue.value =
-          selectedValues.isNotEmpty ? selectedValues.first : '';
+      selectedValues.isNotEmpty ? selectedValues.first : '';
       onSingleChanged?.call(selectedValue.value);
     }
     validate();
@@ -122,8 +122,8 @@ class MyBottomSheetDropdownController extends GetxController {
       errorText.value = isValid
           ? ''
           : isMultipleSelection
-              ? 'Please select at least one option'
-              : 'Please select an option';
+          ? 'Please select at least one option'
+          : 'Please select an option';
     } else {
       errorText.value = 'No options available';
     }
@@ -257,7 +257,7 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
           child: _buildDropdownContainer(),
         ),
         Obx(
-          () => Visibility(
+              () => Visibility(
             visible: widget.isValid && controller.errorText.isNotEmpty,
             child: Padding(
               padding: const EdgeInsets.only(top: 4.0),
@@ -429,7 +429,7 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
                             ? MyColors.activeBlue.withOpacity(0.1)
                             : MyDynamicColors.backgroundColorGreyLightGrey,
                         borderRadius:
-                            BorderRadius.circular(MySizes.cardRadiusSm),
+                        BorderRadius.circular(MySizes.cardRadiusSm),
                         border: Border.all(
                           width: 1,
                           color: isSelected
@@ -452,14 +452,14 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
                                   title,
                                   style: MyTextStyle.bodyLarge.copyWith(
                                     color:
-                                        isSelected ? MyColors.activeBlue : null,
+                                    isSelected ? MyColors.activeBlue : null,
                                   ),
                                 ),
                                 Text(
                                   description,
                                   style: MyTextStyle.labelSmall.copyWith(
                                     color:
-                                        isSelected ? MyColors.activeBlue : null,
+                                    isSelected ? MyColors.activeBlue : null,
                                   ),
                                 ),
                               ],
@@ -494,95 +494,95 @@ class _MyBottomSheetDropdownState extends State<MyBottomSheetDropdown> {
       ),
       builder: (BuildContext context) {
         return Obx(() => SingleChildScrollView(
-              child: Container(
-                padding: const EdgeInsets.only(
-                    left: MySizes.md, right: MySizes.md, bottom: MySizes.md),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Select ${widget.labelText ?? widget.hintText}',
-                        style: MyTextStyle.headlineSmall.copyWith(fontSize: 18),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    SingleChildScrollView(
-                      child: Wrap(
-                        spacing: 8.0 + 4,
-                        runSpacing: 8 + 4,
-                        children: controller.options.map((option) {
-                          final isSelected =
-                              controller.isOptionSelected(option);
-                          return GestureDetector(
-                            onTap: () {
-                              if (!widget.isMultipleSelection) {
-                                controller.selectedValues.clear();
-                              }
-                              isSelected
-                                  ? controller.selectedValues.remove(option)
-                                  : controller.selectedValues.add(option);
-
-                              controller.setSelectedValues(
-                                  List.of(controller.selectedValues));
-
-                              if (!widget.isMultipleSelection) {
-                                Navigator.of(context).pop();
-                              }
-                            },
-                            child: Container(
-                              constraints:
-                                  BoxConstraints(minWidth: Get.width * 0.12),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: MySizes.sm + 4,
-                                  vertical: MySizes.sm),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? MyColors.activeBlue.withOpacity(0.1)
-                                    : MyDynamicColors
-                                        .backgroundColorGreyLightGrey,
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(
-                                  width: 1,
-                                  color: isSelected
-                                      ? MyColors.activeBlue
-                                      : Colors.transparent,
-                                ),
-                              ),
-                              child: Text(
-                                textAlign: TextAlign.center,
-                                option,
-                                style: MyTextStyle.labelLarge.copyWith(
-                                  color:
-                                      isSelected ? MyColors.activeBlue : null,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (widget.isMultipleSelection)
-                      ElevatedButton(
-                        child: const Text('Done'),
-                        onPressed: () {
-                          final selectedValues =
-                              controller.selectedValues.toList();
-                          controller.setSelectedValues(selectedValues);
-
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                  ],
+          child: Container(
+            padding: const EdgeInsets.only(
+                left: MySizes.md, right: MySizes.md, bottom: MySizes.md),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Select ${widget.labelText ?? widget.hintText}',
+                    style: MyTextStyle.headlineSmall.copyWith(fontSize: 18),
+                  ),
                 ),
-              ),
-            ));
+                const SizedBox(height: 16),
+                SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 8.0 + 4,
+                    runSpacing: 8 + 4,
+                    children: controller.options.map((option) {
+                      final isSelected =
+                      controller.isOptionSelected(option);
+                      return GestureDetector(
+                        onTap: () {
+                          if (!widget.isMultipleSelection) {
+                            controller.selectedValues.clear();
+                          }
+                          isSelected
+                              ? controller.selectedValues.remove(option)
+                              : controller.selectedValues.add(option);
+
+                          controller.setSelectedValues(
+                              List.of(controller.selectedValues));
+
+                          if (!widget.isMultipleSelection) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: Container(
+                          constraints:
+                          BoxConstraints(minWidth: Get.width * 0.12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: MySizes.sm + 4,
+                              vertical: MySizes.sm),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? MyColors.activeBlue.withOpacity(0.1)
+                                : MyDynamicColors
+                                .backgroundColorGreyLightGrey,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              width: 1,
+                              color: isSelected
+                                  ? MyColors.activeBlue
+                                  : Colors.transparent,
+                            ),
+                          ),
+                          child: Text(
+                            textAlign: TextAlign.center,
+                            option,
+                            style: MyTextStyle.labelLarge.copyWith(
+                              color:
+                              isSelected ? MyColors.activeBlue : null,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (widget.isMultipleSelection)
+                  ElevatedButton(
+                    child: const Text('Done'),
+                    onPressed: () {
+                      final selectedValues =
+                      controller.selectedValues.toList();
+                      controller.setSelectedValues(selectedValues);
+
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ));
       },
     );
   }
@@ -634,11 +634,11 @@ class GeneralDropdownContainer extends StatelessWidget {
                 child: Obx(() {
                   return Text(
                     controller.selectedValues.isEmpty &&
-                            controller.selectedValue.value.isEmpty
+                        controller.selectedValue.value.isEmpty
                         ? hintText
                         : _getDisplayText(controller),
                     style: controller.selectedValues.isEmpty &&
-                            controller.selectedValue.value.isEmpty
+                        controller.selectedValue.value.isEmpty
                         ? MyTextStyle.placeholder
                         : MyTextStyle.inputField,
                     maxLines: null,
@@ -715,7 +715,7 @@ class FilterDropdownContainer extends StatelessWidget {
                   child: Obx(() {
                     return Text(
                       (controller.selectedValues.isEmpty &&
-                              controller.selectedValue.value.isEmpty)
+                          controller.selectedValue.value.isEmpty)
                           ? hintText
                           : _getDisplayText(controller),
                       style: MyTextStyle.inputField
@@ -762,7 +762,7 @@ class ChoiceChipDropdownContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => SingleChildScrollView(
+          () => SingleChildScrollView(
         child: Wrap(
           spacing: 8.0 + 4,
           runSpacing: 8 + 4,
@@ -792,7 +792,7 @@ class ChoiceChipDropdownContainer extends StatelessWidget {
                   border: Border.all(
                     width: 1,
                     color:
-                        isSelected ? MyColors.activeBlue : Colors.transparent,
+                    isSelected ? MyColors.activeBlue : Colors.transparent,
                   ),
                 ),
                 child: Text(

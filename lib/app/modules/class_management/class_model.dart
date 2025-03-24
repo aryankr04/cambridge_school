@@ -84,13 +84,11 @@ class ClassModel {
   }
 
   // Update a Section
-  void updateSection(String sectionName, SectionModel updatedSection) {
-    final index = sections.indexWhere((s) => s.sectionName == sectionName);
+  void updateSection(int index, String sectionName, SectionModel updatedSection) {
     if (index != -1) {
       sections[index] = updatedSection;
     } else {
-      print(
-          'Section $sectionName not found for updating.'); // Optional: Handle the case where the section doesn't exist.  Perhaps throw an exception or return a boolean indicating success/failure.
+      print('Section $sectionName not found for updating.');
     }
   }
 
@@ -99,9 +97,27 @@ class ClassModel {
     sections.removeWhere((s) => s.sectionName == sectionName);
   }
 
+  // Add a Subject
+  void addSubject(String subject) {
+    subjects.add(subject);
+  }
+
+  // Update a Subject
+  void updateSubject(int index, String updatedSubject) {
+    if (index >= 0 && index < subjects.length) {
+      subjects[index] = updatedSubject;
+    } else {
+      print('Subject not found at index $index.');
+    }
+  }
+
+  // Delete a Subject
+  void deleteSubject(String subject) {
+    subjects.remove(subject);
+  }
+
   void addEventToRoutine(String sectionName, String day, Event event) {
     try {
-
       final section = sections.firstWhere(
         (s) => s.sectionName == sectionName,
       );
@@ -173,7 +189,6 @@ class SectionModel {
   final String sectionName;
   final String classTeacherId;
   final String classTeacherName;
-  final int capacity;
   final String roomNumber;
   final List<Student> students;
   final List<DailyRoutine> routine;
@@ -182,7 +197,6 @@ class SectionModel {
     required this.sectionName,
     required this.classTeacherId,
     required this.classTeacherName,
-    required this.capacity,
     required this.roomNumber,
     required this.students,
     this.routine = const [],
@@ -193,7 +207,6 @@ class SectionModel {
       sectionName: data['sectionName'] as String,
       classTeacherId: data['classTeacherId'] as String,
       classTeacherName: data['classTeacherName'] as String,
-      capacity: data['capacity'] as int,
       roomNumber: data['roomNumber'] as String,
       students: (data['students'] as List<dynamic>?)
               ?.map((dynamic studentData) =>
@@ -213,7 +226,6 @@ class SectionModel {
       'sectionName': sectionName,
       'classTeacherId': classTeacherId,
       'classTeacherName': classTeacherName,
-      'capacity': capacity,
       'roomNumber': roomNumber,
       'students': students.map((student) => student.toMap()).toList(),
       'routine': routine.map((dailyRoutine) => dailyRoutine.toMap()).toList(),
@@ -224,7 +236,6 @@ class SectionModel {
     String? sectionName,
     String? classTeacherId,
     String? classTeacherName,
-    int? capacity,
     String? roomNumber,
     List<Student>? students,
     List<DailyRoutine>? routine,
@@ -233,7 +244,6 @@ class SectionModel {
       sectionName: sectionName ?? this.sectionName,
       classTeacherId: classTeacherId ?? this.classTeacherId,
       classTeacherName: classTeacherName ?? this.classTeacherName,
-      capacity: capacity ?? this.capacity,
       roomNumber: roomNumber ?? this.roomNumber,
       students: students ?? this.students,
       routine: routine ?? this.routine,

@@ -20,7 +20,7 @@ class EventItem extends StatelessWidget {
   final String? classTeacherName;
   final String? className;
   final String? sectionName;
-  final ScheduleEventType itemType;
+  final ScheduleEventType eventType;
   final VoidCallback? onDeletePressed;
   final VoidCallback? onEditPressed;
 
@@ -32,7 +32,7 @@ class EventItem extends StatelessWidget {
     required this.startsAt,
     this.subject,
     this.classTeacherName,
-    required this.itemType,
+    required this.eventType,
     this.onEditPressed,
     this.onDeletePressed,
     this.className,
@@ -43,9 +43,11 @@ class EventItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stripColor = itemType.color;
-    final itemText = itemType.displayName;
-    final itemEmoji = itemType.emoji;
+    final stripColor = eventType.color;
+    final itemText = (eventType == ScheduleEventType.classSession)
+        ? subject
+        : eventType.displayName;
+    final itemEmoji = eventType.emoji;
 
     return Container(
       margin: const EdgeInsets.symmetric(
@@ -113,11 +115,11 @@ class EventItem extends StatelessWidget {
                                     .copyWith(fontSize: 13),
                               ),
                               Text(
-                                itemText,
+                                itemText!,
                                 overflow: TextOverflow.ellipsis,
                                 style: MyTextStyle.bodyLarge,
                               ),
-                              if (itemType == ScheduleEventType.classSession &&
+                              if (eventType == ScheduleEventType.classSession &&
                                   classTeacherName != null) ...[
                                 const SizedBox(height: MySizes.xs - 2),
                                 Wrap(
@@ -179,7 +181,30 @@ class EventItem extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                              ],
+                              ] else
+                                Row(
+                                  mainAxisSize:
+                                      MainAxisSize.min, // Added to fit content
+                                  children: [
+                                    Icon(
+                                      Icons.timelapse,
+                                      size: 12,
+                                      color: MyDynamicColors.subtitleTextColor
+                                          .withOpacity(0.5),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      // Wrap the Text in Flexible to avoid overflow
+                                      child: Text(
+                                        '${interval?.trim()}',
+                                        style: MyTextStyle.labelMedium
+                                            .copyWith(fontSize: 10),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
                         ),

@@ -1,14 +1,15 @@
 import 'package:cambridge_school/app/modules/class_management/class_model.dart';
 import 'package:cambridge_school/app/modules/school_management/school_model.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
+import 'package:cambridge_school/core/utils/constants/enums/schedule_event_type.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
+import 'package:cambridge_school/core/widgets/full_screen_loading_widget.dart';
 import 'package:cambridge_school/core/widgets/snack_bar.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nanoid/nanoid.dart';
 
-import '../../../core/utils/constants/enums/schedule_event_type.dart';
 import '../routine/routine_model.dart';
 import '../school_management/school_repository.dart';
 import 'class_repository.dart';
@@ -17,22 +18,21 @@ class ClassManagementController extends GetxController {
   // **************************************************************************
   // Repository Declarations
   // **************************************************************************
-  final ClassRepository _classRepository =
-      ClassRepository();
-  final SchoolRepository _schoolRepository =
-      SchoolRepository();
+  final ClassRepository _classRepository = ClassRepository();
+  final SchoolRepository _schoolRepository = SchoolRepository();
 
   // **************************************************************************
   // Observables - Manage the state of the UI
   // **************************************************************************
   final schoolId = 'dummy_school_1'.obs;
   final availableClassNames = <String>[].obs;
-  final selectedClass = Rx<ClassModel?>(null);
+  final classModels = Rx<ClassModel?>(null);
   final isLoading = false.obs;
   final isLoadingClass = false.obs;
-  final isEditing = false.obs;
+  final isEditMode = false.obs;
   final selectedClassName = ''.obs;
-  final classData = ClassData(classId: '', className: ClassName.other, sectionName: []).obs;
+  final classData =
+      ClassData(classId: '', className: ClassName.other, sectionName: []).obs;
 
   // **************************************************************************
   // Lifecycle Methods
@@ -40,18 +40,18 @@ class ClassManagementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadAvailableClassNames();
+    fetchClassNames();
   }
 
   // **************************************************************************
   // Data Fetching Methods - Retrieve data from the repositories
   // **************************************************************************
-  Future<void> loadAvailableClassNames() async {
-    // Changed to public method for easier testing and use outside the class
+  Future<void> fetchClassNames() async {
     isLoading.value = true;
     try {
       availableClassNames.value =
-          await _schoolRepository.getAllClassNames(schoolId.value);
+          await _schoolRepository.getClassNames(schoolId.value);
+      // availableClassNames.value=sortClassList(availableClassNames);
     } catch (e) {
       MySnackBar.showErrorSnackBar('Failed to fetch class options: $e');
     } finally {
@@ -59,20 +59,46 @@ class ClassManagementController extends GetxController {
     }
   }
 
-  Future<void> fetchClassDetails(String className) async {
+  Future<void> fetchClass(String className) async {
     isLoadingClass.value = true;
     selectedClassName.value = className;
     try {
-      selectedClass.value = await _classRepository.getClassByClassName(
+      classModels.value = await _classRepository.getClassByClassName(
         schoolId.value,
         className,
       );
+
+      // Update RxList correctly by assigning a new list
+      // availableClassNames.assignAll(sortClassList(availableClassNames.toList()));
     } catch (e) {
       MySnackBar.showErrorSnackBar('Failed to fetch class details: $e');
     } finally {
       isLoadingClass.value = false;
     }
   }
+
+  /// Sorts a list of class name strings according to class sequence.
+  List<String> sortClassList(List<String> classList) {
+    List<String> classList1 = [
+      'Pre-Nursery', 'Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5',
+      '6', '7', '8', '9', '10', '11', '12'
+    ];
+
+    // Sort while handling missing classes
+    classList.sort((a, b) {
+      int indexA = classList1.indexOf(a);
+      int indexB = classList1.indexOf(b);
+
+      // If a class is not found in the predefined list, push it to the end
+      indexA = indexA == -1 ? 999 : indexA;
+      indexB = indexB == -1 ? 999 : indexB;
+
+      return indexA.compareTo(indexB);
+    });
+
+    return classList;
+  }
+
 
   // **************************************************************************
   // Class Management Methods - Add, Delete, Update Classes
@@ -85,81 +111,30 @@ class ClassManagementController extends GetxController {
 
   void deleteClassName(String className) {
     availableClassNames.remove(className);
-    if (selectedClass.value?.className.label == className) {
-      selectedClass.value = null;
+    if (classModels.value?.className.label == className) {
+      classModels.value = null;
     }
-  }
-
-  Future<void> onAddClassButtonPressed(String className) async {
-    final classId = nanoid(12);
-    final classEnum = ClassNameExtension.fromString(className);
-
-    final newClass = ClassModel(
-      id: classId,
-      schoolId: schoolId.value,
-      className: classEnum,
-      academicYear: '${DateTime.now().year} - ${DateTime.now().year + 1}',
-      sections: [],
-      subjects: [],
-      examSyllabus: [],
-    );
-
-    await addClassToFirebase(newClass); //Removed underscore
-    await _schoolRepository.addOrUpdateClassData(
-      schoolId.value,
-      ClassData(classId: classId, className: ClassNameExtension.fromString(className), sectionName: []),
-    );
-    classData.value =
-        ClassData(classId: classId, className: ClassNameExtension.fromString(className), sectionName: []);
-
-    loadAvailableClassNames(); // Removed underscore
   }
 
   // **************************************************************************
   // Section Management Methods - Add, Delete, Update Sections
   // **************************************************************************
-  void addSection(SectionModel section) {
-    selectedClass.update((val) {
-      val?.sections.add(section);
-      sortSections();
-    });
-  }
-
-  void updateSectionAtIndex(int index, SectionModel updatedSection) {
-    selectedClass.update((val) {
-      if (val != null && index >= 0 && index < val.sections.length) {
-        val.sections[index] = updatedSection;
-        sortSections();
-      } else {
-        MySnackBar.showAlertSnackBar('Invalid section index.');
-      }
-    });
-  }
 
   void sortSections() {
-    selectedClass.value?.sections.sort((a, b) {
+    classModels.value?.sections.sort((a, b) {
       final nameA = a.sectionName;
       final nameB = b.sectionName;
       return nameA.compareTo(nameB);
     });
-    selectedClass.refresh(); // Ensure UI update after sort
+    classModels.refresh();
   }
 
-  void deleteSection(String sectionName) {
-    selectedClass.update((val) {
-      val?.sections
-          .removeWhere((section) => section.sectionName == sectionName);
-      sortSections();
-    });
-  }
-
-  // This method is crucial for keeping classData.value.sectionName in sync
   void updateClassDataSections() {
-    if (selectedClass.value != null) {
+    if (classModels.value != null) {
       classData.value = classData.value.copyWith(
-        classId: selectedClass.value!.id,
-        className: selectedClass.value!.className,
-        sectionName: selectedClass.value!.sections
+        classId: classModels.value!.id,
+        className: classModels.value!.className,
+        sectionName: classModels.value!.sections
             .map((section) => section.sectionName)
             .toList()
           ..sort(),
@@ -168,29 +143,16 @@ class ClassManagementController extends GetxController {
   }
 
   // **************************************************************************
-  // Subject Management Methods - Add, Delete Subjects
-  // **************************************************************************
-  void addSubject(String subject) {
-    selectedClass.update((val) {
-      val?.subjects.add(subject);
-    });
-  }
-
-  void deleteSubject(String subject) {
-    selectedClass.update((val) {
-      val?.subjects.remove(subject);
-    });
-  }
-
-  // **************************************************************************
   // Firebase Interaction Methods - Communicate with Firestore
   // **************************************************************************
   Future<void> updateClassToFirebase() async {
-    if (selectedClass.value != null) {
+    if (classModels.value != null) {
       try {
-        await _classRepository.updateClass(selectedClass.value!);
+        MyFullScreenLoading.show(loadingText: 'Saving');
+        await _classRepository.updateClass(classModels.value!);
         updateClassDataSections();
-        _schoolRepository.addOrUpdateClassData(schoolId.value, classData.value);
+        _schoolRepository.updateClassInSchool(schoolId.value, classData.value);
+        MyFullScreenLoading.hide();
         MySnackBar.showSuccessSnackBar('Class updated successfully!');
       } catch (e) {
         MySnackBar.showErrorSnackBar('Failed to update class: $e');
@@ -200,23 +162,51 @@ class ClassManagementController extends GetxController {
     }
   }
 
-  Future<void> addClassToFirebase(ClassModel classModel) async {
-    //Removed underscore
+  Future<void> addClassToFirebase(String className) async {
     try {
-      final newClassId = await _classRepository.addClass(classModel);
-      if (newClassId != null) {
-        availableClassNames.add(classModel.className.label);
-        MySnackBar.showSuccessSnackBar('Class added successfully!');
-      } else {
+      final classId = nanoid(12);
+      final classEnum = ClassNameExtension.fromString(className);
+
+      final newClass = ClassModel(
+        id: classId,
+        schoolId: schoolId.value,
+        className: classEnum,
+        academicYear: '${DateTime.now().year} - ${DateTime.now().year + 1}',
+        sections: [],
+        subjects: [],
+        examSyllabus: [],
+      );
+
+      // Try adding the class to Firestore first
+      final newClassId = await _classRepository.addClass(newClass);
+
+      if (newClassId == null) {
         MySnackBar.showErrorSnackBar('Failed to add class');
+        return;
       }
+
+      // Only update local state after a successful Firestore operation
+      classModels.value = newClass;
+      availableClassNames.add(newClass.className.label);
+      availableClassNames.refresh();
+
+      classData.value = ClassData(
+        classId: classId,
+        className: classEnum,
+        sectionName: [],
+      );
+      selectedClassName.value = className;
+      selectedClassName.refresh();
+
+
+      MySnackBar.showSuccessSnackBar('Class added successfully!');
     } catch (e) {
       MySnackBar.showErrorSnackBar('Failed to add class: $e');
     }
   }
 
   Future<void> deleteClassFromFirebase(ClassModel classModel) async {
-    if (selectedClass.value != null) {
+    if (classModels.value != null) {
       try {
         await _classRepository.deleteClass(classModel.id);
         _schoolRepository.addOrUpdateClassData(schoolId.value, classData.value);
@@ -231,58 +221,15 @@ class ClassManagementController extends GetxController {
   }
 
   // **************************************************************************
-  // Update Methods - Update specific properties and trigger UI refresh
+  // Dummy Data Generation Methods
   // **************************************************************************
-  void updateSubject(String oldSubject, String newSubject) {
-    selectedClass.update((val) {
-      if (val == null) return;
-      final index = val.subjects.indexOf(oldSubject);
-      if (index != -1) {
-        val.subjects[index] = newSubject;
-      }
-    });
-  }
-
-  void updateClassName(String newClassName) async {
-    final oldClassName = selectedClassName.value;
-    selectedClassName.value = newClassName;
-
-    selectedClass.update((val) {
-      if (val == null) return;
-      selectedClass.value = selectedClass.value!
-          .copyWith(className: ClassNameExtension.fromString(newClassName));
-    });
-
-    classData.value = classData.value.copyWith(className: ClassNameExtension.fromString(newClassName));
-
-    try {
-      await updateClassToFirebase();
-      // Update the availableClassNames list
-      availableClassNames.remove(oldClassName);
-      availableClassNames.add(newClassName);
-    } catch (e) {
-      // Revert back the changes if update fails
-      selectedClassName.value = oldClassName;
-      selectedClass.update((val) {
-        if (val == null) return;
-        selectedClass.value = selectedClass.value!
-            .copyWith(className: ClassNameExtension.fromString(oldClassName));
-      });
-      classData.value = classData.value.copyWith(className: ClassNameExtension.fromString(oldClassName));
-      MySnackBar.showErrorSnackBar('Failed to update class name: $e');
-    }
-    selectedClass.refresh();
-  }
 
   Future<void> generateAndUploadDummyClasses() async {
     final faker = Faker();
-    final ClassRepository classRepository =
-        ClassRepository();
+    final ClassRepository classRepository = ClassRepository();
 
     for (int i = 0; i < 4; i++) {
-      // Generate ClassModel ID.  Consider using a consistent method if you need predictable IDs.
-      final String classId = faker.guid.guid();
-      // final String schoolId = faker.guid.guid();
+      final String classId = nanoid(12);
       List<String> subjects = List.generate(
         5,
         (i) => MyLists.subjectOptions[i % MyLists.subjectOptions.length],
@@ -290,14 +237,13 @@ class ClassManagementController extends GetxController {
       final ClassModel classModel = ClassModel(
         id: classId,
         schoolId: schoolId.value,
-        academicYear: faker.date.dateTime().year.toString(),
-        className: ClassName
-            .values[i % ClassName.values.length], // Cycle through class names
+        academicYear: '${DateTime.now().year} - ${DateTime.now().year + 1}',
+        className: ClassName.values[i % ClassName.values.length],
         sections: _generateDummySections(faker),
         subjects: subjects,
         examSyllabus: _generateDummyExamSyllabi(faker),
       );
-      print('classmodel ${classModel.toString()}');
+
       try {
         await classRepository.addClass(classModel);
         print('Uploaded dummy class ${i + 1} with ID: $classId');
@@ -309,14 +255,12 @@ class ClassManagementController extends GetxController {
     print('Finished generating and uploading dummy class data.');
   }
 
-// Helper functions to generate dummy data for nested models
   List<SectionModel> _generateDummySections(Faker faker) {
     return List.generate(3, (index) {
       return SectionModel(
-        sectionName: String.fromCharCode(65 + index), // A, B, C
+        sectionName: String.fromCharCode(65 + index),
         classTeacherId: faker.guid.guid(),
         classTeacherName: faker.person.name(),
-        capacity: faker.randomGenerator.integer(30, min: 20),
         roomNumber: faker.randomGenerator.integer(20).toString(),
         students: _generateDummyStudents(faker),
         routine: _generateDummyRoutines(faker),
@@ -372,8 +316,8 @@ class ClassManagementController extends GetxController {
       return ExamSyllabus(
         examName: MyLists.examOptions[index],
         subjects: _generateDummyExamSubjects(faker),
-        createdAt: faker.date.dateTime(),
-        updatedAt: faker.date.dateTime(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
     });
   }
@@ -383,7 +327,7 @@ class ClassManagementController extends GetxController {
       return ExamSubject(
         subjectName: MyLists.subjectOptions[index],
         topics: _generateDummyTopics(faker),
-        examDate: faker.date.dateTime(),
+        examDate: DateTime.now(),
         totalMarks: faker.randomGenerator.decimal(scale: 100),
         examType: faker.lorem.word(),
       );

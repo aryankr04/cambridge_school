@@ -84,7 +84,7 @@ class MyFullScreenLoading {
 class AnimatedText extends StatefulWidget {
   final String text;
 
-  const AnimatedText(this.text, {Key? key}) : super(key: key);
+  const AnimatedText(this.text, {super.key});
 
   @override
   State<AnimatedText> createState() => _AnimatedTextState();

@@ -1,4 +1,7 @@
-import 'package:cambridge_school/app/modules/subject_management/subject_model.dart';
+import 'package:cambridge_school/app/modules/class_management/widgets/add_section_dialog.dart';
+import 'package:cambridge_school/app/modules/class_management/widgets/add_subject_dialog.dart';
+import 'package:cambridge_school/app/modules/class_management/widgets/section_tile.dart';
+import 'package:cambridge_school/app/modules/class_management/widgets/subject_tile.dart';
 import 'package:cambridge_school/core/utils/constants/colors.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
@@ -7,13 +10,10 @@ import 'package:cambridge_school/core/widgets/bottom_sheet_dropdown.dart';
 import 'package:cambridge_school/core/widgets/card_widget.dart';
 import 'package:cambridge_school/core/widgets/confirmation_dialog.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
-import 'package:cambridge_school/core/widgets/search_field.dart';
-import 'package:cambridge_school/core/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-
 import '../../../../core/widgets/snack_bar.dart';
 import 'class_management_controller.dart';
 import 'class_model.dart';
@@ -49,16 +49,14 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FilledButton(
-                    onPressed: () {
-                      controller.generateAndUploadDummyClasses();
-                    },
-                    child: const Text('Create Dummy Classes')),
                 _buildClassSelectionHeader(),
                 const SizedBox(height: MySizes.sm),
                 MyBottomSheetDropdown(
-                  optionsForChips: controller.availableClassNames,
-                  onSingleChanged: controller.fetchClassDetails,
+                  optionsForChips:controller.availableClassNames,
+                  onSingleChanged: (value) {
+                    controller.selectedClassName.value = value;
+                    controller.fetchClass(value);
+                  },
                   dropdownWidgetType: DropdownWidgetType.choiceChip,
                   selectedValue: controller.selectedClassName,
                 ),
@@ -88,7 +86,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
 
   Widget _buildClassDetailsSection() {
     return Obx(() {
-      final selectedClass = controller.selectedClass.value;
+      final selectedClass = controller.classModels.value;
       return (controller.isLoadingClass.value &&
               controller.selectedClassName.value.isNotEmpty)
           ? Shimmer.fromColors(
@@ -142,25 +140,14 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Obx(() => Text(
-                    controller.selectedClassName.value,
-                    style: MyTextStyle.headlineSmall,
-                  )),
-              if (controller.isEditing.value)
-                IconButton(
-                    onPressed: _showEditClassNameDialog,
-                    icon: const Icon(
-                      Icons.edit,
-                      size: 18,
-                    ))
-            ],
-          ),
-          controller.isEditing.value
+          Obx(() => Text(
+                controller.selectedClassName.value,
+                style: MyTextStyle.headlineSmall,
+              )),
+          controller.isEditMode.value
               ? _buildEditingActions()
               : TextButton.icon(
-                  onPressed: () => controller.isEditing(true),
+                  onPressed: () => controller.isEditMode(true),
                   label: const Text('Edit Class'),
                   icon: const Icon(
                     Icons.edit,
@@ -184,146 +171,156 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
         _buildIconButton(
           icon: Icons.delete,
           color: MyColors.activeRed,
-          onPressed: _showDeleteConfirmationDialog,
+          onPressed: _showDeleteClassConfirmationDialog,
         ),
         const SizedBox(width: MySizes.sm),
         _buildIconButton(
           icon: Icons.close,
           color: MyColors.activeRed,
-          onPressed: () => controller.isEditing(false),
+          onPressed: () => controller.isEditMode(false),
         ),
       ],
     );
   }
 
   Widget _buildSectionsList() {
-    final sections = controller.selectedClass.value?.sections ?? [];
+    final sections = controller.classModels.value?.sections ?? [];
 
-    if (sections.isNotEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Sections', style: MyTextStyle.titleLarge),
-                if (controller.isEditing.value)
-                  TextButton.icon(
-                    onPressed: _showAddSectionDialog,
-                    label: const Text('Add Section'),
-                    icon: const Icon(Icons.add),
-                  ),
-              ],
-            ),
-            const SizedBox(height: MySizes.sm),
-            if (sections.isNotEmpty)
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: sections.length,
-                itemBuilder: (context, index) {
-                  final section = sections[index];
-                  return SectionTile(
-                    section: section,
-                    onEdit: () => _showEditSectionDialog(index, section),
-                    onDelete: () =>
-                        controller.deleteSection(section.sectionName ?? ''),
-                    isEdit: controller.isEditing.value,
-                  );
-                },
-              ),
-          ],
-        ),
-      );
-    } else {
-      return Padding(
-        padding: const EdgeInsets.all(MySizes.md),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return Padding(
+      padding: const EdgeInsets.only(
+          top: MySizes.sm, left: MySizes.md, right: MySizes.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Sections', style: MyTextStyle.titleLarge)),
-              SvgPicture.asset(
-                'assets/images/illustrations/empty_state_illustration/e_commerce_5.svg',
-                width: Get.width * 0.25,
-                height: Get.width * 0.25,
-              ),
-              const Text(
-                'No subjects found',
-                style: MyTextStyle.bodyMedium,
-              ),
+              const Text('Sections', style: MyTextStyle.titleLarge),
+              if (controller.isEditMode.value)
+                TextButton.icon(
+                  onPressed: () {
+                    _showAddOrUpdateSectionDialog(Get.context!, null, null);
+                  },
+                  label: const Text('Add Section'),
+                  icon: const Icon(Icons.add),
+                ),
             ],
           ),
-        ),
-      );
-    }
-  }
-
-  Widget _buildSubjectsList() {
-    if (controller.selectedClass.value?.sections.isNotEmpty ?? false) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Subjects', style: MyTextStyle.titleLarge),
-                if (controller.isEditing.value)
-                  TextButton.icon(
-                    onPressed: _showAddSubjectDialog,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Subject'),
-                  ),
-              ],
-            ),
-            const SizedBox(height: MySizes.sm),
+          const SizedBox(height: MySizes.sm),
+          if (sections.isNotEmpty)
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: controller.selectedClass.value?.subjects.length ?? 0,
+              itemCount: sections.length,
               itemBuilder: (context, index) {
-                final subject = controller.selectedClass.value!.subjects[index];
-                return SubjectTile(
-                  subjectName: subject,
-                  isEdit: controller.isEditing.value,
-                  onEdit: () => _showEditSubjectDialog(subject),
-                  onDelete: () => controller.deleteSubject(subject),
+                final section = sections[index];
+                return SectionTile(
+                  section: section,
+                  onEdit: () {
+                    _showAddOrUpdateSectionDialog(context, section, index);
+                  },
+                  onDelete: () {
+                    controller.classModels.value?.sections.removeWhere(
+                        (element) =>
+                            element.sectionName == section.sectionName);
+                    controller.classModels.value =
+                        controller.classModels.value; // Trigger UI Update
+                  },
+                  isEdit: controller.isEditMode.value,
                 );
               },
+            )
+          else
+            Center(
+              child: Column(
+                children: [
+                  SvgPicture.asset(
+                    'assets/images/illustrations/empty_state_illustration/e_commerce_3.svg',
+                    width: Get.width * 0.35,
+                    height: Get.width * 0.35,
+                  ),
+                  const Text(
+                    'No Section Found.',
+                    style: MyTextStyle.bodyMedium,
+                  ),
+                  const SizedBox(
+                    height: MySizes.md,
+                  )
+                ],
+              ),
             ),
-          ],
-        ),
-      );
-    } else {
-      return Padding(
-        padding: const EdgeInsets.all(MySizes.md),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubjectsList() {
+    final subjects = controller.classModels.value?.subjects ?? [];
+
+    return Padding(
+      padding: const EdgeInsets.only(
+          top: MySizes.sm, left: MySizes.md, right: MySizes.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Subjects', style: MyTextStyle.titleLarge)),
-              SvgPicture.asset(
-                'assets/images/illustrations/empty_state_illustration/e_commerce_5.svg',
-                width: Get.width * 0.25,
-                height: Get.width * 0.25,
-              ),
-              const Text(
-                'No subjects found',
-                style: MyTextStyle.bodyMedium,
-              ),
+              const Text('Subjects', style: MyTextStyle.titleLarge),
+              if (controller.isEditMode.value)
+                TextButton.icon(
+                  onPressed: () {
+                    _showAddOrUpdateSubjectDialog(Get.context!, null, null);
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Subject'),
+                ),
             ],
           ),
-        ),
-      );
-    }
+          const SizedBox(height: MySizes.sm),
+          if (subjects.isNotEmpty)
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: subjects.length,
+              itemBuilder: (context, index) {
+                final subject = subjects[index];
+                return SubjectTile(
+                  subjectName: subject,
+                  isEdit: controller.isEditMode.value,
+                  onEdit: () {
+                    _showAddOrUpdateSubjectDialog(context, subject, index);
+                  },
+                  onDelete: () {
+                    controller.classModels.value!.subjects
+                        .removeWhere((element) => element == subject);
+                    controller.classModels.value = controller.classModels.value;
+                  },
+                );
+              },
+            )
+          else
+            Center(
+              child: Column(
+                children: [
+                  SvgPicture.asset(
+                    'assets/images/illustrations/empty_state_illustration/e_commerce_3.svg',
+                    width: Get.width * 0.35,
+                    height: Get.width * 0.35,
+                  ),
+                  const Text(
+                    'No Subjects Found',
+                    style: MyTextStyle.bodyMedium,
+                  ),
+                  const SizedBox(
+                    height: MySizes.md,
+                  )
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   void _showAddClassDialog() {
@@ -332,26 +329,10 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
         title: 'Add New Class',
         onAdd: (className) {
           if (className.isNotEmpty) {
-            controller.onAddClassButtonPressed(className);
+            controller.addClassToFirebase(className);
           }
           Navigator.of(Get.context!)
               .pop(); // Use Navigator instead of Get.back()
-        },
-      ),
-    );
-  }
-
-  void _showEditClassNameDialog() {
-    Get.dialog(
-      _buildClassDialog(
-        title: 'Edit Class Name',
-        initialClassName: controller.selectedClassName.value,
-        isUpdate: true,
-        onAdd: (className) {
-          if (className.isNotEmpty) {
-            controller.updateClassName(className);
-          }
-          Navigator.of(Get.context!).pop();
         },
       ),
     );
@@ -427,170 +408,78 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
     );
   }
 
-  void _showDeleteConfirmationDialog() {
-    if (controller.selectedClass.value != null) {
+  void _showDeleteClassConfirmationDialog() {
+    if (controller.classModels.value != null) {
       MyConfirmationDialog.show(DialogAction.Delete, onConfirm: () {
-        controller.deleteClassFromFirebase(controller.selectedClass.value!);
+        controller.deleteClassFromFirebase(controller.classModels.value!);
       });
     } else {
       MySnackBar.showAlertSnackBar('No class selected to delete.');
     }
   }
 
-  void _showAddSectionDialog() {
-    Get.dialog(_buildSectionDialog(
-        title: 'Add New Section', onSave: controller.addSection));
-  }
-
-  void _showEditSectionDialog(int index, SectionModel section) {
-    Get.dialog(
-      _buildSectionDialog(
-        title: 'Edit Section',
-        section: section,
-        onSave: (updatedSection) {
-          controller.updateSectionAtIndex(index, updatedSection);
-        },
-        isUpdate: true,
-      ),
-    );
-  }
-
-  Widget _buildSectionDialog({
-    required String title,
+  Future<void> _showAddOrUpdateSectionDialog(
+    BuildContext context,
     SectionModel? section,
-    required Function(SectionModel) onSave,
-    bool isUpdate = false,
-  }) {
-    final selectedSectionName = RxString(section?.sectionName ?? '');
-    final classTeacherNameController =
-        TextEditingController(text: section?.classTeacherName ?? '');
-    final classTeacherIdController =
-        TextEditingController(text: section?.classTeacherId ?? '');
-    final roomNumberController =
-        TextEditingController(text: section?.roomNumber ?? '');
-    final capacityController =
-        TextEditingController(text: (section?.capacity ?? '').toString());
-
-    return AlertDialog(
-      title: Text(title, style: MyTextStyle.headlineSmall),
-      content: SizedBox(
-        width: Get.width,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MyDropdownField(
-                labelText: 'Section Name',
-                options: List.generate(
-                    26, (index) => String.fromCharCode(65 + index)),
-                onSelected: (value) {
-                  if (value != null) {
-                    selectedSectionName.value = value;
-                  }
-                },
-                selectedValue: selectedSectionName,
-              ),
-              MyTextField(
-                labelText: 'Class Teacher Name',
-                controller: classTeacherNameController,
-              ),
-              MyTextField(
-                labelText: 'Class Teacher ID',
-                controller: classTeacherIdController,
-              ),
-              MyTextField(
-                labelText: 'Room Number',
-                controller: roomNumberController,
-              ),
-              MyTextField(
-                labelText: 'Capacity',
-                controller: capacityController,
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        _buildDialogActions(
-          isUpdate: isUpdate,
-          onAdd: () {
-            final newSection = SectionModel(
-              sectionName: selectedSectionName.value,
-              classTeacherName: classTeacherNameController.text,
-              classTeacherId: classTeacherIdController.text,
-              roomNumber: roomNumberController.text,
-              capacity: int.tryParse(capacityController.text) ?? 0,
-              students: section?.students ?? [],
-            );
-            onSave(newSection);
-            Navigator.of(Get.context!).pop();
-          },
-          onCancel: () => Navigator.of(Get.context!).pop(),
-        ),
-      ],
-    );
-  }
-
-  void _showAddSubjectDialog() {
-    Get.dialog(      barrierDismissible: false,
-        _buildSubjectDialog(onSave: controller.addSubject));
-  }
-
-  void _showEditSubjectDialog(String subject) {
+    int? index,
+  ) async {
     Get.dialog(
       barrierDismissible: false,
-      _buildSubjectDialog(
-        initialSubject: subject,
-        onSave: (newSubject) {
-          controller.updateSubject(subject, newSubject);
+      AddSectionDialog(
+        onSubmit: (SectionModel newSection) async {
+          try {
+            if (section != null) {
+              controller.classModels.value?.updateSection(
+                index!,
+                controller.selectedClassName.value,
+                newSection,
+              );
+            } else {
+              controller.classModels.value?.addSection(
+                newSection,
+              );
+            }
+            controller.classModels.refresh();
+            Get.back(); // Close the dialog after submission
+          } catch (e) {
+            MySnackBar.showErrorSnackBar('Failed to update section: $e');
+          }
         },
-        isUpdate: true,
+        section: section,
+        index: index,
       ),
     );
   }
 
-  Widget _buildSubjectDialog({
-    String initialSubject = '',
-    required Function(String) onSave,
-    bool isUpdate = false,
-  }) {
-    final subjectNameController = TextEditingController(text: initialSubject);
-
-    return AlertDialog(
-      title: Text(
-        '${isUpdate ? 'Edit' : 'Add New'} Subject',
-        style: MyTextStyle.headlineSmall,
-      ),
-      content: SizedBox(
-        width: Get.width,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            MySearchField(
-              onSelected: (val) {
-                subjectNameController.text = val;
-              },
-              controller: subjectNameController,
-              options: SchoolSubjects.getSubjects(),
-              labelText: 'Subject',
-              showClearIcon: true,
-            )
-          ],
-        ),
-      ),
-      actions: [
-        _buildDialogActions(
-          isUpdate: isUpdate,
-          onAdd: () {
-            if (subjectNameController.text.isNotEmpty) {
-              onSave(subjectNameController.text);
-              Navigator.of(Get.context!).pop();
+  Future<void> _showAddOrUpdateSubjectDialog(
+    BuildContext context,
+    String? subject,
+    int? index,
+  ) async {
+    Get.dialog(
+      barrierDismissible: false,
+      AddSubjectDialog(
+        onSubmit: (String newSubject) async {
+          try {
+            if (subject != null) {
+              controller.classModels.value?.updateSubject(
+                index!,
+                newSubject,
+              );
+            } else {
+              controller.classModels.value?.addSubject(
+                newSubject,
+              );
             }
-          },
-          onCancel: () => Navigator.of(Get.context!).pop(),
-        ),
-      ],
+            controller.classModels.refresh();
+            Get.back(); // Close the dialog after submission
+          } catch (e) {
+            MySnackBar.showErrorSnackBar('Failed to update subject: $e');
+          }
+        },
+        subject: subject,
+        index: index,
+      ),
     );
   }
 
@@ -770,213 +659,6 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
         icon,
         color: color,
       ),
-    );
-  }
-}
-
-class SectionTile extends StatelessWidget {
-  const SectionTile({
-    super.key,
-    required this.section,
-    required this.isEdit,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  final SectionModel section;
-  final bool isEdit;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final deviceWidth = MediaQuery.of(context).size.width;
-
-    return Container(
-      padding: EdgeInsets.zero,
-      margin: const EdgeInsets.only(bottom: MySizes.md),
-      decoration: BoxDecoration(
-        color: MyColors.activeBlue.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            vertical: MySizes.sm, horizontal: MySizes.md),
-        child: Row(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              width: deviceWidth * 0.1,
-              height: deviceWidth * 0.1,
-              decoration: const BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius:
-                    BorderRadius.all(Radius.circular(MySizes.cardRadiusXs)),
-                color: MyColors.white,
-              ),
-              child: Text(
-                section.sectionName ?? '',
-                style: MyTextStyle.headlineMedium
-                    .copyWith(color: MyColors.activeBlue),
-              ),
-            ),
-            const SizedBox(width: MySizes.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    section.classTeacherName ?? '',
-                    style: MyTextStyle.bodyLarge.copyWith(fontSize: 13),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    section.classTeacherId ?? '',
-                    style: MyTextStyle.labelSmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: MySizes.sm),
-            if (isEdit)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildIconButton(
-                    icon: Icons.edit,
-                    color: MyColors.activeBlue,
-                    onPressed: onEdit,
-                  ),
-                  _buildIconButton(
-                    icon: Icons.delete,
-                    color: MyColors.activeRed,
-                    onPressed: () {
-                      MyConfirmationDialog.show(DialogAction.Delete,
-                          onConfirm: onDelete);
-                    },
-                  ),
-                ],
-              )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIconButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(
-        icon,
-        color: color,
-        size: 20,
-      ),
-      color: color,
-    );
-  }
-}
-
-class SubjectTile extends StatelessWidget {
-  const SubjectTile({
-    super.key,
-    required this.subjectName,
-    required this.isEdit,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  final String subjectName;
-  final bool isEdit;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final deviceWidth = MediaQuery.of(context).size.width;
-
-    return Container(
-      padding: EdgeInsets.zero,
-      margin: const EdgeInsets.only(bottom: MySizes.md),
-      decoration: BoxDecoration(
-        color: MyColors.activeBlue.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            vertical: MySizes.sm, horizontal: MySizes.md),
-        child: Row(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              width: deviceWidth * 0.1,
-              height: deviceWidth * 0.1,
-              decoration: const BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius:
-                    BorderRadius.all(Radius.circular(MySizes.cardRadiusXs)),
-                color: MyColors.white,
-              ),
-              child: Text(
-                SchoolSubjects.getEmoji(subjectName),
-                style: MyTextStyle.headlineMedium
-                    .copyWith(color: MyColors.activeBlue),
-              ),
-            ),
-            const SizedBox(width: MySizes.md),
-            Expanded(
-              child: Text(
-                subjectName,
-                style: MyTextStyle.bodyLarge.copyWith(fontSize: 13),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: MySizes.sm),
-            if (isEdit)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildIconButton(
-                    icon: Icons.edit,
-                    color: MyColors.activeBlue,
-                    onPressed: onEdit,
-                  ),
-                  _buildIconButton(
-                    icon: Icons.delete,
-                    color: MyColors.activeRed,
-                    onPressed: () {
-                      MyConfirmationDialog.show(DialogAction.Delete,
-                          onConfirm: onDelete);
-                    },
-                  ),
-                ],
-              )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIconButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(
-        icon,
-        color: color,
-        size: 20,
-      ),
-      color: color,
     );
   }
 }

@@ -81,6 +81,13 @@ class CreateRoutineController extends GetxController {
       final fetchedClassModel = await _classManagementRepository
           .getClassByClassName(schoolId.value, selectedClassName.value);
       classModel.value = fetchedClassModel;
+
+
+      await extractSectionNames(sectionsData, selectedClassName.value);
+      if (!sectionNameOptions.contains(selectedSectionName.value)) {
+        selectedSectionName.value = sectionNameOptions.first;
+      }
+
     } catch (e) {
       MySnackBar.showErrorSnackBar('Failed to fetch class data: $e');
     } finally {
