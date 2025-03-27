@@ -6,7 +6,7 @@ import '../utils/constants/dynamic_colors.dart';
 class MyCard extends StatelessWidget {
   final Widget child; // The content inside the card
   final double? elevation; // The shadow depth of the card
-   final Color? color; // Background color of the card
+  final Color? color; // Background color of the card
   final BorderRadiusGeometry? borderRadius; // Border radius for rounded corners
   final EdgeInsetsGeometry? padding; // Padding inside the card
   final BoxShadow? boxShadow; // Custom box shadow
@@ -19,24 +19,23 @@ class MyCard extends StatelessWidget {
   final bool isCircular; // Option to make the card circular
   final Alignment alignment;
 
-   const MyCard({
-    super.key,
-    required this.child,
-    this.elevation = 0,
-    this.color,
-
-    this.borderRadius = const BorderRadius.all(Radius.circular(MySizes.cardRadiusMd)),
-    this.padding = const EdgeInsets.all(16.0),
-    this.boxShadow,
-    this.onTap,
-    this.width,
-    this.height,
-    this.border,
-    this.margin,
-    this.hasShadow = true,
-    this.isCircular = false,
-    this.alignment=Alignment.center
-  });
+  const MyCard(
+      {super.key,
+      required this.child,
+      this.elevation = 0,
+      this.color,
+      this.borderRadius =
+          const BorderRadius.all(Radius.circular(MySizes.cardRadiusSm)),
+      this.padding = const EdgeInsets.all(16.0),
+      this.boxShadow,
+      this.onTap,
+      this.width,
+      this.height,
+      this.border,
+      this.margin,
+      this.hasShadow = true,
+      this.isCircular = false,
+      this.alignment = Alignment.center});
 
   @override
   Widget build(BuildContext context) {
@@ -45,17 +44,19 @@ class MyCard extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: color??MyDynamicColors.backgroundColorWhiteDarkGrey,
+        color: color ?? MyDynamicColors.backgroundColorWhiteDarkGrey,
         borderRadius: isCircular ? null : borderRadius,
         border: border,
-        boxShadow: hasShadow && boxShadow != null ? [boxShadow!] :  [
-      BoxShadow(
-      color: Colors.black.withOpacity(0.1),
-      spreadRadius: 1,
-      blurRadius: 10,
-      offset: const Offset(0, 5),
-    ),
-    ],
+        boxShadow: hasShadow && boxShadow != null
+            ? [boxShadow!]
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
         shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
       ),
       padding: padding,
@@ -66,19 +67,19 @@ class MyCard extends StatelessWidget {
       onTap: onTap,
       child: isCircular
           ? Container(
-        margin: margin,
-        child: ClipOval(child: cardContent),
-      )
+              margin: margin ?? EdgeInsets.zero,
+              child: ClipOval(child: cardContent),
+            )
           : Card(
-        elevation: hasShadow ? elevation! : 0,
-        shadowColor: Colors.grey.withOpacity(0.1),
-        shape: RoundedRectangleBorder(
-          borderRadius: borderRadius!,
-        ),
-        margin: margin,
-        color: color,
-        child: cardContent,
-      ),
+              elevation: hasShadow ? elevation! : 0,
+              shadowColor: Colors.grey.withOpacity(0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: borderRadius!,
+              ),
+              margin: margin ?? EdgeInsets.zero,
+              color: color,
+              child: cardContent,
+            ),
     );
   }
 }

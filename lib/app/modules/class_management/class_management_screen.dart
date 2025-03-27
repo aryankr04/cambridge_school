@@ -51,6 +51,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
               children: [
                 _buildClassSelectionHeader(),
                 const SizedBox(height: MySizes.sm),
+                // FilledButton(onPressed: (){controller.generateAndUploadDummyClasses();}, child: Text('Send')),
                 MyBottomSheetDropdown(
                   optionsForChips:controller.availableClassNames,
                   onSingleChanged: (value) {

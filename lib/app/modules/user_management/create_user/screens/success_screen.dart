@@ -481,7 +481,7 @@ class SuccessScreenController extends GetxController {
           hobbies: ['Reading', 'Coding', 'Sports'],
           languagesSpoken: ['English', 'Spanish'],
           roles: UserRole.values.toList(),
-          permanentAddress: Address(
+          permanentAddress: HouseAddress(
             houseAddress: '123 Main St',
             city: 'Anytown',
             district: 'Anydistrict',
@@ -489,7 +489,7 @@ class SuccessScreenController extends GetxController {
             village: 'Anyvillage',
             pinCode: '12345',
           ),
-          currentAddress: Address(
+          currentAddress: HouseAddress(
             houseAddress: '456 Elm St',
             city: 'Newtown',
             district: 'Newdistrict',
@@ -583,7 +583,7 @@ class SuccessScreenController extends GetxController {
     isExpanded.value = !isExpanded.value;
   }
 
-  String? getFullAddress(Address? address) {
+  String? getFullAddress(HouseAddress? address) {
     if (address == null) return "N/A";
     return "${address.houseAddress ?? ''}, ${address.village ?? ''}, ${address.city ?? ''}, ${address.district ?? ''}, ${address.state ?? ''}, ${address.pinCode ?? ''}";
   }

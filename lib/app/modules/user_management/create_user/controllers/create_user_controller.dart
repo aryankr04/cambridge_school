@@ -692,7 +692,7 @@ class CreateUserController extends GetxController {
   /// Builds a `UserModel` object from the form data.
   UserModel buildUserModel(String userId) {
     // --- Address ---
-    final permanentAddress = Address(
+    final permanentAddress = HouseAddress(
       houseAddress: permanentHouseAddressController.text,
       city: permanentCityController.text,
       district: permanentDistrict.value,
@@ -701,7 +701,7 @@ class CreateUserController extends GetxController {
       pinCode: permanentPinCodeController.text,
     );
 
-    final currentAddress = Address(
+    final currentAddress = HouseAddress(
       houseAddress: currentHouseAddressController.text,
       city: currentCityController.text,
       district: currentDistrict.value,

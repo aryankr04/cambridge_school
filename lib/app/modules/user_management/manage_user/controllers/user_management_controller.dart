@@ -2,7 +2,7 @@
 import 'package:get/get.dart';
 
 import '../../create_user/models/user_model.dart';
-import 'package:cambridge_school/app/modules/user_management/manage_user/repositories/roster_repository.dart';
+import 'package:cambridge_school/app/modules/user_management/manage_user/repositories/user_roster_repository.dart';
 import 'package:cambridge_school/app/modules/user_management/create_user/repositories/user_repository.dart';
 
 class UserManagementController extends GetxController {
@@ -23,12 +23,12 @@ class UserManagementController extends GetxController {
   final RxList<UserModel> driverList = <UserModel>[].obs;
 
   // Constants
-  final String schoolId = 'SCH00001';
+  String schoolId = 'SCH00001';
 
   // Repositories
   final UserRepository userRepository = UserRepository();
-  final FirestoreRosterRepository rosterRepository =
-      FirestoreRosterRepository();
+  final UserRosterRepository userRosterRepository =
+  UserRosterRepository(schoolId:'dummy_school_1');
 
   // Data Generators (Removed if not in use)
   //final DummyDataGenerator dummyDataGenerator = DummyDataGenerator();
@@ -58,39 +58,32 @@ class UserManagementController extends GetxController {
 
   // API Data Fetching Methods
   Future<void> fetchStudents() => _fetchUsers(
-      () => rosterRepository.getAllUsersInClassRoster(
-          className.value, sectionName.value, schoolId),
-      studentList,
+    studentList,
       initialSortField: 'rollNumber'); // Sort by rollNumber initially
   Future<void> fetchTeachers() => _fetchUsers(
-      () => rosterRepository.getAllUsersInUserRoster('teacher', schoolId),
       teacherList,
       initialSortField: 'fullName'); // Sort by fullName initially
   Future<void> fetchAdmins() => _fetchUsers(
-      () => rosterRepository.getAllUsersInUserRoster('admin', schoolId),
       adminList,
       initialSortField: 'fullName'); // Sort by fullName initially
   Future<void> fetchStaff() => _fetchUsers(
-      () => rosterRepository.getAllUsersInUserRoster('staff', schoolId),
       staffList,
       initialSortField: 'fullName'); // Sort by fullName initially
   Future<void> fetchDirectors() => _fetchUsers(
-      () => rosterRepository.getAllUsersInUserRoster('director', schoolId),
       directorList,
       initialSortField: 'fullName'); // Sort by fullName initially
   Future<void> fetchDrivers() => _fetchUsers(
-      () => rosterRepository.getAllUsersInUserRoster('driver', schoolId),
       driverList,
       initialSortField: 'fullName'); // Sort by fullName initially
 
   // Private Generic Fetching Function
-  Future<void> _fetchUsers(Future<List<UserModel>> Function() fetchFunction,
+  Future<void> _fetchUsers(
       RxList<UserModel> targetList,
       {String? initialSortField}) async {
     try {
       isLoading.value = true;
-      final users = await fetchFunction();
-      targetList.value = users;
+      final users =[];
+      targetList.value = users as List<UserModel>;
 
       if (initialSortField != null) {
         sortListByField(initialSortField); // Sort after data is loaded

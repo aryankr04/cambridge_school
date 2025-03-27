@@ -1,27 +1,28 @@
-import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_screen.dart';
 import 'package:cambridge_school/core/utils/constants/box_shadow.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
+import 'package:cambridge_school/core/utils/formatters/date_time_formatter.dart';
 import 'package:cambridge_school/core/widgets/app_bar.dart';
 import 'package:cambridge_school/core/widgets/button.dart';
 import 'package:cambridge_school/core/widgets/date_picker_field.dart';
+import 'package:cambridge_school/core/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/constants/dynamic_colors.dart';
+import '../../../../core/utils/constants/enums/attendance_status.dart';
 import '../../../../core/utils/constants/sizes.dart';
-import '../../../../core/utils/helpers/helper_functions.dart';
+import '../../../../core/widgets/card_widget.dart';
 import '../../../../core/widgets/dropdown_field.dart';
 import '../../school_management/school_model.dart';
+import '../attendance_report/attendance_report_screen.dart';
 import 'mark_attendance_controller.dart';
 import 'mark_attendance_user_tile.dart';
 
-class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
+class MarkAttendanceScreen extends StatefulWidget {
   final SectionData? sectionData;
   final DateTime? initialDate;
   final String? initialAttendanceType;
@@ -34,100 +35,114 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
   });
 
   @override
+  State<MarkAttendanceScreen> createState() => _MarkAttendanceScreenState();
+}
+
+class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
+  final MarkAttendanceController controller =
+      Get.put(MarkAttendanceController());
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeAttendanceDetails();
+    });
+  }
+
+  void _initializeAttendanceDetails() {
+    if (widget.sectionData != null) {
+      controller.selectedClass.value = widget.sectionData!.className.label;
+      controller.selectedSection.value = widget.sectionData!.sectionName;
+    }
+    if (widget.initialDate != null) {
+      controller.selectedDate.value = widget.initialDate!;
+    }
+    if (widget.initialAttendanceType != null) {
+      controller.attendanceType.value = widget.initialAttendanceType!;
+    }
+
+    if (widget.sectionData != null ||
+        widget.initialDate != null ||
+        widget.initialAttendanceType != null ||
+        controller.shouldFetchRosterOnInit.value) {
+      controller.loadRosterData();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final MarkAttendanceController attendanceController = Get.put(MarkAttendanceController());
-
-    // Initialize the attendance controller with provided parameters
-    _initializeController(attendanceController);
-
     return Scaffold(
-      appBar: const MyAppBar(
-        title: 'Mark Attendance',
-      ),
+      appBar: const MyAppBar(title: 'Mark Attendance'),
+      backgroundColor: MyColors.lightGrey,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(MySizes.lg),
+        padding: const EdgeInsets.all(MySizes.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildAttendanceDetailsCard(context, attendanceController),
+            AttendanceDetailsCard(
+                sectionData: widget.sectionData, controller: controller),
+            const SizedBox(height: MySizes.md),
+            AttendanceSummaryCard(controller: controller),
             const SizedBox(height: MySizes.lg),
-            _buildAttendanceSummary(attendanceController),
+            MarkAllAttendanceWidget(controller: controller),
             const SizedBox(height: MySizes.lg),
-            _buildAttendanceList(attendanceController),
+            AttendanceList(controller: controller),
             const SizedBox(height: MySizes.lg),
-           Obx(()=> MyButton(
-             text: 'Submit',
-             onPressed: () => attendanceController.updateAttendanceOnFirestore(),
-             isLoading: attendanceController.isUpdatingAttendance.value,
-           ),)
+            Obx(
+              () => MyButton(
+                text: 'Submit',
+                onPressed: controller.saveAttendanceData,
+                isLoading: controller.isUpdatingAttendance.value,
+              ),
+            )
           ],
         ),
       ),
     );
   }
+}
 
-  void _initializeController(MarkAttendanceController controller) {
-    // Set initial values from optional parameters
-    controller.setShouldFetchUsersOnInit(
-        shouldFetch: sectionData != null || initialDate != null || initialAttendanceType != null);
+class AttendanceDetailsCard extends StatelessWidget {
+  const AttendanceDetailsCard({
+    super.key,
+    this.sectionData,
+    required this.controller,
+  });
 
-    if (sectionData != null) {
-      controller.selectedClass.value = sectionData!.className.label;
-      controller.selectedSection.value = sectionData!.sectionName;
-    }
-    if (initialDate != null) {
-      controller.selectedDate.value = initialDate!;
-    }
-    if (initialAttendanceType != null) {
-      controller.selectedAttendanceFor.value = initialAttendanceType!;
-    }
+  final SectionData? sectionData;
+  final MarkAttendanceController controller;
 
-    // Only fetch if initial values are set or `shouldFetchUsersOnInit` is true
-    if (controller.shouldFetchUsersOnInit.value) {
-      controller.fetchUsers();
-    }
-  }
-
-  Widget _buildAttendanceDetailsCard(BuildContext context, MarkAttendanceController controller) {
-    return Container(
+  @override
+  Widget build(BuildContext context) {
+    return MyCard(
       padding: const EdgeInsets.symmetric(
           vertical: MySizes.md, horizontal: MySizes.md),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: MyBoxShadows.kLightShadow,
-        borderRadius: BorderRadius.all(Radius.circular(8)),
-      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                sectionData != null
-                    ? "Class ${sectionData!.className}-${sectionData!.sectionName}"
-                    : 'Attendance Details',
-                style: MyTextStyle.headlineSmall,
-              ),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.date_range,
-                    color: MyColors.iconColor,
-                    size: 18,
-                  ),
-                  const SizedBox(width: MySizes.sm),
-                  Text(
-                    controller.getFormattedSelectedDate(),
-                    style: MyTextStyle.bodyMedium
-                        .copyWith(fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ],
+          Obx(
+            () => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  sectionData != null
+                      ? "${controller.selectedClass}-${controller.selectedSection}"
+                      : 'Attendance Details',
+                  style: MyTextStyle.headlineSmall,
+                ),
+                const SizedBox(width: MySizes.sm),
+                Text(
+                  MyDateTimeFormatter.formatPrettyLongDate(
+                      controller.selectedDate.value),
+                  style: MyTextStyle.bodyMedium
+                      .copyWith(fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
           ),
           FilledButton(
-            onPressed: () => _showAttendanceDetailsDialog(context, controller),
+            onPressed: () => _showAttendanceDetailsDialog(context),
             child: const Text('Change'),
           )
         ],
@@ -135,79 +150,7 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
     );
   }
 
-  Widget _buildAttendanceSummary(MarkAttendanceController controller) {
-    return Obx(
-          () => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _attendanceCardWithIndicator(
-            name: 'Present',
-            value: controller.presentCount.value,
-            total: controller.userList.length,
-            color: MyDynamicColors.activeGreen,
-          ),
-          const SizedBox(width: MySizes.lg),
-          _attendanceCardWithIndicator(
-            name: 'Absent',
-            value: controller.absentCount.value,
-            total: controller.userList.length,
-            color: MyDynamicColors.activeRed,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAttendanceList(MarkAttendanceController controller) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: MyColors.borderColor, width: 0.5),
-        borderRadius: const BorderRadius.all(
-          Radius.circular(MySizes.cardRadiusSm),
-        ),
-        boxShadow: MyBoxShadows.kLightShadow,
-        color: Colors.white,
-      ),
-      child: Column(
-        children: [
-          _buildAttendanceHeader(),
-          _buildMarkAllWidget(controller),
-          const SizedBox(height: MySizes.sm),
-          Obx(
-                () => controller.isLoading.value
-                ? _buildShimmerStudentsList()
-                : ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: controller.userList.length,
-              itemBuilder: (context, index) {
-                final user = controller.userList[index];
-                return AttendanceCard(
-                  user: user,
-                  isPresent: controller.isUserPresent(user),
-                  onMarkPresent: () =>
-                      controller.markUserPresent(user),
-                  onMarkAbsent: () =>
-                      controller.markUserAbsent(user),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: MySizes.sm)
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMarkAllWidget(MarkAttendanceController controller) {
-    return MarkAllWidget(
-      onMarkAllPresent: controller.markAllUsersPresent,
-      onMarkAllAbsent: controller.markAllUsersAbsent,
-    );
-  }
-
-  void _showAttendanceDetailsDialog(
-      BuildContext context, MarkAttendanceController controller) {
+  void _showAttendanceDetailsDialog(BuildContext context) {
     Get.dialog(
       AlertDialog(
         title: const Text(
@@ -233,25 +176,20 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
                     const SizedBox(width: MySizes.md),
                     Expanded(
                       child: MyDropdownField(
-                        options: const [
-                          'Class',
-                          'Employee'
-                        ], // Use your actual list
+                        options: const ['Class', 'Employee'],
                         labelText: "Attendance Type",
                         onSelected: (value) {
-                          controller.selectedAttendanceFor.value = value!;
-                          controller.fetchUsers();
+                          controller.attendanceType.value = value!;
+                          controller.isClassAttendance.value = value == 'Class';
                         },
-                        selectedValue:
-                        controller.selectedAttendanceFor.value.obs,
+                        selectedValue: controller.attendanceType.value.obs,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: MySizes.lg),
                 Obx(
-                      () => Visibility(
-                    visible: controller.selectedAttendanceFor.value == "Class",
+                  () => Visibility(
+                    visible: controller.isClassAttendance.value,
                     child: Column(
                       children: [
                         Row(
@@ -259,32 +197,29 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
                           children: [
                             Expanded(
                               child: MyDropdownField(
-                                options: MyLists.classOptions,
-                                // Use your actual options list
+                                options: ClassNameExtension.displayNamesList,
                                 labelText: "Class",
                                 onSelected: (value) {
                                   controller.selectedClass.value = value!;
                                 },
                                 selectedValue:
-                                controller.selectedClass.value.obs,
+                                    controller.selectedClass.value.obs,
                               ),
                             ),
                             const SizedBox(width: MySizes.md),
                             Expanded(
                               child: MyDropdownField(
                                 options: MyLists.sectionOptions,
-                                // Use your actual options
                                 labelText: "Section",
                                 onSelected: (value) {
                                   controller.selectedSection.value = value!;
                                 },
                                 selectedValue:
-                                controller.selectedSection.value.obs,
+                                    controller.selectedSection.value.obs,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: MySizes.lg),
                       ],
                     ),
                   ),
@@ -298,14 +233,14 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
             children: [
               Expanded(
                 child: TextButton(
-                  onPressed: () => Get.back(),
+                  onPressed: Get.back,
                   child: const Text('Cancel'),
                 ),
               ),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    controller.fetchUsers();
+                    controller.loadRosterData();
                     Get.back();
                   },
                   child: const Text('Apply'),
@@ -317,107 +252,72 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
       ),
     );
   }
+}
 
-  Widget _attendanceCardWithIndicator({
-    required String name,
-    required int value,
-    required int total,
-    required Color color,
-  }) {
-    double percentage = total > 0 ? (value / total).clamp(0.0, 1.0) : 0.0;
+class AttendanceList extends StatelessWidget {
+  const AttendanceList({
+    super.key,
+    required this.controller,
+  });
 
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-            vertical: MySizes.sm, horizontal: MySizes.sm),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
-          boxShadow: MyBoxShadows.kLightShadow,
-        ),
-        child: Column(
-          children: [
-            CircularPercentIndicator(
-              radius: 36,
-              animateFromLastPercent: true,
-              progressColor: color,
-              backgroundColor: color.withOpacity(0.1),
-              animation: true,
-              animationDuration: 1000,
-              circularStrokeCap: CircularStrokeCap.round,
-              lineWidth: 6,
-              percent: percentage,
-              center: CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.white,
-                child: Text(
-                  '${(percentage * 100).toStringAsFixed(1)}%',
-                  style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black),
-                ),
-              ),
-            ),
-            const SizedBox(height: MySizes.sm),
-            Text(
-              '$value/$total',
-              style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: MyColors.headlineTextColor),
-            ),
-            const SizedBox(height: MySizes.sm - 6),
-            Text(
-              name,
-              style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: MyColors.subtitleTextColor),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  final MarkAttendanceController controller;
 
-  Widget _buildAttendanceHeader() {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-          vertical: MySizes.md - 4, horizontal: MySizes.md),
       decoration: BoxDecoration(
-        color: MyDynamicColors.activeBlue,
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(MySizes.cardRadiusSm),
-          topLeft: Radius.circular(MySizes.cardRadiusSm),
+        border: Border.all(color: MyColors.borderColor, width: 0.5),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(MySizes.cardRadiusSm),
         ),
+        boxShadow: MyBoxShadows.kLightShadow,
+        color: Colors.white,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          Row(
-            children: [
-              Text(
-                "Roll No",
-                style: MyTextStyle.bodyLarge.copyWith(color: Colors.white),
-              ),
-              const SizedBox(width: MySizes.md),
-              Text("Students",
-                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
-            ],
-          ),
-          Row(
-            children: [
-              Text("Present",
-                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
-              const SizedBox(width: MySizes.md),
-              Text("Absent",
-                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
-            ],
+          AttendanceListHeader(controller: controller),
+          Obx(
+            () => controller.isLoading.value
+                ? _buildShimmerStudentsList()
+                : _buildRosterList(),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildRosterList() {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return _buildShimmerStudentsList();
+      } else if (controller.userRoster.value == null) {
+        return const Center(
+            child: EmptyStateWidget(
+                type: EmptyStateType.noData,
+                message: 'No user data available.'));
+      } else {
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: controller.userRoster.value!.userList.length,
+          itemBuilder: (context, index) {
+            Rx<AttendanceStatus> attendanceStatus = Rx<AttendanceStatus>(
+                controller.getAttendanceStatus(
+                    controller.userRoster.value!.userList[index]));
+            return AttendanceCard(
+              user: controller.userRoster.value!.userList[index],
+              attendanceStatus: attendanceStatus,
+              onAttendanceChanged: (AttendanceStatus newStatus) {
+                controller.updateAttendanceStatus(
+                    controller.userRoster.value!.userList[index], newStatus);
+                attendanceStatus.value = newStatus;
+                controller.isAllMarkAttendance();
+              },
+            );
+          },
+        );
+      }
+    });
   }
 
   Widget _buildShimmerStudentsList() {
@@ -430,12 +330,13 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
         itemCount: 8,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.all(MySizes.md - 4),
+            padding: const EdgeInsets.symmetric(
+                horizontal: MySizes.md, vertical: MySizes.sm + 4),
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     color: Colors.grey[300]!,
                     shape: BoxShape.circle,
@@ -447,13 +348,13 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: 12,
+                        height: 10,
                         width: double.infinity,
                         color: Colors.grey[300]!,
                         margin: const EdgeInsets.symmetric(vertical: 4),
                       ),
                       Container(
-                        height: 10,
+                        height: 8,
                         width: Get.width * 0.4,
                         color: Colors.grey[300]!,
                         margin: const EdgeInsets.symmetric(vertical: 4),
@@ -470,82 +371,194 @@ class MarkAttendanceScreen extends GetView<MarkAttendanceController> {
   }
 }
 
-class MarkAllWidget extends GetView<MarkAttendanceController> {
-  final VoidCallback onMarkAllPresent;
-  final VoidCallback onMarkAllAbsent;
-
-  const MarkAllWidget({
+class AttendanceListHeader extends StatelessWidget {
+  const AttendanceListHeader({
     super.key,
-    required this.onMarkAllPresent,
-    required this.onMarkAllAbsent,
+    required this.controller,
   });
+
+  final MarkAttendanceController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Container(
+    return Container(
       padding: const EdgeInsets.symmetric(
-          vertical: MySizes.sm, horizontal: MySizes.md),
-      margin: const EdgeInsets.only(bottom: 0),
+          vertical: MySizes.md - 4, horizontal: MySizes.md),
       decoration: BoxDecoration(
-        color: MyHelperFunctions.isDarkMode(context)
-            ? MyDynamicColors.darkerGreyBackgroundColor
-            : MyDynamicColors.activeBlueTint,
-        border: Border(
-            bottom:
-            BorderSide(width: 0.5, color: MyDynamicColors.borderColor)),
+        color: MyDynamicColors.activeBlue,
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(MySizes.cardRadiusSm),
+          topLeft: Radius.circular(MySizes.cardRadiusSm),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(width: MySizes.xl - 14),
-                Text(
-                  "Mark All",
-                  style: MyTextStyle.bodyLarge,
-                ),
-              ],
-            ),
+          Row(
+            children: [
+              Text(
+                controller.isClassAttendance.value ? "Roll No" : "S.No",
+                style: MyTextStyle.bodyLarge.copyWith(color: Colors.white),
+              ),
+              const SizedBox(width: MySizes.md),
+              Text(controller.isClassAttendance.value ? "Student" : "Employee",
+                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
+            ],
           ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: onMarkAllPresent,
-                  child: Icon(
-                    controller.isMarkAllPresent.value
-                        ? Icons.check_circle_outline
-                        : Icons.circle_outlined,
-                    size: 24,
-                    color: controller.isMarkAllPresent.value
-                        ? MyDynamicColors.activeGreen
-                        : Colors.black87,
-                  ),
-                ),
-                const SizedBox(width: MySizes.md + 18),
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: onMarkAllAbsent,
-                  child: Icon(
-                    controller.isMarkAllAbsent.value
-                        ? Icons.check_circle_outline
-                        : Icons.circle_outlined,
-                    size: 24,
-                    color: controller.isMarkAllAbsent.value
-                        ? MyDynamicColors.activeRed
-                        : Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          )
+          Row(
+            children: [
+              Text("Present",
+                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
+              const SizedBox(width: MySizes.md),
+              Text("Absent",
+                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
+            ],
+          ),
         ],
       ),
-    ));
+    );
   }
 }
 
+class MarkAllAttendanceWidget extends StatelessWidget {
+  const MarkAllAttendanceWidget({super.key, required this.controller});
+
+  final MarkAttendanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() => MyCard(
+          padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Mark All",
+                style: MyTextStyle.titleLarge,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _buildMarkAllIcon(AttendanceStatus.present),
+                  _buildMarkAllIcon(AttendanceStatus.absent),
+                  _buildMarkAllIcon(AttendanceStatus.late),
+                  _buildMarkAllIcon(AttendanceStatus.excused),
+                  _buildMarkAllIcon(AttendanceStatus.holiday),
+                  _buildMarkAllIcon(AttendanceStatus.notApplicable),
+                ],
+              )
+            ],
+          ),
+        ));
+  }
+
+  Widget _buildMarkAllIcon(AttendanceStatus status) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        controller.selectedAllStatus.value = status;
+        controller.markAllAttendance();
+      },
+      child: Padding(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 5, vertical: MySizes.sm + 4),
+        child: Row(
+          children: [
+            Text(status.code,
+                style: MyTextStyle.bodyLarge.copyWith(
+                    fontWeight: controller.selectedAllStatus.value == status
+                        ? FontWeight.bold
+                        : FontWeight.w500,
+                    color: (controller.selectedAllStatus.value == status &&
+                            status != AttendanceStatus.notApplicable)
+                        ? status.color
+                        : MyColors.iconColor)),
+            const SizedBox(
+              width: MySizes.xs,
+            ),
+            Icon(
+              controller.selectedAllStatus.value == status
+                  ? Icons.check_circle_outline
+                  : Icons.circle_outlined,
+              size: 20,
+              color: (controller.selectedAllStatus.value == status &&
+                      status != AttendanceStatus.notApplicable)
+                  ? status.color
+                  : MyColors.iconColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AttendanceSummaryCard extends StatelessWidget {
+  const AttendanceSummaryCard({super.key, required this.controller});
+
+  final MarkAttendanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.attendanceData.value == null) {
+        return const MyCard(
+          margin: EdgeInsets.zero,
+          hasShadow: true,
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+      return MyCard(
+        margin: EdgeInsets.zero,
+        hasShadow: true,
+        child: Column(
+          children: [
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Attendance Summary',
+                style: MyTextStyle.headlineSmall,
+              ),
+            ),
+            const SizedBox(height: MySizes.md),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AttendanceStatusCard(
+                  status: AttendanceStatus.present,
+                  summary: controller.attendanceData.value!,
+                ),
+                AttendanceStatusCard(
+                  status: AttendanceStatus.absent,
+                  summary: controller.attendanceData.value!,
+                ),
+                AttendanceStatusCard(
+                  status: AttendanceStatus.late,
+                  summary: controller.attendanceData.value!,
+                ),
+              ],
+            ),
+            const SizedBox(height: MySizes.md),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AttendanceStatusCard(
+                  status: AttendanceStatus.excused,
+                  summary: controller.attendanceData.value!,
+                ),
+                AttendanceStatusCard(
+                  status: AttendanceStatus.holiday,
+                  summary: controller.attendanceData.value!,
+                ),
+                AttendanceStatusCard(
+                  status: AttendanceStatus.notApplicable,
+                  summary: controller.attendanceData.value!,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}

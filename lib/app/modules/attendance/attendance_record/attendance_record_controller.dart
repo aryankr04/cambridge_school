@@ -1,7 +1,7 @@
 import 'package:cambridge_school/app/modules/class_management/class_repository.dart';
+import 'package:cambridge_school/core/widgets/snack_bar.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:nanoid/nanoid.dart';
 
 import '../../school_management/school_model.dart';
 import '../../school_management/school_repository.dart';
@@ -11,14 +11,15 @@ import 'attendance_record_repository.dart';
 class AttendanceRecordController extends GetxController {
   //----------------------------------------------------------------------------
   // Static Data (Consider making this configurable, or injected)
-  static const String schoolId = 'SCH00001';
+  static const String schoolId = 'dummy_school_1';
 
   //----------------------------------------------------------------------------
   // Observables (Reactive Variables)
   final selectedDate = Rx<DateTime>(DateTime.now());
   final sections = RxList<SectionData>();
   final attendanceSummaries = RxList<ClassAttendanceSummary>();
-  final employeeAttendanceSummary = Rx<EmployeeAttendanceSummary?>(null); // Allow null
+  final employeeAttendanceSummary =
+      Rx<EmployeeAttendanceSummary?>(null); // Allow null
   final isLoading = RxBool(false);
   final errorMessage = RxnString();
 
@@ -26,18 +27,18 @@ class AttendanceRecordController extends GetxController {
   // Repositories
   final SchoolRepository schoolRepository;
   final ClassRepository classRepository;
-  final FirestoreAttendanceRecordRepository attendanceRepository;
+  final DailyAttendanceRecordRepository attendanceRecordRepository;
 
   //----------------------------------------------------------------------------
   // Constructor
-  AttendanceRecordController({
-    SchoolRepository? schoolRepo,
-    FirestoreAttendanceRecordRepository? attendanceRepo,
-    ClassRepository? classRepo
-  })  : schoolRepository = schoolRepo ?? SchoolRepository(),
-        classRepository = classRepo ?? ClassRepository(),
-        attendanceRepository =
-            attendanceRepo ?? FirestoreAttendanceRecordRepository();
+  AttendanceRecordController(
+      {SchoolRepository? schoolRepo,
+        DailyAttendanceRecordRepository? attendanceRepo,
+      ClassRepository? classRepo})
+      : schoolRepository = schoolRepo ?? SchoolRepository(),
+        classRepository = classRepo ?? ClassRepository(schoolId: schoolId),
+        attendanceRecordRepository =
+            attendanceRepo ?? DailyAttendanceRecordRepository(schoolId: schoolId);
 
   //----------------------------------------------------------------------------
   // Lifecycle Methods
@@ -68,10 +69,15 @@ class AttendanceRecordController extends GetxController {
   Future<void> _fetchSchoolSections() async {
     isLoading.value = true;
     try {
-     sections.value = await schoolRepository.getSections(schoolId);
-        } catch (error) {
+      sections.value = await schoolRepository.getSections(schoolId);
+      final filteredSections = sections
+          .where((section) => section.sectionName.trim().isNotEmpty)
+          .toList();
+      sections.value=filteredSections;
+
+    } catch (error) {
       errorMessage.value = 'Failed to load school sections: $error';
-      print('Error fetching school sections: $error');
+      MySnackBar.showErrorSnackBar('Error fetching school sections: $error');
     } finally {
       isLoading.value = false;
     }
@@ -79,13 +85,12 @@ class AttendanceRecordController extends GetxController {
 
   Future<void> _fetchDailyAttendanceRecord() async {
     final DailyAttendanceRecord? dailyRecord =
-    await attendanceRepository.getDailyAttendanceRecord(
-      schoolId,
+        await attendanceRecordRepository.getDailyAttendanceRecordByDate(
+
       selectedDate.value,
     );
 
-    attendanceSummaries
-        .assignAll(dailyRecord?.classAttendanceSummaries ?? []);
+    attendanceSummaries.assignAll(dailyRecord?.classAttendanceSummaries ?? []);
     employeeAttendanceSummary.value = dailyRecord?.employeeAttendanceSummary;
   }
 
@@ -98,14 +103,14 @@ class AttendanceRecordController extends GetxController {
 
   bool isAttendanceTakenForSection(String className, String sectionName) {
     return attendanceSummaries.any((summary) =>
-    summary.className == className && summary.sectionName == sectionName);
+        summary.className == className && summary.sectionName == sectionName);
   }
 
   ClassAttendanceSummary getClassAttendanceSummary(
       String className, String sectionName) {
     try {
       return attendanceSummaries.firstWhere(
-            (s) => s.className == className && s.sectionName == sectionName,
+        (s) => s.className == className && s.sectionName == sectionName,
       );
     } catch (e) {
       return ClassAttendanceSummary(
@@ -120,10 +125,6 @@ class AttendanceRecordController extends GetxController {
 
   //----------------------------------------------------------------------------
   // Utility Methods
-  String getFormattedSelectedDate() {
-    final formatter = DateFormat('dd MMMM yyyy');
-    return formatter.format(selectedDate.value);
-  }
 
   // Helper getter for the screen (avoids needing to check for null in the UI)
   bool get isEmployeeAttendanceTaken => employeeAttendanceSummary.value != null;

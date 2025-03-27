@@ -1,5 +1,5 @@
-import 'package:cambridge_school/app/modules/class_management/class_management_controller.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
+import 'package:cambridge_school/core/utils/formatters/date_time_formatter.dart';
 import 'package:cambridge_school/core/widgets/divider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,6 +24,7 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
       appBar: AppBar(
         title: const Text('Attendance Record'),
       ),
+      backgroundColor: MyColors.lightGrey,
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -35,24 +36,26 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
             ),
           );
         } else {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
-            child: Column(
-              children: [
-                _buildHeader(context), // Pass context to _buildHeader
-
-                _buildEmployeeAttendanceSummary(),
-                const MyDottedLine(
-                  dashColor: MyColors.borderColor,
+          return Column(
+            children: [
+              _buildHeader(context), // Pass context to _buildHeader
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildEmployeeAttendanceSummary(),
+                      const MyDottedLine(
+                        dashColor: MyColors.borderColor,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(MySizes.md),
+                        child: _buildClassList(),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(
-                  height: MySizes.md,
-                ),
-                Expanded(
-                  child: _buildClassList(),
-                ),
-              ],
-            ),
+              )
+            ],
           );
         }
       }),
@@ -68,10 +71,11 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
 
     return Container(
       decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          borderRadius:
+              const BorderRadius.all(Radius.circular(MySizes.cardRadiusSm)),
           boxShadow: MyBoxShadows.kLightShadow,
           color: MyDynamicColors.backgroundColorWhiteLightGrey),
-      margin: const EdgeInsets.only(bottom: MySizes.md),
+      margin: const EdgeInsets.all(MySizes.md),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -81,10 +85,9 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Employee Attendance',
-                    style: MyTextStyle.titleLarge
-                        .copyWith(fontWeight: FontWeight.bold),
+                    style: MyTextStyle.titleLarge,
                   ),
                   const SizedBox(height: MySizes.sm),
                   if (isEmployeeAttendanceTaken)
@@ -100,13 +103,13 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
                           children: [
                             MyLabelChip(
                               text:
-                              'Presents: ${controller.employeeAttendanceSummary.value?.presents}',
+                                  'Presents: ${controller.employeeAttendanceSummary.value?.presents}',
                               color: MyColors.activeGreen,
                             ),
                             const SizedBox(width: MySizes.md),
                             MyLabelChip(
                               text:
-                              'Absents: ${controller.employeeAttendanceSummary.value?.absents}',
+                                  'Absents: ${controller.employeeAttendanceSummary.value?.absents}',
                               color: MyColors.activeRed,
                             ),
                           ],
@@ -131,9 +134,9 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
             GestureDetector(
               onTap: () {
                 Get.to(() => MarkAttendanceScreen(
-                  initialDate: controller.selectedDate.value,
-                  initialAttendanceType: 'Employee',
-                ));
+                      initialDate: controller.selectedDate.value,
+                      initialAttendanceType: 'Employee',
+                    ));
               },
               child: Container(
                 width: Get.width * 0.2,
@@ -159,15 +162,20 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: MySizes.md, vertical: MySizes.xs),
+      decoration: const BoxDecoration(
+        boxShadow: MyBoxShadows.kLightShadow,
+        color: Colors.white,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            controller.getFormattedSelectedDate(),
-            style: MyTextStyle.headlineSmall
-                .copyWith(fontWeight: FontWeight.bold),
+            MyDateTimeFormatter.formatPrettyLongDate(controller.selectedDate.value),
+            style:
+                MyTextStyle.headlineSmall,
           ),
           const SizedBox(
             width: MySizes.md,
@@ -190,14 +198,16 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
 
   Widget _buildClassList() {
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: controller.sections.length,
       itemBuilder: (context, index) {
         final SectionData section = controller.sections[index];
         final bool isTaken = controller.isAttendanceTakenForSection(
             section.className.label, section.sectionName);
         final ClassAttendanceSummary summary =
-        controller.getClassAttendanceSummary(
-            section.className.label, section.sectionName);
+            controller.getClassAttendanceSummary(
+                section.className.label, section.sectionName);
 
         return ClassAttendanceSummaryCard(
           summary: summary,
@@ -205,10 +215,10 @@ class AttendanceRecordScreen extends GetView<AttendanceRecordController> {
           isTaken: isTaken,
           onTakeAttendance: (SectionData sectionData) {
             Get.to(() => MarkAttendanceScreen(
-              sectionData: sectionData,
-              initialDate: controller.selectedDate.value,
-              initialAttendanceType: 'Class',
-            ));
+                  sectionData: sectionData,
+                  initialDate: controller.selectedDate.value,
+                  initialAttendanceType: 'Class',
+                ));
           },
         );
       },
@@ -245,12 +255,13 @@ class ClassAttendanceSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color cardColor =
-    isTaken ? MyDynamicColors.activeOrange : MyDynamicColors.activeGreen;
+        isTaken ? MyDynamicColors.activeOrange : MyDynamicColors.activeGreen;
     final String buttonText = isTaken ? 'Update' : 'Take';
 
     return Container(
       decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          borderRadius:
+              const BorderRadius.all(Radius.circular(MySizes.cardRadiusSm)),
           boxShadow: MyBoxShadows.kLightShadow,
           color: MyDynamicColors.backgroundColorWhiteLightGrey),
       margin: const EdgeInsets.only(bottom: MySizes.md),
@@ -264,9 +275,8 @@ class ClassAttendanceSummaryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Class ${summary.className} - ${summary.sectionName}',
-                    style: MyTextStyle.titleLarge
-                        .copyWith(fontWeight: FontWeight.bold),
+                    '${summary.className} - ${summary.sectionName}',
+                    style: MyTextStyle.titleLarge,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (isTaken)

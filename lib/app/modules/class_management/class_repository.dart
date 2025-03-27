@@ -11,15 +11,24 @@ class ClassRepository {
   final FirestoreService _firestoreService = FirestoreService();
   final SchoolRepository schoolRepository = SchoolRepository();
 
-  final String _collectionName = 'classes';
+  final String _collectionPath = 'classes';
+
+  String _getFullCollectionPath() {
+    return 'schools/$schoolId/$_collectionPath';
+  }
+
+  final String schoolId;
+
+  ClassRepository({required this.schoolId});
 
   /// Creates a new ClassModel in Firestore using the existing ID.
   Future<String?> addClass(ClassModel classModel) async {
     try {
-      await _firestoreService.addDocument(_collectionName, classModel.toMap(),
+      await _firestoreService.addDocument(
+          _getFullCollectionPath(), classModel.toMap(),
           documentId: classModel.id);
       schoolRepository.addClassToSchool(
-          classModel.schoolId,
+          schoolId,
           ClassData(
               classId: classModel.id,
               className: classModel.className,
@@ -34,12 +43,11 @@ class ClassRepository {
   }
 
   /// Fetches a class (SchoolClassModel) by className and schoolId.
-  Future<ClassModel?> getClassByClassName(
-      String schoolId, String className) async {
+  Future<ClassModel?> getClassByClassName(String className) async {
     try {
       final List<QueryDocumentSnapshot<Map<String, dynamic>>> results =
           await _firestoreService.queryDocuments(
-              _collectionName, 'schoolId', schoolId);
+              _getFullCollectionPath(), 'schoolId', schoolId);
       final result =
           results.where((element) => element['className'] == className);
       if (result.isNotEmpty) {
@@ -57,7 +65,7 @@ class ClassRepository {
   Future<void> updateClass(ClassModel classModel) async {
     try {
       await _firestoreService.updateDocument(
-          _collectionName, classModel.id, classModel.toMap());
+          _getFullCollectionPath(), classModel.id, classModel.toMap());
     } catch (e) {
       MySnackBar.showErrorSnackBar('Error updating class: $e');
       rethrow;
@@ -67,7 +75,7 @@ class ClassRepository {
   /// Deletes a ClassModel from Firestore.
   Future<void> deleteClass(String classId) async {
     try {
-      await _firestoreService.deleteDocument(_collectionName, classId);
+      await _firestoreService.deleteDocument(_getFullCollectionPath(), classId);
     } catch (e) {
       MySnackBar.showErrorSnackBar('Error deleting class: $e');
       rethrow;
@@ -75,10 +83,10 @@ class ClassRepository {
   }
 
   /// Retrieves all ClassModels for a specific school.
-  Future<List<ClassModel>> getClasses(String schoolId) async {
+  Future<List<ClassModel>> getClasses() async {
     try {
       final documents = await _firestoreService.queryDocuments(
-          _collectionName, 'schoolId', schoolId);
+          _getFullCollectionPath(), 'schoolId', schoolId);
 
       return documents
           .map((doc) => ClassModel.fromMap(doc.data(), doc.id))
@@ -90,10 +98,11 @@ class ClassRepository {
   }
 
   /// Streams all ClassModels for a specific school (for real-time updates).
-  Stream<List<ClassModel>> streamClassesBySchoolId(String schoolId) {
+  Stream<List<ClassModel>> streamClassesBySchoolId() {
     try {
-      return _firestoreService.getCollectionStream(_collectionName).map(
-          (docs) => docs
+      return _firestoreService
+          .getCollectionStream(_getFullCollectionPath())
+          .map((docs) => docs
               .where((doc) =>
                   doc['schoolId'] == schoolId) // Filtering on the client-side
               .map((doc) => ClassModel.fromMap(doc.data(), doc.id))

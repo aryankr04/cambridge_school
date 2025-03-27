@@ -32,11 +32,6 @@ extension ClassNameExtension on ClassName {
   /// Returns the previous class in sequence, or `null` if this is the first class.
   ClassName? get previousClass => _getAdjacentClass(-1);
 
-  /// Checks if the class falls within a specific category.
-  bool get isPrePrimaryClass => _prePrimaryClasses.contains(this);
-  bool get isPrimaryClass => _primaryClasses.contains(this);
-  bool get isMiddleClass => _middleClasses.contains(this);
-  bool get isHighSchool => _highSchoolClasses.contains(this);
 
   /// Converts a string value to the corresponding `ClassName` enum.
   static ClassName fromString(String value) {
@@ -82,35 +77,6 @@ extension ClassNameExtension on ClassName {
     for (var className in ClassName.values)
       className.name.toLowerCase(): className,
   };
-
-  static const List<ClassName> _prePrimaryClasses = [
-    ClassName.preNursery,
-    ClassName.nursery,
-    ClassName.kg,
-    ClassName.lkg,
-    ClassName.ukg
-  ];
-
-  static const List<ClassName> _primaryClasses = [
-    ClassName.first,
-    ClassName.second,
-    ClassName.third,
-    ClassName.fourth,
-    ClassName.fifth
-  ];
-
-  static const List<ClassName> _middleClasses = [
-    ClassName.sixth,
-    ClassName.seventh,
-    ClassName.eighth
-  ];
-
-  static const List<ClassName> _highSchoolClasses = [
-    ClassName.ninth,
-    ClassName.tenth,
-    ClassName.eleventh,
-    ClassName.twelfth
-  ];
 
   /// Sorts a list of class name strings according to class sequence.
   static List<String> sortClassList(List<String> classList) {

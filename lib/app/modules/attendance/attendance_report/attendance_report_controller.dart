@@ -1,8 +1,9 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/utils/constants/enums/attendance_status.dart';
 import '../../user_management/create_user/models/user_model.dart';
-import '../../user_management/manage_user/repositories/roster_repository.dart';
+import '../../user_management/manage_user/repositories/user_roster_repository.dart';
 import '../mark_attendance/user_attendance_model.dart';
 
 class AttendanceReportController extends GetxController {
@@ -18,24 +19,37 @@ class AttendanceReportController extends GetxController {
   final RxBool isLoading = false.obs;
   final Rx<DateTime> selectedMonth = DateTime.now().obs;
   final RxList<UserModel> studentList = <UserModel>[].obs;
-  final Rx<UserAttendance?> userAttendanceData = UserAttendance(
-      academicPeriodStart: DateTime.now(), attendanceString: '')
-      .obs; // Initialize with a default UserAttendance object.
+  final Rx<UserAttendance?> userAttendanceData = Rx<UserAttendance?>(null);
   final RxDouble averageClassAttendance = 0.0.obs;
   final RxList<StudentRanking> studentRankings = <StudentRanking>[].obs;
 
   // Summary Data (Derived from UserAttendance)
-  final RxMap<String, int> _attendanceSummary = <String, int>{}.obs;
-  final RxList<Map<String, dynamic>> _streaks = <Map<String, dynamic>>[].obs;
+  final Rx<AttendanceData> _attendanceSummary = AttendanceData(
+    present: 0,
+    absent: 0,
+    holiday: 0,
+    late: 0,
+    excused: 0,
+    notApplicable: 0,
+    workingDays: 0,
+    presentPercentage: 0.0,
+    absentPercentage: 0.0,
+    holidayPercentage: 0.0,
+    latePercentage: 0.0,
+    excusedPercentage: 0.0,
+    notApplicablePercentage: 0.0,
+    workingPercentage: 0.0,
+  ).obs;
+  final RxList<Streak> _streaks = <Streak>[].obs;
 
   //----------------------------------------------------------------------------
   // Getters for Private Observables (Encapsulation)
-  Map<String, int> get attendanceSummary => _attendanceSummary;
-  List<Map<String, dynamic>> get streaks => _streaks;
+  AttendanceData get attendanceSummary => _attendanceSummary.value;
+  List<Streak> get streaks => _streaks;
 
   //----------------------------------------------------------------------------
   // Repository
-  final FirestoreRosterRepository rosterRepository = FirestoreRosterRepository();
+  final UserRosterRepository userRosterRepository = UserRosterRepository(schoolId:'dummy_school_1');
 
   //----------------------------------------------------------------------------
   // Lifecycle Methods
@@ -64,8 +78,8 @@ class AttendanceReportController extends GetxController {
   }
 
   Future<void> fetchClassRoster() async {
-    studentList.value = await rosterRepository.getAllUsersInClassRoster(
-        className.value, section.value, schoolId.value);
+    // studentList.value = await rosterRepository.getClassRoster(
+    //     className.value, section.value, schoolId.value);
 
     // Load user attendance data for the selected user
     if (studentList.isNotEmpty) {
@@ -113,10 +127,8 @@ class AttendanceReportController extends GetxController {
 
     final summary = attendance.getMonthlyAttendanceSummary(
         selectedMonth.value); // Or specify any month
-    final presentDays = summary['Present'] ?? 0;
-    final totalWorkingDays = summary['Working'] ?? 0;
 
-    return totalWorkingDays > 0 ? (presentDays / totalWorkingDays) * 100 : 0;
+    return summary.workingDays > 0 ? (summary.present / summary.workingDays) * 100 : 0;
   }
 
   void rankStudentsByAttendance() {
@@ -152,8 +164,8 @@ class AttendanceReportController extends GetxController {
         final summaryB =
         attendanceB.getMonthlyAttendanceSummary(DateTime.now());
 
-        final absencesA = (summaryA['Absent'] ?? 0) as int;
-        final absencesB = (summaryB['Absent'] ?? 0) as int;
+        final absencesA = summaryA.absent;
+        final absencesB = summaryB.absent;
 
         return (absencesB).compareTo(absencesA);
       });
@@ -174,24 +186,31 @@ class AttendanceReportController extends GetxController {
       final summary =
       attendanceData.getMonthlyAttendanceSummary(selectedMonth.value);
 
-      _attendanceSummary.assignAll({
-        'Present': summary['Present'] as int? ?? 0,
-        'Absent': summary['Absent'] as int? ?? 0,
-        'Holiday': summary['Holiday'] as int? ?? 0,
-        'Late': summary['Late'] as int? ?? 0,
-        'Excused': summary['Excused'] as int? ?? 0,
-        'Not Applicable': summary['Not Applicable'] as int? ?? 0,
-        'Working': summary['Working'] as int? ?? 0,
-      });
+      _attendanceSummary.value = summary;
     } else {
-      _attendanceSummary.clear();
+      _attendanceSummary.value = AttendanceData(
+        present: 0,
+        absent: 0,
+        holiday: 0,
+        late: 0,
+        excused: 0,
+        notApplicable: 0,
+        workingDays: 0,
+        presentPercentage: 0.0,
+        absentPercentage: 0.0,
+        holidayPercentage: 0.0,
+        latePercentage: 0.0,
+        excusedPercentage: 0.0,
+        notApplicablePercentage: 0.0,
+        workingPercentage: 0.0,
+      );
     }
   }
 
   void updateStreaks() {
     final attendanceData = userAttendanceData.value;
     if (attendanceData != null) {
-      _streaks.assignAll(attendanceData.getStreaks('P'));
+      _streaks.assignAll(attendanceData.getStreaks(AttendanceStatus.present).map((streakMap) => Streak.fromMap(streakMap)).toList());
     } else {
       _streaks.clear();
     }
@@ -199,9 +218,9 @@ class AttendanceReportController extends GetxController {
 
   //----------------------------------------------------------------------------
   // Data Formatting (UI Helper Methods)
-  String streakToString(Map<String, dynamic> streak) {
+  String streakToString(Streak streak) {
     DateFormat dateFormat = DateFormat('dd/MM/yyyy');
-    return 'Start: ${dateFormat.format(streak['start'] as DateTime)}, End: ${dateFormat.format(streak['end'] as DateTime)}, Length: ${streak['length']} days';
+    return 'Start: ${dateFormat.format(streak.start)}, End: ${dateFormat.format(streak.end)}, Length: ${streak.length} days';
   }
 
   //----------------------------------------------------------------------------
@@ -234,4 +253,20 @@ class StudentRanking {
   final double percentage;
 
   StudentRanking({required this.student, required this.percentage});
+}
+
+class Streak {
+  final DateTime start;
+  final DateTime end;
+  final int length;
+
+  Streak({required this.start, required this.end, required this.length});
+
+  factory Streak.fromMap(Map<String, dynamic> map) {
+    return Streak(
+      start: map['start'] as DateTime,
+      end: map['end'] as DateTime,
+      length: map['length'] as int,
+    );
+  }
 }

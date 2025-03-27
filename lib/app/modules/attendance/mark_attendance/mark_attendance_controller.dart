@@ -1,383 +1,259 @@
 import 'package:cambridge_school/app/modules/attendance/attendance_record/attendance_record_models.dart';
 import 'package:cambridge_school/app/modules/attendance/mark_attendance/user_attendance_model.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/models/roster_model.dart';
+import 'package:cambridge_school/core/utils/constants/enums/attendance_status.dart';
 import 'package:cambridge_school/core/widgets/full_screen_loading_widget.dart';
+import 'package:cambridge_school/core/widgets/snack_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
+import 'package:nanoid/nanoid.dart';
 
 import '../../user_management/create_user/models/user_model.dart';
-import '../../user_management/manage_user/repositories/roster_repository.dart';
+import '../../user_management/manage_user/repositories/user_roster_repository.dart';
 import '../attendance_record/attendance_record_repository.dart';
 
 class MarkAttendanceController extends GetxController {
-  //----------------------------------------------------------------------------
-  // Static Data (Consider moving to a config file or dependency injection)
-
-  final String schoolId = 'SCH00001';
-
-  //----------------------------------------------------------------------------
-  // Observables (Reactive Variables)
+  final String schoolId = 'dummy_school_1';
 
   final selectedDate = DateTime.now().obs;
-  final selectedAttendanceFor = RxString('Class');
-  final selectedClass = ('1').obs;
+  final attendanceType = RxString('Class');
+  final isClassAttendance = true.obs;
+
+  final selectedClass = ('Class 1').obs;
   final selectedSection = ('A').obs;
+
   final isLoading = false.obs;
   final isUpdatingAttendance = false.obs;
-  final userList = <UserModel>[].obs;
-  final isMarkAllPresent = false.obs;
-  final isMarkAllAbsent = false.obs;
-  final presentCount = 0.obs;
-  final absentCount = 0.obs;
-  final shouldFetchUsersOnInit = false.obs;
-  final Rxn<ClassRoster> classRoster = Rxn<ClassRoster>();
-  final Rxn<UserRoster> employeeRoster = Rxn<UserRoster>();
 
-  //----------------------------------------------------------------------------
-  // Non-Reactive Variables (Consider making configurable or injected)
+  final selectedAllStatus = Rxn<AttendanceStatus>();
+
+  final studentCount = 0.obs;
+  final absentCount = 0.obs;
+
+  final shouldFetchRosterOnInit = false.obs;
+  final Rxn<UserRoster> userRoster = Rxn<UserRoster>();
+  final Rxn<AttendanceData> attendanceData = Rxn<AttendanceData>();
 
   final String attendanceTakerName = 'Mr. S.K Pandey';
 
-  //----------------------------------------------------------------------------
-  // Repositories and Services
-
-  final FirestoreRosterRepository rosterRepository = FirestoreRosterRepository();
+  final UserRosterRepository userRosterRepository = UserRosterRepository(schoolId:'dummy_school_1');
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-  //----------------------------------------------------------------------------
-  // Lifecycle Methods
 
   @override
   void onInit() {
     super.onInit();
-    if (shouldFetchUsersOnInit.value) {
-      fetchUsers();
+    if (shouldFetchRosterOnInit.value) {
+      loadRosterData();
     }
   }
 
   @override
   void onClose() {
-    // Properly close all Rx variables to prevent memory leaks
     selectedDate.close();
-    selectedAttendanceFor.close();
+    attendanceType.close();
     selectedClass.close();
     selectedSection.close();
-    isLoading.close();
+    isClassAttendance.close();
     isUpdatingAttendance.close();
-    userList.close();
-    isMarkAllPresent.close();
-    isMarkAllAbsent.close();
-    presentCount.close();
+    studentCount.close();
     absentCount.close();
-    shouldFetchUsersOnInit.close();
-    classRoster.close();
-    employeeRoster.close();
+    shouldFetchRosterOnInit.close();
+    userRoster.close();
+    attendanceData.close();
     super.onClose();
   }
 
-  //----------------------------------------------------------------------------
-  // UI Interaction and Configuration
-
-  /// Sets whether the users should be fetched automatically on initialization.
-  void setShouldFetchUsersOnInit({bool shouldFetch = true}) {
-    shouldFetchUsersOnInit.value = shouldFetch;
+  void setShouldFetchRosterOnInit({bool shouldFetch = true}) {
+    shouldFetchRosterOnInit.value = shouldFetch;
   }
 
-  /// Determines if a user is marked as present.
-  RxBool isUserPresent(UserModel user) {
-    final attendance = getUserAttendanceStatus(user);
-    return (attendance == 'P').obs;
-  }
-
-  //----------------------------------------------------------------------------
-  // Data Fetching and Initialization
-
-  /// Fetches users based on the selected attendance type (Class or Employee).
-  Future<void> fetchUsers() async {
-    isLoading(true);
+  Future<void> loadRosterData() async {
+    isLoading.value = true;
     try {
-      if (selectedAttendanceFor.value == 'Class') {
-        await _fetchClassRoster();
-      } else if (selectedAttendanceFor.value == 'Employee') {
-        await _fetchEmployeeRoster();
+      if (isClassAttendance.value) {
+        userRoster.value = await userRosterRepository.getClassRoster(
+            className: selectedClass.value,
+            sectionName: selectedSection.value,
+            schoolId: schoolId);
+        refreshAttendanceSummary();
+      } else {
+        userRoster.value =
+            await userRosterRepository.getEmployeeRosters(schoolId);
+        refreshAttendanceSummary();
       }
-
-      _initializeUserAttendance();
-      updateAttendanceCounts();
     } catch (e) {
-      print('Error fetching users: $e');
-      Get.snackbar('Error', 'Failed to fetch users: $e');
+      MySnackBar.showErrorSnackBar('Error loading roster: $e');
     } finally {
-      isLoading(false);
+      isLoading.value = false;
     }
   }
 
-  /// Fetches the class roster from Firestore.
-  Future<void> _fetchClassRoster() async {
-    ClassRoster? fetchedClassRoster = await rosterRepository.getClassRoster(
-        selectedClass.value, selectedSection.value, schoolId);
+  AttendanceStatus getAttendanceStatus(UserModel user) {
+    if (user.userAttendance == null) {
+      return AttendanceStatus.notApplicable;
+    }
+    return user.userAttendance!.getAttendanceStatus(selectedDate.value);
+  }
 
-    if (fetchedClassRoster != null) {
-      classRoster.value = fetchedClassRoster;
-      userList.value = fetchedClassRoster.studentList;
+  void updateAttendanceStatus(UserModel user, AttendanceStatus status) {
+    user.userAttendance ??= UserAttendance.empty(
+      academicPeriodStart: selectedDate.value,
+      numberOfDays: 365,
+    );
+    user.userAttendance =
+        user.userAttendance!.updateAttendance(selectedDate.value, status);
+    refreshAttendanceSummary();
+  }
+
+  void markAllAttendance() {
+    for (UserModel user in userRoster.value!.userList) {
+      updateAttendanceStatus(
+          user, selectedAllStatus.value ?? AttendanceStatus.present);
+    }
+
+    userRoster.refresh();
+
+    refreshAttendanceSummary();
+  }
+
+  void isAllMarkAttendance() {
+    if (userRoster.value == null) {
+      selectedAllStatus.value = null;
+      return;
+    }
+
+    AttendanceStatus? firstAttendanceStatus;
+    bool allSame = true;
+
+    for (UserModel user in userRoster.value!.userList) {
+      if (user.userAttendance == null ||
+          user.userAttendance!.attendanceString.isEmpty) {
+        allSame = false;
+        break;
+      }
+
+      AttendanceStatus currentStatus = getAttendanceStatus(user);
+
+      if (firstAttendanceStatus == null) {
+        firstAttendanceStatus = currentStatus;
+      } else if (currentStatus != firstAttendanceStatus) {
+        allSame = false;
+        break;
+      }
+    }
+
+    if (allSame && firstAttendanceStatus != null) {
+      selectedAllStatus.value = firstAttendanceStatus;
     } else {
-      print(
-          'Class roster not found for className: ${selectedClass
-              .value}, sectionName: ${selectedSection
-              .value}, schoolId: $schoolId');
-      Get.snackbar('Error', 'Class roster not found.');
-      userList.value = [];
+      selectedAllStatus.value = null;
     }
   }
 
-  /// Fetches the employee roster from Firestore.
-  Future<void> _fetchEmployeeRoster() async {
-    UserRoster? fetchedEmployeeRoster = await rosterRepository.getUserRoster(
-        'employee', // Corrected 'Employee' to 'employee' to match roster type
-        schoolId);
-
-    if (fetchedEmployeeRoster != null) {
-      employeeRoster.value = fetchedEmployeeRoster;
-      userList.value = fetchedEmployeeRoster.userList;
-    } else {
-      print('Employee roster not found for schoolId: $schoolId');
-      Get.snackbar('Error', 'Employee roster not found.');
-      userList.value = [];
-    }
+  void refreshAttendanceSummary() {
+    attendanceData.value =
+        userRoster.value!.calculateAttendanceDataForDate(selectedDate.value);
   }
 
-  /// Initializes the user attendance data for the selected date.
-  void _initializeUserAttendance() {
-    final today = DateTime(
-        selectedDate.value.year, selectedDate.value.month, selectedDate.value
-        .day);
-    for (var user in userList) {
-      user.userAttendance ??= UserAttendance.empty(
-        academicPeriodStart: today,
-        numberOfDays: 30,
-      );
-      user.userAttendance = user.userAttendance!.compact(today);
-    }
-  }
-
-  //----------------------------------------------------------------------------
-  // Attendance Marking and Updates
-
-  /// Updates the attendance status for all users to the specified status.
-  void _updateAttendanceForAll(String status) {
-    for (var user in userList) {
-      updateUserAttendance(user, status, isAll: true);
-    }
-  }
-
-  /// Marks a user as present.
-  void markUserPresent(UserModel user) {
-    updateUserAttendance(user, 'P');
-  }
-
-  /// Marks a user as absent.
-  void markUserAbsent(UserModel user) {
-    updateUserAttendance(user, 'A');
-  }
-
-  /// Marks all users as present.
-  void markAllUsersPresent() {
-    if (!isMarkAllPresent.value) {
-      _updateAttendanceForAll('P');
-      isMarkAllPresent.value = true;
-      isMarkAllAbsent.value = false;
-    }
-  }
-
-  /// Marks all users as absent.
-  void markAllUsersAbsent() {
-    if (!isMarkAllAbsent.value) {
-      _updateAttendanceForAll('A');
-      isMarkAllAbsent.value = true;
-      isMarkAllPresent.value = false;
-    }
-  }
-
-  /// Updates the attendance status for a specific user.
-  void updateUserAttendance(UserModel user, String status,
-      {bool isAll = false}) {
-    try {
-      final updatedAttendance =
-      user.userAttendance!.updateAttendance(selectedDate.value, status);
-      final updatedUser = user.copyWith(userAttendance: updatedAttendance);
-
-      final index = userList.indexOf(user);
-      if (index != -1) {
-        userList[index] = updatedUser;
-      }
-
-      if (!isAll) {
-        isMarkAllPresent.value = false;
-        isMarkAllAbsent.value = false;
-      }
-      updateAttendanceCounts();
-      update();
-    } catch (e) {
-      print('Error updating attendance: $e');
-      Get.snackbar('Error', 'Failed to update attendance: $e');
-    }
-  }
-
-  /// Gets the attendance status for a specific user on the selected date.
-  String getUserAttendanceStatus(UserModel user) {
-    try {
-      return user.userAttendance!.getAttendanceStatus(selectedDate.value);
-    } catch (e) {
-      print("Error fetching attendance for this date - $e");
-      return 'N';
-    }
-  }
-
-  /// Updates the counts for present and absent users.
-  void updateAttendanceCounts() {
-    presentCount.value = 0;
-    absentCount.value = 0;
-
-    for (var user in userList) {
-      final status = getUserAttendanceStatus(user);
-      if (status == 'P') {
-        presentCount.value++;
-      } else if (status == 'A') {
-        absentCount.value++;
-      }
-    }
-  }
-
-  //----------------------------------------------------------------------------
-  // Firestore Interaction (Updating Attendance)
-
-  /// Updates the attendance data in Firestore.
-  Future<void> updateAttendanceOnFirestore() async {
-    isUpdatingAttendance(true);
+  Future<void> saveAttendanceData() async {
     MyFullScreenLoading.show(loadingText: 'Updating Attendance');
 
-    FirestoreAttendanceRecordRepository firestoreAttendanceRecordRepository =
-    FirestoreAttendanceRecordRepository();
+    DailyAttendanceRecordRepository attendanceRecordRepository =
+        DailyAttendanceRecordRepository(schoolId: schoolId);
 
     try {
-      final rosterType = selectedAttendanceFor.value.toLowerCase();
-      final userListMaps = userList.map((user) => user.toMap()).toList();
-
-      // Update the roster at Firestore
-      if (selectedAttendanceFor.value == 'Class' && classRoster.value != null) {
-        await _updateClassRosterOnFirestore(userListMaps);
+      if (attendanceType.value == 'Class' && userRoster.value != null) {
+        await userRosterRepository.updateUserRoster(userRoster.value!);
       } else {
-        await _updateEmployeeRosterOnFirestore(userListMaps);
+        await userRosterRepository.updateUserRoster(userRoster.value!);
       }
 
-      // After updating the roster, update the daily attendance record
-      await _updateDailyAttendanceRecord(firestoreAttendanceRecordRepository);
+      await _updateDailyAttendanceRecord(attendanceRecordRepository);
 
-      Get.snackbar('Success', 'Attendance updated successfully!');
+      MySnackBar.showSuccessSnackBar('Attendance updated successfully!');
     } catch (e) {
-      print('Error updating attendance in Firestore: $e');
-      Get.snackbar('Error', 'Failed to update attendance: $e');
+      MySnackBar.showErrorSnackBar(
+          'Error updating attendance in Firestore: $e');
     } finally {
-      isUpdatingAttendance(false);
       MyFullScreenLoading.hide();
     }
   }
 
-  /// Updates the class roster data in Firestore.
-  Future<void> _updateClassRosterOnFirestore(
-      List<Map<String, dynamic>> userListMaps) async {
-    final userRosterDocRef = firestore
-        .collection('rosters')
-        .doc('class_roster')
-        .collection('classes')
-        .doc(classRoster.value?.id);
-
-    await userRosterDocRef.update({'studentList': userListMaps});
-  }
-
-  /// Updates the employee roster data in Firestore.
-  Future<void> _updateEmployeeRosterOnFirestore(
-      List<Map<String, dynamic>> userListMaps) async {
-    final userRosterDocRef = firestore
-        .collection('rosters')
-        .doc(selectedAttendanceFor.value.toLowerCase())
-        .collection('schools')
-        .doc(schoolId);
-
-    await userRosterDocRef.update({'userList': userListMaps});
-  }
-
-  /// Updates the daily attendance record in Firestore.
   Future<void> _updateDailyAttendanceRecord(
-      FirestoreAttendanceRecordRepository firestoreAttendanceRecordRepository) async {
+      DailyAttendanceRecordRepository attendanceRecordRepository) async {
     final date = selectedDate.value;
     final markedBy = AttendanceTaker(
         uid: schoolId, name: attendanceTakerName, time: DateTime.now());
 
-    DailyAttendanceRecord? existingRecord =
-    await firestoreAttendanceRecordRepository.getDailyAttendanceRecord(
-        schoolId, date);
+    try {
+      DailyAttendanceRecord? existingRecord =
+          await attendanceRecordRepository.getDailyAttendanceRecordByDate(date);
 
-    DailyAttendanceRecord newRecord;
+      DailyAttendanceRecord newRecord;
+      final recordId = nanoid(16);
 
-    if (selectedAttendanceFor.value == 'Class') {
-      final classSummary = ClassAttendanceSummary(
-          className: selectedClass.value,
-          sectionName: selectedSection.value,
-          markedBy: markedBy,
-          presents: presentCount.value,
-          absents: absentCount.value);
+      if (isClassAttendance.value) {
+        final classSummary = ClassAttendanceSummary(
+            className: selectedClass.value,
+            sectionName: selectedSection.value,
+            markedBy: markedBy,
+            presents: attendanceData.value!.present,
+            absents: attendanceData.value!.absent);
 
-      if (existingRecord != null) {
-        existingRecord.classAttendanceSummaries = [classSummary];
-        existingRecord.employeeAttendanceSummary =
-        null; //clear employee summary if any
+        if (existingRecord != null) {
+          existingRecord.classAttendanceSummaries = [classSummary];
+          existingRecord.employeeAttendanceSummary = null;
+          await attendanceRecordRepository
+              .updateDailyAttendanceRecord(existingRecord); //Provide ID
+          MySnackBar.showSuccessSnackBar(
+              'Daily Attendance Record updated successfully in Firestore');
+        } else {
+          newRecord = DailyAttendanceRecord(
+            id: recordId,
+            date: date,
+            classAttendanceSummaries: [classSummary],
+          );
+          await attendanceRecordRepository.addDailyAttendanceRecord(newRecord);
+          MySnackBar.showSuccessSnackBar(
+              'Daily Attendance Record added successfully in Firestore');
+        }
       } else {
-        newRecord = DailyAttendanceRecord(
-          schoolId: schoolId,
-          date: date,
-          classAttendanceSummaries: [classSummary],
-        );
-        existingRecord = newRecord;
+        final employeeSummary = EmployeeAttendanceSummary(
+            markedBy: markedBy,
+            presents: attendanceData.value!.present,
+            absents: attendanceData.value!.absent);
+
+        if (existingRecord != null) {
+          existingRecord.employeeAttendanceSummary = employeeSummary;
+          existingRecord.classAttendanceSummaries = null;
+          await attendanceRecordRepository
+              .updateDailyAttendanceRecord(existingRecord); //Provide ID
+          MySnackBar.showSuccessSnackBar(
+              'Daily Attendance Record updated successfully in Firestore');
+        } else {
+          newRecord = DailyAttendanceRecord(
+            id: recordId,
+            date: date,
+            employeeAttendanceSummary: employeeSummary,
+          );
+          await attendanceRecordRepository.addDailyAttendanceRecord(newRecord);
+          MySnackBar.showSuccessSnackBar(
+              'Daily Attendance Record added successfully in Firestore');
+        }
       }
-    } else {
-      final employeeSummary = EmployeeAttendanceSummary(
-          markedBy: markedBy,
-          presents: presentCount.value,
-          absents: absentCount.value);
 
-      if (existingRecord != null) {
-        existingRecord.employeeAttendanceSummary = employeeSummary;
-        existingRecord.classAttendanceSummaries =
-        null; //clear class summary if any
-      } else {
-        newRecord = DailyAttendanceRecord(
-          schoolId: schoolId,
-          date: date,
-          employeeAttendanceSummary: employeeSummary,
-        );
-        existingRecord = newRecord;
+      if (existingRecord?.classAttendanceSummaries == null &&
+          existingRecord?.employeeAttendanceSummary == null) {
+        MySnackBar.showErrorSnackBar("No attendance data to update.");
+        return;
       }
+      // Handle the case where existing record is null:
+      if (existingRecord == null) {
+        MySnackBar.showErrorSnackBar("No attendance data to update.");
+        return;
+      }
+    } catch (e) {
+      MySnackBar.showErrorSnackBar(
+          'Error updating Daily Attendance Record: $e');
     }
-    if (existingRecord.classAttendanceSummaries == null &&
-        existingRecord.employeeAttendanceSummary == null) {
-      print("Existing record not found");
-      Get.snackbar('Error', "Existing Attendance record not found!");
-      return;
-    }
-
-    await firestoreAttendanceRecordRepository
-        .updateDailyAttendanceRecord(existingRecord);
-    print('Daily Attendance Record updated successfully in Firestore');
-  }
-
-  //----------------------------------------------------------------------------
-  // Utility Methods (Formatting and UI Helpers)
-
-  /// Returns the selected date formatted as 'dd MMMM yyyy'.
-  String getFormattedSelectedDate() {
-    final formatter = DateFormat('dd MMMM yyyy');
-    return formatter.format(selectedDate.value);
   }
 }

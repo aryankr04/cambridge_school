@@ -13,7 +13,7 @@ import '../../school_management/school_model.dart';
 
 class CreateRoutineController extends GetxController {
   // Dependencies
-  final ClassRepository _classManagementRepository = ClassRepository();
+  final ClassRepository _classManagementRepository = ClassRepository(schoolId: 'dummy_school_1');
 
   final SchoolRepository schoolRepository = SchoolRepository();
 
@@ -79,7 +79,7 @@ class CreateRoutineController extends GetxController {
     }
     try {
       final fetchedClassModel = await _classManagementRepository
-          .getClassByClassName(schoolId.value, selectedClassName.value);
+          .getClassByClassName( selectedClassName.value);
       classModel.value = fetchedClassModel;
 
 

@@ -1,104 +1,149 @@
-import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../../../core/services/firebase/firestore_service.dart';
 import 'attendance_record_models.dart';
 
-class FirestoreAttendanceRecordRepository {
-  //----------------------------------------------------------------------------
-  // Instance Variables
+class DailyAttendanceRecordRepository {
   final FirestoreService _firestoreService = FirestoreService();
+  final String _collectionPath = 'daily_attendance_records';
+  final String schoolId;
+
+  DailyAttendanceRecordRepository({required this.schoolId});
 
   //----------------------------------------------------------------------------
-  // Constants
-  static const String attendanceRecordsCollection = 'attendance_records';
-  static const String dailyAttendanceRecordsSubcollection = 'daily_attendance_records';
+  // CRUD Operations using FirestoreService
 
-  //----------------------------------------------------------------------------
-  // DailyAttendanceRecord Operations
+  String _getFullCollectionPath() {
+    return 'schools/$schoolId/$_collectionPath';
+  }
 
-  // Creates a new daily attendance record in Firestore.
-  Future<void> createDailyAttendanceRecord(DailyAttendanceRecord record) async {
+
+  /// Adds a new DailyAttendanceRecord to Firestore.
+  Future<DocumentReference<Map<String, dynamic>>> addDailyAttendanceRecord(
+      DailyAttendanceRecord record) async {
     try {
-      final String dailyAttendanceDocPath = _getDailyAttendanceDocPath(record.schoolId, record.date);
-      await _firestoreService.addDocument(dailyAttendanceDocPath, record.toMap());
+      return await _firestoreService.addDocument(
+          _getFullCollectionPath(), record.toMap());
     } catch (e) {
-      print("Error creating DailyAttendanceRecord: $e");
+      if (kDebugMode) {
+        print("Error adding DailyAttendanceRecord: $e");
+      }
       rethrow;
     }
   }
 
-  /// Retrieves a daily attendance record from Firestore.
-  Future<DailyAttendanceRecord?> getDailyAttendanceRecord(String schoolId, DateTime date) async {
+  /// Retrieves a DailyAttendanceRecord by its date. Returns null if no record is found.
+  Future<DailyAttendanceRecord?> getDailyAttendanceRecordByDate(
+      DateTime date) async {
     try {
-      final String dailyAttendanceDocPath = _getDailyAttendanceDocPath(schoolId, date);
-      final String documentId = formatDate(date);
+      final startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
-      print('📂 Fetching document from path: $dailyAttendanceDocPath with ID: $documentId');
+      QuerySnapshot<Map<String, dynamic>> querySnapshot =
+      await FirebaseFirestore.instance
+          .collection(_getFullCollectionPath())
+          .where('date',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
+          .limit(1) // Limit the result to 1 record
+          .get();
 
-      final snapshot = await _firestoreService.getDocumentById(dailyAttendanceDocPath, documentId);
-
-      if (!snapshot.exists || snapshot.data() == null) {
-        print('❌ Document not found: $documentId in $dailyAttendanceDocPath');
+      if (querySnapshot.docs.isNotEmpty) {
+        // Convert the first document in the query result to a DailyAttendanceRecord object
+        return DailyAttendanceRecord.fromMap(querySnapshot.docs.first.data());
+      } else {
+        // No document found for the given date
         return null;
       }
-
-      final data = snapshot.data() as Map<String, dynamic>?;
-
-      if (data == null) {
-        print('⚠️ Snapshot data is null for document ID: $documentId');
-        return null;
-      }
-
-      print('✅ Document found: $documentId, parsing data...');
-      return DailyAttendanceRecord.fromMap(data);
     } catch (e) {
-      print("🚨 Error getting DailyAttendanceRecord: $e");
+      if (kDebugMode) {
+        print("Error getting DailyAttendanceRecord by date: $e");
+      }
       return null;
     }
   }
 
 
 
-
-  /// Updates an existing daily attendance record in Firestore.
-  Future<void> updateDailyAttendanceRecord(DailyAttendanceRecord record) async {
+  /// Updates an existing DailyAttendanceRecord in Firestore.
+  Future<void> updateDailyAttendanceRecord(
+  DailyAttendanceRecord record) async {
     try {
-      final String dailyAttendanceDocPath = _getDailyAttendanceDocPath(record.schoolId, record.date);
-      await _firestoreService.updateDocument(dailyAttendanceDocPath, formatDate(record.date), record.toMap());
+      await _firestoreService.updateDocument(
+          _getFullCollectionPath(), record.id, record.toMap());
     } catch (e) {
-      print("Error updating DailyAttendanceRecord: $e");
+      if (kDebugMode) {
+        print("Error updating DailyAttendanceRecord: $e");
+      }
       rethrow;
     }
   }
 
-  /// Deletes a daily attendance record from Firestore.
-  Future<void> deleteDailyAttendanceRecord(String schoolId, DateTime date) async {
+  /// Deletes a DailyAttendanceRecord from Firestore.
+  Future<void> deleteDailyAttendanceRecord(String documentId) async {
     try {
-      final String dailyAttendanceDocPath = _getDailyAttendanceDocPath(schoolId, date);
-      await _firestoreService.deleteDocument(dailyAttendanceDocPath, formatDate(date));
+      await _firestoreService.deleteDocument(_getFullCollectionPath(), documentId);
     } catch (e) {
-      print("Error deleting DailyAttendanceRecord: $e");
+      if (kDebugMode) {
+        print("Error deleting DailyAttendanceRecord: $e");
+      }
       rethrow;
     }
   }
 
   //----------------------------------------------------------------------------
-  // Utility Methods (Private)
+  // Query Operations
 
-  /// Gets the document path for a daily attendance record in Firestore.
-  String _getDailyAttendanceDocPath(String schoolId, DateTime date) {
-    return '$attendanceRecordsCollection/$schoolId/$dailyAttendanceRecordsSubcollection';
+  /// Retrieves all DailyAttendanceRecords from Firestore.
+  Future<List<DailyAttendanceRecord>> getAllDailyAttendanceRecords() async {
+    try {
+      final querySnapshot =
+      await _firestoreService.getAllDocuments(_getFullCollectionPath());
+      return querySnapshot
+          .map((doc) => DailyAttendanceRecord.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error getting all DailyAttendanceRecords: $e");
+      }
+      return [];
+    }
   }
 
-  /// Formats a [DateTime] object into a string representation in 'yyyy-MM-dd' format.
-  String formatDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
+  /// Queries DailyAttendanceRecords by date.  Note: Firestore range queries on different fields aren't supported.
+  ///  This only queries by the date.  For more complex queries, you'll likely need to use a cloud function.
+  Future<List<DailyAttendanceRecord>> getDailyAttendanceRecordsByDate(
+      DateTime date) async {
+    try {
+      final querySnapshot = await _firestoreService.queryDocuments(
+          _getFullCollectionPath(), 'date', Timestamp.fromDate(date));
+      return querySnapshot
+          .map((doc) => DailyAttendanceRecord.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error getting DailyAttendanceRecords by date: $e");
+      }
+      return [];
+    }
   }
 
   //----------------------------------------------------------------------------
-  // Utility Methods (Static)
+  // Stream Operations (Real-time)
 
-  /// Gets the document ID for a daily attendance record based on the date.
-  static String getDailyAttendanceDocId(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
+  /// Returns a real-time stream of a single DailyAttendanceRecord.
+  Stream<DailyAttendanceRecord?> getDailyAttendanceRecordStream(
+      String documentId) {
+    return _firestoreService
+        .getDocumentStream(_getFullCollectionPath(), documentId)
+        .map((snapshot) {
+      if (snapshot.exists) {
+        return DailyAttendanceRecord.fromMap(
+            snapshot.data() as Map<String, dynamic>);
+      } else {
+        return null;
+      }
+    });
   }
 }

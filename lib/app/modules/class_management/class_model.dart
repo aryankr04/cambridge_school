@@ -5,7 +5,6 @@ import '../routine/routine_model.dart';
 
 class ClassModel {
   final String id;
-  final String schoolId;
   final String? academicYear;
   final ClassName className;
   final List<SectionModel> sections;
@@ -14,7 +13,6 @@ class ClassModel {
 
   ClassModel({
     required this.id,
-    required this.schoolId,
     this.academicYear,
     required this.className,
     this.sections = const [],
@@ -25,7 +23,6 @@ class ClassModel {
   factory ClassModel.fromMap(Map<String, dynamic> map, String? documentId) {
     return ClassModel(
       id: map['id'] as String,
-      schoolId: map['schoolId'] as String,
       academicYear: map['academicYear'] as String?,
       className: ClassNameExtension.fromString(map['className'] as String),
       sections: (map['sections'] as List<dynamic>?)
@@ -45,7 +42,6 @@ class ClassModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'schoolId': schoolId,
       'academicYear': academicYear,
       'className': className.label,
       'sections': sections.map((section) => section.toMap()).toList(),
@@ -65,7 +61,6 @@ class ClassModel {
   }) {
     return ClassModel(
       id: id ?? this.id,
-      schoolId: schoolId ?? this.schoolId,
       academicYear: academicYear ?? this.academicYear,
       className: className ?? this.className,
       sections: sections ?? this.sections,

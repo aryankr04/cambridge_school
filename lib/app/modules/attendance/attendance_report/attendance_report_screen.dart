@@ -12,6 +12,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
+import '../../../../core/utils/constants/enums/attendance_status.dart';
+import '../mark_attendance/user_attendance_model.dart';
 import 'attendance_calendar_widget.dart';
 import 'attendance_report_controller.dart';
 
@@ -25,32 +27,32 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
         title: const Text('Attendance Report'),
       ),
       body: Obx(
-            () => controller.isLoading.value
+        () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-          padding: const EdgeInsets.all(MySizes.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              MyAttendanceCalendar(
-                userAttendance: controller.userAttendanceData.value,
-                onMonthChanged: controller.setSelectedMonth,
+                padding: const EdgeInsets.all(MySizes.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MyAttendanceCalendar(
+                      userAttendance: controller.userAttendanceData.value,
+                      onMonthChanged: controller.setSelectedMonth,
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    AttendanceSummaryDashboard(controller: controller),
+                    const SizedBox(height: MySizes.lg),
+                    const MonthlyAttendanceBarChart(),
+                    const SizedBox(height: MySizes.lg),
+                    _buildYourAverageVsClassAverage(context),
+                    const SizedBox(height: MySizes.lg),
+                    _buildRankOverview(),
+                    const SizedBox(height: MySizes.lg),
+                    AttendanceConsistencyIndicator(controller: controller),
+                    const SizedBox(height: MySizes.lg),
+                    _buildStreaksSection(),
+                  ],
+                ),
               ),
-              const SizedBox(height: MySizes.md),
-              AttendanceSummaryDashboard(controller: controller),
-              const SizedBox(height: MySizes.lg),
-              const MonthlyAttendanceBarChart(),
-              const SizedBox(height: MySizes.lg),
-              _buildYourAverageVsClassAverage(context),
-              const SizedBox(height: MySizes.lg),
-              _buildRankOverview(),
-              const SizedBox(height: MySizes.lg),
-              AttendanceConsistencyIndicator(controller: controller),
-              const SizedBox(height: MySizes.lg),
-              _buildStreaksSection(),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -74,7 +76,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
             center: Text(
               '${value.toStringAsFixed(2)}%',
               style:
-              MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                  MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
             ),
             progressColor: color,
             backgroundColor: color.withOpacity(0.3),
@@ -139,11 +141,11 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
             children: [
               Icon(
                 studentAttendancePercentage >=
-                    controller.averageClassAttendance.value
+                        controller.averageClassAttendance.value
                     ? Icons.trending_up
                     : Icons.trending_down,
                 color: studentAttendancePercentage >=
-                    controller.averageClassAttendance.value
+                        controller.averageClassAttendance.value
                     ? Colors.green
                     : Colors.red,
               ),
@@ -185,11 +187,11 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
               _buildRankBox(
                   "Your Rank",
                   controller.studentRankings.indexWhere((element) =>
-                  element.student.userId == controller.userId.value) +
+                          element.student.userId == controller.userId.value) +
                       1,
                   controller.getStudentAttendancePercentage(
                       controller.studentList.firstWhere((student) =>
-                      student.userId == controller.userId.value)),
+                          student.userId == controller.userId.value)),
                   Colors.orangeAccent),
               _buildRankBox(
                   "Top Rank",
@@ -214,8 +216,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
 
   Widget _buildRankBox(String label, int rank, double percentage, Color color) {
     return Container(
-      padding:
-      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
@@ -296,7 +297,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
         Align(
           alignment: Alignment.centerRight,
           child: Obx(
-                () => GestureDetector(
+            () => GestureDetector(
               onTap: () => _isExpanded.value = !_isExpanded.value,
               child: Text(
                 _isExpanded.value ? 'See Less' : 'See All',
@@ -338,10 +339,10 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
                 rank == '1'
                     ? "1st"
                     : rank == '2'
-                    ? "2nd"
-                    : rank == '3'
-                    ? "3rd"
-                    : rank,
+                        ? "2nd"
+                        : rank == '3'
+                            ? "3rd"
+                            : rank,
                 style: Theme.of(Get.context!)
                     .textTheme
                     .labelLarge
@@ -388,15 +389,15 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
           Text('Attendance Streaks',
               style: Theme.of(Get.context!).textTheme.headlineSmall),
           const SizedBox(height: MySizes.sm),
-          controller.streaks.isEmpty
-              ? const Text("No streaks to display.")
-              : Wrap(
-            spacing: 8.0,
-            runSpacing: 4.0,
-            children: controller.streaks
-                .map((streak) => StreakCard(streak: streak))
-                .toList(),
-          ),
+          // controller.streaks.isEmpty
+          //     ? const Text("No streaks to display.")
+          //     : Wrap(
+          //   spacing: 8.0,
+          //   runSpacing: 4.0,
+          //   children: controller.streaks
+          //       .map((streak) => StreakCard(streak: streak))
+          //       .toList(),
+          // ),
         ],
       ),
     );
@@ -462,49 +463,63 @@ class StreakCard extends StatelessWidget {
 }
 
 class AttendanceStatusCard extends StatelessWidget {
-  final String status;
-  final String label;
-  final Map<String, int> summary;
-  final int totalDays;
+  final AttendanceStatus status;
+  final AttendanceData summary;
 
   const AttendanceStatusCard({
     super.key,
     required this.status,
-    required this.label,
     required this.summary,
-    required this.totalDays,
   });
 
-  Color _getStatusColor(String status) {
+  int _getStatusCount(AttendanceStatus status) {
     switch (status) {
-      case 'P':
-        return MyDynamicColors.activeGreen;
-      case 'A':
-        return MyDynamicColors.activeRed;
-      case 'H':
-        return MyColors.activeOrange;
-      case 'L':
-        return Colors.purple;
-      case 'E':
-        return MyColors.colorViolet;
-      case 'W':
-        return MyColors.activeBlue;
-      default:
-        return Colors.transparent;
+      case AttendanceStatus.present:
+        return summary.present;
+      case AttendanceStatus.absent:
+        return summary.absent;
+      case AttendanceStatus.holiday:
+        return summary.holiday;
+      case AttendanceStatus.late:
+        return summary.late;
+      case AttendanceStatus.excused:
+        return summary.excused;
+      case AttendanceStatus.notApplicable:
+        return summary.notApplicable;
+      case AttendanceStatus.working:
+        return summary.workingDays;
+    }
+  }
+
+  double _getStatusPercentage(AttendanceStatus status) {
+    switch (status) {
+      case AttendanceStatus.present:
+        return summary.presentPercentage;
+      case AttendanceStatus.absent:
+        return summary.absentPercentage;
+      case AttendanceStatus.holiday:
+        return summary.holidayPercentage;
+      case AttendanceStatus.late:
+        return summary.latePercentage;
+      case AttendanceStatus.excused:
+        return summary.excusedPercentage;
+      case AttendanceStatus.notApplicable:
+        return summary.notApplicablePercentage;
+      case AttendanceStatus.working:
+        return summary.workingPercentage;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    int count = summary[label] ?? 0;
-    double percentage = totalDays > 0 ? (count / totalDays) : 0.0;
-    Color statusColor = _getStatusColor(status);
+    int count = _getStatusCount(status);
+    double percentage = _getStatusPercentage(status);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
       margin: const EdgeInsets.symmetric(horizontal: MySizes.xs),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: status.color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
       ),
       child: Column(
@@ -513,30 +528,28 @@ class AttendanceStatusCard extends StatelessWidget {
           CircularPercentIndicator(
             radius: 34,
             lineWidth: 6.0,
-            percent: percentage,
+            percent: percentage / 100,
             center: Text(
-              '${(percentage * 100).toStringAsFixed(1)}%',
+              percentage.toStringAsFixed(2),
               style:
-              MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                  MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
             ),
-            progressColor: statusColor,
-            backgroundColor: statusColor.withOpacity(0.3),
+            progressColor: status.color,
+            backgroundColor: status.color.withOpacity(0.3),
             circularStrokeCap: CircularStrokeCap.round,
             animation: true,
             animationDuration: 1000,
           ),
-          const SizedBox(height: MySizes.sm),
+          const SizedBox(height: MySizes.xs),
           Text(
             '$count',
             style: MyTextStyle.bodyLarge,
           ),
-          const SizedBox(width: MySizes.xs,),
           Text(
-            label,
-            style: MyTextStyle.bodyMedium,
+            status.label,
+            style: MyTextStyle.bodyMedium.copyWith(height: 1),
             textAlign: TextAlign.center,
           ),
-
         ],
       ),
     );
@@ -615,7 +628,7 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
 
     for (final data in monthlyData) {
       final monthKey =
-      DateFormat('MMM').format(DateFormat('yyyy-MM').parse(data.monthYear));
+          DateFormat('MMM').format(DateFormat('yyyy-MM').parse(data.monthYear));
       if (!monthlySummary.containsKey(monthKey)) {
         monthlySummary[monthKey] = _MonthlyAttendanceSummary();
       }
@@ -657,7 +670,7 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
       groupIndex++;
     }
     double maxAttendanceValue =
-    monthlySummary.values.map((e) => e.present + e.absent).reduce(math.max);
+        monthlySummary.values.map((e) => e.present + e.absent).reduce(math.max);
 
     return MyCard(
       hasShadow: true,
@@ -692,7 +705,7 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
                           fontSize: 12,
                         );
                         final String text =
-                        monthlySummary.keys.toList()[value.toInt()];
+                            monthlySummary.keys.toList()[value.toInt()];
                         return SideTitleWidget(
                           axisSide: meta.axisSide,
                           space: 10,
@@ -786,7 +799,10 @@ class AttendanceSummaryDashboard extends StatelessWidget {
                 onTap: () {
                   Get.dialog(const AttendanceExplanationDialog());
                 },
-                child: const Text('Explain?',style: TextStyle(color: MyColors.activeBlue,fontSize: 12),),
+                child: const Text(
+                  'Explain?',
+                  style: TextStyle(color: MyColors.activeBlue, fontSize: 12),
+                ),
               )
             ],
           ),
@@ -797,22 +813,16 @@ class AttendanceSummaryDashboard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               AttendanceStatusCard(
-                status: 'P',
-                label: 'Present',
+                status: AttendanceStatus.present,
                 summary: controller.attendanceSummary,
-                totalDays: controller.attendanceSummary['Working'] ?? 0,
               ),
               AttendanceStatusCard(
-                status: 'A',
-                label: 'Absent',
+                status: AttendanceStatus.absent,
                 summary: controller.attendanceSummary,
-                totalDays: controller.attendanceSummary['Working'] ?? 0,
               ),
               AttendanceStatusCard(
-                status: 'W',
-                label: 'Working',
+                status: AttendanceStatus.working,
                 summary: controller.attendanceSummary,
-                totalDays: getTotalDaysInMonth(controller.selectedMonth.value),
               ),
             ],
           ),
@@ -821,22 +831,16 @@ class AttendanceSummaryDashboard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               AttendanceStatusCard(
-                status: 'L',
-                label: 'Late',
+                status: AttendanceStatus.late,
                 summary: controller.attendanceSummary,
-                totalDays: controller.attendanceSummary['Working'] ?? 0,
               ),
               AttendanceStatusCard(
-                status: 'E',
-                label: 'Excused',
+                status: AttendanceStatus.excused,
                 summary: controller.attendanceSummary,
-                totalDays: controller.attendanceSummary['Working'] ?? 0,
               ),
               AttendanceStatusCard(
-                status: 'H',
-                label: 'Holiday',
+                status: AttendanceStatus.holiday,
                 summary: controller.attendanceSummary,
-                totalDays: getTotalDaysInMonth(controller.selectedMonth.value),
               ),
             ],
           ),
@@ -906,7 +910,7 @@ class AttendanceExplanationDialog extends StatelessWidget {
                 title: 'Total Working Days (W)',
                 calculation: 'W = P + A + L + E',
                 description:
-                'Total Working Days is the sum of Present, Absent, Late, and Excused days.',
+                    'Total Working Days is the sum of Present, Absent, Late, and Excused days.',
                 color: MyColors.activeBlue,
                 termLetter: 'W'),
             const SizedBox(height: MySizes.sm),
@@ -957,8 +961,7 @@ class AttendanceExplanationDialog extends StatelessWidget {
                   ),
                 ),
                 child: Text('Close',
-                    style:
-                    MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
+                    style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
               ),
             ),
           ],
@@ -969,9 +972,9 @@ class AttendanceExplanationDialog extends StatelessWidget {
 
   Widget _buildTermExplanation(BuildContext context,
       {required String term,
-        required String description,
-        required Color color,
-        required String termLetter}) {
+      required String description,
+      required Color color,
+      required String termLetter}) {
     return Container(
       margin: const EdgeInsets.only(bottom: MySizes.sm),
       padding: const EdgeInsets.symmetric(
@@ -1012,10 +1015,10 @@ class AttendanceExplanationDialog extends StatelessWidget {
 
   Widget _buildCalculationExplanation(BuildContext context,
       {required String title,
-        required String calculation,
-        required String description,
-        required Color color,
-        required String termLetter}) {
+      required String calculation,
+      required String description,
+      required Color color,
+      required String termLetter}) {
     return Container(
       margin: const EdgeInsets.only(bottom: MySizes.sm),
       padding: const EdgeInsets.all(12.0),
@@ -1066,12 +1069,12 @@ class AttendanceExplanationDialog extends StatelessWidget {
 
   Widget _buildPercentageCalculation(BuildContext context,
       {required String percentageType,
-        required String calculation,
-        required Color color,
-        required String termLetter}) {
+      required String calculation,
+      required Color color,
+      required String termLetter}) {
     return Container(
-        margin: const EdgeInsets.only(bottom: MySizes.sm),
-    padding: const EdgeInsets.all(12.0),
+      margin: const EdgeInsets.only(bottom: MySizes.sm),
+      padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),

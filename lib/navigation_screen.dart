@@ -1,5 +1,7 @@
+import 'package:cambridge_school/app/modules/dashboard/main_page/profile/profile.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
+import 'package:cambridge_school/core/utils/helpers/helper_functions.dart';
 import 'package:cambridge_school/router.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,6 +25,7 @@ class NavigationScreen extends StatelessWidget {
               _buildCategoryHeader("School Management"),
               _buildButtonGrid([
                 _buildNavButton('School Management', AppRoutes.manageSchoolRoute, Icons.settings),
+                _buildNavButton('Profile', AppRoutes.manageSchoolRoute, Icons.settings),
                 _buildNavButton('School List', AppRoutes.schoolListRoute, Icons.list),
                 _buildNavButton('Create School', AppRoutes.createSchoolRoute, Icons.school),
               ]),

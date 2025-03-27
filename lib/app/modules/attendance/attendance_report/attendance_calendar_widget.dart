@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../../core/utils/constants/colors.dart';
 import '../../../../../core/utils/constants/dynamic_colors.dart';
 import '../../../../../core/utils/constants/sizes.dart';
+import '../../../../core/utils/constants/enums/attendance_status.dart';
 import '../mark_attendance/user_attendance_model.dart';
 
 class MyAttendanceCalendar extends StatelessWidget {
@@ -82,7 +83,7 @@ class _AttendanceCalendarWidgetState extends State<_AttendanceCalendarWidget> {
   @override
   Widget build(BuildContext context) {
     final DateTime lastDayOfMonth =
-        DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
+    DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
     final int daysInMonth = lastDayOfMonth.day;
 
     return MyCard(
@@ -102,7 +103,8 @@ class _AttendanceCalendarWidgetState extends State<_AttendanceCalendarWidget> {
                       color: MyColors.activeBlue),
                   child: const Icon(
                     Icons.arrow_back,
-                    color: Colors.white,size: 20,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ),
               ),
@@ -124,7 +126,8 @@ class _AttendanceCalendarWidgetState extends State<_AttendanceCalendarWidget> {
                       color: MyColors.activeBlue),
                   child: const Icon(
                     Icons.arrow_forward,
-                    color: Colors.white,size: 20,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ),
               ),
@@ -160,11 +163,12 @@ class _AttendanceCalendarWidgetState extends State<_AttendanceCalendarWidget> {
 
               final int day = index - (_firstDayOfWeekday - 2);
               final DateTime currentDate =
-                  DateTime(_currentMonth.year, _currentMonth.month, day);
+              DateTime(_currentMonth.year, _currentMonth.month, day);
 
-              String status = widget.userAttendance != null
+              //  Get the attendance status using the enum
+              AttendanceStatus status = widget.userAttendance != null
                   ? widget.userAttendance!.getAttendanceStatus(currentDate)
-                  : 'N';
+                  : AttendanceStatus.notApplicable;
 
               return Container(
                 margin: const EdgeInsets.all(7),
@@ -176,12 +180,12 @@ class _AttendanceCalendarWidgetState extends State<_AttendanceCalendarWidget> {
                 child: Text(
                   "$day",
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: status == 'N'
-                            ? MyDynamicColors.subtitleTextColor
-                            : Colors.white,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: status == AttendanceStatus.notApplicable
+                        ? MyDynamicColors.subtitleTextColor
+                        : Colors.white,
+                  ),
                 ),
               );
             },
@@ -191,19 +195,19 @@ class _AttendanceCalendarWidgetState extends State<_AttendanceCalendarWidget> {
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(AttendanceStatus status) {
     switch (status) {
-      case 'P':
+      case AttendanceStatus.present:
         return MyDynamicColors.activeGreen;
-      case 'A':
+      case AttendanceStatus.absent:
         return MyDynamicColors.activeRed;
-      case 'H':
+      case AttendanceStatus.holiday:
         return Colors.orange;
-      case 'L':
+      case AttendanceStatus.late:
         return Colors.purple;
-      case 'E':
+      case AttendanceStatus.excused:
         return Colors.blue;
-      case 'N':
+      case AttendanceStatus.notApplicable:
       default:
         return Colors.transparent;
     }

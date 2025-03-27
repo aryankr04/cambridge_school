@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DailyAttendanceRecord {
-  String schoolId;
+  String id; // Add the ID field
   DateTime date;
   List<ClassAttendanceSummary>? classAttendanceSummaries;
   EmployeeAttendanceSummary? employeeAttendanceSummary;
 
   DailyAttendanceRecord({
-    required this.schoolId,
+    required this.id, // ID is optional when creating a new record
     required this.date,
     this.classAttendanceSummaries,
     this.employeeAttendanceSummary,
@@ -15,7 +15,7 @@ class DailyAttendanceRecord {
 
   Map<String, dynamic> toMap() {
     return {
-      'schoolId': schoolId,
+      'id': id,
       'date': Timestamp.fromDate(date),
       'classAttendanceSummaries': classAttendanceSummaries?.map((e) => e.toMap()).toList(),
       'employeeAttendanceSummary': employeeAttendanceSummary?.toMap(),
@@ -24,7 +24,7 @@ class DailyAttendanceRecord {
 
   factory DailyAttendanceRecord.fromMap(Map<String, dynamic> map) {
     return DailyAttendanceRecord(
-      schoolId: map['schoolId'] as String,
+      id: map['id'] as String, // Extract ID from the map
       date: (map['date'] as Timestamp).toDate(),
       classAttendanceSummaries: (map['classAttendanceSummaries'] as List<dynamic>?)
           ?.map((e) => ClassAttendanceSummary.fromMap(e as Map<String, dynamic>))
@@ -102,37 +102,6 @@ class EmployeeAttendanceSummary {
   }
 }
 
-class AttendanceEvent {
-  final DateTime date;
-  final AttendanceTaker markedBy;
-  final int presents;
-  final int absents;
-
-  AttendanceEvent({
-    required this.date,
-    required this.markedBy,
-    required this.presents,
-    required this.absents,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'date': Timestamp.fromDate(date),
-      'markedBy': markedBy.toMap(),
-      'presents': presents,
-      'absents': absents,
-    };
-  }
-
-  factory AttendanceEvent.fromMap(Map<String, dynamic> map) {
-    return AttendanceEvent(
-      date: (map['date'] as Timestamp).toDate(),
-      markedBy: AttendanceTaker.fromMap(map['markedBy'] as Map<String, dynamic>),
-      presents: map['presents'] as int? ?? 0,
-      absents: map['absents'] as int? ?? 0,
-    );
-  }
-}
 
 class AttendanceTaker {
   final String uid;

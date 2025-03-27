@@ -38,8 +38,8 @@ class UserModel {
   final bool? isPhysicalDisability;
 
   // 5️⃣ Contact Information
-  final Address? permanentAddress;
-  final Address? currentAddress;
+  final HouseAddress? permanentAddress;
+  final HouseAddress? currentAddress;
 
   // 6️⃣ Transportation Details
   final String? modeOfTransport;
@@ -217,10 +217,10 @@ class UserModel {
         bloodGroup: data['bloodGroup'] as String?,
         isPhysicalDisability: data['isPhysicalDisability'] as bool?,
         permanentAddress: data['permanentAddress'] != null
-            ? Address.fromMap(data['permanentAddress'] as Map<String, dynamic>)
+            ? HouseAddress.fromMap(data['permanentAddress'] as Map<String, dynamic>)
             : null,
         currentAddress: data['currentAddress'] != null
-            ? Address.fromMap(data['currentAddress'] as Map<String, dynamic>)
+            ? HouseAddress.fromMap(data['currentAddress'] as Map<String, dynamic>)
             : null,
         modeOfTransport: data['modeOfTransport'] as String?,
         transportDetails: data['transportDetails'] != null
@@ -329,8 +329,8 @@ class UserModel {
     double? weight,
     String? bloodGroup,
     bool? isPhysicalDisability,
-    Address? permanentAddress,
-    Address? currentAddress,
+    HouseAddress? permanentAddress,
+    HouseAddress? currentAddress,
     String? modeOfTransport,
     TransportDetails? transportDetails,
     List<UserRole>? roles,
@@ -823,7 +823,7 @@ class Favorite {
 }
 
 // Address Class
-class Address {
+class HouseAddress {
   final String? houseAddress;
   final String? city;
   final String? district;
@@ -832,7 +832,7 @@ class Address {
   final String? pinCode;
   final String? addressType;
 
-  Address({
+  HouseAddress({
     this.houseAddress,
     this.city,
     this.district,
@@ -852,7 +852,7 @@ class Address {
     'addressType': addressType,
   };
 
-  static Address fromMap(Map<String, dynamic> data) => Address(
+  static HouseAddress fromMap(Map<String, dynamic> data) => HouseAddress(
     houseAddress: data['houseAddress'] as String?,
     city: data['city'] as String?,
     district: data['district'] as String?,

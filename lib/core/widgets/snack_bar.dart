@@ -30,6 +30,7 @@ class MySnackBar {
           ],
         ),
         duration: const Duration(milliseconds: 3000),
+        dismissDirection:  DismissDirection.horizontal,
       ),
     );
   }
