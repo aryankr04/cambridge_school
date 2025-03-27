@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'app/modules/user_management/create_user/models/user_model.dart';
+import 'app/modules/user_management/create_user/screens/pending_approval_screen.dart';
 import 'core/utils/theme/theme.dart';
 import 'firebase_options.dart';
 
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _getAppTheme(context),
       getPages: AppRoutes.routes,
-      // initialRoute: AppRoutes.classManagementRoute,
+      // initialRoute: AppRoutes.pendingApprovalRoute,
       home: const NavigationScreen(),
     );
   }

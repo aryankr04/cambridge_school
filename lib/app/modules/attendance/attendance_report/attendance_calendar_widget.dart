@@ -1,3 +1,4 @@
+import 'package:cambridge_school/core/utils/constants/enums.dart';
 import 'package:cambridge_school/core/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -83,7 +84,7 @@ class _AttendanceCalendarWidgetState extends State<_AttendanceCalendarWidget> {
   @override
   Widget build(BuildContext context) {
     final DateTime lastDayOfMonth =
-    DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
+        DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
     final int daysInMonth = lastDayOfMonth.day;
 
     return MyCard(
@@ -163,29 +164,31 @@ class _AttendanceCalendarWidgetState extends State<_AttendanceCalendarWidget> {
 
               final int day = index - (_firstDayOfWeekday - 2);
               final DateTime currentDate =
-              DateTime(_currentMonth.year, _currentMonth.month, day);
+                  DateTime(_currentMonth.year, _currentMonth.month, day);
 
               //  Get the attendance status using the enum
               AttendanceStatus status = widget.userAttendance != null
-                  ? widget.userAttendance!.getAttendanceStatus(currentDate)
+                  ? widget.userAttendance!.getAttendanceStatusForDate(currentDate)
                   : AttendanceStatus.notApplicable;
 
               return Container(
                 margin: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _getStatusColor(status),
+                  color: status == AttendanceStatus.notApplicable
+                      ? null
+                      : status.color,
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   "$day",
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: status == AttendanceStatus.notApplicable
-                        ? MyDynamicColors.subtitleTextColor
-                        : Colors.white,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: status == AttendanceStatus.notApplicable
+                            ? MyDynamicColors.subtitleTextColor
+                            : Colors.white,
+                      ),
                 ),
               );
             },
@@ -193,23 +196,5 @@ class _AttendanceCalendarWidgetState extends State<_AttendanceCalendarWidget> {
         ],
       ),
     );
-  }
-
-  Color _getStatusColor(AttendanceStatus status) {
-    switch (status) {
-      case AttendanceStatus.present:
-        return MyDynamicColors.activeGreen;
-      case AttendanceStatus.absent:
-        return MyDynamicColors.activeRed;
-      case AttendanceStatus.holiday:
-        return Colors.orange;
-      case AttendanceStatus.late:
-        return Colors.purple;
-      case AttendanceStatus.excused:
-        return Colors.blue;
-      case AttendanceStatus.notApplicable:
-      default:
-        return Colors.transparent;
-    }
   }
 }

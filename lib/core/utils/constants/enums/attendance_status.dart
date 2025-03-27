@@ -48,7 +48,7 @@ enum AttendanceStatus {
   working(
     label: 'Working',
     description:
-        'Student is expected to be present but has not been marked as present, late, or absent.',
+    'Student is expected to be present but has not been marked as present, late, or absent.',
     code: 'W',
     color: MyColors.activeBlue,
     icon: Icons.work,
@@ -70,9 +70,13 @@ enum AttendanceStatus {
 
   static AttendanceStatus fromCode(String code) {
     return AttendanceStatus.values.firstWhere(
-      (element) => element.code == code,
+          (element) => element.code == code,
       orElse: () =>
-          AttendanceStatus.notApplicable, // Default to N/A if code not found
+      AttendanceStatus.notApplicable, // Default to N/A if code not found
     );
+  }
+
+  static List<String> getLabels() {
+    return AttendanceStatus.values.map((status) => status.label).toList();
   }
 }

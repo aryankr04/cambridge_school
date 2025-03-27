@@ -1,11 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:cambridge_school/core/utils/constants/colors.dart';
-import 'package:cambridge_school/core/utils/constants/dynamic_colors.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
+import 'package:cambridge_school/core/utils/formatters/date_time_formatter.dart';
+import 'package:cambridge_school/core/widgets/bottom_sheet_dropdown.dart';
 import 'package:cambridge_school/core/widgets/card_widget.dart';
+import 'package:cambridge_school/core/widgets/date_picker_field.dart';
 import 'package:cambridge_school/core/widgets/divider.dart';
+import 'package:cambridge_school/core/widgets/dropdown_field.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,7 +21,7 @@ import 'attendance_calendar_widget.dart';
 import 'attendance_report_controller.dart';
 
 class AttendanceReportScreen extends GetView<AttendanceReportController> {
-  AttendanceReportScreen({super.key});
+  const AttendanceReportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +29,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
       appBar: AppBar(
         title: const Text('Attendance Report'),
       ),
+      backgroundColor: MyColors.lightGrey,
       body: Obx(
         () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
@@ -34,481 +38,570 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    MyAttendanceCalendar(
-                      userAttendance: controller.userAttendanceData.value,
-                      onMonthChanged: controller.setSelectedMonth,
+                    Obx(
+                      () => MyAttendanceCalendar(
+                        userAttendance: controller.userAttendanceData.value,
+                        onMonthChanged: controller.setSelectedMonth,
+                      ),
                     ),
                     const SizedBox(height: MySizes.md),
                     AttendanceSummaryDashboard(controller: controller),
+
                     const SizedBox(height: MySizes.lg),
                     const MonthlyAttendanceBarChart(),
                     const SizedBox(height: MySizes.lg),
-                    _buildYourAverageVsClassAverage(context),
+                    // StudentAverageComparisonCard(controller: controller),
                     const SizedBox(height: MySizes.lg),
-                    _buildRankOverview(),
+                    // StudentRankOverviewCard(controller: controller),
                     const SizedBox(height: MySizes.lg),
-                    AttendanceConsistencyIndicator(controller: controller),
-                    const SizedBox(height: MySizes.lg),
-                    _buildStreaksSection(),
+                    AttendanceStreakCard(controller: controller),
                   ],
                 ),
               ),
       ),
     );
   }
+}
 
-  Widget _buildAverageBox(String label, double value, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          vertical: MySizes.md, horizontal: MySizes.md),
-      margin: const EdgeInsets.symmetric(horizontal: MySizes.xs),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularPercentIndicator(
-            radius: 36,
-            lineWidth: 6.0,
-            percent: value / 100,
-            center: Text(
-              '${value.toStringAsFixed(2)}%',
-              style:
-                  MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-            ),
-            progressColor: color,
-            backgroundColor: color.withOpacity(0.3),
-            circularStrokeCap: CircularStrokeCap.round,
-            animation: true,
-            animationDuration: 1000,
-          ),
-          const SizedBox(height: MySizes.md),
-          Text(
-            label,
-            style: MyTextStyle.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+class AttendanceStreakCard extends StatelessWidget {
+  const AttendanceStreakCard({
+    super.key,
+    required this.controller,
+  });
 
-  Widget _buildYourAverageVsClassAverage(BuildContext context) {
-    final studentAttendancePercentage = controller
-        .getStudentAttendancePercentage(controller.studentList.firstWhere(
-            (student) => student.userId == controller.userId.value));
+  final AttendanceReportController controller;
 
+  @override
+  Widget build(BuildContext context) {
     return MyCard(
       hasShadow: true,
-      padding: const EdgeInsets.all(MySizes.md),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "Your Average vs Class Average",
-              style: MyTextStyle.headlineSmall,
-            ),
-          ),
-          const SizedBox(height: MySizes.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildAverageBox("Your Average", studentAttendancePercentage,
-                  MyColors.activeGreen),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: CircleAvatar(
-                  backgroundColor: MyColors.activeRed.withOpacity(0.1),
-                  child: Text(
-                    'VS',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontSize: 16,
-                        color: Colors.red,
-                        fontWeight: FontWeight.w600),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: MySizes.md, vertical: MySizes.sm),
+            child: Column(
+              children: [
+                HeadingForCard(
+                    controller: controller, heading: 'Attendance Streaks'),
+                const SizedBox(
+                  height: MySizes.md,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: MyBottomSheetDropdown(
+                    optionsForChips: const [
+                      'Present',
+                      'Absent',
+                      'Late',
+                      'Excused',
+                    ],
+                    onSingleChanged: (value) {
+                      controller.selectedStatus.value =
+                          AttendanceStatus.fromCode(value);
+                    },
+                    selectedValue: controller.selectedStatus.value.label.obs,
+                    dropdownWidgetType: DropdownWidgetType.choiceChip,
                   ),
                 ),
-              ),
-              _buildAverageBox("Class Average",
-                  controller.averageClassAttendance.value, MyColors.activeBlue),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Icon(
-                studentAttendancePercentage >=
-                        controller.averageClassAttendance.value
-                    ? Icons.trending_up
-                    : Icons.trending_down,
-                color: studentAttendancePercentage >=
-                        controller.averageClassAttendance.value
-                    ? Colors.green
-                    : Colors.red,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                "Difference: ${studentAttendancePercentage >= controller.averageClassAttendance.value ? '+ ${(studentAttendancePercentage - controller.averageClassAttendance.value).toStringAsFixed(2)}%' : '${(studentAttendancePercentage - controller.averageClassAttendance.value).toStringAsFixed(2)}%'} vs Class",
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRankOverview() {
-    return MyCard(
-      padding: const EdgeInsets.all(MySizes.md),
-      hasShadow: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "Rank Overview",
-              style: MyTextStyle.headlineSmall,
+              ],
             ),
           ),
-          const SizedBox(height: MySizes.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildRankBox(
-                  "Your Rank",
-                  controller.studentRankings.indexWhere((element) =>
-                          element.student.userId == controller.userId.value) +
-                      1,
-                  controller.getStudentAttendancePercentage(
-                      controller.studentList.firstWhere((student) =>
-                          student.userId == controller.userId.value)),
-                  Colors.orangeAccent),
-              _buildRankBox(
-                  "Top Rank",
-                  1,
-                  controller.studentRankings.isNotEmpty
-                      ? controller.studentRankings.first.percentage
-                      : 0.0,
-                  Colors.blueAccent),
-            ],
+          const Divider(
+            color: MyColors.borderColor,
+            thickness: 0.5,
+            height: 1,
           ),
-          const SizedBox(height: 20),
-          const Text(
-            "Rank Breakdown",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 10),
-          ..._buildRankDistributionRows(controller.studentRankings),
+          Obx(() {
+            final summary = controller.userAttendanceSummary.value;
+
+            if (summary == null) {
+              return const Center(
+                  child:
+                      CircularProgressIndicator()); // Or any other loading indicator
+            }
+
+            if (summary.presentStreaks.streaks.isEmpty) {
+              return const Text("No present streaks to display.");
+            }
+
+            return Wrap(
+              spacing: 8.0,
+              runSpacing: 4.0,
+              children: summary.presentStreaks.streaks
+                  .map((streak) => StreakItem(streak: streak))
+                  .toList(),
+            );
+          }),
         ],
       ),
     );
   }
+}
 
-  Widget _buildRankBox(String label, int rank, double percentage, Color color) {
+// class StudentAverageComparisonCard extends StatelessWidget {
+//   const StudentAverageComparisonCard({
+//     super.key,
+//     required this.controller,
+//   });
+//
+//   final AttendanceReportController controller;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final studentAttendancePercentage = controller.userAttendanceSummary.value 0.0;
+//
+//     return MyCard(
+//       hasShadow: true,
+//       padding: const EdgeInsets.all(MySizes.md),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           HeadingForCard(controller: controller, heading: 'Your vs Class '),
+//
+//           const SizedBox(height: MySizes.md),
+//     Align(
+//     alignment: Alignment.centerLeft,
+//     child: MyBottomSheetDropdown(
+//     optionsForChips: const [
+//     'Present',
+//     'Absent',
+//     'Late',
+//     'Excused',
+//     ],
+//     onSingleChanged: (value) {
+//     controller.selectedStatus.value =
+//     AttendanceStatus.fromCode(value);
+//     },
+//     selectedValue: controller.selectedStatus.value.label.obs,
+//     dropdownWidgetType: DropdownWidgetType.choiceChip,
+//     ),
+//     ),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: [
+//               _buildAverageBox(
+//                 context,
+//                 "Your Average",
+//                 studentAttendancePercentage,
+//                 MyColors.activeGreen,
+//               ),
+//               Container(
+//                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
+//                 child: CircleAvatar(
+//                   backgroundColor: MyColors.activeRed.withOpacity(0.1),
+//                   child: Text(
+//                     'VS',
+//                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
+//                           fontSize: 16,
+//                           color: Colors.red,
+//                           fontWeight: FontWeight.w600,
+//                         ),
+//                   ),
+//                 ),
+//               ),
+//               _buildAverageBox(
+//                 context,
+//                 "Class Average",
+//                 controller.averageClassAttendance.value,
+//                 MyColors.activeBlue,
+//               ),
+//             ],
+//           ),
+//           const SizedBox(height: 20),
+//           Row(
+//             children: [
+//               Icon(
+//                 studentAttendancePercentage >=
+//                         controller.averageClassAttendance.value
+//                     ? Icons.trending_up
+//                     : Icons.trending_down,
+//                 color: studentAttendancePercentage >=
+//                         controller.averageClassAttendance.value
+//                     ? Colors.green
+//                     : Colors.red,
+//               ),
+//               const SizedBox(width: 8),
+//               Text(
+//                 "Difference: ${studentAttendancePercentage >= controller.averageClassAttendance.value ? '+ ${(studentAttendancePercentage - controller.averageClassAttendance.value).toStringAsFixed(2)}%' : '${(studentAttendancePercentage - controller.averageClassAttendance.value).toStringAsFixed(2)}%'} vs Class",
+//                 style: const TextStyle(
+//                   fontSize: 14,
+//                   fontWeight: FontWeight.w500,
+//                   color: Colors.black,
+//                   fontStyle: FontStyle.italic,
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildAverageBox(
+//       BuildContext context, String label, double value, Color color) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(
+//         vertical: MySizes.md,
+//         horizontal: MySizes.md,
+//       ),
+//       margin: const EdgeInsets.symmetric(horizontal: MySizes.xs),
+//       decoration: BoxDecoration(
+//         color: color.withOpacity(0.1),
+//         borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
+//       ),
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center,
+//         children: [
+//           CircularPercentIndicator(
+//             radius: 36,
+//             lineWidth: 6.0,
+//             percent: value / 100,
+//             center: Text(
+//               '${value.toStringAsFixed(2)}%',
+//               style:
+//                   MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+//             ),
+//             progressColor: color,
+//             backgroundColor: color.withOpacity(0.3),
+//             circularStrokeCap: CircularStrokeCap.round,
+//             animation: true,
+//             animationDuration: 1000,
+//           ),
+//           const SizedBox(height: MySizes.md),
+//           Text(
+//             label,
+//             style: MyTextStyle.bodyLarge,
+//             textAlign: TextAlign.center,
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+//
+// class StudentRankOverviewCard extends StatelessWidget {
+//   StudentRankOverviewCard({super.key, required this.controller});
+//
+//   final AttendanceReportController controller;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MyCard(
+//       padding: const EdgeInsets.all(MySizes.md),
+//       hasShadow: true,
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           const Align(
+//             alignment: Alignment.centerLeft,
+//             child: Text(
+//               "Rank Overview",
+//               style: MyTextStyle.headlineSmall,
+//             ),
+//           ),
+//           const SizedBox(height: MySizes.md),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               _buildRankBox(
+//                 context,
+//                 "Your Rank",
+//                 controller.studentRankings.indexWhere((element) =>
+//                         element.student.userId == controller.userId.value) +
+//                     1,
+//                 controller.getStudentAttendancePercentage(
+//                   controller.studentList.firstWhere(
+//                       (student) => student.userId == controller.userId.value),
+//                 ),
+//                 Colors.orangeAccent,
+//               ),
+//               _buildRankBox(
+//                 context,
+//                 "Top Rank",
+//                 1,
+//                 controller.studentRankings.isNotEmpty
+//                     ? controller.studentRankings.first.percentage
+//                     : 0.0,
+//                 Colors.blueAccent,
+//               ),
+//             ],
+//           ),
+//           const SizedBox(height: 20),
+//           const Text(
+//             "Rank Breakdown",
+//             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+//           ),
+//           const SizedBox(height: 10),
+//           ..._buildRankDistributionRows(context, controller.studentRankings),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildRankBox(BuildContext context, String label, int rank,
+//       double percentage, Color color) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(
+//         horizontal: 12.0,
+//         vertical: 12,
+//       ),
+//       decoration: BoxDecoration(
+//         color: color,
+//         borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+//       ),
+//       child: Row(
+//         children: [
+//           Text(
+//             rank == 1 ? '👑' : '🏅',
+//             style: const TextStyle(
+//               fontSize: 28,
+//             ),
+//           ),
+//           const SizedBox(width: MySizes.sm),
+//           Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Text(
+//                 "$label: $rank${_getRankSuffix(rank)}",
+//                 style: const TextStyle(
+//                   fontSize: 15,
+//                   fontWeight: FontWeight.w600,
+//                   color: Colors.white,
+//                 ),
+//               ),
+//               Row(
+//                 children: [
+//                   Text(
+//                     "${percentage.toStringAsFixed(1)}%",
+//                     style: const TextStyle(
+//                       fontSize: 13,
+//                       fontWeight: FontWeight.w500,
+//                       color: Colors.white70,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   String _getRankSuffix(int rank) {
+//     if (rank == 1) {
+//       return 'st';
+//     } else if (rank == 2) {
+//       return 'nd';
+//     } else if (rank == 3) {
+//       return 'rd';
+//     } else {
+//       return 'th';
+//     }
+//   }
+//
+//   Color _getRankColor(String rank) {
+//     final rankInt = int.tryParse(rank) ?? 0;
+//     if (rankInt == 1) {
+//       return Colors.green;
+//     } else if (rankInt == 2) {
+//       return Colors.blue;
+//     } else {
+//       return Colors.red;
+//     }
+//   }
+//
+//   final RxBool _isExpanded = false.obs;
+//
+//   List<Widget> _buildRankDistributionRows(
+//       BuildContext context, List<StudentRanking> rankingList) {
+//     final topRanks = rankingList
+//         .where((student) => rankingList.indexOf(student) + 1 <= 3)
+//         .toList();
+//     final limit = _isExpanded.value ? rankingList.length : topRanks.length;
+//     final rankDistributionRows = <Widget>[];
+//
+//     for (var i = 0; i < limit; i++) {
+//       final student = rankingList[i];
+//       final name = student.student.fullName ?? '';
+//       final id = student.student.userId;
+//       final rank = (rankingList.indexOf(student) + 1).toString();
+//       final percentage = student.percentage.toString();
+//       final color = _getRankColor(rank);
+//
+//       rankDistributionRows.add(_buildRankDistributionRow(
+//           context, name, id, rank, percentage, color));
+//     }
+//
+//     if (rankingList.length > topRanks.length) {
+//       rankDistributionRows.add(
+//         Align(
+//           alignment: Alignment.centerRight,
+//           child: Obx(
+//             () => GestureDetector(
+//               onTap: () => _isExpanded.value = !_isExpanded.value,
+//               child: Text(
+//                 _isExpanded.value ? 'See Less' : 'See All',
+//                 style: const TextStyle(
+//                   color: MyColors.activeBlue,
+//                   fontWeight: FontWeight.w400,
+//                 ),
+//               ),
+//             ),
+//           ),
+//         ),
+//       );
+//     }
+//
+//     return rankDistributionRows;
+//   }
+//
+//   Widget _buildRankDistributionRow(BuildContext context, String name, String id,
+//       String rank, String percentage, Color color) {
+//     return Container(
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+//         color: controller.userId.value == id
+//             ? color.withOpacity(0.1)
+//             : Colors.transparent,
+//       ),
+//       child: Padding(
+//         padding: const EdgeInsets.symmetric(
+//           vertical: 8.0,
+//           horizontal: 8,
+//         ),
+//         child: Row(
+//           mainAxisAlignment: MainAxisAlignment.start,
+//           children: [
+//             Container(
+//               padding: const EdgeInsets.all(12.0),
+//               decoration: BoxDecoration(
+//                 shape: BoxShape.circle,
+//                 color: color.withOpacity(0.2),
+//               ),
+//               child: Text(
+//                 _getRankText(rank),
+//                 style: Theme.of(context)
+//                     .textTheme
+//                     .labelLarge
+//                     ?.copyWith(color: color),
+//               ),
+//             ),
+//             const SizedBox(width: 12),
+//             Expanded(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     controller.userId.value == id ? 'You' : name,
+//                     style: const TextStyle(
+//                       fontSize: 14,
+//                       fontWeight: FontWeight.w600,
+//                       color: Colors.black,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             const SizedBox(width: 12),
+//             Text(
+//               '$percentage%',
+//               style: const TextStyle(
+//                 fontSize: 14,
+//                 fontWeight: FontWeight.w600,
+//                 color: Colors.black,
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+//
+//   String _getRankText(String rank) {
+//     switch (rank) {
+//       case '1':
+//         return "1st";
+//       case '2':
+//         return "2nd";
+//       case '3':
+//         return "3rd";
+//       default:
+//         return rank;
+//     }
+//   }
+// }
+
+class StreakItem extends StatelessWidget {
+  const StreakItem({super.key, required this.streak});
+
+  final AttendanceStreak streak;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('dd MMM yy');
+    final startDate = streak.start;
+    final endDate = streak.end;
+    final length = streak.length;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
-      ),
-      child: Row(
-        children: [
-          Text(
-            rank == 1 ? '👑' : '🏅',
-            style: const TextStyle(
-              fontSize: 28,
-            ),
-          ),
-          const SizedBox(width: MySizes.sm),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "$label: $rank${rank == 1 ? 'st' : rank == 2 ? 'nd' : rank == 3 ? 'rd' : 'th'}",
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              Row(
-                children: [
-                  Text(
-                    "${percentage.toStringAsFixed(1)}%",
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  final RxBool _isExpanded = false.obs;
-
-  Color _getRankColor(String rank) {
-    final rankInt = int.tryParse(rank) ?? 0;
-    if (rankInt == 1) {
-      return Colors.green;
-    } else if (rankInt == 2) {
-      return Colors.blue;
-    } else {
-      return Colors.red;
-    }
-  }
-
-  List<Widget> _buildRankDistributionRows(List<StudentRanking> rankingList) {
-    final topRanks = rankingList
-        .where((student) => rankingList.indexOf(student) + 1 <= 3)
-        .toList();
-    final limit = _isExpanded.value ? rankingList.length : topRanks.length;
-    final rankDistributionRows = <Widget>[];
-
-    for (var i = 0; i < limit; i++) {
-      final student = rankingList[i];
-      final name = student.student.fullName ?? '';
-      final id = student.student.userId;
-      final rank = (rankingList.indexOf(student) + 1).toString();
-      final percentage = student.percentage.toString();
-      final color = _getRankColor(rank);
-
-      rankDistributionRows
-          .add(_buildRankDistributionRow(name, id, rank, percentage, color));
-    }
-
-    if (rankingList.length > topRanks.length) {
-      rankDistributionRows.add(
-        Align(
-          alignment: Alignment.centerRight,
-          child: Obx(
-            () => GestureDetector(
-              onTap: () => _isExpanded.value = !_isExpanded.value,
-              child: Text(
-                _isExpanded.value ? 'See Less' : 'See All',
-                style: const TextStyle(
-                  color: MyColors.activeBlue,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return rankDistributionRows;
-  }
-
-  Widget _buildRankDistributionRow(
-      String name, String id, String rank, String percentage, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
-        color: controller.userId.value == id
-            ? color.withOpacity(0.1)
-            : Colors.transparent,
-      ),
+      decoration: const BoxDecoration(
+          border: Border(
+              bottom: BorderSide(color: MyColors.borderColor, width: 0.5))),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8),
+        padding: const EdgeInsets.symmetric(
+            vertical: MySizes.sm, horizontal: MySizes.md),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withOpacity(0.2),
-              ),
-              child: Text(
-                rank == '1'
-                    ? "1st"
-                    : rank == '2'
-                        ? "2nd"
-                        : rank == '3'
-                            ? "3rd"
-                            : rank,
-                style: Theme.of(Get.context!)
-                    .textTheme
-                    .labelLarge
-                    ?.copyWith(color: color),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    controller.userId.value == id ? 'You' : name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
             Text(
-              '$percentage%',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
+              '🔥   $length Days',
+              style: MyTextStyle.bodyLarge,
+            ),
+            const SizedBox(width: MySizes.lg),
+            Text(
+              dateFormat.format(startDate),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(width: MySizes.md),
+            const Expanded(
+              child: MyDottedLine(
+                dashColor: MyColors.dividerColor,
+                lineThickness: 2,
               ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: MyColors.dividerColor,
+              size: 12,
+            ),
+            const SizedBox(width: MySizes.md),
+            const Text(
+              '',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            Text(
+              dateFormat.format(endDate),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildStreaksSection() {
-    return MyCard(
-      hasShadow: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Attendance Streaks',
-              style: Theme.of(Get.context!).textTheme.headlineSmall),
-          const SizedBox(height: MySizes.sm),
-          // controller.streaks.isEmpty
-          //     ? const Text("No streaks to display.")
-          //     : Wrap(
-          //   spacing: 8.0,
-          //   runSpacing: 4.0,
-          //   children: controller.streaks
-          //       .map((streak) => StreakCard(streak: streak))
-          //       .toList(),
-          // ),
-        ],
-      ),
-    );
-  }
 }
 
-class StreakCard extends StatelessWidget {
-  const StreakCard({super.key, required this.streak});
-
-  final Map<String, dynamic> streak;
-
-  @override
-  Widget build(BuildContext context) {
-    final dateFormat = DateFormat('dd MMM yy');
-    final startDate = streak['start'] as DateTime;
-    final endDate = streak['end'] as DateTime;
-    final length = streak['length'] as int;
-
-    return Padding(
-      padding: const EdgeInsets.all(MySizes.sm),
-      child: Row(
-        children: [
-          Text(
-            '🔥   $length Days',
-            style: MyTextStyle.bodyLarge,
-          ),
-          const SizedBox(
-            width: MySizes.lg,
-          ),
-          Text(
-            dateFormat.format(startDate),
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-          const SizedBox(
-            width: MySizes.md,
-          ),
-          const Expanded(
-            child: MyDottedLine(
-              dashColor: MyColors.dividerColor,
-              lineThickness: 2,
-            ),
-          ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: MyColors.dividerColor,
-            size: 16,
-          ),
-          const SizedBox(
-            width: MySizes.md,
-          ),
-          const Text(
-            '',
-            style: TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-          Text(
-            dateFormat.format(endDate),
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class AttendanceStatusCard extends StatelessWidget {
-  final AttendanceStatus status;
-  final AttendanceData summary;
-
-  const AttendanceStatusCard({
+class UserAttendanceSummaryCard extends StatelessWidget {
+  const UserAttendanceSummaryCard({
     super.key,
     required this.status,
     required this.summary,
   });
 
-  int _getStatusCount(AttendanceStatus status) {
-    switch (status) {
-      case AttendanceStatus.present:
-        return summary.present;
-      case AttendanceStatus.absent:
-        return summary.absent;
-      case AttendanceStatus.holiday:
-        return summary.holiday;
-      case AttendanceStatus.late:
-        return summary.late;
-      case AttendanceStatus.excused:
-        return summary.excused;
-      case AttendanceStatus.notApplicable:
-        return summary.notApplicable;
-      case AttendanceStatus.working:
-        return summary.workingDays;
-    }
-  }
-
-  double _getStatusPercentage(AttendanceStatus status) {
-    switch (status) {
-      case AttendanceStatus.present:
-        return summary.presentPercentage;
-      case AttendanceStatus.absent:
-        return summary.absentPercentage;
-      case AttendanceStatus.holiday:
-        return summary.holidayPercentage;
-      case AttendanceStatus.late:
-        return summary.latePercentage;
-      case AttendanceStatus.excused:
-        return summary.excusedPercentage;
-      case AttendanceStatus.notApplicable:
-        return summary.notApplicablePercentage;
-      case AttendanceStatus.working:
-        return summary.workingPercentage;
-    }
-  }
+  final AttendanceStatus status;
+  final UserAttendanceSummary summary;
 
   @override
   Widget build(BuildContext context) {
@@ -516,7 +609,10 @@ class AttendanceStatusCard extends StatelessWidget {
     double percentage = _getStatusPercentage(status);
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
+      padding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 12,
+      ),
       margin: const EdgeInsets.symmetric(horizontal: MySizes.xs),
       decoration: BoxDecoration(
         color: status.color.withOpacity(0.1),
@@ -554,56 +650,43 @@ class AttendanceStatusCard extends StatelessWidget {
       ),
     );
   }
-}
 
-class AttendanceConsistencyIndicator extends StatelessWidget {
-  const AttendanceConsistencyIndicator({super.key, required this.controller});
+  int _getStatusCount(AttendanceStatus status) {
+    switch (status) {
+      case AttendanceStatus.present:
+        return summary.presentCount;
+      case AttendanceStatus.absent:
+        return summary.absentCount;
+      case AttendanceStatus.holiday:
+        return summary.holidayCount;
+      case AttendanceStatus.late:
+        return summary.lateCount;
+      case AttendanceStatus.excused:
+        return summary.excusedCount;
+      case AttendanceStatus.notApplicable:
+        return summary.notApplicableCount;
+      case AttendanceStatus.working:
+        return summary.workingDaysCount;
+    }
+  }
 
-  final AttendanceReportController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return MyCard(
-      hasShadow: true,
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Attendance Consistency',
-              style: Theme.of(Get.context!)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontSize: 18),
-            ),
-          ),
-          const SizedBox(
-            height: MySizes.md,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: LinearProgressIndicator(
-                    value: 1 - (controller.consistency / 100),
-                    backgroundColor: MyColors.activeBlue.withOpacity(0.2),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                        MyColors.activeBlue),
-                    minHeight: 8,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                "${(100 - (controller.consistency)).toStringAsFixed(2)}%",
-                style: MyTextStyle.bodyLarge,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+  double _getStatusPercentage(AttendanceStatus status) {
+    switch (status) {
+      case AttendanceStatus.present:
+        return summary.presentPercentage;
+      case AttendanceStatus.absent:
+        return summary.absentPercentage;
+      case AttendanceStatus.holiday:
+        return summary.holidayPercentage;
+      case AttendanceStatus.late:
+        return summary.latePercentage;
+      case AttendanceStatus.excused:
+        return summary.excusedPercentage;
+      case AttendanceStatus.notApplicable:
+        return summary.notApplicablePercentage;
+      case AttendanceStatus.working:
+        return summary.workingDaysPercentage;
+    }
   }
 }
 
@@ -612,241 +695,347 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
 
   @override
   Widget build(BuildContext context) {
-    final monthlyData = controller.monthlyAttendanceData.entries.map((entry) {
-      List<String> parts = entry.key.split('_');
-      String monthYear = parts[0];
-      String type = parts[1];
-
-      return _MonthlyAttendanceData(
-        monthYear,
-        type,
-        entry.value,
-      );
-    }).toList();
-
-    final Map<String, _MonthlyAttendanceSummary> monthlySummary = {};
-
-    for (final data in monthlyData) {
-      final monthKey =
-          DateFormat('MMM').format(DateFormat('yyyy-MM').parse(data.monthYear));
-      if (!monthlySummary.containsKey(monthKey)) {
-        monthlySummary[monthKey] = _MonthlyAttendanceSummary();
+    return Obx(() {
+      if (controller.userAttendanceSummary.value == null) {
+        return const Center(child: CircularProgressIndicator());
       }
-      if (data.type == 'P') {
-        monthlySummary[monthKey]!.present = data.count.toDouble();
-      } else {
-        monthlySummary[monthKey]!.absent = data.count.toDouble();
-      }
-    }
 
-    List<BarChartGroupData> barGroups = [];
-    int groupIndex = 0;
-    const double barWidth = 6;
+      final monthlyAttendanceList =
+          controller.userAttendanceSummary.value!.monthlyAttendance;
 
-    for (final monthName in monthlySummary.keys) {
-      final summary = monthlySummary[monthName]!;
+      // Prepare data for the chart
+      List<BarChartGroupData> barGroups = [];
+      int groupIndex = 0;
+      const double barWidth = 6;
 
-      barGroups.add(
-        BarChartGroupData(
-          showingTooltipIndicators: [0, 1],
-          x: groupIndex,
-          barRods: [
-            BarChartRodData(
-              toY: summary.present,
-              color: MyColors.activeGreen,
-              width: barWidth,
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-            ),
-            BarChartRodData(
-              toY: summary.absent,
-              color: MyColors.activeRed,
-              width: barWidth,
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-            ),
-          ],
-          barsSpace: 4,
-        ),
-      );
-      groupIndex++;
-    }
-    double maxAttendanceValue =
-        monthlySummary.values.map((e) => e.present + e.absent).reduce(math.max);
-
-    return MyCard(
-      hasShadow: true,
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Monthly Attendance',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+      for (final monthlyData in monthlyAttendanceList) {
+        barGroups.add(
+          BarChartGroupData(
+            showingTooltipIndicators: [0, 1],
+            x: groupIndex,
+            barRods: [
+              BarChartRodData(
+                toY: monthlyData.presentCount.toDouble(),
+                color: MyColors.activeGreen,
+                width: barWidth,
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              ),
+              BarChartRodData(
+                toY: monthlyData.absentCount.toDouble(),
+                color: MyColors.activeRed,
+                width: barWidth,
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              ),
+            ],
+            barsSpace: 4,
           ),
-          SizedBox(
-            height: Get.width * .6,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: maxAttendanceValue + 5,
-                barGroups: barGroups,
-                groupsSpace: 20,
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 30,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        const style = TextStyle(
-                          color: MyColors.captionTextColor,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 12,
-                        );
-                        final String text =
-                            monthlySummary.keys.toList()[value.toInt()];
-                        return SideTitleWidget(
-                          axisSide: meta.axisSide,
-                          space: 10,
-                          child: Text(text, style: style),
+        );
+        groupIndex++;
+      }
+
+      double maxAttendanceValue = monthlyAttendanceList.isNotEmpty
+          ? monthlyAttendanceList
+              .map((e) => e.presentCount + e.absentCount)
+              .reduce(math.max)
+              .toDouble()
+          : 0; // Handle empty case
+
+      return MyCard(
+        hasShadow: true,
+        child: Column(
+          children: [
+            HeadingForCard(
+                controller: controller, heading: 'Monthly Attendance'),
+            const SizedBox(
+              height: MySizes.md,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: MyBottomSheetDropdown(
+                optionsForChips: const [
+                  'Present',
+                  'Absent',
+                  'Late',
+                  'Excused',
+                ],
+                onSingleChanged: (value) {
+                  controller.selectedStatus.value =
+                      AttendanceStatus.fromCode(value);
+                },
+                selectedValue: controller.selectedStatus.value.label.obs,
+                dropdownWidgetType: DropdownWidgetType.choiceChip,
+              ),
+            ),
+            SizedBox(
+              height: Get.width * .6,
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: maxAttendanceValue + 5,
+                  barGroups: barGroups,
+                  groupsSpace: 20,
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 30,
+                        interval: 1,
+                        getTitlesWidget: (value, meta) {
+                          const style = TextStyle(
+                            color: MyColors.captionTextColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
+                          );
+                          if (monthlyAttendanceList.isEmpty ||
+                              value.toInt() >= monthlyAttendanceList.length) {
+                            return const Text(
+                                ""); // or handle the error appropriately
+                          }
+                          final String text = DateFormat('MMM').format(
+                              DateFormat('yyyy-MM').parse(
+                                  monthlyAttendanceList[value.toInt()].month));
+                          return SideTitleWidget(
+                            axisSide: meta.axisSide,
+                            space: 10,
+                            child: Text(text, style: style),
+                          );
+                        },
+                      ),
+                    ),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  barTouchData: BarTouchData(
+                    enabled: false,
+                    touchTooltipData: BarTouchTooltipData(
+                      tooltipPadding: const EdgeInsets.all(0),
+                      getTooltipColor: (BarChartGroupData group) {
+                        return Colors.transparent;
+                      },
+                      tooltipMargin: 0,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        return BarTooltipItem(
+                          '${rod.toY.toInt()}',
+                          const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
                         );
                       },
                     ),
+                    handleBuiltInTouches: true,
                   ),
-                  leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
+                  borderData: FlBorderData(
+                    show: false,
                   ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
+                  gridData: const FlGridData(show: false),
                 ),
-                barTouchData: BarTouchData(
-                  enabled: false,
-                  touchTooltipData: BarTouchTooltipData(
-                    tooltipPadding: const EdgeInsets.all(0),
-                    getTooltipColor: (BarChartGroupData group) {
-                      return Colors.transparent;
-                    },
-                    tooltipMargin: 0,
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      return BarTooltipItem(
-                        '${rod.toY.toInt()}',
-                        const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      );
-                    },
-                  ),
-                  handleBuiltInTouches: true,
-                ),
-                borderData: FlBorderData(
-                  show: false,
-                ),
-                gridData: const FlGridData(show: false),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
-}
-
-class _MonthlyAttendanceData {
-  final String monthYear;
-  final String type;
-  final int count;
-
-  _MonthlyAttendanceData(this.monthYear, this.type, this.count);
-}
-
-class _MonthlyAttendanceSummary {
-  double present = 0;
-  double absent = 0;
 }
 
 class AttendanceSummaryDashboard extends StatelessWidget {
-  final AttendanceReportController controller;
   const AttendanceSummaryDashboard({super.key, required this.controller});
 
-  int getTotalDaysInMonth(DateTime date) {
-    return DateTime(date.year, date.month + 1, 0).day;
-  }
+  final AttendanceReportController controller;
 
   @override
   Widget build(BuildContext context) {
-    return MyCard(
-      hasShadow: true,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Attendance Summary',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(fontSize: 20),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Get.dialog(const AttendanceExplanationDialog());
-                },
-                child: const Text(
-                  'Explain?',
-                  style: TextStyle(color: MyColors.activeBlue, fontSize: 12),
+    return Obx(() {
+      if (controller.userAttendanceSummary.value == null) {
+        return const MyCard(
+          margin: EdgeInsets.zero,
+          hasShadow: true,
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+      return MyCard(
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.only(
+          top: MySizes.sm,
+          bottom: MySizes.md,
+          left: MySizes.md,
+          right: MySizes.md,
+        ),
+        hasShadow: true,
+        child: Column(
+          children: [
+            HeadingForCard(
+                controller: controller, heading: 'Attendance Summary'),
+            const SizedBox(height: MySizes.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                UserAttendanceSummaryCard(
+                  status: AttendanceStatus.present,
+                  summary: controller.userAttendanceSummary.value!,
                 ),
-              )
-            ],
+                UserAttendanceSummaryCard(
+                  status: AttendanceStatus.absent,
+                  summary: controller.userAttendanceSummary.value!,
+                ),
+                UserAttendanceSummaryCard(
+                  status: AttendanceStatus.late,
+                  summary: controller.userAttendanceSummary.value!,
+                ),
+              ],
+            ),
+            const SizedBox(height: MySizes.md),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                UserAttendanceSummaryCard(
+                  status: AttendanceStatus.excused,
+                  summary: controller.userAttendanceSummary.value!,
+                ),
+                UserAttendanceSummaryCard(
+                  status: AttendanceStatus.holiday,
+                  summary: controller.userAttendanceSummary.value!,
+                ),
+                UserAttendanceSummaryCard(
+                  status: AttendanceStatus.working,
+                  summary: controller.userAttendanceSummary.value!,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+class HeadingForCard extends StatelessWidget {
+  const HeadingForCard({
+    super.key,
+    required this.controller,
+    required this.heading,
+  });
+
+  final AttendanceReportController controller;
+  final String heading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            heading,
+            style: MyTextStyle.headlineSmall,
           ),
-          const SizedBox(
-            height: MySizes.md,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AttendanceStatusCard(
-                status: AttendanceStatus.present,
-                summary: controller.attendanceSummary,
-              ),
-              AttendanceStatusCard(
-                status: AttendanceStatus.absent,
-                summary: controller.attendanceSummary,
-              ),
-              AttendanceStatusCard(
-                status: AttendanceStatus.working,
-                summary: controller.attendanceSummary,
-              ),
-            ],
-          ),
-          const SizedBox(height: MySizes.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AttendanceStatusCard(
-                status: AttendanceStatus.late,
-                summary: controller.attendanceSummary,
-              ),
-              AttendanceStatusCard(
-                status: AttendanceStatus.excused,
-                summary: controller.attendanceSummary,
-              ),
-              AttendanceStatusCard(
-                status: AttendanceStatus.holiday,
-                summary: controller.attendanceSummary,
-              ),
-            ],
-          ),
+          Obx(
+            () => Text(
+              'From ${MyDateTimeFormatter.formatPrettyLongDate(controller.selectedStartDate.value)} to ${MyDateTimeFormatter.formatPrettyLongDate(controller.selectedEndDate.value)}',
+              style: MyTextStyle.labelMedium,
+            ),
+          )
         ],
       ),
-    );
+      TextButton(
+        onPressed: () {
+          Get.dialog(
+            AlertDialog(
+              title: const Text(
+                'Filter Attendance',
+                style: MyTextStyle.headlineSmall,
+              ),
+              content: SingleChildScrollView(
+                child: Obx(() => Column(
+                      children: [
+                        MyDropdownField(
+                          options: const ['Monthly', 'Yearly', 'Custom'],
+                          selectedValue: controller.selectedFilterType,
+                          onSelected: (value) {
+                            controller.selectedFilterType.value = value!;
+                          },
+                          labelText: 'Filter By',
+                        ),
+                        if (controller.selectedFilterType.value == 'Monthly')
+                          MyDropdownField(
+                            options: controller.monthList,
+                            selectedValue: controller.selectedMonth,
+                            onSelected: (value) {
+                              controller.selectedMonth.value = value!;
+                            },
+                            labelText: 'Month',
+                          )
+                        else if (controller.selectedFilterType.value ==
+                            'Yearly')
+                          MyDropdownField(
+                            options: controller.yearList,
+                            selectedValue: controller.selectedYear,
+                            onSelected: (value) {
+                              controller.selectedYear.value = value!;
+                            },
+                            labelText: 'Year',
+                          )
+                        else if (controller.selectedFilterType.value ==
+                            'Custom')
+                          Column(
+                            children: [
+                              MyDatePickerField(
+                                labelText: 'From',
+                                selectedDate: controller.selectedStartDate,
+                                firstDate: controller.userAttendanceData.value!
+                                    .academicPeriodStart,
+                                lastDate: DateTime.now(),
+                                onDateChanged: (value) {
+                                  controller.selectedStartDate.value = value;
+                                },
+                              ),
+                              MyDatePickerField(
+                                labelText: 'To',
+                                selectedDate: controller.selectedEndDate,
+                                firstDate: controller.userAttendanceData.value!
+                                    .academicPeriodStart,
+                                lastDate: DateTime.now(),
+                                onDateChanged: (value) {
+                                  controller.selectedEndDate.value = value;
+                                },
+                              ),
+                            ],
+                          )
+                      ],
+                    )),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Get.back(); // Use Get.back() to close the dialog
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    controller.updateDateRange();
+                    Get.back();
+                  },
+                  child: const Text('Apply'),
+                ),
+              ],
+            ),
+            barrierDismissible: false, // Prevents closing on tap outside
+          );
+        },
+        child: const Text('Filter'),
+      ),
+    ]);
   }
 }
 
@@ -869,84 +1058,116 @@ class AttendanceExplanationDialog extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Attendance Terms',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Attendance Terms',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: MySizes.md),
-            _buildTermExplanation(context,
-                term: 'Present (P)',
-                description: 'Student was present on this day.',
-                color: MyColors.activeGreen,
-                termLetter: 'P'),
-            _buildTermExplanation(context,
-                term: 'Absent (A)',
-                description: 'Student was absent on this day.',
-                color: MyColors.activeRed,
-                termLetter: 'A'),
-            _buildTermExplanation(context,
-                term: 'Holiday (H)',
-                description: 'A holiday was observed on this day.',
-                color: MyColors.activeOrange,
-                termLetter: 'H'),
-            _buildTermExplanation(context,
-                term: 'Late (L)',
-                description: 'Student was late on this day.',
-                color: MyColors.colorPurple,
-                termLetter: 'L'),
-            _buildTermExplanation(context,
-                term: 'Excused (E)',
-                description: 'Student was excused on this day.',
-                color: MyColors.colorViolet,
-                termLetter: 'E'),
-            _buildTermExplanation(context,
-                term: 'Working (W)',
-                description: 'Total working days in this month.',
-                color: MyColors.activeBlue,
-                termLetter: 'W'),
+            _buildTermExplanation(
+              context,
+              term: 'Present (P)',
+              description: 'Student was present on this day.',
+              color: MyColors.activeGreen,
+              termLetter: 'P',
+            ),
+            _buildTermExplanation(
+              context,
+              term: 'Absent (A)',
+              description: 'Student was absent on this day.',
+              color: MyColors.activeRed,
+              termLetter: 'A',
+            ),
+            _buildTermExplanation(
+              context,
+              term: 'Holiday (H)',
+              description: 'A holiday was observed on this day.',
+              color: MyColors.activeOrange,
+              termLetter: 'H',
+            ),
+            _buildTermExplanation(
+              context,
+              term: 'Late (L)',
+              description: 'Student was late on this day.',
+              color: MyColors.colorPurple,
+              termLetter: 'L',
+            ),
+            _buildTermExplanation(
+              context,
+              term: 'Excused (E)',
+              description: 'Student was excused on this day.',
+              color: MyColors.colorViolet,
+              termLetter: 'E',
+            ),
+            _buildTermExplanation(
+              context,
+              term: 'Working (W)',
+              description: 'Total working days in this month.',
+              color: MyColors.activeBlue,
+              termLetter: 'W',
+            ),
             const SizedBox(height: MySizes.sm),
-            Text('Attendance Calculation:',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Attendance Calculation:',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: MySizes.md),
-            _buildCalculationExplanation(context,
-                title: 'Total Working Days (W)',
-                calculation: 'W = P + A + L + E',
-                description:
-                    'Total Working Days is the sum of Present, Absent, Late, and Excused days.',
-                color: MyColors.activeBlue,
-                termLetter: 'W'),
+            _buildCalculationExplanation(
+              context,
+              title: 'Total Working Days (W)',
+              calculation: 'W = P + A + L + E',
+              description:
+                  'Total Working Days is the sum of Present, Absent, Late, and Excused days.',
+              color: MyColors.activeBlue,
+              termLetter: 'W',
+            ),
             const SizedBox(height: MySizes.sm),
-            Text('Percentage Calculation',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Percentage Calculation',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: MySizes.md),
-            _buildPercentageCalculation(context,
-                percentageType: 'Present Percentage',
-                calculation: '(Present Days / Total Working Days) * 100',
-                color: MyColors.activeGreen,
-                termLetter: 'P'),
-            _buildPercentageCalculation(context,
-                percentageType: 'Absent Percentage',
-                calculation: '(Absent Days / Total Working Days) * 100',
-                color: MyColors.activeRed,
-                termLetter: 'A'),
-            _buildPercentageCalculation(context,
-                percentageType: 'Late Percentage',
-                calculation: '(Late Days / Total Working Days) * 100',
-                color: MyColors.colorPurple,
-                termLetter: 'L'),
-            _buildPercentageCalculation(context,
-                percentageType: 'Excused Percentage',
-                calculation: '(Excused Days / Total Working Days) * 100',
-                color: MyColors.colorViolet,
-                termLetter: 'E'),
-            _buildPercentageCalculation(context,
-                percentageType: 'Holiday Percentage',
-                calculation: '(Holiday Days / Total Days in Month) * 100',
-                color: MyColors.activeOrange,
-                termLetter: 'H'),
-            _buildPercentageCalculation(context,
-                percentageType: 'Working Percentage',
-                calculation: '(Working Days / Total Days in Month) * 100',
-                color: MyColors.activeBlue,
-                termLetter: 'W'),
+            _buildPercentageCalculation(
+              context,
+              percentageType: 'Present Percentage',
+              calculation: '(Present Days / Total Working Days) * 100',
+              color: MyColors.activeGreen,
+              termLetter: 'P',
+            ),
+            _buildPercentageCalculation(
+              context,
+              percentageType: 'Absent Percentage',
+              calculation: '(Absent Days / Total Working Days) * 100',
+              color: MyColors.activeRed,
+              termLetter: 'A',
+            ),
+            _buildPercentageCalculation(
+              context,
+              percentageType: 'Late Percentage',
+              calculation: '(Late Days / Total Working Days) * 100',
+              color: MyColors.colorPurple,
+              termLetter: 'L',
+            ),
+            _buildPercentageCalculation(
+              context,
+              percentageType: 'Excused Percentage',
+              calculation: '(Excused Days / Total Working Days) * 100',
+              color: MyColors.colorViolet,
+              termLetter: 'E',
+            ),
+            _buildPercentageCalculation(
+              context,
+              percentageType: 'Holiday Percentage',
+              calculation: '(Holiday Days / Total Days in Month) * 100',
+              color: MyColors.activeOrange,
+              termLetter: 'H',
+            ),
+            _buildPercentageCalculation(
+              context,
+              percentageType: 'Working Percentage',
+              calculation: '(Working Days / Total Days in Month) * 100',
+              color: MyColors.activeBlue,
+              termLetter: 'W',
+            ),
             const SizedBox(height: MySizes.lg),
             Align(
               alignment: Alignment.center,
@@ -955,13 +1176,17 @@ class AttendanceExplanationDialog extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: MySizes.xl, vertical: MySizes.md),
+                    horizontal: MySizes.xl,
+                    vertical: MySizes.md,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(MySizes.buttonRadius),
                   ),
                 ),
-                child: Text('Close',
-                    style: MyTextStyle.bodyLarge.copyWith(color: Colors.white)),
+                child: Text(
+                  'Close',
+                  style: MyTextStyle.bodyLarge.copyWith(color: Colors.white),
+                ),
               ),
             ),
           ],
@@ -970,15 +1195,19 @@ class AttendanceExplanationDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildTermExplanation(BuildContext context,
-      {required String term,
-      required String description,
-      required Color color,
-      required String termLetter}) {
+  Widget _buildTermExplanation(
+    BuildContext context, {
+    required String term,
+    required String description,
+    required Color color,
+    required String termLetter,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: MySizes.sm),
       padding: const EdgeInsets.symmetric(
-          vertical: MySizes.sm, horizontal: MySizes.md),
+        vertical: MySizes.sm,
+        horizontal: MySizes.md,
+      ),
       decoration: BoxDecoration(
         color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
@@ -1013,12 +1242,14 @@ class AttendanceExplanationDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildCalculationExplanation(BuildContext context,
-      {required String title,
-      required String calculation,
-      required String description,
-      required Color color,
-      required String termLetter}) {
+  Widget _buildCalculationExplanation(
+    BuildContext context, {
+    required String title,
+    required String calculation,
+    required String description,
+    required Color color,
+    required String termLetter,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: MySizes.sm),
       padding: const EdgeInsets.all(12.0),
@@ -1067,11 +1298,13 @@ class AttendanceExplanationDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildPercentageCalculation(BuildContext context,
-      {required String percentageType,
-      required String calculation,
-      required Color color,
-      required String termLetter}) {
+  Widget _buildPercentageCalculation(
+    BuildContext context, {
+    required String percentageType,
+    required String calculation,
+    required Color color,
+    required String termLetter,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: MySizes.sm),
       padding: const EdgeInsets.all(12.0),

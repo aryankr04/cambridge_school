@@ -1,7 +1,6 @@
 import 'package:cambridge_school/app/modules/class_management/class_repository.dart';
 import 'package:cambridge_school/core/widgets/snack_bar.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 import '../../school_management/school_model.dart';
 import '../../school_management/school_repository.dart';
@@ -33,12 +32,12 @@ class AttendanceRecordController extends GetxController {
   // Constructor
   AttendanceRecordController(
       {SchoolRepository? schoolRepo,
-        DailyAttendanceRecordRepository? attendanceRepo,
+      DailyAttendanceRecordRepository? attendanceRepo,
       ClassRepository? classRepo})
       : schoolRepository = schoolRepo ?? SchoolRepository(),
         classRepository = classRepo ?? ClassRepository(schoolId: schoolId),
-        attendanceRecordRepository =
-            attendanceRepo ?? DailyAttendanceRecordRepository(schoolId: schoolId);
+        attendanceRecordRepository = attendanceRepo ??
+            DailyAttendanceRecordRepository(schoolId: schoolId);
 
   //----------------------------------------------------------------------------
   // Lifecycle Methods
@@ -73,8 +72,7 @@ class AttendanceRecordController extends GetxController {
       final filteredSections = sections
           .where((section) => section.sectionName.trim().isNotEmpty)
           .toList();
-      sections.value=filteredSections;
-
+      sections.value = filteredSections;
     } catch (error) {
       errorMessage.value = 'Failed to load school sections: $error';
       MySnackBar.showErrorSnackBar('Error fetching school sections: $error');
@@ -84,11 +82,8 @@ class AttendanceRecordController extends GetxController {
   }
 
   Future<void> _fetchDailyAttendanceRecord() async {
-    final DailyAttendanceRecord? dailyRecord =
-        await attendanceRecordRepository.getDailyAttendanceRecordByDate(
-
-      selectedDate.value,
-    );
+    final DailyAttendanceRecord? dailyRecord = await attendanceRecordRepository
+        .getDailyAttendanceRecordByDate(selectedDate.value);
 
     attendanceSummaries.assignAll(dailyRecord?.classAttendanceSummaries ?? []);
     employeeAttendanceSummary.value = dailyRecord?.employeeAttendanceSummary;

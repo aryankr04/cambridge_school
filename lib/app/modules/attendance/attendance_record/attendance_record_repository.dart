@@ -18,13 +18,13 @@ class DailyAttendanceRecordRepository {
     return 'schools/$schoolId/$_collectionPath';
   }
 
-
   /// Adds a new DailyAttendanceRecord to Firestore.
   Future<DocumentReference<Map<String, dynamic>>> addDailyAttendanceRecord(
       DailyAttendanceRecord record) async {
     try {
       return await _firestoreService.addDocument(
-          _getFullCollectionPath(), record.toMap());
+          _getFullCollectionPath(), record.toMap(),
+          documentId: record.id);
     } catch (e) {
       if (kDebugMode) {
         print("Error adding DailyAttendanceRecord: $e");
@@ -37,17 +37,13 @@ class DailyAttendanceRecordRepository {
   Future<DailyAttendanceRecord?> getDailyAttendanceRecordByDate(
       DateTime date) async {
     try {
-      final startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
-      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
-
+      date = DateTime(date.year, date.month, date.day);
       QuerySnapshot<Map<String, dynamic>> querySnapshot =
-      await FirebaseFirestore.instance
-          .collection(_getFullCollectionPath())
-          .where('date',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-          .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
-          .limit(1) // Limit the result to 1 record
-          .get();
+          await FirebaseFirestore.instance
+              .collection(_getFullCollectionPath())
+              .where('date', isEqualTo: Timestamp.fromDate(date))
+              .limit(1) // Limit the result to 1 record
+              .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         // Convert the first document in the query result to a DailyAttendanceRecord object
@@ -64,11 +60,8 @@ class DailyAttendanceRecordRepository {
     }
   }
 
-
-
   /// Updates an existing DailyAttendanceRecord in Firestore.
-  Future<void> updateDailyAttendanceRecord(
-  DailyAttendanceRecord record) async {
+  Future<void> updateDailyAttendanceRecord(DailyAttendanceRecord record) async {
     try {
       await _firestoreService.updateDocument(
           _getFullCollectionPath(), record.id, record.toMap());
@@ -83,7 +76,8 @@ class DailyAttendanceRecordRepository {
   /// Deletes a DailyAttendanceRecord from Firestore.
   Future<void> deleteDailyAttendanceRecord(String documentId) async {
     try {
-      await _firestoreService.deleteDocument(_getFullCollectionPath(), documentId);
+      await _firestoreService.deleteDocument(
+          _getFullCollectionPath(), documentId);
     } catch (e) {
       if (kDebugMode) {
         print("Error deleting DailyAttendanceRecord: $e");
@@ -99,7 +93,7 @@ class DailyAttendanceRecordRepository {
   Future<List<DailyAttendanceRecord>> getAllDailyAttendanceRecords() async {
     try {
       final querySnapshot =
-      await _firestoreService.getAllDocuments(_getFullCollectionPath());
+          await _firestoreService.getAllDocuments(_getFullCollectionPath());
       return querySnapshot
           .map((doc) => DailyAttendanceRecord.fromMap(doc.data()))
           .toList();

@@ -32,11 +32,12 @@ class MarkAttendanceController extends GetxController {
 
   final shouldFetchRosterOnInit = false.obs;
   final Rxn<UserRoster> userRoster = Rxn<UserRoster>();
-  final Rxn<AttendanceData> attendanceData = Rxn<AttendanceData>();
+  final Rxn<RosterAttendanceSummary> classAttendanceSummary = Rxn<RosterAttendanceSummary>();
 
   final String attendanceTakerName = 'Mr. S.K Pandey';
 
-  final UserRosterRepository userRosterRepository = UserRosterRepository(schoolId:'dummy_school_1');
+  final UserRosterRepository userRosterRepository =
+      UserRosterRepository(schoolId: 'dummy_school_1');
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
@@ -59,7 +60,7 @@ class MarkAttendanceController extends GetxController {
     absentCount.close();
     shouldFetchRosterOnInit.close();
     userRoster.close();
-    attendanceData.close();
+    classAttendanceSummary.close();
     super.onClose();
   }
 
@@ -92,16 +93,16 @@ class MarkAttendanceController extends GetxController {
     if (user.userAttendance == null) {
       return AttendanceStatus.notApplicable;
     }
-    return user.userAttendance!.getAttendanceStatus(selectedDate.value);
+    return user.userAttendance!.getAttendanceStatusForDate(selectedDate.value);
   }
 
   void updateAttendanceStatus(UserModel user, AttendanceStatus status) {
-    user.userAttendance ??= UserAttendance.empty(
-      academicPeriodStart: selectedDate.value,
+    user.userAttendance ??= UserAttendance.createEmptyRecord(
+      academicPeriodStartDate: selectedDate.value,
       numberOfDays: 365,
     );
     user.userAttendance =
-        user.userAttendance!.updateAttendance(selectedDate.value, status);
+        user.userAttendance!.updateAttendanceForDate(selectedDate.value, status);
     refreshAttendanceSummary();
   }
 
@@ -150,7 +151,7 @@ class MarkAttendanceController extends GetxController {
   }
 
   void refreshAttendanceSummary() {
-    attendanceData.value =
+    classAttendanceSummary.value =
         userRoster.value!.calculateAttendanceDataForDate(selectedDate.value);
   }
 
@@ -180,7 +181,8 @@ class MarkAttendanceController extends GetxController {
 
   Future<void> _updateDailyAttendanceRecord(
       DailyAttendanceRecordRepository attendanceRecordRepository) async {
-    final date = selectedDate.value;
+    final date = DateTime(selectedDate.value.year, selectedDate.value.month,
+        selectedDate.value.day);
     final markedBy = AttendanceTaker(
         uid: schoolId, name: attendanceTakerName, time: DateTime.now());
 
@@ -196,8 +198,8 @@ class MarkAttendanceController extends GetxController {
             className: selectedClass.value,
             sectionName: selectedSection.value,
             markedBy: markedBy,
-            presents: attendanceData.value!.present,
-            absents: attendanceData.value!.absent);
+            presents: classAttendanceSummary.value!.presentCount,
+            absents: classAttendanceSummary.value!.absentCount);
 
         if (existingRecord != null) {
           existingRecord.classAttendanceSummaries = [classSummary];
@@ -219,8 +221,8 @@ class MarkAttendanceController extends GetxController {
       } else {
         final employeeSummary = EmployeeAttendanceSummary(
             markedBy: markedBy,
-            presents: attendanceData.value!.present,
-            absents: attendanceData.value!.absent);
+            presents: classAttendanceSummary.value!.presentCount,
+            absents: classAttendanceSummary.value!.absentCount);
 
         if (existingRecord != null) {
           existingRecord.employeeAttendanceSummary = employeeSummary;

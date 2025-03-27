@@ -549,8 +549,8 @@ class ClassManagementController extends GetxController {
         teacher: faker.person.name(),
         book: faker.lorem.word(),
       ),
-      userAttendance: UserAttendance.empty(
-        academicPeriodStart: DateTime.now(),
+      userAttendance: UserAttendance.createEmptyRecord(
+        academicPeriodStartDate: DateTime.now(),
         numberOfDays: 365,
       ),
       createdAt: DateTime.now(),

@@ -9,11 +9,17 @@ class MyDateTimeFormatter {
   /// Predefined date formatters for common formats.  You can also create
   /// custom formats using `DateFormat`.
 
+
+  /// Short date format: MM/dd/yyyy (e.g., 05/03/2024)
+
   /// Short date format: dd/MM/yyyy (e.g., 05/03/2024)
   static final DateFormat europeanShortDate = DateFormat('dd/MM/yyyy');
 
   /// Long date format: d MMMM, yyyy (e.g., 5 March, 2024)
   static final DateFormat prettyLongDate = DateFormat('d MMMM, yyyy');
+
+  /// Short date format: d MMM, yyyy (e.g., 5 Mar, 24)
+  static final DateFormat prettyShortDate = DateFormat('d MMM, yy');
 
   /// Short date and time: dd/MM/yyyy H:mm (e.g., 05/03/2024 14:45) - 24-hour time
   static final DateFormat europeanShortDateTime = DateFormat('dd/MM/yyyy H:mm');
@@ -47,6 +53,10 @@ class MyDateTimeFormatter {
   /// Returns the formatted string. Returns an empty string if `dateTime` is null.
   static String formatPrettyLongDate(DateTime? dateTime) {
     return dateTime == null ? '' : prettyLongDate.format(dateTime);
+  }
+  /// Returns the formatted string. Returns an empty string if `dateTime` is null.
+  static String formatPrettyShortDate(DateTime? dateTime) {
+    return dateTime == null ? '' : prettyShortDate.format(dateTime);
   }
 
   /// Formats a `DateTime` object to a short date and time string (dd/MM/yyyy H:mm).

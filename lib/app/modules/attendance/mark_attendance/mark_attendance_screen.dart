@@ -1,3 +1,4 @@
+import 'package:cambridge_school/app/modules/user_management/manage_user/models/roster_model.dart';
 import 'package:cambridge_school/core/utils/constants/box_shadow.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
@@ -9,6 +10,7 @@ import 'package:cambridge_school/core/widgets/date_picker_field.dart';
 import 'package:cambridge_school/core/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/utils/constants/colors.dart';
@@ -501,7 +503,7 @@ class AttendanceSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.attendanceData.value == null) {
+      if (controller.classAttendanceSummary.value == null) {
         return const MyCard(
           margin: EdgeInsets.zero,
           hasShadow: true,
@@ -524,17 +526,17 @@ class AttendanceSummaryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                AttendanceStatusCard(
+                RosterAttendanceSummaryCard(
                   status: AttendanceStatus.present,
-                  summary: controller.attendanceData.value!,
+                  summary: controller.classAttendanceSummary.value!,
                 ),
-                AttendanceStatusCard(
+                RosterAttendanceSummaryCard(
                   status: AttendanceStatus.absent,
-                  summary: controller.attendanceData.value!,
+                  summary: controller.classAttendanceSummary.value!,
                 ),
-                AttendanceStatusCard(
+                RosterAttendanceSummaryCard(
                   status: AttendanceStatus.late,
-                  summary: controller.attendanceData.value!,
+                  summary: controller.classAttendanceSummary.value!,
                 ),
               ],
             ),
@@ -542,17 +544,17 @@ class AttendanceSummaryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                AttendanceStatusCard(
+                RosterAttendanceSummaryCard(
                   status: AttendanceStatus.excused,
-                  summary: controller.attendanceData.value!,
+                  summary: controller.classAttendanceSummary.value!,
                 ),
-                AttendanceStatusCard(
+                RosterAttendanceSummaryCard(
                   status: AttendanceStatus.holiday,
-                  summary: controller.attendanceData.value!,
+                  summary: controller.classAttendanceSummary.value!,
                 ),
-                AttendanceStatusCard(
+                RosterAttendanceSummaryCard(
                   status: AttendanceStatus.notApplicable,
-                  summary: controller.attendanceData.value!,
+                  summary: controller.classAttendanceSummary.value!,
                 ),
               ],
             ),
@@ -560,5 +562,101 @@ class AttendanceSummaryCard extends StatelessWidget {
         ),
       );
     });
+  }
+}
+class RosterAttendanceSummaryCard extends StatelessWidget {
+  const RosterAttendanceSummaryCard({
+    super.key,
+    required this.status,
+    required this.summary,
+  });
+
+  final AttendanceStatus status;
+  final RosterAttendanceSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    int count = _getStatusCount(status);
+    double percentage = _getStatusPercentage(status);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 12,
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: MySizes.xs),
+      decoration: BoxDecoration(
+        color: status.color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularPercentIndicator(
+            radius: 34,
+            lineWidth: 6.0,
+            percent: percentage / 100,
+            center: Text(
+              percentage.toStringAsFixed(2),
+              style:
+              MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+            ),
+            progressColor: status.color,
+            backgroundColor: status.color.withOpacity(0.3),
+            circularStrokeCap: CircularStrokeCap.round,
+            animation: true,
+            animationDuration: 1000,
+          ),
+          const SizedBox(height: MySizes.xs),
+          Text(
+            '$count',
+            style: MyTextStyle.bodyLarge,
+          ),
+          Text(
+            status.label,
+            style: MyTextStyle.bodyMedium.copyWith(height: 1),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _getStatusCount(AttendanceStatus status) {
+    switch (status) {
+      case AttendanceStatus.present:
+        return summary.presentCount;
+      case AttendanceStatus.absent:
+        return summary.absentCount;
+      case AttendanceStatus.holiday:
+        return summary.holidayCount;
+      case AttendanceStatus.late:
+        return summary.lateCount;
+      case AttendanceStatus.excused:
+        return summary.excusedCount;
+      case AttendanceStatus.notApplicable:
+        return summary.notApplicableCount;
+      case AttendanceStatus.working:
+        return summary.workingDaysCount;
+    }
+  }
+
+  double _getStatusPercentage(AttendanceStatus status) {
+    switch (status) {
+      case AttendanceStatus.present:
+        return summary.presentPercentage;
+      case AttendanceStatus.absent:
+        return summary.absentPercentage;
+      case AttendanceStatus.holiday:
+        return summary.holidayPercentage;
+      case AttendanceStatus.late:
+        return summary.latePercentage;
+      case AttendanceStatus.excused:
+        return summary.excusedPercentage;
+      case AttendanceStatus.notApplicable:
+        return summary.notApplicablePercentage;
+      case AttendanceStatus.working:
+        return summary.workingDaysPercentage;
+    }
   }
 }

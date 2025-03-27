@@ -2,6 +2,8 @@ import 'package:intl/intl.dart';
 import 'dart:math' as math;
 
 import '../../../../core/utils/constants/enums/attendance_status.dart';
+import '../../user_management/manage_user/models/roster_model.dart';
+
 
 class UserAttendance {
   final DateTime academicPeriodStart;
@@ -11,27 +13,29 @@ class UserAttendance {
     required this.academicPeriodStart,
     required this.attendanceString,
   }) : assert(
-          attendanceString.isEmpty ||
-              attendanceString.split('').every((char) => _isValidChar(char)),
-          'Invalid attendance string: Contains invalid characters.',
-        );
+  attendanceString.isEmpty ||
+      attendanceString
+          .split('')
+          .every((char) => _isValidAttendanceCode(char)),
+  'Invalid attendance record: Contains invalid characters.',
+  );
 
   // Private helper method to check if a character is a valid attendance character.
-  static bool _isValidChar(String char) {
+  static bool _isValidAttendanceCode(String char) {
     return AttendanceStatus.values.any((status) => status.code == char);
   }
 
   // Factory method to create a UserAttendance instance with an empty string.
-  factory UserAttendance.empty({
-    required DateTime academicPeriodStart,
+  factory UserAttendance.createEmptyRecord({
+    required DateTime academicPeriodStartDate,
     required int numberOfDays,
   }) {
     assert(numberOfDays >= 0, 'Number of days cannot be negative.');
-    final emptyString =
-        ''.padRight(numberOfDays, AttendanceStatus.notApplicable.code);
+    final emptyAttendanceRecord =
+    ''.padRight(numberOfDays, AttendanceStatus.notApplicable.code);
     return UserAttendance(
-      academicPeriodStart: academicPeriodStart,
-      attendanceString: emptyString,
+      academicPeriodStart: academicPeriodStartDate,
+      attendanceString: emptyAttendanceRecord,
     );
   }
 
@@ -53,7 +57,7 @@ class UserAttendance {
 
       return UserAttendance(
         academicPeriodStart:
-            DateTime.parse(map['academicPeriodStart'] as String),
+        DateTime.parse(map['academicPeriodStart'] as String),
         attendanceString: map['attendanceString'] as String,
       );
     } catch (e) {
@@ -62,39 +66,63 @@ class UserAttendance {
     }
   }
 
+  // Adjust the attendance record to a new start date.
+  UserAttendance adjustToNewStartDate(DateTime newStartDate) {
+    final daysToTrim = newStartDate.difference(academicPeriodStart).inDays;
+    if (daysToTrim <= 0) return this;
+
+    final updatedAttendanceRecord = daysToTrim >= attendanceString.length
+        ? ''
+        : attendanceString.substring(daysToTrim);
+
+    return UserAttendance(
+      academicPeriodStart: newStartDate,
+      attendanceString: updatedAttendanceRecord,
+    );
+  }
+
+  // Get the date of the first occurrence of a specific status.
+  DateTime? findDateOfFirstOccurrence(AttendanceStatus status) {
+    final index = attendanceString.indexOf(status.code);
+    if (index == -1) return null;
+
+    return academicPeriodStart.add(Duration(days: index));
+  }
+
   // Update the attendance status for a specific date.
-  UserAttendance updateAttendance(DateTime date, AttendanceStatus status) {
+  UserAttendance updateAttendanceForDate(
+      DateTime date, AttendanceStatus status) {
     final normalizedDate = DateTime(date.year, date.month, date.day);
-    final offset = normalizedDate.difference(academicPeriodStart).inDays;
+    final dayOffset = normalizedDate.difference(academicPeriodStart).inDays;
 
-    String newAttendanceString = attendanceString;
-    DateTime newAcademicPeriodStart = academicPeriodStart;
+    String newAttendanceRecord = attendanceString;
+    DateTime newAcademicPeriodStartDate = academicPeriodStart;
 
-    if (offset < 0) {
-      final daysBefore = offset.abs();
-      newAcademicPeriodStart = normalizedDate;
-      newAttendanceString = status.code +
-          ''.padRight(math.max(daysBefore - 1, 0),
+    if (dayOffset < 0) {
+      final daysBeforeStart = dayOffset.abs();
+      newAcademicPeriodStartDate = normalizedDate;
+      newAttendanceRecord = status.code +
+          ''.padRight(math.max(daysBeforeStart - 1, 0),
               AttendanceStatus.notApplicable.code) +
           attendanceString;
-    } else if (offset >= attendanceString.length) {
-      final daysToAdd = math.max(0, offset - attendanceString.length);
-      newAttendanceString = attendanceString +
-          ''.padRight(daysToAdd, AttendanceStatus.notApplicable.code) +
+    } else if (dayOffset >= attendanceString.length) {
+      final daysBeyondEnd = math.max(0, dayOffset - attendanceString.length);
+      newAttendanceRecord = attendanceString +
+          ''.padRight(daysBeyondEnd, AttendanceStatus.notApplicable.code) +
           status.code;
     } else {
-      newAttendanceString =
-          attendanceString.replaceRange(offset, offset + 1, status.code);
+      newAttendanceRecord =
+          attendanceString.replaceRange(dayOffset, dayOffset + 1, status.code);
     }
 
     return UserAttendance(
-      academicPeriodStart: newAcademicPeriodStart,
-      attendanceString: newAttendanceString,
+      academicPeriodStart: newAcademicPeriodStartDate,
+      attendanceString: newAttendanceRecord,
     );
   }
 
   // Update the attendance status for a range of dates.
-  UserAttendance updateMultiDateAttendance(
+  UserAttendance updateAttendanceForDateRange(
       DateTime startDate, DateTime endDate, AttendanceStatus status) {
     if (endDate.isBefore(startDate)) {
       throw ArgumentError('End date must not be before start date.');
@@ -106,121 +134,268 @@ class UserAttendance {
     startOffset = math.max(0, startOffset);
     endOffset = math.max(endOffset, startOffset);
 
-    String newAttendanceString = attendanceString;
+    String newAttendanceRecord = attendanceString;
 
-    if (startOffset >= newAttendanceString.length) {
-      newAttendanceString = newAttendanceString.padRight(
+    if (startOffset >= newAttendanceRecord.length) {
+      newAttendanceRecord = newAttendanceRecord.padRight(
           startOffset, AttendanceStatus.notApplicable.code);
     }
 
-    if (endOffset >= newAttendanceString.length) {
-      newAttendanceString = newAttendanceString.padRight(
+    if (endOffset >= newAttendanceRecord.length) {
+      newAttendanceRecord = newAttendanceRecord.padRight(
           endOffset + 1, AttendanceStatus.notApplicable.code);
     }
 
-    newAttendanceString = newAttendanceString.replaceRange(startOffset,
+    newAttendanceRecord = newAttendanceRecord.replaceRange(startOffset,
         endOffset + 1, ''.padRight(endOffset - startOffset + 1, status.code));
 
     return UserAttendance(
       academicPeriodStart: academicPeriodStart,
-      attendanceString: newAttendanceString,
+      attendanceString: newAttendanceRecord,
     );
   }
 
   // Get the attendance status for a specific date.
-  AttendanceStatus getAttendanceStatus(DateTime date) {
-    final offset = date.difference(academicPeriodStart).inDays;
-    if (offset < 0 || offset >= attendanceString.length) {
+  AttendanceStatus getAttendanceStatusForDate(DateTime date) {
+    final dayOffset = date.difference(academicPeriodStart).inDays;
+    if (dayOffset < 0 || dayOffset >= attendanceString.length) {
       return AttendanceStatus.notApplicable;
     }
-    return AttendanceStatus.fromCode(attendanceString[offset]);
+    return AttendanceStatus.fromCode(attendanceString[dayOffset]);
+  }
+
+  // Get attendance statuses within a specific date range.
+  Map<DateTime, AttendanceStatus> getAttendanceStatusInDateRange(
+      DateTime startDate, DateTime endDate) {
+    Map<DateTime, AttendanceStatus> attendanceMap = {};
+    DateTime currentDate = startDate;
+
+    while (!currentDate.isAfter(endDate)) {
+      attendanceMap[currentDate] = getAttendanceStatusForDate(currentDate);
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+
+    return attendanceMap;
   }
 
   // Calculate the attendance summary (counts of P, A, H, L, E, N).
-  AttendanceData calculateAttendanceSummary() {
-    int present = 0;
-    int absent = 0;
-    int holiday = 0;
-    int late = 0;
-    int excused = 0;
-    int notApplicable = 0;
+  UserAttendanceSummary calculateAttendanceSummaryInDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    DateTime analysisStartDate = startDate;
+    DateTime analysisEndDate = endDate;
 
-    for (final char in attendanceString.split('')) {
-      switch (AttendanceStatus.fromCode(char)) {
-        case AttendanceStatus.present:
-          present++;
-          break;
-        case AttendanceStatus.absent:
-          absent++;
-          break;
-        case AttendanceStatus.holiday:
-          holiday++;
-          break;
-        case AttendanceStatus.late:
-          late++;
-          break;
-        case AttendanceStatus.excused:
-          excused++;
-          break;
-        case AttendanceStatus.notApplicable:
-          notApplicable++;
-          break;
+    analysisStartDate = analysisStartDate.isBefore(academicPeriodStart)
+        ? academicPeriodStart
+        : analysisStartDate;
+    analysisEndDate = analysisEndDate.isAfter(academicPeriodStart
+        .add(Duration(days: attendanceString.length - 1)))
+        ? academicPeriodStart.add(Duration(days: attendanceString.length - 1))
+        : analysisEndDate;
+
+    int presentCount = 0;
+    int absentCount = 0;
+    int holidayCount = 0;
+    int lateCount = 0;
+    int excusedCount = 0;
+    int notApplicableCount = 0;
+
+    int workingDaysCount = 0;
+    int totalDaysInPeriod = 0; // Total days within the calculation range
+
+    // Monthly attendance data
+    List<MonthlyAttendance> monthlyAttendanceList = [];
+    Map<String, MonthlyAttendanceBuilder> monthlyBuilders = {};
+
+    // Iterate only within the specified date range.
+    DateTime currentDate = analysisStartDate;
+    while (!currentDate.isAfter(analysisEndDate)) {
+      int dayOffset = currentDate.difference(academicPeriodStart).inDays;
+
+      if (dayOffset >= 0 && dayOffset < attendanceString.length) {
+        final attendanceCode = attendanceString[dayOffset];
+        final attendanceStatus = AttendanceStatus.fromCode(attendanceCode);
+
+        // Get the month key.
+        String monthKey = DateFormat('yyyy-MM').format(currentDate);
+
+        // Get or create the monthly attendance builder
+        MonthlyAttendanceBuilder monthlyBuilder =
+        monthlyBuilders.putIfAbsent(monthKey, () {
+          return MonthlyAttendanceBuilder(month: monthKey);
+        });
+
+        switch (attendanceStatus) {
+          case AttendanceStatus.present:
+            presentCount++;
+            monthlyBuilder.presentCount++;
+            break;
+          case AttendanceStatus.absent:
+            absentCount++;
+            monthlyBuilder.absentCount++;
+            break;
+          case AttendanceStatus.holiday:
+            holidayCount++;
+            monthlyBuilder.holidayCount++;
+            break;
+          case AttendanceStatus.late:
+            lateCount++;
+            monthlyBuilder.lateCount++;
+            break;
+          case AttendanceStatus.excused:
+            excusedCount++;
+            monthlyBuilder.excusedCount++;
+            break;
+          case AttendanceStatus.notApplicable:
+            notApplicableCount++;
+            monthlyBuilder.notApplicableCount++;
+            break;
           case AttendanceStatus.working:
-          break;
+            break;
+        }
+
+        // Increment workingDays only for statuses that are considered working days
+        if (attendanceStatus != AttendanceStatus.holiday &&
+            attendanceStatus != AttendanceStatus.notApplicable) {
+          workingDaysCount++;
+          monthlyBuilder.workingDaysCount++;
+        }
+
+        totalDaysInPeriod++;
+        monthlyBuilder.totalDaysInMonth++;
       }
+      currentDate = currentDate.add(const Duration(days: 1));
     }
-
-    int totalDays = attendanceString.length;
-    int workingDays = present +
-        absent +
-        late +
-        excused; // Fixed: Correctly calculate working days
-
+    // Calculate percentages based on the filtered data
     double presentPercentage =
-        workingDays > 0 ? (present / workingDays) * 100 : 0;
+    workingDaysCount > 0 ? (presentCount / workingDaysCount) * 100 : 0;
     double absentPercentage =
-        workingDays > 0 ? (absent / workingDays) * 100 : 0;
-    double holidayPercentage = totalDays > 0 ? (holiday / totalDays) * 100 : 0;
-    double latePercentage = workingDays > 0 ? (late / workingDays) * 100 : 0;
+    workingDaysCount > 0 ? (absentCount / workingDaysCount) * 100 : 0;
+    double holidayPercentage =
+    totalDaysInPeriod > 0 ? (holidayCount / totalDaysInPeriod) * 100 : 0;
+    double latePercentage =
+    workingDaysCount > 0 ? (lateCount / workingDaysCount) * 100 : 0;
     double excusedPercentage =
-        workingDays > 0 ? (excused / workingDays) * 100 : 0;
-    double notApplicablePercentage =
-        totalDays > 0 ? (notApplicable / totalDays) * 100 : 0;
-    double workingPercentage = totalDays > 0
-        ? (workingDays / totalDays) * 100
-        : 0; // Calculate working percentage
+    workingDaysCount > 0 ? (excusedCount / workingDaysCount) * 100 : 0;
+    double notApplicablePercentage = totalDaysInPeriod > 0
+        ? (notApplicableCount / totalDaysInPeriod) * 100
+        : 0;
+    double workingPercentage = totalDaysInPeriod > 0
+        ? (workingDaysCount / totalDaysInPeriod) * 100
+        : 0;
 
-    return AttendanceData(
-      present: present,
-      absent: absent,
-      holiday: holiday,
-      late: late,
-      excused: excused,
-      notApplicable: notApplicable,
-      workingDays: workingDays,
-      presentPercentage: presentPercentage,
-      absentPercentage: absentPercentage,
-      holidayPercentage: holidayPercentage,
-      latePercentage: latePercentage,
-      excusedPercentage: excusedPercentage,
-      notApplicablePercentage: notApplicablePercentage,
-      workingPercentage: workingPercentage,
+    // Calculate Streaks
+    final presentStreaks = _getAttendanceStreaksForSummary(
+        analysisStartDate, analysisEndDate, AttendanceStatus.present);
+    final absentStreaks = _getAttendanceStreaksForSummary(
+        analysisStartDate, analysisEndDate, AttendanceStatus.absent);
+    final holidayStreaks = _getAttendanceStreaksForSummary(
+        analysisStartDate, analysisEndDate, AttendanceStatus.holiday);
+    final lateStreaks = _getAttendanceStreaksForSummary(
+        analysisStartDate, analysisEndDate, AttendanceStatus.late);
+    final excusedStreaks = _getAttendanceStreaksForSummary(
+        analysisStartDate, analysisEndDate, AttendanceStatus.excused);
+    final notApplicableStreaks = _getAttendanceStreaksForSummary(
+        analysisStartDate, analysisEndDate, AttendanceStatus.notApplicable);
+
+    //Build monthly attendances
+    monthlyAttendanceList = monthlyBuilders.values.map((builder) => builder.build()).toList();
+
+    // Sort the streaks lists by length in descending order
+    presentStreaks.sort((a, b) => b.length.compareTo(a.length));
+    absentStreaks.sort((a, b) => b.length.compareTo(a.length));
+    holidayStreaks.sort((a, b) => b.length.compareTo(a.length));
+    lateStreaks.sort((a, b) => b.length.compareTo(a.length));
+    excusedStreaks.sort((a, b) => b.length.compareTo(a.length));
+    notApplicableStreaks.sort((a, b) => b.length.compareTo(a.length));
+
+    return UserAttendanceSummary(
+        presentCount: presentCount,
+        absentCount: absentCount,
+        holidayCount: holidayCount,
+        lateCount: lateCount,
+        excusedCount: excusedCount,
+        notApplicableCount: notApplicableCount,
+        workingDaysCount: workingDaysCount,
+        presentPercentage: presentPercentage,
+        absentPercentage: absentPercentage,
+        holidayPercentage: holidayPercentage,
+        latePercentage: latePercentage,
+        excusedPercentage: excusedPercentage,
+        notApplicablePercentage: notApplicablePercentage,
+        workingDaysPercentage: workingPercentage,
+        currentPresentStreak:
+        presentStreaks.isNotEmpty ? presentStreaks.first.length : 0,
+        currentAbsentStreak:
+        absentStreaks.isNotEmpty ? absentStreaks.first.length : 0,
+        currentHolidayStreak:
+        holidayStreaks.isNotEmpty ? holidayStreaks.first.length : 0,
+        currentLateStreak: lateStreaks.isNotEmpty ? lateStreaks.first.length : 0,
+        currentExcusedStreak:
+        excusedStreaks.isNotEmpty ? excusedStreaks.first.length : 0,
+        currentNotApplicableStreak: notApplicableStreaks.isNotEmpty
+            ? notApplicableStreaks.first.length
+            : 0,
+        presentStreaks: AttendanceStreakList(
+            type: AttendanceStatus.present, streaks: presentStreaks),
+        absentStreaks: AttendanceStreakList(
+            type: AttendanceStatus.absent, streaks: absentStreaks),
+        holidayStreaks: AttendanceStreakList(
+            type: AttendanceStatus.holiday, streaks: holidayStreaks),
+        lateStreaks: AttendanceStreakList(
+            type: AttendanceStatus.late, streaks: lateStreaks),
+        excusedStreaks: AttendanceStreakList(
+            type: AttendanceStatus.excused, streaks: excusedStreaks),
+        notApplicableStreaks: AttendanceStreakList(
+            type: AttendanceStatus.notApplicable, streaks: notApplicableStreaks),
+        monthlyAttendance: monthlyAttendanceList
     );
   }
 
-  // Compact the attendance string to a new start date.
-  UserAttendance compact(DateTime newStartDate) {
-    final daysToRemove = newStartDate.difference(academicPeriodStart).inDays;
-    if (daysToRemove <= 0) return this;
+  List<AttendanceStreak> _getAttendanceStreaksForSummary(
+      DateTime analysisStartDate,
+      DateTime analysisEndDate,
+      AttendanceStatus status) {
+    List<AttendanceStreak> streaks = [];
+    DateTime? streakStartDate;
+    int streakLength = 0;
 
-    final newAttendanceString = daysToRemove >= attendanceString.length
-        ? ''
-        : attendanceString.substring(daysToRemove);
+    DateTime currentDate = academicPeriodStart;
 
-    return UserAttendance(
-      academicPeriodStart: newStartDate,
-      attendanceString: newAttendanceString,
-    );
+    for (int i = 0; i < attendanceString.length; i++) {
+      final date = academicPeriodStart.add(Duration(days: i));
+      if (date.isBefore(analysisStartDate) || date.isAfter(analysisEndDate)) {
+        continue; // Skip dates outside the analysis range
+      }
+      if (AttendanceStatus.fromCode(attendanceString[i]) == status) {
+        streakLength++;
+        streakStartDate ??= date;
+      } else if (streakLength > 0) {
+        if (streakStartDate != null) {
+          // Check if streakStartDate has a value
+          streaks.add(AttendanceStreak(
+              start: streakStartDate,
+              end: date.subtract(const Duration(days: 1)),
+              length: streakLength));
+        }
+        streakStartDate = null;
+        streakLength = 0;
+      }
+    }
+
+    // Handle any remaining streak at the end
+    if (streakLength > 0) {
+      if (streakStartDate != null) {
+        // Check if streakStartDate has a value
+        streaks.add(AttendanceStreak(
+            start: streakStartDate,
+            end: currentDate.subtract(const Duration(days: 1)),
+            length: streakLength));
+      }
+    }
+
+    return streaks;
   }
 
   // Get the count of consecutive days with a specific status.
@@ -238,73 +413,6 @@ class UserAttendance {
     }
 
     return maxStreak;
-  }
-
-  // Get the date of the first occurrence of a specific status.
-  DateTime? getDateForFirstStatusOccurrence(AttendanceStatus status) {
-    final index = attendanceString.indexOf(status.code);
-    if (index == -1) return null;
-
-    return academicPeriodStart.add(Duration(days: index));
-  }
-
-  // Get the total days covered by the attendance string.
-  int getTotalDays() {
-    return attendanceString.length;
-  }
-
-  // Get attendance statuses within a specific date range.
-  Map<DateTime, AttendanceStatus> getAttendanceInRange(
-      DateTime startDate, DateTime endDate) {
-    Map<DateTime, AttendanceStatus> attendanceMap = {};
-    DateTime currentDate = startDate;
-
-    while (!currentDate.isAfter(endDate)) {
-      attendanceMap[currentDate] = getAttendanceStatus(currentDate);
-      currentDate = currentDate.add(const Duration(days: 1));
-    }
-
-    return attendanceMap;
-  }
-
-  // Generate heatmap data for attendance (e.g., for calendar heatmap).
-  Map<String, String> getAttendanceHeatmapData() {
-    Map<String, String> heatmapData = {};
-    DateTime currentDate = academicPeriodStart;
-
-    for (int i = 0; i < attendanceString.length; i++) {
-      String formattedDate = DateFormat('yyyy-MM-dd').format(currentDate);
-      heatmapData[formattedDate] = attendanceString[i];
-      currentDate = currentDate.add(const Duration(days: 1));
-    }
-    return heatmapData;
-  }
-
-  // Provide data for a monthly attendance trend line chart.
-  Map<String, double> getMonthlyAttendanceTrends() {
-    Map<String, double> monthlyTrends = {};
-    DateTime currentDate = academicPeriodStart;
-
-    Map<String, int> monthlyPresent = {};
-    Map<String, int> monthlyTotal = {};
-
-    for (int i = 0; i < attendanceString.length; i++) {
-      String monthKey = DateFormat('yyyy-MM').format(currentDate);
-      monthlyTotal[monthKey] = (monthlyTotal[monthKey] ?? 0) + 1;
-
-      if (attendanceString[i] == 'P') {
-        monthlyPresent[monthKey] = (monthlyPresent[monthKey] ?? 0) + 1;
-      }
-
-      currentDate = currentDate.add(const Duration(days: 1));
-    }
-
-    for (String month in monthlyTotal.keys) {
-      monthlyTrends[month] =
-          (monthlyPresent[month] ?? 0) / monthlyTotal[month]! * 100;
-    }
-
-    return monthlyTrends;
   }
 
   // Identify and return streaks of a particular status (e.g., 'P' for Present).
@@ -341,66 +449,8 @@ class UserAttendance {
     return streaks;
   }
 
-  // Analyze and visualize attendance consistency.
-  double getAttendanceConsistency() {
-    int changes = 0;
-
-    for (int i = 1; i < attendanceString.length; i++) {
-      if (attendanceString[i] != attendanceString[i - 1]) {
-        changes++;
-      }
-    }
-
-    return changes / attendanceString.length * 100;
-  }
-
-  // Prepare data for pie chart visualization of attendance summary.
-  Map<String, double> getPieChartData() {
-    AttendanceData summary = calculateAttendanceSummary();
-    return {
-      'Present': summary.present.toDouble(),
-      'Absent': summary.absent.toDouble(),
-      'Holiday': summary.holiday.toDouble(),
-      'Late': summary.late.toDouble(),
-      'Excused': summary.excused.toDouble(),
-      'Not Applicable': summary.notApplicable.toDouble(),
-    };
-  }
-
-  // Prepare data for a bar chart comparing weekly attendance.
-  Map<String, int> getWeeklyAttendanceData() {
-    Map<String, int> weeklyData = {};
-    DateTime currentDate = academicPeriodStart;
-    int weekNumber = 1;
-
-    for (int i = 0; i < attendanceString.length; i += 7) {
-      int presentCount = 0;
-      for (int j = 0; j < 7 && (i + j) < attendanceString.length; j++) {
-        if (attendanceString[i + j] == 'P') {
-          presentCount++;
-        }
-      }
-      weeklyData['Week $weekNumber'] = presentCount;
-      weekNumber++;
-    }
-    return weeklyData;
-  }
-
-  // Provide data for trend analysis using line charts.
-  Map<String, double> getLineChartData() {
-    Map<String, double> lineChartData = {};
-    DateTime currentDate = academicPeriodStart;
-
-    for (int i = 0; i < attendanceString.length; i++) {
-      lineChartData[formatDate(currentDate)] =
-          attendanceString[i] == 'P' ? 1.0 : 0.0;
-      currentDate = currentDate.add(const Duration(days: 1));
-    }
-    return lineChartData;
-  }
-
   // Prepare data for a bar chart comparing monthly attendance.
-  Map<String, int> getMonthlyAttendanceData() {
+  Map<String, int> getMonthlyAttendanceSummary() {
     Map<String, int> monthlyPresent = {};
     Map<String, int> monthlyAbsent = {};
     Map<String, int> monthlyData = {};
@@ -427,94 +477,44 @@ class UserAttendance {
 
     return monthlyData;
   }
+  UserAverageAttendanceSummary calculateAverageAttendanceSummaryInDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+    required String userId,
+    required String userName,
+    String? rollNo,
+  }) {
+    UserAttendanceSummary userAttendanceSummary =
+    calculateAttendanceSummaryInDateRange(
+        startDate: startDate, endDate: endDate);
 
+    return UserAverageAttendanceSummary(
+      userId: userId,
+      userName: userName,
+      rollNo: rollNo,
+      presentPercentage: userAttendanceSummary.presentPercentage,
+      absentPercentage: userAttendanceSummary.absentPercentage,
+      holidayPercentage: userAttendanceSummary.holidayPercentage,
+      latePercentage: userAttendanceSummary.latePercentage,
+      excusedPercentage: userAttendanceSummary.excusedPercentage,
+      notApplicablePercentage: userAttendanceSummary.notApplicablePercentage,
+      workingPercentage: userAttendanceSummary.workingDaysPercentage,
+    );
+  }
   // Helper method to format a date.
   String formatDate(DateTime date) {
     return DateFormat('yyyy-MM-dd').format(date);
   }
-
-  AttendanceData getMonthlyAttendanceSummary(DateTime month) {
-    DateTime startDate = DateTime(month.year, month.month, 1);
-    DateTime endDate = DateTime(month.year, month.month + 1, 0);
-
-    Map<DateTime, AttendanceStatus> attendanceInRange =
-        getAttendanceInRange(startDate, endDate);
-
-    int present = 0;
-    int absent = 0;
-    int holiday = 0;
-    int late = 0;
-    int excused = 0;
-    int notApplicable = 0;
-    int working = 0;
-
-    for (var status in attendanceInRange.values) {
-      switch (status) {
-        case AttendanceStatus.present:
-          present++;
-          break;
-        case AttendanceStatus.absent:
-          absent++;
-          break;
-        case AttendanceStatus.holiday:
-          holiday++;
-          break;
-        case AttendanceStatus.late:
-          late++;
-          break;
-        case AttendanceStatus.excused:
-          excused++;
-          break;
-        case AttendanceStatus.notApplicable:
-          notApplicable++;
-          break;
-        case AttendanceStatus.working:
-          working++;
-          break;
-      }
-    }
-
-    int totalDays = attendanceInRange.length;
-    int workingDays = present + absent + late + excused;
-
-    double presentPercentage =
-        totalDays > 0 ? (present / workingDays) * 100 : 0;
-    double absentPercentage = totalDays > 0 ? (absent / workingDays) * 100 : 0;
-    double holidayPercentage = totalDays > 0 ? (holiday / totalDays) * 100 : 0;
-    double latePercentage = totalDays > 0 ? (late / workingDays) * 100 : 0;
-    double excusedPercentage =
-        totalDays > 0 ? (excused / workingDays) * 100 : 0;
-    double notApplicablePercentage =
-        totalDays > 0 ? (notApplicable / totalDays) * 100 : 0;
-    double workingPercentage =
-        totalDays > 0 ? (workingDays / totalDays) * 100 : 0;
-
-    return AttendanceData(
-        present: present,
-        absent: absent,
-        holiday: holiday,
-        late: late,
-        excused: excused,
-        notApplicable: notApplicable,
-        workingDays: workingDays,
-        presentPercentage: presentPercentage,
-        absentPercentage: absentPercentage,
-        holidayPercentage: holidayPercentage,
-        latePercentage: latePercentage,
-        excusedPercentage: excusedPercentage,
-        notApplicablePercentage: notApplicablePercentage,
-        workingPercentage: workingPercentage);
-  }
 }
 
-class AttendanceData {
-  final int present;
-  final int absent;
-  final int holiday;
-  final int late;
-  final int excused;
-  final int notApplicable;
-  final int workingDays;
+class UserAttendanceSummary {
+  final int presentCount;
+  final int absentCount;
+  final int holidayCount;
+  final int lateCount;
+  final int excusedCount;
+  final int notApplicableCount;
+  final int workingDaysCount;
 
   final double presentPercentage;
   final double absentPercentage;
@@ -522,61 +522,118 @@ class AttendanceData {
   final double latePercentage;
   final double excusedPercentage;
   final double notApplicablePercentage;
-  final double workingPercentage;
+  final double workingDaysPercentage;
 
-  AttendanceData({
-    required this.present,
-    required this.absent,
-    required this.holiday,
-    required this.late,
-    required this.excused,
-    required this.notApplicable,
-    required this.workingDays,
+  final int currentPresentStreak;
+  final int currentAbsentStreak;
+  final int currentHolidayStreak;
+  final int currentLateStreak;
+  final int currentExcusedStreak;
+  final int currentNotApplicableStreak;
+
+  final AttendanceStreakList presentStreaks;
+  final AttendanceStreakList absentStreaks;
+  final AttendanceStreakList holidayStreaks;
+  final AttendanceStreakList lateStreaks;
+  final AttendanceStreakList excusedStreaks;
+  final AttendanceStreakList notApplicableStreaks;
+
+  final List<MonthlyAttendance> monthlyAttendance;
+
+  UserAttendanceSummary({
+    required this.presentCount,
+    required this.absentCount,
+    required this.holidayCount,
+    required this.lateCount,
+    required this.excusedCount,
+    required this.notApplicableCount,
+    required this.workingDaysCount,
     required this.presentPercentage,
     required this.absentPercentage,
     required this.holidayPercentage,
     required this.latePercentage,
     required this.excusedPercentage,
     required this.notApplicablePercentage,
-    required this.workingPercentage,
+    required this.workingDaysPercentage,
+    required this.currentPresentStreak,
+    required this.currentAbsentStreak,
+    required this.currentHolidayStreak,
+    required this.currentLateStreak,
+    required this.currentExcusedStreak,
+    required this.currentNotApplicableStreak,
+    required this.presentStreaks,
+    required this.absentStreaks,
+    required this.holidayStreaks,
+    required this.lateStreaks,
+    required this.excusedStreaks,
+    required this.notApplicableStreaks,
+    required this.monthlyAttendance,
   });
+}
 
-  factory AttendanceData.fromJson(Map<String, dynamic> json) {
-    return AttendanceData(
-      present: json['Present'] ?? 0,
-      absent: json['Absent'] ?? 0,
-      holiday: json['Holiday'] ?? 0,
-      late: json['Late'] ?? 0,
-      excused: json['Excused'] ?? 0,
-      notApplicable: json['Not Applicable'] ?? 0,
-      workingDays: json['Working'] ?? 0,
-      presentPercentage: (json['PresentPercentage'] ?? 0.0).toDouble(),
-      absentPercentage: (json['AbsentPercentage'] ?? 0.0).toDouble(),
-      holidayPercentage: (json['HolidayPercentage'] ?? 0.0).toDouble(),
-      latePercentage: (json['LatePercentage'] ?? 0.0).toDouble(),
-      excusedPercentage: (json['ExcusedPercentage'] ?? 0.0).toDouble(),
-      notApplicablePercentage:
-          (json['NotApplicablePercentage'] ?? 0.0).toDouble(),
-      workingPercentage: (json['WorkingPercentage'] ?? 0.0).toDouble(),
-    );
-  }
+class AttendanceStreakList {
+  final AttendanceStatus type;
+  final List<AttendanceStreak> streaks;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'Present': present,
-      'Absent': absent,
-      'Holiday': holiday,
-      'Late': late,
-      'Excused': excused,
-      'Not Applicable': notApplicable,
-      'Working': workingDays,
-      'PresentPercentage': presentPercentage,
-      'AbsentPercentage': absentPercentage,
-      'HolidayPercentage': holidayPercentage,
-      'LatePercentage': latePercentage,
-      'ExcusedPercentage': excusedPercentage,
-      'NotApplicablePercentage': notApplicablePercentage,
-      'WorkingPercentage': workingPercentage,
-    };
+  AttendanceStreakList({required this.type, required this.streaks});
+}
+
+class AttendanceStreak {
+  final DateTime start;
+  final DateTime end;
+  final int length;
+
+  AttendanceStreak(
+      {required this.start, required this.end, required this.length});
+}
+
+class MonthlyAttendance {
+  final String month;
+  final int presentCount;
+  final int absentCount;
+  final int holidayCount;
+  final int lateCount;
+  final int excusedCount;
+  final int notApplicableCount;
+  final int workingDaysCount;
+  final int totalDaysInMonth; // add this to the class as we use it to calculate the percentages
+
+  MonthlyAttendance({
+    required this.month,
+    required this.presentCount,
+    required this.absentCount,
+    required this.holidayCount,
+    required this.lateCount,
+    required this.excusedCount,
+    required this.notApplicableCount,
+    required this.workingDaysCount,
+    required this.totalDaysInMonth,
+  });
+}
+
+class MonthlyAttendanceBuilder {
+  final String month;
+  int presentCount = 0;
+  int absentCount = 0;
+  int holidayCount = 0;
+  int lateCount = 0;
+  int excusedCount = 0;
+  int notApplicableCount = 0;
+  int workingDaysCount = 0;
+  int totalDaysInMonth = 0;
+
+  MonthlyAttendanceBuilder({required this.month});
+
+  MonthlyAttendance build() {
+    return MonthlyAttendance(
+        month: month,
+        presentCount: presentCount,
+        absentCount: absentCount,
+        holidayCount: holidayCount,
+        lateCount: lateCount,
+        excusedCount: excusedCount,
+        notApplicableCount: notApplicableCount,
+        workingDaysCount: workingDaysCount,
+        totalDaysInMonth: totalDaysInMonth);
   }
 }
