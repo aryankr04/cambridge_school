@@ -75,6 +75,13 @@ enum AttendanceStatus {
       AttendanceStatus.notApplicable, // Default to N/A if code not found
     );
   }
+  static AttendanceStatus fromLabel(String label) {
+    return AttendanceStatus.values.firstWhere(
+          (element) => element.label == label,
+      orElse: () =>
+      AttendanceStatus.notApplicable, // Default to N/A if code not found
+    );
+  }
 
   static List<String> getLabels() {
     return AttendanceStatus.values.map((status) => status.label).toList();

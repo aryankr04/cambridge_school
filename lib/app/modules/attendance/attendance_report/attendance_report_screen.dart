@@ -9,6 +9,8 @@ import 'package:cambridge_school/core/widgets/card_widget.dart';
 import 'package:cambridge_school/core/widgets/date_picker_field.dart';
 import 'package:cambridge_school/core/widgets/divider.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
+import 'package:cambridge_school/core/widgets/empty_state.dart';
+import 'package:cambridge_school/core/widgets/shimmer_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,6 +18,7 @@ import 'package:intl/intl.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../../../core/utils/constants/enums/attendance_status.dart';
+import '../../user_management/manage_user/models/roster_model.dart';
 import '../mark_attendance/user_attendance_model.dart';
 import 'attendance_calendar_widget.dart';
 import 'attendance_report_controller.dart';
@@ -32,7 +35,55 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
       backgroundColor: MyColors.lightGrey,
       body: Obx(
         () => controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
+            ? const SingleChildScrollView(
+          padding: EdgeInsets.all(MySizes.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Calendar Shimmer
+              MyShimmerWithText(
+                text: 'Loading Calendar...',
+                height: 120,
+                itemPadding: EdgeInsets.only(bottom: MySizes.md),
+              ),
+
+              // Summary Dashboard Shimmer
+              MyShimmerWithText(
+                text: 'Loading Summary...',
+                height: 150,
+                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+              ),
+
+              // Bar Chart Shimmer
+              MyShimmerWithText(
+                text: 'Loading Bar Chart...',
+                height: 200,
+                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+              ),
+
+              // Comparison Card Shimmer
+              MyShimmerWithText(
+                text: 'Loading Comparison...',
+                height: 150,
+                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+              ),
+
+              // Rank Overview Card Shimmer
+              MyShimmerWithText(
+                text: 'Loading Rank...',
+                height: 200,
+                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+              ),
+
+              // Streak Card Shimmer
+              MyShimmerWithText(
+                text: 'Loading Streaks...',
+                height: 150,
+                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+              ),
+            ],
+          ),
+        )
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(MySizes.md),
                 child: Column(
@@ -46,13 +97,12 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
                     ),
                     const SizedBox(height: MySizes.md),
                     AttendanceSummaryDashboard(controller: controller),
-
                     const SizedBox(height: MySizes.lg),
                     const MonthlyAttendanceBarChart(),
                     const SizedBox(height: MySizes.lg),
-                    // StudentAverageComparisonCard(controller: controller),
+                    StudentAverageComparisonCard(controller: controller),
                     const SizedBox(height: MySizes.lg),
-                    // StudentRankOverviewCard(controller: controller),
+                    StudentRankOverviewCard(controller: controller),
                     const SizedBox(height: MySizes.lg),
                     AttendanceStreakCard(controller: controller),
                   ],
@@ -64,12 +114,11 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
 }
 
 class AttendanceStreakCard extends StatelessWidget {
-  const AttendanceStreakCard({
-    super.key,
-    required this.controller,
-  });
+  AttendanceStreakCard({super.key, required this.controller});
 
   final AttendanceReportController controller;
+  final RxBool _isExpanded = false.obs; // For "Show More/Less" functionality
+  final int initialStreakCount = 10; // Show 10 streaks initially
 
   @override
   Widget build(BuildContext context) {
@@ -80,8 +129,11 @@ class AttendanceStreakCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: MySizes.md, vertical: MySizes.sm),
+            padding: const EdgeInsets.only(
+                left: MySizes.md,
+                right: MySizes.md,
+                top: MySizes.md,
+                bottom: MySizes.sm),
             child: Column(
               children: [
                 HeadingForCard(
@@ -100,7 +152,7 @@ class AttendanceStreakCard extends StatelessWidget {
                     ],
                     onSingleChanged: (value) {
                       controller.selectedStatus.value =
-                          AttendanceStatus.fromCode(value);
+                          AttendanceStatus.fromLabel(value);
                     },
                     selectedValue: controller.selectedStatus.value.label.obs,
                     dropdownWidgetType: DropdownWidgetType.choiceChip,
@@ -116,6 +168,7 @@ class AttendanceStreakCard extends StatelessWidget {
           ),
           Obx(() {
             final summary = controller.userAttendanceSummary.value;
+            final selectedStatus = controller.selectedStatus.value;
 
             if (summary == null) {
               return const Center(
@@ -123,16 +176,61 @@ class AttendanceStreakCard extends StatelessWidget {
                       CircularProgressIndicator()); // Or any other loading indicator
             }
 
-            if (summary.presentStreaks.streaks.isEmpty) {
-              return const Text("No present streaks to display.");
+            AttendanceStreakList streaks;
+            switch (selectedStatus) {
+              case AttendanceStatus.present:
+                streaks = summary.presentStreaks;
+                break;
+              case AttendanceStatus.absent:
+                streaks = summary.absentStreaks;
+                break;
+              case AttendanceStatus.late:
+                streaks = summary.lateStreaks;
+                break;
+              case AttendanceStatus.excused:
+                streaks = summary.excusedStreaks;
+                break;
+              default:
+                streaks = AttendanceStreakList(
+                    streaks: [],
+                    type: AttendanceStatus.present); // Empty list if default
             }
 
-            return Wrap(
-              spacing: 8.0,
-              runSpacing: 4.0,
-              children: summary.presentStreaks.streaks
-                  .map((streak) => StreakItem(streak: streak))
-                  .toList(),
+            if (streaks.streaks.isEmpty) {
+              return const MyEmptyStateWidget(
+                  type: EmptyStateType.noData,
+                  message: 'No streaks to display.');
+            }
+
+            //Determine display limit
+            final displayLimit =
+                _isExpanded.value ? streaks.streaks.length : initialStreakCount;
+            final displayedStreaks =
+                streaks.streaks.take(displayLimit).toList();
+
+            return Column(
+              children: [
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: displayedStreaks
+                      .map((streak) => StreakItem(streak: streak))
+                      .toList(),
+                ),
+                if (streaks.streaks.length > initialStreakCount)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        _isExpanded.value = !_isExpanded.value;
+                      },
+                      child: Text(
+                        _isExpanded.value ? 'See Less' : 'See All',
+                        style: const TextStyle(color: MyColors.activeBlue),
+                      ),
+                    ),
+                  ),
+              ],
             );
           }),
         ],
@@ -141,399 +239,636 @@ class AttendanceStreakCard extends StatelessWidget {
   }
 }
 
-// class StudentAverageComparisonCard extends StatelessWidget {
-//   const StudentAverageComparisonCard({
-//     super.key,
-//     required this.controller,
-//   });
-//
-//   final AttendanceReportController controller;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final studentAttendancePercentage = controller.userAttendanceSummary.value 0.0;
-//
-//     return MyCard(
-//       hasShadow: true,
-//       padding: const EdgeInsets.all(MySizes.md),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           HeadingForCard(controller: controller, heading: 'Your vs Class '),
-//
-//           const SizedBox(height: MySizes.md),
-//     Align(
-//     alignment: Alignment.centerLeft,
-//     child: MyBottomSheetDropdown(
-//     optionsForChips: const [
-//     'Present',
-//     'Absent',
-//     'Late',
-//     'Excused',
-//     ],
-//     onSingleChanged: (value) {
-//     controller.selectedStatus.value =
-//     AttendanceStatus.fromCode(value);
-//     },
-//     selectedValue: controller.selectedStatus.value.label.obs,
-//     dropdownWidgetType: DropdownWidgetType.choiceChip,
-//     ),
-//     ),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//             children: [
-//               _buildAverageBox(
-//                 context,
-//                 "Your Average",
-//                 studentAttendancePercentage,
-//                 MyColors.activeGreen,
-//               ),
-//               Container(
-//                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
-//                 child: CircleAvatar(
-//                   backgroundColor: MyColors.activeRed.withOpacity(0.1),
-//                   child: Text(
-//                     'VS',
-//                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-//                           fontSize: 16,
-//                           color: Colors.red,
-//                           fontWeight: FontWeight.w600,
-//                         ),
-//                   ),
-//                 ),
-//               ),
-//               _buildAverageBox(
-//                 context,
-//                 "Class Average",
-//                 controller.averageClassAttendance.value,
-//                 MyColors.activeBlue,
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 20),
-//           Row(
-//             children: [
-//               Icon(
-//                 studentAttendancePercentage >=
-//                         controller.averageClassAttendance.value
-//                     ? Icons.trending_up
-//                     : Icons.trending_down,
-//                 color: studentAttendancePercentage >=
-//                         controller.averageClassAttendance.value
-//                     ? Colors.green
-//                     : Colors.red,
-//               ),
-//               const SizedBox(width: 8),
-//               Text(
-//                 "Difference: ${studentAttendancePercentage >= controller.averageClassAttendance.value ? '+ ${(studentAttendancePercentage - controller.averageClassAttendance.value).toStringAsFixed(2)}%' : '${(studentAttendancePercentage - controller.averageClassAttendance.value).toStringAsFixed(2)}%'} vs Class",
-//                 style: const TextStyle(
-//                   fontSize: 14,
-//                   fontWeight: FontWeight.w500,
-//                   color: Colors.black,
-//                   fontStyle: FontStyle.italic,
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildAverageBox(
-//       BuildContext context, String label, double value, Color color) {
-//     return Container(
-//       padding: const EdgeInsets.symmetric(
-//         vertical: MySizes.md,
-//         horizontal: MySizes.md,
-//       ),
-//       margin: const EdgeInsets.symmetric(horizontal: MySizes.xs),
-//       decoration: BoxDecoration(
-//         color: color.withOpacity(0.1),
-//         borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
-//       ),
-//       child: Column(
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: [
-//           CircularPercentIndicator(
-//             radius: 36,
-//             lineWidth: 6.0,
-//             percent: value / 100,
-//             center: Text(
-//               '${value.toStringAsFixed(2)}%',
-//               style:
-//                   MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-//             ),
-//             progressColor: color,
-//             backgroundColor: color.withOpacity(0.3),
-//             circularStrokeCap: CircularStrokeCap.round,
-//             animation: true,
-//             animationDuration: 1000,
-//           ),
-//           const SizedBox(height: MySizes.md),
-//           Text(
-//             label,
-//             style: MyTextStyle.bodyLarge,
-//             textAlign: TextAlign.center,
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-//
-// class StudentRankOverviewCard extends StatelessWidget {
-//   StudentRankOverviewCard({super.key, required this.controller});
-//
-//   final AttendanceReportController controller;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MyCard(
-//       padding: const EdgeInsets.all(MySizes.md),
-//       hasShadow: true,
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           const Align(
-//             alignment: Alignment.centerLeft,
-//             child: Text(
-//               "Rank Overview",
-//               style: MyTextStyle.headlineSmall,
-//             ),
-//           ),
-//           const SizedBox(height: MySizes.md),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               _buildRankBox(
-//                 context,
-//                 "Your Rank",
-//                 controller.studentRankings.indexWhere((element) =>
-//                         element.student.userId == controller.userId.value) +
-//                     1,
-//                 controller.getStudentAttendancePercentage(
-//                   controller.studentList.firstWhere(
-//                       (student) => student.userId == controller.userId.value),
-//                 ),
-//                 Colors.orangeAccent,
-//               ),
-//               _buildRankBox(
-//                 context,
-//                 "Top Rank",
-//                 1,
-//                 controller.studentRankings.isNotEmpty
-//                     ? controller.studentRankings.first.percentage
-//                     : 0.0,
-//                 Colors.blueAccent,
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 20),
-//           const Text(
-//             "Rank Breakdown",
-//             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-//           ),
-//           const SizedBox(height: 10),
-//           ..._buildRankDistributionRows(context, controller.studentRankings),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildRankBox(BuildContext context, String label, int rank,
-//       double percentage, Color color) {
-//     return Container(
-//       padding: const EdgeInsets.symmetric(
-//         horizontal: 12.0,
-//         vertical: 12,
-//       ),
-//       decoration: BoxDecoration(
-//         color: color,
-//         borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
-//       ),
-//       child: Row(
-//         children: [
-//           Text(
-//             rank == 1 ? '👑' : '🏅',
-//             style: const TextStyle(
-//               fontSize: 28,
-//             ),
-//           ),
-//           const SizedBox(width: MySizes.sm),
-//           Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Text(
-//                 "$label: $rank${_getRankSuffix(rank)}",
-//                 style: const TextStyle(
-//                   fontSize: 15,
-//                   fontWeight: FontWeight.w600,
-//                   color: Colors.white,
-//                 ),
-//               ),
-//               Row(
-//                 children: [
-//                   Text(
-//                     "${percentage.toStringAsFixed(1)}%",
-//                     style: const TextStyle(
-//                       fontSize: 13,
-//                       fontWeight: FontWeight.w500,
-//                       color: Colors.white70,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   String _getRankSuffix(int rank) {
-//     if (rank == 1) {
-//       return 'st';
-//     } else if (rank == 2) {
-//       return 'nd';
-//     } else if (rank == 3) {
-//       return 'rd';
-//     } else {
-//       return 'th';
-//     }
-//   }
-//
-//   Color _getRankColor(String rank) {
-//     final rankInt = int.tryParse(rank) ?? 0;
-//     if (rankInt == 1) {
-//       return Colors.green;
-//     } else if (rankInt == 2) {
-//       return Colors.blue;
-//     } else {
-//       return Colors.red;
-//     }
-//   }
-//
-//   final RxBool _isExpanded = false.obs;
-//
-//   List<Widget> _buildRankDistributionRows(
-//       BuildContext context, List<StudentRanking> rankingList) {
-//     final topRanks = rankingList
-//         .where((student) => rankingList.indexOf(student) + 1 <= 3)
-//         .toList();
-//     final limit = _isExpanded.value ? rankingList.length : topRanks.length;
-//     final rankDistributionRows = <Widget>[];
-//
-//     for (var i = 0; i < limit; i++) {
-//       final student = rankingList[i];
-//       final name = student.student.fullName ?? '';
-//       final id = student.student.userId;
-//       final rank = (rankingList.indexOf(student) + 1).toString();
-//       final percentage = student.percentage.toString();
-//       final color = _getRankColor(rank);
-//
-//       rankDistributionRows.add(_buildRankDistributionRow(
-//           context, name, id, rank, percentage, color));
-//     }
-//
-//     if (rankingList.length > topRanks.length) {
-//       rankDistributionRows.add(
-//         Align(
-//           alignment: Alignment.centerRight,
-//           child: Obx(
-//             () => GestureDetector(
-//               onTap: () => _isExpanded.value = !_isExpanded.value,
-//               child: Text(
-//                 _isExpanded.value ? 'See Less' : 'See All',
-//                 style: const TextStyle(
-//                   color: MyColors.activeBlue,
-//                   fontWeight: FontWeight.w400,
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ),
-//       );
-//     }
-//
-//     return rankDistributionRows;
-//   }
-//
-//   Widget _buildRankDistributionRow(BuildContext context, String name, String id,
-//       String rank, String percentage, Color color) {
-//     return Container(
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
-//         color: controller.userId.value == id
-//             ? color.withOpacity(0.1)
-//             : Colors.transparent,
-//       ),
-//       child: Padding(
-//         padding: const EdgeInsets.symmetric(
-//           vertical: 8.0,
-//           horizontal: 8,
-//         ),
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.start,
-//           children: [
-//             Container(
-//               padding: const EdgeInsets.all(12.0),
-//               decoration: BoxDecoration(
-//                 shape: BoxShape.circle,
-//                 color: color.withOpacity(0.2),
-//               ),
-//               child: Text(
-//                 _getRankText(rank),
-//                 style: Theme.of(context)
-//                     .textTheme
-//                     .labelLarge
-//                     ?.copyWith(color: color),
-//               ),
-//             ),
-//             const SizedBox(width: 12),
-//             Expanded(
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(
-//                     controller.userId.value == id ? 'You' : name,
-//                     style: const TextStyle(
-//                       fontSize: 14,
-//                       fontWeight: FontWeight.w600,
-//                       color: Colors.black,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             const SizedBox(width: 12),
-//             Text(
-//               '$percentage%',
-//               style: const TextStyle(
-//                 fontSize: 14,
-//                 fontWeight: FontWeight.w600,
-//                 color: Colors.black,
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-//   String _getRankText(String rank) {
-//     switch (rank) {
-//       case '1':
-//         return "1st";
-//       case '2':
-//         return "2nd";
-//       case '3':
-//         return "3rd";
-//       default:
-//         return rank;
-//     }
-//   }
-// }
+class StudentAverageComparisonCard extends StatelessWidget {
+  const StudentAverageComparisonCard({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  final AttendanceReportController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return MyCard(
+      hasShadow: true,
+      padding: const EdgeInsets.all(MySizes.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          HeadingForCard(controller: controller, heading: 'You Vs Class'),
+          const SizedBox(height: MySizes.md),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: MyBottomSheetDropdown(
+              optionsForChips: const [
+                'Present',
+                'Absent',
+                'Late',
+                'Excused',
+              ],
+              onSingleChanged: (value) {
+                controller.selectedStatus.value =
+                    AttendanceStatus.fromLabel(value);
+              },
+              selectedValue: controller.selectedStatus.value.label.obs,
+              dropdownWidgetType: DropdownWidgetType.choiceChip,
+            ),
+          ),
+          Obx(() {
+            // Access rosterAverageAttendanceSummary from the controller
+            final rosterAverageAttendanceSummary =
+                controller.rosterAverageAttendanceSummary.value;
+            final userAttendanceSummary =
+                controller.userAttendanceSummary.value;
+
+            // Check if rosterAverageAttendanceSummary is null to prevent errors
+            if (rosterAverageAttendanceSummary == null ||
+                userAttendanceSummary == null) {
+              return const Center(child: Text("No data available"));
+            }
+
+            // Determine which percentage to use based on the selected status
+            double studentAttendancePercentage;
+            double classAveragePercentage;
+
+            switch (controller.selectedStatus.value) {
+              case AttendanceStatus.present:
+                studentAttendancePercentage =
+                    userAttendanceSummary.presentPercentage;
+                classAveragePercentage =
+                    rosterAverageAttendanceSummary.presentPercentage;
+                break;
+              case AttendanceStatus.absent:
+                studentAttendancePercentage =
+                    userAttendanceSummary.absentPercentage;
+                classAveragePercentage =
+                    rosterAverageAttendanceSummary.absentPercentage;
+                break;
+              case AttendanceStatus.late:
+                studentAttendancePercentage =
+                    userAttendanceSummary.latePercentage;
+                classAveragePercentage =
+                    rosterAverageAttendanceSummary.latePercentage;
+                break;
+              case AttendanceStatus.excused:
+                studentAttendancePercentage =
+                    userAttendanceSummary.excusedPercentage;
+                classAveragePercentage =
+                    rosterAverageAttendanceSummary.excusedPercentage;
+                break;
+              default:
+                studentAttendancePercentage = 0.0;
+                classAveragePercentage = 0.0;
+            }
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildAverageBox(
+                  context,
+                  "Your",
+                  studentAttendancePercentage,
+                  MyColors.activeGreen,
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: CircleAvatar(
+                    backgroundColor: MyColors.activeRed.withOpacity(0.1),
+                    child: Text(
+                      'VS',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontSize: 16,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ),
+                _buildAverageBox(
+                  context,
+                  "Class Average",
+                  classAveragePercentage,
+                  MyColors.activeBlue,
+                ),
+              ],
+            );
+          }),
+          const SizedBox(height: 20),
+          Obx(() {
+            final rosterAverageAttendanceSummary =
+                controller.rosterAverageAttendanceSummary.value;
+            final userAttendanceSummary =
+                controller.userAttendanceSummary.value;
+
+            if (rosterAverageAttendanceSummary == null ||
+                userAttendanceSummary == null) {
+              return const SizedBox.shrink(); // Or any placeholder you'd like
+            }
+
+            double studentAttendancePercentage;
+            double classAveragePercentage;
+
+            switch (controller.selectedStatus.value) {
+              case AttendanceStatus.present:
+                studentAttendancePercentage =
+                    userAttendanceSummary.presentPercentage;
+                classAveragePercentage =
+                    rosterAverageAttendanceSummary.presentPercentage;
+                break;
+              case AttendanceStatus.absent:
+                studentAttendancePercentage =
+                    userAttendanceSummary.absentPercentage;
+                classAveragePercentage =
+                    rosterAverageAttendanceSummary.absentPercentage;
+                break;
+              case AttendanceStatus.late:
+                studentAttendancePercentage =
+                    userAttendanceSummary.latePercentage;
+                classAveragePercentage =
+                    rosterAverageAttendanceSummary.latePercentage;
+                break;
+              case AttendanceStatus.excused:
+                studentAttendancePercentage =
+                    userAttendanceSummary.excusedPercentage;
+                classAveragePercentage =
+                    rosterAverageAttendanceSummary.excusedPercentage;
+                break;
+              default:
+                studentAttendancePercentage = 0.0;
+                classAveragePercentage = 0.0;
+            }
+
+            return Row(
+              children: [
+                Icon(
+                  studentAttendancePercentage >= classAveragePercentage
+                      ? Icons.trending_up
+                      : Icons.trending_down,
+                  color: studentAttendancePercentage >= classAveragePercentage
+                      ? Colors.green
+                      : Colors.red,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  "Difference: ${studentAttendancePercentage >= classAveragePercentage ? '+ ${(studentAttendancePercentage - classAveragePercentage).toStringAsFixed(2)}%' : '${(studentAttendancePercentage - classAveragePercentage).toStringAsFixed(2)}%'} vs Class",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAverageBox(
+      BuildContext context, String label, double value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: MySizes.md,
+        horizontal: MySizes.md,
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: MySizes.xs),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularPercentIndicator(
+            radius: 36,
+            lineWidth: 6.0,
+            percent: value / 100,
+            center: Text(
+              '${value.toStringAsFixed(2)}%',
+              style:
+                  MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+            ),
+            progressColor: color,
+            backgroundColor: color.withOpacity(0.3),
+            circularStrokeCap: CircularStrokeCap.round,
+            animation: true,
+            animationDuration: 1000,
+          ),
+          const SizedBox(height: MySizes.md),
+          Text(
+            label,
+            style: MyTextStyle.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StudentRankOverviewCard extends StatelessWidget {
+  StudentRankOverviewCard({super.key, required this.controller});
+
+  final AttendanceReportController controller;
+  final RxBool _isExpanded = false.obs;
+
+  @override
+  Widget build(BuildContext context) {
+    return MyCard(
+      padding: const EdgeInsets.all(MySizes.md),
+      hasShadow: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          HeadingForCard(controller: controller, heading: 'Rank Overview'),
+          const SizedBox(height: MySizes.md),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: MyBottomSheetDropdown(
+              optionsForChips: const [
+                'Present',
+                'Absent',
+                'Late',
+                'Excused',
+              ],
+              onSingleChanged: (value) {
+                controller.selectedStatus.value =
+                    AttendanceStatus.fromLabel(value);
+              },
+              selectedValue: controller.selectedStatus.value.label.obs,
+              dropdownWidgetType: DropdownWidgetType.choiceChip,
+            ),
+          ),
+          Obx(() {
+            final selectedStatus = controller.selectedStatus.value;
+            final rosterAverageAttendanceSummary =
+                controller.rosterAverageAttendanceSummary.value;
+
+            //Early return null if null
+            if (rosterAverageAttendanceSummary == null) {
+              return const SizedBox.shrink();
+            }
+
+            // Extract user summaries and sort based on selected status
+            final userSummaries =
+                rosterAverageAttendanceSummary.userAverageAttendanceSummaryList;
+
+            if (userSummaries.isEmpty) {
+              return const Center(
+                  child: MyEmptyStateWidget(
+                      type: EmptyStateType.noData,
+                      message: 'No Users available!'));
+            }
+
+            // Sort the user summaries based on the selected status
+            final sortedSummaries =
+                List<UserAverageAttendanceSummary>.from(userSummaries);
+            sortedSummaries.sort((a, b) {
+              final percentageA = getAveragePercentage(a, selectedStatus);
+              final percentageB = getAveragePercentage(b, selectedStatus);
+              return percentageB.compareTo(percentageA);
+            });
+
+            // Get the top rank percentage
+            double topRankPercentage = 0.0;
+            if (sortedSummaries.isNotEmpty) {
+              topRankPercentage =
+                  getAveragePercentage(sortedSummaries.first, selectedStatus);
+            }
+
+            // Find the user's average summary
+            final userSummary = sortedSummaries.firstWhereOrNull(
+                (element) => element.userId == controller.userId.value);
+
+            // Calculate user's rank
+            int userRank = 0;
+            if (userSummary != null) {
+              final userPercentage =
+                  getAveragePercentage(userSummary, selectedStatus);
+              userRank = calculateRank(
+                  sortedSummaries, userPercentage, selectedStatus);
+            }
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildRankBox(
+                  context,
+                  "Your Rank",
+                  userRank,
+                  userSummary != null
+                      ? getAveragePercentage(userSummary, selectedStatus)
+                      : 0.0,
+                  Colors.blueAccent,
+                ),
+                _buildRankBox(
+                  context,
+                  "Top Rank",
+                  1,
+                  topRankPercentage,
+                  Colors.orangeAccent,
+                ),
+              ],
+            );
+          }),
+          const SizedBox(height: 20),
+          const Text(
+            "Rank Breakdown",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          Obx(() {
+            final selectedStatus = controller.selectedStatus.value;
+            final rosterAverageAttendanceSummary =
+                controller.rosterAverageAttendanceSummary.value;
+
+            //If null return
+            if (rosterAverageAttendanceSummary == null) {
+              return const SizedBox.shrink();
+            }
+
+            // Extract user summaries
+            final userSummaries =
+                rosterAverageAttendanceSummary.userAverageAttendanceSummaryList;
+
+            // Sort user summaries based on selected status
+            final sortedSummaries =
+                List<UserAverageAttendanceSummary>.from(userSummaries);
+            sortedSummaries.sort((a, b) {
+              final percentageA = getAveragePercentage(a, selectedStatus);
+              final percentageB = getAveragePercentage(b, selectedStatus);
+              return percentageB.compareTo(percentageA);
+            });
+
+            return Column(
+              children: _buildRankDistributionRows(
+                context,
+                sortedSummaries,
+                selectedStatus,
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // Function to calculate rank, handling ties
+  int calculateRank(
+    List<UserAverageAttendanceSummary> sortedSummaries,
+    double userPercentage,
+    AttendanceStatus selectedStatus,
+  ) {
+    int rank = 1;
+    for (int i = 0; i < sortedSummaries.length; i++) {
+      final percentage =
+          getAveragePercentage(sortedSummaries[i], selectedStatus);
+      if (percentage > userPercentage) {
+        rank++;
+      } else if (percentage == userPercentage) {
+        // Already found a tie, return the current rank
+        break;
+      } else {
+        //Found user
+        break;
+      }
+    }
+    return rank;
+  }
+
+  double getAveragePercentage(
+      UserAverageAttendanceSummary userSummary, AttendanceStatus status) {
+    switch (status) {
+      case AttendanceStatus.present:
+        return userSummary.presentPercentage;
+      case AttendanceStatus.absent:
+        return userSummary.absentPercentage;
+      case AttendanceStatus.late:
+        return userSummary.latePercentage;
+      case AttendanceStatus.excused:
+        return userSummary.excusedPercentage;
+      default:
+        return 0.0;
+    }
+  }
+
+  Widget _buildRankBox(BuildContext context, String label, int rank,
+      double percentage, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12.0,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+      ),
+      child: Row(
+        children: [
+          Text(
+            rank == 1 ? '👑' : '🏅',
+            style: const TextStyle(
+              fontSize: 28,
+            ),
+          ),
+          const SizedBox(width: MySizes.sm),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "$label: $rank${_getRankSuffix(rank)}",
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    "${percentage.toStringAsFixed(1)}%",
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getRankSuffix(int rank) {
+    if (rank == 1) {
+      return 'st';
+    } else if (rank == 2) {
+      return 'nd';
+    } else if (rank == 3) {
+      return 'rd';
+    } else {
+      return 'th';
+    }
+  }
+
+  Color _getRankColor(String rank) {
+    final rankInt = int.tryParse(rank) ?? 0;
+    if (rankInt == 1) {
+      return Colors.green;
+    } else if (rankInt == 2) {
+      return Colors.blue;
+    } else {
+      return Colors.red;
+    }
+  }
+
+  List<Widget> _buildRankDistributionRows(
+    BuildContext context,
+    List<UserAverageAttendanceSummary> rankingList,
+    AttendanceStatus selectedStatus,
+  ) {
+    // Define the limit for initial display (top 3)
+    final topRanks = rankingList.take(3).toList();
+
+    // Determine the limit for the rows based on expansion state
+    final limit = _isExpanded.value ? rankingList.length : topRanks.length;
+    int currentRank = 0;
+    double previousPercentage = -1.0;
+    int rankIncrement = 1;
+
+    final rankDistributionRows = <Widget>[];
+
+    for (var i = 0; i < limit; i++) {
+      final student = rankingList[i];
+      final name = student.userName;
+      final id = student.userId;
+      final rollNo = student.rollNo;
+      final percentage = getAveragePercentage(student, selectedStatus);
+
+      if (percentage != previousPercentage) {
+        currentRank += rankIncrement;
+        rankIncrement = 1;
+      } else {
+        rankIncrement++;
+      }
+
+      previousPercentage = percentage;
+
+      final rank = currentRank.toString();
+      final color = _getRankColor(rank);
+
+      rankDistributionRows.add(_buildRankDistributionRow(context, name, id,
+          rank, percentage.toStringAsFixed(1), color, rollNo));
+    }
+
+    // Add "See All" / "See Less" button if the list is longer than the initial limit
+    if (rankingList.length > topRanks.length) {
+      rankDistributionRows.add(
+        Align(
+          alignment: Alignment.centerRight,
+          child: Obx(
+            () => GestureDetector(
+              onTap: () => _isExpanded.value = !_isExpanded.value,
+              child: Text(
+                _isExpanded.value ? 'See Less' : 'See All',
+                style: const TextStyle(
+                  color: MyColors.activeBlue,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return rankDistributionRows;
+  }
+
+  Widget _buildRankDistributionRow(BuildContext context, String name, String id,
+      String rank, String percentage, Color color, String? rollNo) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
+        color: controller.userId.value == id
+            ? color.withOpacity(0.1)
+            : Colors.transparent,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 8,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color.withOpacity(0.2),
+              ),
+              child: Text(
+                _getRankText(rank),
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: color),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    controller.userId.value == id ? 'You' : name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    rollNo == null ? id : 'Roll No: $rollNo ($id)',
+                    style: MyTextStyle.labelMedium,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '$percentage%',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getRankText(String rank) {
+    switch (rank) {
+      case '1':
+        return "1st";
+      case '2':
+        return "2nd";
+      case '3':
+        return "3rd";
+      default:
+        return rank;
+    }
+  }
+}
 
 class StreakItem extends StatelessWidget {
   const StreakItem({super.key, required this.streak});
@@ -702,6 +1037,7 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
 
       final monthlyAttendanceList =
           controller.userAttendanceSummary.value!.monthlyAttendance;
+      final selectedStatus = controller.selectedStatus.value;
 
       // Prepare data for the chart
       List<BarChartGroupData> barGroups = [];
@@ -709,20 +1045,47 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
       const double barWidth = 6;
 
       for (final monthlyData in monthlyAttendanceList) {
+        // Determine the count based on selected status
+        double count;
+        Color barColor;
+
+        switch (selectedStatus) {
+          case AttendanceStatus.present:
+            count = monthlyData.presentCount.toDouble();
+            barColor = AttendanceStatus.present.color;
+            break;
+          case AttendanceStatus.absent:
+            count = monthlyData.absentCount.toDouble();
+            barColor = AttendanceStatus.absent.color;
+            break;
+          case AttendanceStatus.late:
+            count = monthlyData.lateCount.toDouble();
+            barColor = AttendanceStatus.late.color;
+            break;
+          case AttendanceStatus.excused:
+            count = monthlyData.excusedCount.toDouble();
+            barColor = AttendanceStatus.excused.color;
+            break;
+          case AttendanceStatus.holiday:
+            count = monthlyData.holidayCount.toDouble();
+            barColor = AttendanceStatus.holiday.color;
+            break;
+          case AttendanceStatus.working:
+            count = monthlyData.workingDaysCount.toDouble();
+            barColor = AttendanceStatus.working.color;
+          default: // Consider adding a "default" case or handling other statuses
+            count = 0;
+            barColor = Colors.grey; // Or any other default color
+        }
+
         barGroups.add(
           BarChartGroupData(
-            showingTooltipIndicators: [0, 1],
+            showingTooltipIndicators: [0],
             x: groupIndex,
             barRods: [
               BarChartRodData(
-                toY: monthlyData.presentCount.toDouble(),
-                color: MyColors.activeGreen,
-                width: barWidth,
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-              ),
-              BarChartRodData(
-                toY: monthlyData.absentCount.toDouble(),
-                color: MyColors.activeRed,
+                toY: count,
+                color: barColor,
                 width: barWidth,
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
               ),
@@ -735,7 +1098,24 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
 
       double maxAttendanceValue = monthlyAttendanceList.isNotEmpty
           ? monthlyAttendanceList
-              .map((e) => e.presentCount + e.absentCount)
+              .map((e) {
+                switch (selectedStatus) {
+                  case AttendanceStatus.present:
+                    return e.presentCount;
+                  case AttendanceStatus.absent:
+                    return e.absentCount;
+                  case AttendanceStatus.late:
+                    return e.lateCount;
+                  case AttendanceStatus.excused:
+                    return e.excusedCount;
+                  case AttendanceStatus.holiday:
+                    return e.holidayCount;
+                  case AttendanceStatus.working:
+                    return e.workingDaysCount;
+                  default:
+                    return 0;
+                }
+              })
               .reduce(math.max)
               .toDouble()
           : 0; // Handle empty case
@@ -757,10 +1137,12 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
                   'Absent',
                   'Late',
                   'Excused',
+                  'Holiday',
+                  'Working',
                 ],
                 onSingleChanged: (value) {
                   controller.selectedStatus.value =
-                      AttendanceStatus.fromCode(value);
+                      AttendanceStatus.fromLabel(value);
                 },
                 selectedValue: controller.selectedStatus.value.label.obs,
                 dropdownWidgetType: DropdownWidgetType.choiceChip,
@@ -865,18 +1247,13 @@ class AttendanceSummaryDashboard extends StatelessWidget {
       }
       return MyCard(
         margin: EdgeInsets.zero,
-        padding: const EdgeInsets.only(
-          top: MySizes.sm,
-          bottom: MySizes.md,
-          left: MySizes.md,
-          right: MySizes.md,
-        ),
+        padding: const EdgeInsets.all(MySizes.md),
         hasShadow: true,
         child: Column(
           children: [
             HeadingForCard(
                 controller: controller, heading: 'Attendance Summary'),
-            const SizedBox(height: MySizes.sm),
+            const SizedBox(height: MySizes.md),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -958,14 +1335,32 @@ class HeadingForCard extends StatelessWidget {
               content: SingleChildScrollView(
                 child: Obx(() => Column(
                       children: [
-                        MyDropdownField(
-                          options: const ['Monthly', 'Yearly', 'Custom'],
-                          selectedValue: controller.selectedFilterType,
-                          onSelected: (value) {
-                            controller.selectedFilterType.value = value!;
-                          },
-                          labelText: 'Filter By',
+                        // Text('Filter By',style: MyTextStyle.bodyLarge,),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: MyBottomSheetDropdown(
+                            optionsForChips: const [
+                              'Monthly',
+                              'Yearly',
+                              'Custom'
+                            ],
+                            selectedValue: controller.selectedFilterType,
+                            onSingleChanged: (value) {
+                              controller.selectedFilterType.value = value;
+                              controller.selectedMonth.value = '';
+                              controller.selectedYear.value = '';
+                              controller.selectedStartDate.value = DateTime(
+                                  DateTime.now().year, DateTime.now().month, 1);
+                              controller.selectedEndDate.value = DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month + 1,
+                                  0);
+                            },
+                            labelText: 'Filter By',
+                            dropdownWidgetType: DropdownWidgetType.choiceChip,
+                          ),
                         ),
+
                         if (controller.selectedFilterType.value == 'Monthly')
                           MyDropdownField(
                             options: controller.monthList,

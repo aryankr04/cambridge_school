@@ -66,7 +66,8 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
 
   @override
   void dispose() {
-    _focusNode.removeListener(_handleFocusChange); // Important to prevent memory leaks!
+    _focusNode.removeListener(
+        _handleFocusChange); // Important to prevent memory leaks!
     _focusNode.dispose();
     super.dispose();
   }
@@ -107,10 +108,13 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
               const SizedBox(height: 6),
             ],
             GestureDetector(
-              onTap: widget.enabled ? () { // Simplified onTap
-                _toggleDropdown();
-                _focusNode.requestFocus();
-              } : null, // Disable onTap when disabled
+              onTap: widget.enabled
+                  ? () {
+                      // Simplified onTap
+                      _toggleDropdown();
+                      _focusNode.requestFocus();
+                    }
+                  : null, // Disable onTap when disabled
               behavior: HitTestBehavior.translucent,
               child: Container(
                 decoration: widget.decoration ??
@@ -127,20 +131,23 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                     ],
                     Expanded(
                       child: Obx(() => Text(
-                        (_selectedValue.value != null &&
-                            _selectedValue.value!.isNotEmpty)
-                            ? _selectedValue.value!
-                            : widget.hintText ?? defaultHintText,
-                        style: (_selectedValue.value != null &&
-                            _selectedValue.value!.isNotEmpty)
-                            ? widget.selectedTextStyle ??
-                            MyTextStyle.inputField
-                            : widget.hintTextStyle ??
-                            Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: MyColors.placeholderColor,
-                            ),
-                        overflow: TextOverflow.ellipsis,
-                      )),
+                            (_selectedValue.value != null &&
+                                    _selectedValue.value!.isNotEmpty)
+                                ? _selectedValue.value!
+                                : widget.hintText ?? defaultHintText,
+                            style: (_selectedValue.value != null &&
+                                    _selectedValue.value!.isNotEmpty)
+                                ? widget.selectedTextStyle ??
+                                    MyTextStyle.inputField
+                                : widget.hintTextStyle ??
+                                    Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: MyColors.placeholderColor,
+                                        ),
+                            overflow: TextOverflow.ellipsis,
+                          )),
                     ),
                     if (widget.suffixIcon != null) ...[
                       const SizedBox(width: 8.0),
@@ -194,34 +201,42 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
           boxShadow: MyBoxShadows.kMediumShadow,
           borderRadius: widget.dropdownBorderRadius ?? BorderRadius.circular(4),
         ),
-        constraints: const BoxConstraints(maxHeight: 200,maxWidth: double.infinity), // Added maxHeight constraint
+        constraints: const BoxConstraints(
+            maxHeight: 200,
+            maxWidth: double.infinity), // Added maxHeight constraint
         child: SingleChildScrollView(
-          child: Column( // Changed Wrap to Column
+          child: Column(
+            // Changed Wrap to Column
             mainAxisSize: MainAxisSize.min,
-            children: widget.options.map((option) => Material(
-              color: _selectedValue.value == option
-                  ? Colors.lightBlue.withOpacity(0.3)
-                  : Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  _selectedValue.value = option;
-                  widget.onSelected?.call(option);
-                  _closeDropdown();
-                  _focusNode.unfocus();
-                },
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
-                    child: Text(
-                      option,
-                      style: MyTextStyle.bodyMedium,
-                    ),
-                  ),
-                ),
-              ),
-            )).toList(),
+            children: widget.options
+                .map((option) => Material(
+                      color: _selectedValue.value == option
+                          ? Colors.lightBlue.withOpacity(0.3)
+                          : Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          _selectedValue.value = option;
+                          widget.onSelected?.call(option);
+                          _closeDropdown();
+                          _focusNode.unfocus();
+                        },
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 16),
+                            child: Text(
+                              option,
+                              style: _selectedValue.value == option
+                                  ? MyTextStyle.bodyLarge
+                                      .copyWith(color: MyColors.activeBlue,fontWeight: FontWeight.bold)
+                                  : MyTextStyle.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ))
+                .toList(),
           ),
         ),
       ),

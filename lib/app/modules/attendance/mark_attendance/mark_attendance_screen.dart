@@ -294,7 +294,7 @@ class AttendanceList extends StatelessWidget {
         return _buildShimmerStudentsList();
       } else if (controller.userRoster.value == null) {
         return const Center(
-            child: EmptyStateWidget(
+            child: MyEmptyStateWidget(
                 type: EmptyStateType.noData,
                 message: 'No user data available.'));
       } else {

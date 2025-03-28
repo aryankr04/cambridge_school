@@ -4,13 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../utils/constants/text_styles.dart';
 
-class EmptyStateWidget extends StatelessWidget {
+class MyEmptyStateWidget extends StatelessWidget {
   final EmptyStateType type;
   final String message;
   final TextStyle? textStyle;
   final double svgSize;
 
-  const EmptyStateWidget({
+  const MyEmptyStateWidget({
     super.key,
     required this.type,
     required this.message,
