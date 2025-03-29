@@ -1,5 +1,6 @@
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/enums/schedule_event_type.dart';
+import 'package:cambridge_school/core/utils/constants/enums/subject.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,7 +16,6 @@ import '../../../../core/widgets/snack_bar.dart';
 import '../../../../core/widgets/text_field.dart';
 import '../../../../core/widgets/time_picker.dart';
 import '../../class_management/class_model.dart';
-import '../../subject_management/subject_model.dart';
 import '../routine_item.dart';
 import '../routine_model.dart';
 import 'create_routine_controller.dart';
@@ -68,7 +68,6 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       child: Column(
         children: [
           _buildFilterSection(),
-
           Column(
             children: [
               _buildRoutineDisplaySection(),
@@ -176,8 +175,6 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       onSingleChanged: (value) async {
         controller.selectedClassName.value = value;
         await controller.fetchClassData();
-
-
       },
       dropdownWidgetType: DropdownWidgetType.filter,
       hintText: 'Class',
@@ -642,7 +639,7 @@ class _AddRoutineDialogState extends State<AddRoutineDialog> {
                           _subjectController.text = val;
                         },
                         controller: _subjectController,
-                        options: SchoolSubjects.getSubjects(),
+                        options: SubjectName.labelsList,
                         labelText: 'Subject',
                         showClearIcon: true,
                       ),

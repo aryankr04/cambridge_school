@@ -17,7 +17,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../../../core/utils/constants/enums/academic_level.dart';
-import '../../../../core/utils/constants/enums/exam_pattern.dart';
+import '../../../../core/utils/constants/enums/examination_pattern.dart';
 import '../../../../core/utils/constants/enums/grading_system.dart';
 import '../../../../core/utils/constants/enums/medium_of_instruction.dart';
 import '../../../../core/utils/constants/enums/school_ownership.dart';
@@ -279,10 +279,10 @@ class CreateSchoolController extends GetxController {
         status: AccountStatus.active,
         establishedYear: establishedYearController.text.trim(),
         createdAt: DateTime.now(),
-        schoolBoard: SchoolBoardExtension.fromString(selectedSchoolBoard.value),
+        schoolBoard: SchoolBoard.fromString(selectedSchoolBoard.value),
         schoolCode: schoolCodeController.text.trim(),
         schoolOwnership:
-        SchoolOwnershipExtension.fromString(selectedSchoolOwnership.value),
+        SchoolOwnership.fromString(selectedSchoolOwnership.value),
         affiliationNumber: affiliationRegistrationNumberController.text,
         address: address,
         primaryPhoneNo: primaryPhoneNumberController.text,
@@ -291,12 +291,12 @@ class CreateSchoolController extends GetxController {
         website: websiteController.text,
         faxNumber: faxNumberController.text,
         gradingSystem:
-        GradingSystemExtension.fromString(selectedGradingSystem.value),
-        examPattern: ExaminationPatternExtension.fromString(
+        GradingSystem.fromString(selectedGradingSystem.value),
+        examPattern: ExaminationPattern.fromString(
             selectedExaminationPattern.value),
         academicLevel:
-        AcademicLevelExtension.fromString(selectedAcademicLevel.value),
-        mediumOfInstruction: MediumOfInstructionExtension.fromString(
+        AcademicLevel.fromString(selectedAcademicLevel.value),
+        mediumOfInstruction: MediumOfInstruction.fromString(
             selectedMediumOfInstruction.value),
         academicYear:
         '${selectedAcademicYearStart.value} - ${selectedAcademicYearEnd.value}',
@@ -310,9 +310,9 @@ class CreateSchoolController extends GetxController {
         ),
         noOfPeriodsPerDay: int.tryParse(periodsPerDayController.text) ?? 0,
         feePaymentMethods: [FeePaymentMethod.cash], // Assuming a single default
-        schoolSpecialization: SchoolSpecializationExtension.fromString(
+        schoolSpecialization: SchoolSpecialization .fromString(
             selectedSchoolSpecialization.value),
-        schoolGenderPolicy: SchoolGenderPolicyExtension.fromString(
+        schoolGenderPolicy: SchoolGenderPolicy.fromString(
             selectedSchoolGenderPolicy.value),
         musicAndArtFacilities: selectedMusicAndArtFacilities,
         studentClubs: selectedStudentClubs,

@@ -1,10 +1,10 @@
+import 'package:cambridge_school/core/utils/constants/enums/subject.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/constants/sizes.dart';
 import '../../../../core/utils/constants/text_styles.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
-import '../../subject_management/subject_model.dart';
 
 class SubjectTile extends StatelessWidget {
   const SubjectTile({
@@ -47,7 +47,7 @@ class SubjectTile extends StatelessWidget {
                 color: MyColors.white,
               ),
               child: Text(
-                SchoolSubjects.getEmoji(subjectName),
+                SubjectName.getEmojiByLabel(subjectName)??'N/A',
                 style: MyTextStyle.headlineMedium
                     .copyWith(color: MyColors.activeBlue),
               ),

@@ -7,6 +7,8 @@ import 'package:cambridge_school/core/widgets/bottom_sheet_dropdown.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../core/utils/constants/enums/class_name.dart';
+import '../../../../core/utils/constants/enums/notice_category.dart';
 import '../../../../core/widgets/text_field.dart';
 import '../../../../roles_manager.dart';
 import '../notice_model.dart';
@@ -57,7 +59,7 @@ class _CreateNoticeScreenState extends State<CreateNoticeScreen> {
                 maxLines: 4,
               ),
               MyDropdownField(
-                options: MyLists.noticeCategories(),
+                options: NoticeCategory.labelsList,
                 onSelected: (val) {
                   controller.selectedCategory.value = val;
                 },
@@ -85,7 +87,7 @@ class _CreateNoticeScreenState extends State<CreateNoticeScreen> {
               Obx(() => (controller.selectedTargetAudience?.contains('Student') ?? false) ||
                   (controller.selectedTargetAudience?.contains('All') ?? false)
                   ? MyBottomSheetDropdown(
-                optionsForChips: MyLists.classOptions,
+                optionsForChips: ClassName.displayNamesList,
                 isMultipleSelection: true,
                 onMultipleChanged: (List<String>? values) {
                   controller.selectedForClass?.clear();

@@ -1,121 +1,68 @@
 enum MediumOfInstruction {
-  english,
-  hindi,
-  bilingual,
-  sanskrit,
-  urdu,
-  assamese,
-  bengali,
-  bodo,
-  dogri,
-  gujarati,
-  kannada,
-  kashmiri,
-  konkani,
-  maithili,
-  malayalam,
-  manipuri,
-  marathi,
-  nepali,
-  odia,
-  punjabi,
-  sindhi,
-  tamil,
-  telugu,
-  santali,
-  meitei,
-  bhili,
-  gondi,
-  tulu,
-  khasi,
-  mizo,
-  ho,
-  lepcha,
-  garhwali,
-  ladakhi,
-  marwari,
-  chhattisgarhi,
-  kumaoni,
-  magahi,
-  bundeli,
-  rajasthani,
-  brahui,
-  french,
-  spanish,
-  german,
-  arabic,
-  mandarin,
-  other,
-}
+  english(label: "English"),
+  hindi(label: "Hindi"),
+  bilingual(label: "Bilingual (English & Hindi)"),
+  sanskrit(label: "Sanskrit"),
+  urdu(label: "Urdu"),
+  assamese(label: "Assamese"),
+  bengali(label: "Bengali"),
+  bodo(label: "Bodo"),
+  dogri(label: "Dogri"),
+  gujarati(label: "Gujarati"),
+  kannada(label: "Kannada"),
+  kashmiri(label: "Kashmiri"),
+  konkani(label: "Konkani"),
+  maithili(label: "Maithili"),
+  malayalam(label: "Malayalam"),
+  manipuri(label: "Manipuri"),
+  marathi(label: "Marathi"),
+  nepali(label: "Nepali"),
+  odia(label: "Odia"),
+  punjabi(label: "Punjabi"),
+  sindhi(label: "Sindhi"),
+  tamil(label: "Tamil"),
+  telugu(label: "Telugu"),
+  santali(label: "Santali"),
+  meitei(label: "Meitei (Manipuri)"),
+  bhili(label: "Bhili"),
+  gondi(label: "Gondi"),
+  tulu(label: "Tulu"),
+  khasi(label: "Khasi"),
+  mizo(label: "Mizo"),
+  ho(label: "Ho"),
+  lepcha(label: "Lepcha"),
+  garhwali(label: "Garhwali"),
+  ladakhi(label: "Ladakhi"),
+  marwari(label: "Marwari"),
+  chhattisgarhi(label: "Chhattisgarhi"),
+  kumaoni(label: "Kumaoni"),
+  magahi(label: "Magahi"),
+  bundeli(label: "Bundeli"),
+  rajasthani(label: "Rajasthani"),
+  brahui(label: "Brahui"),
+  french(label: "French"),
+  spanish(label: "Spanish"),
+  german(label: "German"),
+  arabic(label: "Arabic"),
+  mandarin(label: "Mandarin"),
+  other(label: "Other");
 
-extension MediumOfInstructionExtension on MediumOfInstruction {
-  /// Returns a user-friendly label for the medium of instruction.
-  String get label => _labels[this] ?? "Other";
+  const MediumOfInstruction({required this.label});
 
-  /// Returns a description explaining the medium of instruction.
+  final String label;
+
+  /// Description is derived from the label
   String get description => "Instruction is provided in $label.";
-
-  /// Mapping of `MediumOfInstruction` to readable labels.
-  static const Map<MediumOfInstruction, String> _labels = {
-    MediumOfInstruction.english: "English",
-    MediumOfInstruction.hindi: "Hindi",
-    MediumOfInstruction.bilingual: "Bilingual (English & Hindi)",
-    MediumOfInstruction.sanskrit: "Sanskrit",
-    MediumOfInstruction.urdu: "Urdu",
-    MediumOfInstruction.assamese: "Assamese",
-    MediumOfInstruction.bengali: "Bengali",
-    MediumOfInstruction.bodo: "Bodo",
-    MediumOfInstruction.dogri: "Dogri",
-    MediumOfInstruction.gujarati: "Gujarati",
-    MediumOfInstruction.kannada: "Kannada",
-    MediumOfInstruction.kashmiri: "Kashmiri",
-    MediumOfInstruction.konkani: "Konkani",
-    MediumOfInstruction.maithili: "Maithili",
-    MediumOfInstruction.malayalam: "Malayalam",
-    MediumOfInstruction.manipuri: "Manipuri",
-    MediumOfInstruction.marathi: "Marathi",
-    MediumOfInstruction.nepali: "Nepali",
-    MediumOfInstruction.odia: "Odia",
-    MediumOfInstruction.punjabi: "Punjabi",
-    MediumOfInstruction.sindhi: "Sindhi",
-    MediumOfInstruction.tamil: "Tamil",
-    MediumOfInstruction.telugu: "Telugu",
-    MediumOfInstruction.santali: "Santali",
-    MediumOfInstruction.meitei: "Meitei (Manipuri)",
-    MediumOfInstruction.bhili: "Bhili",
-    MediumOfInstruction.gondi: "Gondi",
-    MediumOfInstruction.tulu: "Tulu",
-    MediumOfInstruction.khasi: "Khasi",
-    MediumOfInstruction.mizo: "Mizo",
-    MediumOfInstruction.ho: "Ho",
-    MediumOfInstruction.lepcha: "Lepcha",
-    MediumOfInstruction.garhwali: "Garhwali",
-    MediumOfInstruction.ladakhi: "Ladakhi",
-    MediumOfInstruction.marwari: "Marwari",
-    MediumOfInstruction.chhattisgarhi: "Chhattisgarhi",
-    MediumOfInstruction.kumaoni: "Kumaoni",
-    MediumOfInstruction.magahi: "Magahi",
-    MediumOfInstruction.bundeli: "Bundeli",
-    MediumOfInstruction.rajasthani: "Rajasthani",
-    MediumOfInstruction.brahui: "Brahui",
-    MediumOfInstruction.french: "French",
-    MediumOfInstruction.spanish: "Spanish",
-    MediumOfInstruction.german: "German",
-    MediumOfInstruction.arabic: "Arabic",
-    MediumOfInstruction.mandarin: "Mandarin",
-    MediumOfInstruction.other: "Other",
-  };
-
-  /// Reverse mapping for fast `fromString` lookup.
-  static final Map<String, MediumOfInstruction> _labelToEnum = {
-    for (var entry in _labels.entries) entry.value.toLowerCase(): entry.key,
-  };
 
   /// Converts a string label to the corresponding `MediumOfInstruction` enum.
   static MediumOfInstruction fromString(String value) {
-    return _labelToEnum[value.toLowerCase()] ?? MediumOfInstruction.other;
+    return MediumOfInstruction.values.firstWhere(
+          (element) => element.label.toLowerCase() == value.toLowerCase(),
+      orElse: () => MediumOfInstruction.other,
+    );
   }
 
   /// Returns a list of all medium of instruction labels.
-  static List<String> get labelsList => _labels.values.toList();
+  static List<String> get labelsList =>
+      MediumOfInstruction.values.map((e) => e.label).toList();
 }

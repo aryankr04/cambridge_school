@@ -1,5 +1,7 @@
 import 'package:cambridge_school/app/modules/user_management/create_user/controllers/create_user_controller.dart';
 import 'package:cambridge_school/core/utils/constants/colors.dart';
+import 'package:cambridge_school/core/utils/constants/enums/gender.dart';
+import 'package:cambridge_school/core/utils/constants/enums/subject.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/widgets/button.dart';
@@ -12,6 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/utils/constants/enums/class_name.dart';
+import '../../../../../core/utils/constants/enums/martial_status.dart';
 import '../../../../../core/utils/constants/text_styles.dart';
 import '../../../../../roles_manager.dart';
 import '../widgets/qualification_widget.dart';
@@ -29,23 +33,23 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   String? _currentExpandedTile;
 
   final ExpansionTileController _personalInfoController =
-  ExpansionTileController();
+      ExpansionTileController();
   final ExpansionTileController _healthInfoController =
-  ExpansionTileController();
+      ExpansionTileController();
   final ExpansionTileController _fatherDetailsController =
-  ExpansionTileController();
+      ExpansionTileController();
   final ExpansionTileController _motherDetailsController =
-  ExpansionTileController();
+      ExpansionTileController();
   final ExpansionTileController _addressDetailsController =
-  ExpansionTileController();
+      ExpansionTileController();
   final ExpansionTileController _emergencyContactController =
-  ExpansionTileController();
+      ExpansionTileController();
   final ExpansionTileController _qualificationDetailsController =
-  ExpansionTileController();
+      ExpansionTileController();
   final ExpansionTileController _transportDetailsController =
-  ExpansionTileController();
+      ExpansionTileController();
   final ExpansionTileController _accountDetailsController =
-  ExpansionTileController();
+      ExpansionTileController();
 
   @override
   Widget build(BuildContext context) {
@@ -63,60 +67,60 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
             children: [
               _buildRolesSection(context),
               Obx(() => _buildExpansionTileCustom(
-                controller: _personalInfoController,
-                title: 'Personal Information',
-                isValid: controller.personalInfoValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Personal Information');
-                },
-                children: _buildPersonalInformationFields(),
-              )),
+                    controller: _personalInfoController,
+                    title: 'Personal Information',
+                    isValid: controller.personalInfoValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Personal Information');
+                    },
+                    children: _buildPersonalInformationFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _healthInfoController,
-                title: 'Health & Medical Information',
-                isValid: controller.physicalHealthValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(
-                      expanded, 'Health & Medical Information');
-                },
-                children: _buildPhysicalHealthInformationFields(),
-              )),
+                    controller: _healthInfoController,
+                    title: 'Health & Medical Information',
+                    isValid: controller.physicalHealthValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(
+                          expanded, 'Health & Medical Information');
+                    },
+                    children: _buildPhysicalHealthInformationFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _fatherDetailsController,
-                title: 'Father’s Details',
-                isValid: controller.fatherDetailsValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Father’s Details');
-                },
-                children: _buildFatherDetailsFields(),
-              )),
+                    controller: _fatherDetailsController,
+                    title: 'Father’s Details',
+                    isValid: controller.fatherDetailsValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Father’s Details');
+                    },
+                    children: _buildFatherDetailsFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _motherDetailsController,
-                title: 'Mother’s Details',
-                isValid: controller.motherDetailsValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Mother’s Details');
-                },
-                children: _buildMotherDetailsFields(),
-              )),
+                    controller: _motherDetailsController,
+                    title: 'Mother’s Details',
+                    isValid: controller.motherDetailsValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Mother’s Details');
+                    },
+                    children: _buildMotherDetailsFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _addressDetailsController,
-                title: 'Residential Address',
-                isValid: controller.addressDetailsValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Residential Address');
-                },
-                children: _buildAddressDetailsFields(),
-              )),
+                    controller: _addressDetailsController,
+                    title: 'Residential Address',
+                    isValid: controller.addressDetailsValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Residential Address');
+                    },
+                    children: _buildAddressDetailsFields(),
+                  )),
               Obx(() => _buildExpansionTileCustom(
-                controller: _emergencyContactController,
-                title: 'Emergency Contact Details',
-                isValid: controller.emergencyContactValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Emergency Contact Details');
-                },
-                children: _buildEmergencyContactFields(),
-              )),
+                    controller: _emergencyContactController,
+                    title: 'Emergency Contact Details',
+                    isValid: controller.emergencyContactValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Emergency Contact Details');
+                    },
+                    children: _buildEmergencyContactFields(),
+                  )),
               Obx(() {
                 if (!controller.selectedRoles.contains(UserRole.student) &&
                     controller.selectedRoles.isNotEmpty) {
@@ -134,27 +138,27 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               }),
               _buildRoleSpecificDetails(),
               Obx(() => _buildExpansionTileCustom(
-                controller: _transportDetailsController,
-                title: 'Transport Details',
-                isValid: controller.transportDetailsValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Transport Details');
-                },
-                children: _buildTransportationDetailsFields(),
-              )),
+                    controller: _transportDetailsController,
+                    title: 'Transport Details',
+                    isValid: controller.transportDetailsValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Transport Details');
+                    },
+                    children: _buildTransportationDetailsFields(),
+                  )),
               _buildExpansionTileCustom(
                 title: 'Personal Interests',
                 children: _buildFavoritesFields(),
               ),
               Obx(() => _buildExpansionTileCustom(
-                controller: _accountDetailsController,
-                title: 'Login & Account Information',
-                isValid: controller.loginInfoValid.value,
-                onExpansionChanged: (expanded) {
-                  _handleExpansion(expanded, 'Login & Account Information');
-                },
-                children: _buildAccountDetailsFields(),
-              )),
+                    controller: _accountDetailsController,
+                    title: 'Login & Account Information',
+                    isValid: controller.loginInfoValid.value,
+                    onExpansionChanged: (expanded) {
+                      _handleExpansion(expanded, 'Login & Account Information');
+                    },
+                    children: _buildAccountDetailsFields(),
+                  )),
               const SizedBox(height: MySizes.md),
               MyButton(
                 text: 'Create User',
@@ -209,6 +213,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       }
     });
   }
+
   Widget _buildRolesSection(BuildContext context) {
     return Container(
       width: Get.width,
@@ -232,11 +237,12 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               ),
               GestureDetector(
                 onTap: () {
-                  showSelectRolesDialog(context); //Use controller.selectedRoles here
+                  showSelectRolesDialog(
+                      context); //Use controller.selectedRoles here
                 },
                 child: Container(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   decoration: BoxDecoration(
                     color: MyColors.activeBlue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -254,29 +260,29 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           ),
           const SizedBox(height: MySizes.sm + 4),
           Obx(() => Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              ...controller.selectedRoles.map((role) => Chip(
-                label: Text(
-                  role.value, // Change here
-                  style: const TextStyle(
-                      color: Colors.white, fontSize: 13),
-                ),
-                backgroundColor: MyColors.activeBlue,
-                onDeleted: () {
-                  controller.selectedRoles.remove(role);
-                },
-                deleteIconColor: Colors.white,
-                deleteIcon: const Icon(Icons.close, size: 16),
-                padding: EdgeInsets.zero,
-                labelPadding:
-                const EdgeInsets.symmetric(horizontal: 12),
-                deleteButtonTooltipMessage: 'Remove this role',
-                side: BorderSide.none,
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  ...controller.selectedRoles.map((role) => Chip(
+                        label: Text(
+                          role.value, // Change here
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 13),
+                        ),
+                        backgroundColor: MyColors.activeBlue,
+                        onDeleted: () {
+                          controller.selectedRoles.remove(role);
+                        },
+                        deleteIconColor: Colors.white,
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        padding: EdgeInsets.zero,
+                        labelPadding:
+                            const EdgeInsets.symmetric(horizontal: 12),
+                        deleteButtonTooltipMessage: 'Remove this role',
+                        side: BorderSide.none,
+                      )),
+                ],
               )),
-            ],
-          )),
         ],
       ),
     );
@@ -284,7 +290,8 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   Future<void> showSelectRolesDialog(BuildContext context) async {
     List<String> roleCategories = UserRole.values
-        .map((role) => role.category).toSet()
+        .map((role) => role.category)
+        .toSet()
         .toList(); // Convert back to a list
     return showDialog<void>(
       context: context,
@@ -307,7 +314,8 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(bottom: MySizes.md), // Add some padding
+                      padding: const EdgeInsets.only(
+                          bottom: MySizes.md), // Add some padding
                       child: Text(
                         category,
                         style: MyTextStyle.headlineSmall.copyWith(fontSize: 18),
@@ -321,15 +329,16 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                         final role = rolesInCategory[index];
                         return Padding(
                           padding: const EdgeInsets.only(
-                            bottom: MySizes.md, ), 
+                            bottom: MySizes.md,
+                          ),
                           child: Obx(() => _buildRoleCard(
-                            role: role.value,
-                            description: role.description,
-                            isSelected: controller.isRoleSelected(role),
-                            assetPath: controller.getAssetPath(role),
-                            onTap: () =>
-                                controller.toggleRoleSelection(role),
-                          )),
+                                role: role.value,
+                                description: role.description,
+                                isSelected: controller.isRoleSelected(role),
+                                assetPath: controller.getAssetPath(role),
+                                onTap: () =>
+                                    controller.toggleRoleSelection(role),
+                              )),
                         );
                       },
                     ),
@@ -348,6 +357,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       },
     );
   }
+
   Widget _buildExpansionTileCustom({
     required String title,
     required List<Widget> children,
@@ -378,13 +388,13 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         isValid == null
             ? Icons.error
             : isValid
-            ? Icons.check_circle
-            : Icons.close_rounded,
+                ? Icons.check_circle
+                : Icons.close_rounded,
         color: isValid == null
             ? MyColors.activeOrange
             : isValid
-            ? MyColors.activeGreen
-            : MyColors.activeRed,
+                ? MyColors.activeGreen
+                : MyColors.activeRed,
         size: 24,
       ),
       title: Text(title),
@@ -417,7 +427,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
-        options: MyLists.genderOptions,
+        options: Gender.labels,
         labelText: 'Gender',
         selectedValue: controller.gender,
         onSelected: (value) {
@@ -485,13 +495,13 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Nationality',
         optionsForChips: MyLists.nationalityOptions,
         onSingleChanged: (value) {
-          controller.nationality.value = value ?? '';
+          controller.nationality.value = value;
         },
         isValid: true,
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
-        options: MyLists.maritalStatusOptions,
+        options: MaritalStatus.labels,
         labelText: 'Marital Status',
         selectedValue: controller.maritalStatus,
         onSelected: (value) {
@@ -515,7 +525,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.heightController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Height must be a valid number')
+                errorText: 'Height must be a valid number')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -524,7 +534,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.weightController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Weight must be a valid number')
+                errorText: 'Weight must be a valid number')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -545,7 +555,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           controller.isPhysicalDisability.value = value == 'Yes';
         },
         selectedValue:
-        controller.isPhysicalDisability.value ? 'Yes'.obs : 'No'.obs,
+            controller.isPhysicalDisability.value ? 'Yes'.obs : 'No'.obs,
       ),
       const SizedBox(height: MySizes.md),
     ];
@@ -554,64 +564,64 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   List<Widget> _buildTransportationDetailsFields() {
     return [
       Obx(() => Column(
-        children: [
-          MyDropdownField(
-            labelText: 'Mode of Transport',
-            options: MyLists.modeOfTransportOptions,
-            selectedValue: controller.modeOfTransport,
-            onSelected: (value) {
-              controller.modeOfTransport.value = value ?? '';
-            },
-            isValidate: true,
-          ),
-          const SizedBox(height: MySizes.md),
-          if (controller.modeOfTransport.value == 'School Transport') ...[
-            MyTextField(
-              labelText: 'Transport Route Number',
-              controller: controller.transportRouteNumberController,
-              validator: RequiredValidator(
-                  errorText: 'Transport Route Number is required')
-                  .call,
-            ),
-            const SizedBox(height: MySizes.md),
-            MyTextField(
-              labelText: 'Transport Pickup Point',
-              controller: controller.transportPickupPointController,
-              validator: RequiredValidator(
-                  errorText: 'Transport Pickup Point is required')
-                  .call,
-            ),
-            const SizedBox(height: MySizes.md),
-            MyTextField(
-              labelText: 'Transport Drop Off Point',
-              controller: controller.transportDropOffPointController,
-              validator: RequiredValidator(
-                  errorText: 'Transport Drop Off Point is required')
-                  .call,
-            ),
-            const SizedBox(height: MySizes.md),
-            MyTextField(
-              labelText: 'Transport Vehicle Number',
-              controller: controller.transportVehicleNumberController,
-              validator: RequiredValidator(
-                  errorText: 'Transport Vehicle Number is required')
-                  .call,
-            ),
-            const SizedBox(height: MySizes.md),
-            MyTextField(
-              labelText: 'Transport Fare',
-              controller: controller.transportFareController,
-              keyboardType: TextInputType.number,
-              validator: MultiValidator([
-                RequiredValidator(errorText: 'Transport Fare is required'),
-                PatternValidator(r'^[0-9]*\.?[0-9]*$',
-                    errorText: 'Enter a valid number'),
-              ]).call,
-            ),
-            const SizedBox(height: MySizes.md),
-          ],
-        ],
-      ))
+            children: [
+              MyDropdownField(
+                labelText: 'Mode of Transport',
+                options: MyLists.modeOfTransportOptions,
+                selectedValue: controller.modeOfTransport,
+                onSelected: (value) {
+                  controller.modeOfTransport.value = value ?? '';
+                },
+                isValidate: true,
+              ),
+              const SizedBox(height: MySizes.md),
+              if (controller.modeOfTransport.value == 'School Transport') ...[
+                MyTextField(
+                  labelText: 'Transport Route Number',
+                  controller: controller.transportRouteNumberController,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Route Number is required')
+                      .call,
+                ),
+                const SizedBox(height: MySizes.md),
+                MyTextField(
+                  labelText: 'Transport Pickup Point',
+                  controller: controller.transportPickupPointController,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Pickup Point is required')
+                      .call,
+                ),
+                const SizedBox(height: MySizes.md),
+                MyTextField(
+                  labelText: 'Transport Drop Off Point',
+                  controller: controller.transportDropOffPointController,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Drop Off Point is required')
+                      .call,
+                ),
+                const SizedBox(height: MySizes.md),
+                MyTextField(
+                  labelText: 'Transport Vehicle Number',
+                  controller: controller.transportVehicleNumberController,
+                  validator: RequiredValidator(
+                          errorText: 'Transport Vehicle Number is required')
+                      .call,
+                ),
+                const SizedBox(height: MySizes.md),
+                MyTextField(
+                  labelText: 'Transport Fare',
+                  controller: controller.transportFareController,
+                  keyboardType: TextInputType.number,
+                  validator: MultiValidator([
+                    RequiredValidator(errorText: 'Transport Fare is required'),
+                    PatternValidator(r'^[0-9]*\.?[0-9]*$',
+                        errorText: 'Enter a valid number'),
+                  ]).call,
+                ),
+                const SizedBox(height: MySizes.md),
+              ],
+            ],
+          ))
     ];
   }
 
@@ -648,7 +658,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
               errorText: 'Password must be at least 8 characters long'),
           PatternValidator(r'^(?=.*[A-Z])(?=.*[!@#\$&*~])(?=.*[0-9]).*$',
               errorText:
-              'Password must contain at least one uppercase letter, one number, and one special character')
+                  'Password must contain at least one uppercase letter, one number, and one special character')
         ]).call,
       ),
       const SizedBox(height: MySizes.md),
@@ -661,15 +671,15 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Full Name',
         controller: controller.fatherFullNameController,
         validator:
-        RequiredValidator(errorText: 'Father\'s Full Name is required')
-            .call,
+            RequiredValidator(errorText: 'Father\'s Full Name is required')
+                .call,
       ),
       const SizedBox(height: MySizes.md),
       MyBottomSheetDropdown(
         labelText: 'Relationship to Student',
         optionsForChips: MyLists.relationshipOptions,
         onSingleChanged: (value) {
-          controller.fatherRelationshipToStudent.value = value ?? '';
+          controller.fatherRelationshipToStudent.value = value;
         },
         isValid: true,
       ),
@@ -689,7 +699,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.fatherPhoneNumberController,
         keyboardType: TextInputType.phone,
         validator: PatternValidator(r'^[0-9]+$',
-            errorText: 'Phone Number must contain only digits')
+                errorText: 'Phone Number must contain only digits')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -698,7 +708,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.fatherEmailAddressController,
         keyboardType: TextInputType.emailAddress,
         validator:
-        EmailValidator(errorText: 'Enter a valid email address').call,
+            EmailValidator(errorText: 'Enter a valid email address').call,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -716,7 +726,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.fatherAnnualIncomeController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Annual Income must be a valid number')
+                errorText: 'Annual Income must be a valid number')
             .call,
       ),
     ];
@@ -728,8 +738,8 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Full Name',
         controller: controller.motherFullNameController,
         validator:
-        RequiredValidator(errorText: 'Mother\'s Full Name is required')
-            .call,
+            RequiredValidator(errorText: 'Mother\'s Full Name is required')
+                .call,
       ),
       const SizedBox(height: MySizes.md),
       MyDropdownField(
@@ -757,7 +767,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.motherPhoneNumberController,
         keyboardType: TextInputType.phone,
         validator: PatternValidator(r'^[0-9]+$',
-            errorText: 'Phone Number must contain only digits')
+                errorText: 'Phone Number must contain only digits')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -766,7 +776,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.motherEmailAddressController,
         keyboardType: TextInputType.emailAddress,
         validator:
-        EmailValidator(errorText: 'Enter a valid email address').call,
+            EmailValidator(errorText: 'Enter a valid email address').call,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -784,7 +794,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.motherAnnualIncomeController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Annual Income must be a valid number')
+                errorText: 'Annual Income must be a valid number')
             .call,
       ),
     ];
@@ -804,7 +814,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'House Address',
         controller: controller.permanentHouseAddressController,
         validator:
-        RequiredValidator(errorText: 'House Address is required').call,
+            RequiredValidator(errorText: 'House Address is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MyTextField(
@@ -853,156 +863,155 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       ),
       const SizedBox(height: MySizes.md + 4),
       Obx(() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Current Address",
-            style: TextStyle(
-                color: MyColors.headlineTextColor,
-                fontSize: 16,
-                fontWeight: FontWeight.bold),
-          ),
-          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Checkbox(
-                value: controller.isSameAsPermanent.value,
-                onChanged: (value) {
-                  controller.isSameAsPermanent.value = value!;
-                  if (value) {
-                    controller.currentHouseAddressController.text =
-                        controller.permanentHouseAddressController.text;
-                    controller.currentCityController.text =
-                        controller.permanentCityController.text;
-                    controller.currentDistrict.value =
-                        controller.permanentDistrict.value;
-                    controller.currentState.value =
-                        controller.permanentState.value;
-                    controller.currentVillageController.text =
-                        controller.permanentVillageController.text;
-                    controller.currentPinCodeController.text =
-                        controller.permanentPinCodeController.text;
-                  } else {
-                    controller.currentHouseAddressController.clear();
-                    controller.currentCityController.clear();
-                    controller.currentDistrict.value = '';
-                    controller.currentState.value = '';
-                    controller.currentVillageController.clear();
-                    controller.currentPinCodeController.clear();
-                  }
-                },
-              ),
               const Text(
-                "Same as Permanent Address",
+                "Current Address",
                 style: TextStyle(
                     color: MyColors.headlineTextColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
               ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: controller.isSameAsPermanent.value,
+                    onChanged: (value) {
+                      controller.isSameAsPermanent.value = value!;
+                      if (value) {
+                        controller.currentHouseAddressController.text =
+                            controller.permanentHouseAddressController.text;
+                        controller.currentCityController.text =
+                            controller.permanentCityController.text;
+                        controller.currentDistrict.value =
+                            controller.permanentDistrict.value;
+                        controller.currentState.value =
+                            controller.permanentState.value;
+                        controller.currentVillageController.text =
+                            controller.permanentVillageController.text;
+                        controller.currentPinCodeController.text =
+                            controller.permanentPinCodeController.text;
+                      } else {
+                        controller.currentHouseAddressController.clear();
+                        controller.currentCityController.clear();
+                        controller.currentDistrict.value = '';
+                        controller.currentState.value = '';
+                        controller.currentVillageController.clear();
+                        controller.currentPinCodeController.clear();
+                      }
+                    },
+                  ),
+                  const Text(
+                    "Same as Permanent Address",
+                    style: TextStyle(
+                        color: MyColors.headlineTextColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              if (!controller.isSameAsPermanent.value)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MyTextField(
+                      labelText: 'House Address',
+                      controller: controller.currentHouseAddressController,
+                      validator: RequiredValidator(
+                              errorText: 'House Address is required')
+                          .call,
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MyTextField(
+                      labelText: 'City',
+                      controller: controller.currentCityController,
+                      validator:
+                          RequiredValidator(errorText: 'City is required').call,
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MySearchableDropdown(
+                      labelText: 'District',
+                      options: MyLists.indianStateOptions,
+                      onSelected: (value) {
+                        controller.currentDistrict.value = value;
+                      },
+                      isValidate: true,
+                      hintText: "Please select District",
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MyDropdownField(
+                      labelText: 'State',
+                      options: MyLists.indianStateOptions,
+                      selectedValue: controller.currentState,
+                      onSelected: (value) {
+                        controller.currentState.value = value ?? '';
+                      },
+                      isValidate: true,
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MyTextField(
+                      labelText: 'Village',
+                      controller: controller.currentVillageController,
+                      validator:
+                          RequiredValidator(errorText: 'Village is required')
+                              .call,
+                    ),
+                    const SizedBox(height: MySizes.md),
+                    MyTextField(
+                      labelText: 'Pin Code',
+                      controller: controller.currentPinCodeController,
+                      keyboardType: TextInputType.number,
+                      validator: MultiValidator([
+                        RequiredValidator(errorText: 'Pin Code is required'),
+                        PatternValidator(r'^[0-9]+$',
+                            errorText: 'Pin Code must contain only digits'),
+                        LengthRangeValidator(
+                            errorText: 'Pin Code must be 6 digits long',
+                            min: 6,
+                            max: 6)
+                      ]).call,
+                    )
+                  ],
+                ),
             ],
-          ),
-          if (!controller.isSameAsPermanent.value)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MyTextField(
-                  labelText: 'House Address',
-                  controller: controller.currentHouseAddressController,
-                  validator: RequiredValidator(
-                      errorText: 'House Address is required')
-                      .call,
-                ),
-                const SizedBox(height: MySizes.md),
-                MyTextField(
-                  labelText: 'City',
-                  controller: controller.currentCityController,
-                  validator:
-                  RequiredValidator(errorText: 'City is required').call,
-                ),
-                const SizedBox(height: MySizes.md),
-                MySearchableDropdown(
-                  labelText: 'District',
-                  options: MyLists.indianStateOptions,
-                  onSelected: (value) {
-                    controller.currentDistrict.value = value;
-                  },
-                  isValidate: true,
-                  hintText: "Please select District",
-                ),
-                const SizedBox(height: MySizes.md),
-                MyDropdownField(
-                  labelText: 'State',
-                  options: MyLists.indianStateOptions,
-                  selectedValue: controller.currentState,
-                  onSelected: (value) {
-                    controller.currentState.value = value ?? '';
-                  },
-                  isValidate: true,
-                ),
-                const SizedBox(height: MySizes.md),
-                MyTextField(
-                  labelText: 'Village',
-                  controller: controller.currentVillageController,
-                  validator:
-                  RequiredValidator(errorText: 'Village is required')
-                      .call,
-                ),
-                const SizedBox(height: MySizes.md),
-                MyTextField(
-                  labelText: 'Pin Code',
-                  controller: controller.currentPinCodeController,
-                  keyboardType: TextInputType.number,
-                  validator: MultiValidator([
-                    RequiredValidator(errorText: 'Pin Code is required'),
-                    PatternValidator(r'^[0-9]+$',
-                        errorText: 'Pin Code must contain only digits'),
-                    LengthRangeValidator(
-                        errorText: 'Pin Code must be 6 digits long',
-                        min: 6,
-                        max: 6)
-                  ]).call,
-                )
-              ],
-            ),
-        ],
-      )),
+          )),
     ];
   }
 
   List<Widget> _buildEmergencyContactFields() {
     return [
-    MyTextField(
-      labelText: 'Full Name',
-      controller: controller.emergencyFullNameController,
-      validator: RequiredValidator(errorText: 'Full Name is required').call,
-    ),
-    const SizedBox(height: MySizes.md),
-    MyDropdownField(
-    labelText: 'Relationship',
-    options: MyLists.relationshipOptions,
-    selectedValue: controller.emergencyRelationship,
-    onSelected: (value) {
-    controller.emergencyRelationship.value = value ?? '';
-    },
-    isValidate: true),
-    const SizedBox(height: MySizes.md),
-    MyTextField(
-    labelText: 'Phone Number',
-    controller: controller.emergencyPhoneNumberController,
-    keyboardType: TextInputType.phone,
-    validator: MultiValidator([
-    RequiredValidator(errorText: 'Phone Number is required'),
-    PatternValidator(r'^[0-9]+$',
-    errorText: 'Phone Number must contain only digits')
-      
+      MyTextField(
+        labelText: 'Full Name',
+        controller: controller.emergencyFullNameController,
+        validator: RequiredValidator(errorText: 'Full Name is required').call,
+      ),
+      const SizedBox(height: MySizes.md),
+      MyDropdownField(
+          labelText: 'Relationship',
+          options: MyLists.relationshipOptions,
+          selectedValue: controller.emergencyRelationship,
+          onSelected: (value) {
+            controller.emergencyRelationship.value = value ?? '';
+          },
+          isValidate: true),
+      const SizedBox(height: MySizes.md),
+      MyTextField(
+        labelText: 'Phone Number',
+        controller: controller.emergencyPhoneNumberController,
+        keyboardType: TextInputType.phone,
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Phone Number is required'),
+          PatternValidator(r'^[0-9]+$',
+              errorText: 'Phone Number must contain only digits')
         ]).call,
-    ),
+      ),
       const SizedBox(height: MySizes.md),
       MyTextField(
         labelText: 'Email Address',
         controller: controller.emergencyEmailAddressController,
         keyboardType: TextInputType.emailAddress,
         validator:
-        EmailValidator(errorText: 'Enter a valid email address').call,
+            EmailValidator(errorText: 'Enter a valid email address').call,
       ),
     ];
   }
@@ -1012,14 +1021,14 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       MyBottomSheetDropdown(
         labelText: 'Favorite Dish',
         optionsForChips: MyLists.dishOptions,
-        onSingleChanged: (value) => controller.favoriteDish.value = value ?? '',
+        onSingleChanged: (value) => controller.favoriteDish.value = value,
       ),
       const SizedBox(height: MySizes.md),
       MyBottomSheetDropdown(
         labelText: 'Favorite Subject',
-        optionsForChips: MyLists.subjectOptions,
+        optionsForChips: SubjectName.labelsList,
         onSingleChanged: (value) =>
-        controller.favoriteSubject.value = value ?? '',
+            controller.favoriteSubject.value = value,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -1040,7 +1049,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Favorite Sport',
         optionsForChips: MyLists.favoriteSportOptions,
         onSingleChanged: (value) =>
-        controller.favoriteSport.value = value ?? '',
+            controller.favoriteSport.value = value,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -1096,7 +1105,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Favorite Season',
         optionsForChips: MyLists.seasonOptions,
         onSingleChanged: (value) =>
-        controller.favoriteSeason.value = value ?? '',
+            controller.favoriteSeason.value = value,
       ),
       const SizedBox(height: MySizes.md),
       MySearchableDropdown(
@@ -1115,42 +1124,41 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
 
   Widget _buildRoleSpecificDetails() {
     return Obx(() => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (controller.selectedRoles.contains(UserRole.student))
-          _buildExpansionTileCustom(
-              title: 'Student Details', children: _buildStudentDetails()),
-        if (controller.selectedRoles.contains(UserRole.teacher))
-          _buildExpansionTileCustom(
-              title: 'Teacher Details', children: _buildTeacherDetails()),
-        if (controller.selectedRoles.contains(UserRole.busDriver))
-          _buildExpansionTileCustom(
-              title: 'Driver Details', children: _buildDriverDetails()),
-        if (controller.selectedRoles.contains(UserRole.securityGuard))
-          _buildExpansionTileCustom(
-              title: 'Security Guard Details',
-              children: _buildSecurityGuardDetails()),
-        if (controller.selectedRoles
-            .contains(UserRole.janitor))
-          _buildExpansionTileCustom(
-              title: 'Maintenance Staff Details',
-              children: _buildMaintenanceStaffDetails()),
-        if (controller.selectedRoles.contains(UserRole.admin))
-          _buildExpansionTileCustom(
-              title: 'Admin Details', children: _buildAdminDetails()),
-        if (controller.selectedRoles.contains(UserRole.schoolAdmin))
-          _buildExpansionTileCustom(
-              title: 'School Admin Details',
-              children: _buildSchoolAdminDetails()),
-        if (controller.selectedRoles.contains(UserRole.director))
-          _buildExpansionTileCustom(
-              title: 'Director Details', children: _buildDirectorDetails()),
-        if (controller.selectedRoles.contains(UserRole.departmentHead))
-          _buildExpansionTileCustom(
-              title: 'Department Head Details',
-              children: _buildDepartmentHeadDetails())
-      ],
-    ));
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (controller.selectedRoles.contains(UserRole.student))
+              _buildExpansionTileCustom(
+                  title: 'Student Details', children: _buildStudentDetails()),
+            if (controller.selectedRoles.contains(UserRole.teacher))
+              _buildExpansionTileCustom(
+                  title: 'Teacher Details', children: _buildTeacherDetails()),
+            if (controller.selectedRoles.contains(UserRole.busDriver))
+              _buildExpansionTileCustom(
+                  title: 'Driver Details', children: _buildDriverDetails()),
+            if (controller.selectedRoles.contains(UserRole.securityGuard))
+              _buildExpansionTileCustom(
+                  title: 'Security Guard Details',
+                  children: _buildSecurityGuardDetails()),
+            if (controller.selectedRoles.contains(UserRole.janitor))
+              _buildExpansionTileCustom(
+                  title: 'Maintenance Staff Details',
+                  children: _buildMaintenanceStaffDetails()),
+            if (controller.selectedRoles.contains(UserRole.admin))
+              _buildExpansionTileCustom(
+                  title: 'Admin Details', children: _buildAdminDetails()),
+            if (controller.selectedRoles.contains(UserRole.schoolAdmin))
+              _buildExpansionTileCustom(
+                  title: 'School Admin Details',
+                  children: _buildSchoolAdminDetails()),
+            if (controller.selectedRoles.contains(UserRole.director))
+              _buildExpansionTileCustom(
+                  title: 'Director Details', children: _buildDirectorDetails()),
+            if (controller.selectedRoles.contains(UserRole.departmentHead))
+              _buildExpansionTileCustom(
+                  title: 'Department Head Details',
+                  children: _buildDepartmentHeadDetails())
+          ],
+        ));
   }
 
   List<Widget> _buildStudentDetails() {
@@ -1168,17 +1176,18 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       const SizedBox(height: MySizes.md),
       MyBottomSheetDropdown(
           labelText: 'Class',
-          optionsForChips: MyLists.classOptions,
+          optionsForChips: ClassName.displayNamesList,
           onSingleChanged: (value) {
-            controller.className.value = value ?? '';
+            controller.className.value = value;
           },
           isValid: true),
       const SizedBox(height: MySizes.md),
       MyBottomSheetDropdown(
           labelText: 'Section',
-          optionsForChips: MyLists.sectionOptions,
+          optionsForChips:
+              List.generate(26, (index) => String.fromCharCode(65 + index)),
           onSingleChanged: (value) {
-            controller.section.value = value ?? '';
+            controller.section.value = value;
           },
           isValid: true),
       const SizedBox(height: MySizes.md),
@@ -1186,7 +1195,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
           labelText: 'House',
           optionsForChips: MyLists.schoolHouseOptions,
           onSingleChanged: (value) {
-            controller.house.value = value ?? '';
+            controller.house.value = value;
           },
           isValid: true),
       const SizedBox(height: MySizes.md),
@@ -1213,72 +1222,72 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
       ),
       const SizedBox(height: MySizes.lg),
       Obx(() => Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Guardian',
-            style: MyTextStyle.titleLarge,
-          ),
-          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Radio<String>(
-                value: "Father",
-                groupValue: controller.selectedGuardian.value,
-                onChanged: (value) {
-                  controller.selectedGuardian.value = value;
-                },
-              ),
               const Text(
-                "Father",
-                style: TextStyle(
-                    color: MyColors.subtitleTextColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500),
+                'Guardian',
+                style: MyTextStyle.titleLarge,
               ),
+              Row(
+                children: [
+                  Radio<String>(
+                    value: "Father",
+                    groupValue: controller.selectedGuardian.value,
+                    onChanged: (value) {
+                      controller.selectedGuardian.value = value;
+                    },
+                  ),
+                  const Text(
+                    "Father",
+                    style: TextStyle(
+                        color: MyColors.subtitleTextColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Radio<String>(
+                    value: "Mother",
+                    groupValue: controller.selectedGuardian.value,
+                    onChanged: (value) {
+                      controller.selectedGuardian.value = value;
+                    },
+                  ),
+                  const Text(
+                    "Mother",
+                    style: TextStyle(
+                        color: MyColors.subtitleTextColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Radio<String>(
+                    value: "Other",
+                    groupValue: controller.selectedGuardian.value,
+                    onChanged: (value) {
+                      controller.selectedGuardian.value = value;
+                    },
+                  ),
+                  const Text(
+                    "Other Guardian (Relative/Legal Guardian)",
+                    style: TextStyle(
+                        color: MyColors.subtitleTextColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              if (controller.selectedGuardian.value == null)
+                const Text("Please Select A Guardian",
+                    style: TextStyle(color: MyColors.activeRed)),
             ],
-          ),
-          Row(
-            children: [
-              Radio<String>(
-                value: "Mother",
-                groupValue: controller.selectedGuardian.value,
-                onChanged: (value) {
-                  controller.selectedGuardian.value = value;
-                },
-              ),
-              const Text(
-                "Mother",
-                style: TextStyle(
-                    color: MyColors.subtitleTextColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Radio<String>(
-                value: "Other",
-                groupValue: controller.selectedGuardian.value,
-                onChanged: (value) {
-                  controller.selectedGuardian.value = value;
-                },
-              ),
-              const Text(
-                "Other Guardian (Relative/Legal Guardian)",
-                style: TextStyle(
-                    color: MyColors.subtitleTextColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          if (controller.selectedGuardian.value == null)
-            const Text("Please Select A Guardian",
-                style: TextStyle(color: MyColors.activeRed)),
-        ],
-      )),
+          )),
       const SizedBox(height: MySizes.md),
       Obx(() {
         if (controller.selectedGuardian.value == "Other") {
@@ -1296,14 +1305,14 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 labelText: 'Full Name',
                 controller: controller.guardianFullNameController,
                 validator:
-                RequiredValidator(errorText: 'Full Name is required').call,
+                    RequiredValidator(errorText: 'Full Name is required').call,
               ),
               const SizedBox(height: MySizes.md),
               MyBottomSheetDropdown(
                 labelText: 'Relationship to Student',
                 optionsForChips: MyLists.relationshipOptions,
                 onSingleChanged: (value) {
-                  controller.guardianRelationshipToStudent.value = value ?? '';
+                  controller.guardianRelationshipToStudent.value = value;
                 },
                 isValid: true,
               ),
@@ -1312,7 +1321,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 labelText: 'Occupation',
                 optionsForChips: MyLists.occupations,
                 onSingleChanged: (value) {
-                  controller.guardianOccupation.value = value ?? '';
+                  controller.guardianOccupation.value = value;
                 },
                 isValid: true,
               ),
@@ -1333,8 +1342,8 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 controller: controller.motherEmailAddressController,
                 keyboardType: TextInputType.emailAddress,
                 validator:
-                EmailValidator(errorText: 'Enter a valid email address')
-                    .call,
+                    EmailValidator(errorText: 'Enter a valid email address')
+                        .call,
               ),
               const SizedBox(height: MySizes.md),
               MyDropdownField(
@@ -1352,7 +1361,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 controller: controller.motherAnnualIncomeController,
                 keyboardType: TextInputType.number,
                 validator: PatternValidator(r'^[0-9.]*$',
-                    errorText: 'Annual Income must be a valid number')
+                        errorText: 'Annual Income must be a valid number')
                     .call,
               ),
             ],
@@ -1392,7 +1401,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Experience',
         controller: controller.experienceController,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Experience must be a valid number')
+                errorText: 'Experience must be a valid number')
             .call,
       ),
     ];
@@ -1404,7 +1413,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'License Number',
         controller: controller.licenseNumberController,
         validator:
-        RequiredValidator(errorText: 'License Number is required').call,
+            RequiredValidator(errorText: 'License Number is required').call,
       ),
       const SizedBox(height: MySizes.md),
       MyBottomSheetDropdown(
@@ -1422,10 +1431,10 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   List<Widget> _buildQualificationDetails() {
     return [
       ...controller.qualifications.map((qualification) => QualificationWidget(
-        qualification: qualification,
-        onEdit: () => controller.editQualification(qualification),
-        onDelete: () => controller.deleteQualification(qualification),
-      )),
+            qualification: qualification,
+            onEdit: () => controller.editQualification(qualification),
+            onDelete: () => controller.deleteQualification(qualification),
+          )),
       TextButton(
         onPressed: () {
           controller.showAddQualificationDialog(Get.context!);
@@ -1441,7 +1450,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         labelText: 'Assigned Area',
         controller: controller.assignedAreaController,
         validator:
-        RequiredValidator(errorText: 'Assigned Area is required').call,
+            RequiredValidator(errorText: 'Assigned Area is required').call,
       ),
       const SizedBox(height: MySizes.md),
     ];
@@ -1451,7 +1460,12 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
     return [
       MyBottomSheetDropdown(
         labelText: 'Responsibilities',
-        optionsForChips: const ['Cleaning', 'Repairing', 'Gardening', 'Plumbing'],
+        optionsForChips: const [
+          'Cleaning',
+          'Repairing',
+          'Gardening',
+          'Plumbing'
+        ],
         onMultipleChanged: (values) {
           controller.maintenanceResponsibilities.value = values ?? [];
         },
@@ -1581,7 +1595,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         controller: controller.yearsAsHeadController,
         keyboardType: TextInputType.number,
         validator: PatternValidator(r'^[0-9.]*$',
-            errorText: 'Years as head must be a valid number')
+                errorText: 'Years as head must be a valid number')
             .call,
       ),
       const SizedBox(height: MySizes.md),
@@ -1602,7 +1616,6 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   }
 }
 
-
 Widget _buildRoleCard({
   required String role,
   required String description,
@@ -1610,7 +1623,8 @@ Widget _buildRoleCard({
   required String assetPath,
   required VoidCallback onTap, // Added onTap callback
 }) {
-  return GestureDetector( // Wrap with GestureDetector
+  return GestureDetector(
+    // Wrap with GestureDetector
     onTap: onTap, // Attach onTap callback
     child: Container(
       decoration: BoxDecoration(
@@ -1622,7 +1636,7 @@ Widget _buildRoleCard({
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(MySizes.md-4),
+        padding: const EdgeInsets.all(MySizes.md - 4),
         child: Row(
           children: [
             // SizedBox(
@@ -1638,19 +1652,21 @@ Widget _buildRoleCard({
               // Added Expanded to prevent overflow
               child: Column(
                 crossAxisAlignment:
-                CrossAxisAlignment.start, // Align text to the left
+                    CrossAxisAlignment.start, // Align text to the left
                 children: [
                   Text(
                     role,
                     style: MyTextStyle.bodyLarge,
                   ),
-                  const SizedBox(height: MySizes.xs,),
+                  const SizedBox(
+                    height: MySizes.xs,
+                  ),
                   Text(
                     description,
                     style: MyTextStyle.labelMedium,
                     maxLines: 2, // Limit to 2 lines
                     overflow:
-                    TextOverflow.ellipsis, // Handle overflow with ellipsis
+                        TextOverflow.ellipsis, // Handle overflow with ellipsis
                   ),
                 ],
               ),

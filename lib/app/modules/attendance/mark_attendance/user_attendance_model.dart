@@ -505,6 +505,39 @@ class UserAttendance {
   String formatDate(DateTime date) {
     return DateFormat('yyyy-MM-dd').format(date);
   }
+
+  /// Returns a list of months in 'MMMM yyyy' format between [academicPeriodStart]
+  /// and the last date covered by [attendanceString].
+  List<String> getListOfMonths() {
+    List<String> months = [];
+    DateTime currentDate = academicPeriodStart;
+    DateTime endDate = academicPeriodStart.add(Duration(days: attendanceString.length - 1));
+
+    while (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
+      months.add(DateFormat('MMMM yyyy').format(currentDate));
+      currentDate = DateTime(currentDate.year, currentDate.month + 1); // Move to the first day of the next month
+    }
+
+    return months;
+  }
+
+  /// Returns a list of years in 'yyyy' format between [academicPeriodStart] and
+  /// the last date covered by [attendanceString].  Duplicates are removed.
+  List<String> getListOfYears() {
+    Set<String> years = {};
+    DateTime currentDate = academicPeriodStart;
+    DateTime endDate = academicPeriodStart.add(Duration(days: attendanceString.length - 1));
+
+    while (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
+      years.add(DateFormat('yyyy').format(currentDate));
+      currentDate = DateTime(currentDate.year + 1, currentDate.month); // Move to the same month of the next year
+    }
+
+    return years.toList();
+  }
+  DateTime getEndDateOfAttendance() {
+    return academicPeriodStart.add(Duration(days: attendanceString.length - 1));
+  }
 }
 
 class UserAttendanceSummary {

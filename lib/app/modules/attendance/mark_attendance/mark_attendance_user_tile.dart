@@ -33,14 +33,6 @@ class AttendanceCard extends GetView<MarkAttendanceController> {
         child: Container(
           padding:
               const EdgeInsets.symmetric(vertical: MySizes.xs, horizontal: 16),
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: MyColors.borderColor,
-                width: 0.5,
-              ),
-            ),
-          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -120,17 +112,15 @@ class AttendanceCard extends GetView<MarkAttendanceController> {
   }) {
     return IconButton(
       onPressed: () {
-        if(attendanceStatus.value==status){
-          if(attendanceStatus.value==AttendanceStatus.present){
-            attendanceStatus.value=AttendanceStatus.absent;
+        if (attendanceStatus.value == status) {
+          if (attendanceStatus.value == AttendanceStatus.present) {
+            attendanceStatus.value = AttendanceStatus.absent;
             onAttendanceChanged(AttendanceStatus.absent);
-          }else{
-            attendanceStatus.value=AttendanceStatus.present;
+          } else {
+            attendanceStatus.value = AttendanceStatus.present;
             onAttendanceChanged(AttendanceStatus.present);
           }
-
-        }
-        else {
+        } else {
           onAttendanceChanged(status);
         }
       },
@@ -149,9 +139,8 @@ class AttendanceCard extends GetView<MarkAttendanceController> {
         Get.back();
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(
-            horizontal: MySizes.sm + 4, vertical: MySizes.sm),
-        margin: const EdgeInsets.only(bottom: MySizes.md),
+        width: Get.width / 4, // Occupy equal space
+        padding: const EdgeInsets.all(MySizes.md),
         decoration: BoxDecoration(
           color: attendanceStatus.value == status
               ? MyColors.activeBlue.withOpacity(0.1)
@@ -164,26 +153,22 @@ class AttendanceCard extends GetView<MarkAttendanceController> {
                 : Colors.transparent,
           ),
         ),
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(status.icon,
+                size: 24,
                 color: attendanceStatus.value == status
                     ? MyColors.activeBlue
                     : MyColors.iconColor),
-            const SizedBox(width: MySizes.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    status.label,
-                    style: MyTextStyle.bodyLarge.copyWith(
-                      color: attendanceStatus.value == status
-                          ? MyColors.activeBlue
-                          : null,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: MySizes.xs),
+            Text(
+              status.label,
+              textAlign: TextAlign.center,
+              style: MyTextStyle.labelLarge.copyWith(
+                color: attendanceStatus.value == status
+                    ? MyColors.activeBlue
+                    : null,
               ),
             ),
           ],
@@ -195,29 +180,47 @@ class AttendanceCard extends GetView<MarkAttendanceController> {
   void _showStatusOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (BuildContext bc) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(MySizes.md),
+              child: Text(
                 'Select Attendance for ${user.fullName}',
-                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: MyTextStyle.headlineSmall,
               ),
-              const SizedBox(
-                height: MySizes.md,
-              ),
-              _buildOption(AttendanceStatus.present),
-              _buildOption(AttendanceStatus.absent),
-              _buildOption(AttendanceStatus.late),
-              _buildOption(AttendanceStatus.excused),
-              _buildOption(AttendanceStatus.holiday),
-              _buildOption(AttendanceStatus.notApplicable),
-            ],
-          ),
+            ),
+            const SizedBox(
+              height: MySizes.sm,
+            ),
+            Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceEvenly, //Distribute evenly
+              children: [
+                _buildOption(AttendanceStatus.present),
+                _buildOption(AttendanceStatus.absent),
+                _buildOption(AttendanceStatus.late),
+              ],
+            ),
+            const SizedBox(
+              height: MySizes.md,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildOption(AttendanceStatus.excused),
+                _buildOption(AttendanceStatus.holiday),
+                _buildOption(AttendanceStatus.notApplicable),
+              ],
+            ),
+            const SizedBox(
+              height: MySizes.xl,
+            ), // Add some bottom padding
+          ],
         );
       },
     );

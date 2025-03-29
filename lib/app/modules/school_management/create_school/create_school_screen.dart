@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:cambridge_school/core/utils/constants/colors.dart';
 import 'package:cambridge_school/core/utils/constants/enums/campus_area.dart';
-import 'package:cambridge_school/core/utils/constants/enums/exam_pattern.dart';
+import 'package:cambridge_school/core/utils/constants/enums/examination_pattern.dart';
 import 'package:cambridge_school/core/utils/constants/enums/grading_system.dart';
+import 'package:cambridge_school/core/utils/constants/enums/month.dart';
 import 'package:cambridge_school/core/utils/constants/enums/school_board.dart';
 import 'package:cambridge_school/core/utils/constants/enums/school_gender_policy.dart';
 import 'package:cambridge_school/core/utils/constants/enums/school_ownership.dart';
@@ -296,25 +297,25 @@ class CreateSchoolScreen extends StatelessWidget {
             ),
             const SizedBox(height: MySizes.lg),
             MyBottomSheetDropdown(
-              optionsForChips: SchoolOwnershipExtension.labelsList,
+              optionsForChips: SchoolOwnership.labelsList,
               onSingleChanged: (val) {
-                controller.selectedSchoolOwnership.value = val!;
+                controller.selectedSchoolOwnership.value = val;
               },
               labelText: 'School Ownership',
             ),
             const SizedBox(height: MySizes.lg),
             MyBottomSheetDropdown(
-              optionsForChips: SchoolSpecializationExtension.labelsList,
+              optionsForChips: SchoolSpecialization .labelsList,
               onSingleChanged: (val) {
-                controller.selectedSchoolSpecialization.value = val!;
+                controller.selectedSchoolSpecialization.value = val;
               },
               labelText: 'School Specialization',
             ),
             const SizedBox(height: MySizes.lg),
             MyBottomSheetDropdown(
-              optionsForChips: SchoolGenderPolicyExtension.labelsList,
+              optionsForChips: SchoolGenderPolicy.labelsList,
               onSingleChanged: (val) {
-                controller.selectedSchoolGenderPolicy.value = val!;
+                controller.selectedSchoolGenderPolicy.value = val;
               },
               labelText: 'School Gender Policy',
             ),
@@ -346,7 +347,7 @@ class CreateSchoolScreen extends StatelessWidget {
             MyBottomSheetDropdown(
               optionsForChips: MyLists.countriesOptions,
               onSingleChanged: (val) {
-                controller.selectedCountry.value = val!;
+                controller.selectedCountry.value = val;
               },
               labelText: 'Country',
               prefixIcon: Icons.public,
@@ -355,7 +356,7 @@ class CreateSchoolScreen extends StatelessWidget {
             MyBottomSheetDropdown(
               optionsForChips: MyLists.indianStateOptions,
               onSingleChanged: (val) {
-                controller.selectedState.value = val!;
+                controller.selectedState.value = val;
               },
               labelText: 'State',
               prefixIcon: Icons.map,
@@ -364,7 +365,7 @@ class CreateSchoolScreen extends StatelessWidget {
             MyBottomSheetDropdown(
               optionsForChips: MyLists.indianStateOptions,
               onSingleChanged: (val) {
-                controller.selectedDistrict.value = val!;
+                controller.selectedDistrict.value = val;
               },
               labelText: 'District',
               prefixIcon: Icons.map,
@@ -510,7 +511,7 @@ class CreateSchoolScreen extends StatelessWidget {
               optionsForChips:
                   List.generate(25, (index) => (index + 1).toString()),
               onSingleChanged: (val) {
-                controller.selectedNumberOfBuildings.value = val!;
+                controller.selectedNumberOfBuildings.value = val;
               },
               labelText: 'Number of Buildings',
               prefixIcon: Icons.apartment,
@@ -655,9 +656,9 @@ class CreateSchoolScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: MyBottomSheetDropdown(
-                      optionsForChips: MyLists.monthOptions,
+                      optionsForChips: Month.labelsList(),
                       onSingleChanged: (val) {
-                        controller.selectedAcademicYearStart.value = val!;
+                        controller.selectedAcademicYearStart.value = val;
                       },
                       labelText: 'Academic Year Start',
                       prefixIcon: Icons.date_range,
@@ -669,9 +670,9 @@ class CreateSchoolScreen extends StatelessWidget {
                   ),
                   Expanded(
                     child: MyBottomSheetDropdown(
-                      optionsForChips: MyLists.monthOptions,
+                      optionsForChips: Month.labelsList(),
                       onSingleChanged: (val) {
-                        controller.selectedAcademicYearEnd.value = val!;
+                        controller.selectedAcademicYearEnd.value = val;
                       },
                       labelText: 'Academic Year End',
                       prefixIcon: Icons.date_range,
@@ -824,7 +825,7 @@ class CreateSchoolScreen extends StatelessWidget {
             MyBottomSheetDropdown(
               optionsForChips: SchoolBoard.values.map((e) => e.label).toList(),
               onSingleChanged: (val) {
-                controller.selectedSchoolBoard.value = val!;
+                controller.selectedSchoolBoard.value = val;
               },
               labelText: 'School Board',
             ),
@@ -833,7 +834,7 @@ class CreateSchoolScreen extends StatelessWidget {
               optionsForChips:
                   GradingSystem.values.map((e) => e.label).toList(),
               onSingleChanged: (val) {
-                controller.selectedGradingSystem.value = val!;
+                controller.selectedGradingSystem.value = val;
               },
               labelText: 'Grading System',
             ),
@@ -842,7 +843,7 @@ class CreateSchoolScreen extends StatelessWidget {
               optionsForChips:
                   ExaminationPattern.values.map((e) => e.label).toList(),
               onSingleChanged: (val) {
-                controller.selectedExaminationPattern.value = val!;
+                controller.selectedExaminationPattern.value = val;
               },
               labelText: 'Examination Pattern',
             ),
@@ -851,7 +852,7 @@ class CreateSchoolScreen extends StatelessWidget {
               optionsForChips:
                   AcademicLevel.values.map((e) => e.label).toList(),
               onSingleChanged: (val) {
-                controller.selectedAcademicLevel.value = val!;
+                controller.selectedAcademicLevel.value = val;
               },
               labelText: 'Academic Level',
             ),
@@ -860,7 +861,7 @@ class CreateSchoolScreen extends StatelessWidget {
               optionsForChips:
                   MediumOfInstruction.values.map((e) => e.label).toList(),
               onSingleChanged: (val) {
-                controller.selectedMediumOfInstruction.value = val!;
+                controller.selectedMediumOfInstruction.value = val;
               },
               labelText: 'Medium of Instruction',
             ),
@@ -995,7 +996,7 @@ class CreateSchoolScreen extends StatelessWidget {
           MyBottomSheetDropdown(
             optionsForChips: CampusArea.values.map((e) => e.label).toList(),
             onSingleChanged: (val) {
-              selectedCampusArea.value = val!;
+              selectedCampusArea.value = val;
             },
             labelText: 'Campus Area',
           ),
@@ -1005,7 +1006,7 @@ class CreateSchoolScreen extends StatelessWidget {
               if (selectedCampusArea.isNotEmpty) {
                 Get.back();
                 controller.pickImages(
-                    CampusAreaExtension.fromString(selectedCampusArea.value) ??
+                    CampusArea.fromString(selectedCampusArea.value) ??
                         CampusArea.classroom);
               } else {
                 Get.snackbar("Error", "Please enter a place name.");

@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../../../core/utils/constants/enums/academic_level.dart';
-import '../../../../core/utils/constants/enums/exam_pattern.dart';
+import '../../../../core/utils/constants/enums/examination_pattern.dart';
 import '../../../../core/utils/constants/enums/grading_system.dart';
 import '../../../../core/utils/constants/enums/medium_of_instruction.dart';
 import '../../../../core/utils/constants/enums/school_ownership.dart';
@@ -316,12 +316,12 @@ class EditSchoolController extends GetxController
 
     //Convert enums to appropriate types
     SchoolOwnership schoolOwnership =
-        SchoolOwnershipExtension.fromString(selectedSchoolOwnership.value);
+    SchoolOwnership.fromString(selectedSchoolOwnership.value);
     SchoolSpecialization schoolSpecialization =
-        SchoolSpecializationExtension.fromString(
+    SchoolSpecialization .fromString(
             selectedSchoolSpecialization.value);
     SchoolGenderPolicy schoolGenderPolicy =
-        SchoolGenderPolicyExtension.fromString(
+    SchoolGenderPolicy.fromString(
             selectedSchoolGenderPolicy.value);
 
     // Store admin phone number for future use (e.g., sending SMS notifications)
@@ -346,7 +346,7 @@ class EditSchoolController extends GetxController
       numberOfBuildings: numberOfBuildings,
       noOfPeriodsPerDay: noOfPeriodsPerDay,
       schoolTimings: schoolTimings,
-      schoolBoard: SchoolBoardExtension.fromString(selectedSchoolBoard.value),
+      schoolBoard: SchoolBoard.fromString(selectedSchoolBoard.value),
       schoolOwnership: schoolOwnership,
       schoolSpecialization: schoolSpecialization,
       schoolGenderPolicy: schoolGenderPolicy,
@@ -403,13 +403,13 @@ class EditSchoolController extends GetxController
       createdByName: '',
       academicEvents: [],
       academicLevel:
-          AcademicLevelExtension.fromString(selectedAcademicLevel.value),
+          AcademicLevel.fromString(selectedAcademicLevel.value),
       academicYear: '$selectedAcademicYearStart - $selectedAcademicYearEnd',
-      examPattern: ExaminationPatternExtension.fromString(
+      examPattern: ExaminationPattern.fromString(
           selectedExaminationPattern.value),
       gradingSystem:
-          GradingSystemExtension.fromString(selectedGradingSystem.value),
-      mediumOfInstruction: MediumOfInstructionExtension.fromString(
+      GradingSystem.fromString(selectedGradingSystem.value),
+      mediumOfInstruction: MediumOfInstruction.fromString(
           selectedMediumOfInstruction.value),
       classes: [],
       auditoriums: [],

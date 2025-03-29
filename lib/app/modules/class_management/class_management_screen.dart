@@ -51,7 +51,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
               children: [
                 _buildClassSelectionHeader(),
                 const SizedBox(height: MySizes.sm),
-                // FilledButton(onPressed: (){controller.generateAndUploadDummyClasses();}, child: Text('Send')),
+                // FilledButton(onPressed: (){controller.createAndUploadDummyClassRosters();}, child: Text('Send')),
                 MyBottomSheetDropdown(
                   optionsForChips:controller.availableClassNames,
                   onSingleChanged: (value) {
@@ -356,7 +356,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
           children: [
             MyDropdownField(
               labelText: 'Class Name',
-              options: ClassNameExtension.displayNamesList
+              options: ClassName.displayNamesList
                   .where((name) =>
                       !controller.availableClassNames.contains(name) ||
                       name == initialClassName)

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cambridge_school/core/utils/constants/colors.dart';
 import 'package:cambridge_school/core/utils/constants/enums/campus_area.dart';
-import 'package:cambridge_school/core/utils/constants/enums/exam_pattern.dart';
+import 'package:cambridge_school/core/utils/constants/enums/examination_pattern.dart';
 import 'package:cambridge_school/core/utils/constants/enums/grading_system.dart';
 import 'package:cambridge_school/core/utils/constants/enums/school_board.dart';
 import 'package:cambridge_school/core/utils/constants/enums/school_gender_policy.dart';
@@ -23,6 +23,7 @@ import '../../../../../../core/utils/constants/dynamic_colors.dart';
 import '../../../../../../core/widgets/time_picker.dart';
 import '../../../../core/utils/constants/enums/academic_level.dart';
 import '../../../../core/utils/constants/enums/medium_of_instruction.dart';
+import '../../../../core/utils/constants/enums/month.dart';
 import 'edit_school_details_controller.dart';
 
 class EditSchoolDetailsScreen extends StatelessWidget {
@@ -223,7 +224,7 @@ class EditSchoolDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: MySizes.lg),
             MyBottomSheetDropdown(
-              optionsForChips: SchoolOwnershipExtension.labelsList,
+              optionsForChips: SchoolOwnership.labelsList,
               onSingleChanged: (val) {
                 controller.selectedSchoolOwnership.value = val;
               },
@@ -233,7 +234,7 @@ class EditSchoolDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: MySizes.lg),
             MyBottomSheetDropdown(
-              optionsForChips: SchoolSpecializationExtension.labelsList,
+              optionsForChips: SchoolSpecialization .labelsList,
               onSingleChanged: (val) {
                 controller.selectedSchoolSpecialization.value = val;
               },
@@ -243,7 +244,7 @@ class EditSchoolDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: MySizes.lg),
             MyBottomSheetDropdown(
-              optionsForChips: SchoolGenderPolicyExtension.labelsList,
+              optionsForChips: SchoolGenderPolicy.labelsList,
               onSingleChanged: (val) {
                 controller.selectedSchoolGenderPolicy.value = val;
               },
@@ -577,7 +578,7 @@ class EditSchoolDetailsScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: MyBottomSheetDropdown(
-                    optionsForChips: MyLists.monthOptions,
+                    optionsForChips: Month.labelsList(),
                     onSingleChanged: (val) {
                       controller.selectedAcademicYearStart.value = val;
                     },
@@ -593,7 +594,7 @@ class EditSchoolDetailsScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: MyBottomSheetDropdown(
-                    optionsForChips: MyLists.monthOptions,
+                    optionsForChips: Month.labelsList(),
                     onSingleChanged: (val) {
                       controller.selectedAcademicYearEnd.value = val;
                     },
@@ -926,7 +927,7 @@ class EditSchoolDetailsScreen extends StatelessWidget {
               if (selectedCampusArea.isNotEmpty) {
                 Get.back();
                 controller.pickImages(
-                    CampusAreaExtension.fromString(selectedCampusArea.value) ??
+                    CampusArea.fromString(selectedCampusArea.value) ??
                         CampusArea.classroom);
               } else {
                 Get.snackbar("Error", "Please select a campus area.");

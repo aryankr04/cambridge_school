@@ -132,7 +132,7 @@ class CreateRoutineController extends GetxController {
     if (sectionsData == null) return [];
     List<String> sectionNames = [];
     for (var section in sectionsData) {
-      if (section.className == ClassNameExtension.fromString(className)) {
+      if (section.className == ClassName.fromString(className)) {
         sectionNames.add(section.sectionName);
       }
     }

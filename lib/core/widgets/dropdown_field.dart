@@ -211,8 +211,9 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
             children: widget.options
                 .map((option) => Material(
                       color: _selectedValue.value == option
-                          ? Colors.lightBlue.withOpacity(0.3)
+                          ? MyColors.activeBlue.withOpacity(0.1)
                           : Colors.transparent,
+
                       child: InkWell(
                         onTap: () {
                           _selectedValue.value = option;
@@ -228,8 +229,9 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                             child: Text(
                               option,
                               style: _selectedValue.value == option
-                                  ? MyTextStyle.bodyLarge
-                                      .copyWith(color: MyColors.activeBlue,fontWeight: FontWeight.bold)
+                                  ? MyTextStyle.bodyLarge.copyWith(
+                                      color: MyColors.activeBlue,
+                                      fontWeight: FontWeight.bold)
                                   : MyTextStyle.bodyMedium,
                             ),
                           ),

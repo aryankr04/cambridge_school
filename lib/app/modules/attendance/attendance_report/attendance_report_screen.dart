@@ -10,6 +10,7 @@ import 'package:cambridge_school/core/widgets/date_picker_field.dart';
 import 'package:cambridge_school/core/widgets/divider.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
 import 'package:cambridge_school/core/widgets/empty_state.dart';
+import 'package:cambridge_school/core/widgets/label_chip.dart';
 import 'package:cambridge_school/core/widgets/shimmer_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -36,54 +37,54 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
       body: Obx(
         () => controller.isLoading.value
             ? const SingleChildScrollView(
-          padding: EdgeInsets.all(MySizes.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Calendar Shimmer
-              MyShimmerWithText(
-                text: 'Loading Calendar...',
-                height: 120,
-                itemPadding: EdgeInsets.only(bottom: MySizes.md),
-              ),
+                padding: EdgeInsets.all(MySizes.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Calendar Shimmer
+                    MyShimmers(
+                      text: 'Loading Calendar...',
+                      height: 150,
+                      itemPadding: EdgeInsets.only(bottom: MySizes.md),
+                    ),
 
-              // Summary Dashboard Shimmer
-              MyShimmerWithText(
-                text: 'Loading Summary...',
-                height: 150,
-                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
-              ),
+                    // Summary Dashboard Shimmer
+                    MyShimmers(
+                      text: 'Loading Summary...',
+                      height: 150,
+                      itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+                    ),
 
-              // Bar Chart Shimmer
-              MyShimmerWithText(
-                text: 'Loading Bar Chart...',
-                height: 200,
-                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
-              ),
+                    // Bar Chart Shimmer
+                    MyShimmers(
+                      text: 'Loading Bar Chart...',
+                      height: 150,
+                      itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+                    ),
 
-              // Comparison Card Shimmer
-              MyShimmerWithText(
-                text: 'Loading Comparison...',
-                height: 150,
-                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
-              ),
+                    // Comparison Card Shimmer
+                    MyShimmers(
+                      text: 'Loading Comparison...',
+                      height: 150,
+                      itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+                    ),
 
-              // Rank Overview Card Shimmer
-              MyShimmerWithText(
-                text: 'Loading Rank...',
-                height: 200,
-                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
-              ),
+                    // Rank Overview Card Shimmer
+                    MyShimmers(
+                      text: 'Loading Rank...',
+                      height: 150,
+                      itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+                    ),
 
-              // Streak Card Shimmer
-              MyShimmerWithText(
-                text: 'Loading Streaks...',
-                height: 150,
-                itemPadding: EdgeInsets.only(bottom: MySizes.lg),
-              ),
-            ],
-          ),
-        )
+                    // Streak Card Shimmer
+                    MyShimmers(
+                      text: 'Loading Streaks...',
+                      height: 150,
+                      itemPadding: EdgeInsets.only(bottom: MySizes.lg),
+                    ),
+                  ],
+                ),
+              )
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(MySizes.md),
                 child: Column(
@@ -95,7 +96,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
                         onMonthChanged: controller.setSelectedMonth,
                       ),
                     ),
-                    const SizedBox(height: MySizes.md),
+                    const SizedBox(height: MySizes.lg),
                     AttendanceSummaryDashboard(controller: controller),
                     const SizedBox(height: MySizes.lg),
                     const MonthlyAttendanceBarChart(),
@@ -114,7 +115,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
 }
 
 class AttendanceStreakCard extends StatelessWidget {
-  AttendanceStreakCard({super.key, required this.controller});
+  AttendanceStreakCard({Key? key, required this.controller}) : super(key: key);
 
   final AttendanceReportController controller;
   final RxBool _isExpanded = false.obs; // For "Show More/Less" functionality
@@ -141,21 +142,25 @@ class AttendanceStreakCard extends StatelessWidget {
                 const SizedBox(
                   height: MySizes.md,
                 ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: MyBottomSheetDropdown(
-                    optionsForChips: const [
-                      'Present',
-                      'Absent',
-                      'Late',
-                      'Excused',
-                    ],
-                    onSingleChanged: (value) {
-                      controller.selectedStatus.value =
-                          AttendanceStatus.fromLabel(value);
-                    },
-                    selectedValue: controller.selectedStatus.value.label.obs,
-                    dropdownWidgetType: DropdownWidgetType.choiceChip,
+                Obx(
+                  () => Align(
+                    alignment: Alignment.centerLeft,
+                    child: MyBottomSheetDropdown(
+                      optionsForChips: const [
+                        'Present',
+                        'Absent',
+                        'Late',
+                        'Excused',
+                      ],
+                      onSingleChanged: (String? value) {
+                        if (value != null) {
+                          controller.selectedStatus.value =
+                              AttendanceStatus.fromLabel(value);
+                        }
+                      },
+                      selectedValue: controller.selectedStatus.value.label.obs,
+                      dropdownWidgetType: DropdownWidgetType.choiceChip,
+                    ),
                   ),
                 ),
               ],
@@ -213,9 +218,20 @@ class AttendanceStreakCard extends StatelessWidget {
                 Wrap(
                   spacing: 8.0,
                   runSpacing: 4.0,
-                  children: displayedStreaks
-                      .map((streak) => StreakItem(streak: streak))
-                      .toList(),
+                  children: List.generate(displayedStreaks.length, (index) {
+                    final streak = displayedStreaks[index];
+                    return Column(
+                      children: [
+                        StreakItem(streak: streak),
+                        if (index != displayLimit - 1)
+                          const Divider(
+                            color: MyColors.borderColor,
+                            thickness: 0.5,
+                            height: 1,
+                          ),
+                      ],
+                    );
+                  }),
                 ),
                 if (streaks.streaks.length > initialStreakCount)
                   Align(
@@ -241,9 +257,9 @@ class AttendanceStreakCard extends StatelessWidget {
 
 class StudentAverageComparisonCard extends StatelessWidget {
   const StudentAverageComparisonCard({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final AttendanceReportController controller;
 
@@ -257,21 +273,23 @@ class StudentAverageComparisonCard extends StatelessWidget {
         children: [
           HeadingForCard(controller: controller, heading: 'You Vs Class'),
           const SizedBox(height: MySizes.md),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: MyBottomSheetDropdown(
-              optionsForChips: const [
-                'Present',
-                'Absent',
-                'Late',
-                'Excused',
-              ],
-              onSingleChanged: (value) {
-                controller.selectedStatus.value =
-                    AttendanceStatus.fromLabel(value);
-              },
-              selectedValue: controller.selectedStatus.value.label.obs,
-              dropdownWidgetType: DropdownWidgetType.choiceChip,
+          Obx(
+            () => Align(
+              alignment: Alignment.centerLeft,
+              child: MyBottomSheetDropdown(
+                optionsForChips: const [
+                  'Present',
+                  'Absent',
+                  'Late',
+                  'Excused',
+                ],
+                onSingleChanged: (value) {
+                  controller.selectedStatus.value =
+                      AttendanceStatus.fromLabel(value);
+                },
+                selectedValue: controller.selectedStatus.value.label.obs,
+                dropdownWidgetType: DropdownWidgetType.choiceChip,
+              ),
             ),
           ),
           Obx(() {
@@ -324,11 +342,13 @@ class StudentAverageComparisonCard extends StatelessWidget {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildAverageBox(
-                  context,
-                  "Your",
-                  studentAttendancePercentage,
-                  MyColors.activeGreen,
+                Expanded(
+                  child: _buildAverageBox(
+                    context,
+                    "Your",
+                    studentAttendancePercentage,
+                    MyColors.activeGreen,
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -344,11 +364,13 @@ class StudentAverageComparisonCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                _buildAverageBox(
-                  context,
-                  "Class Average",
-                  classAveragePercentage,
-                  MyColors.activeBlue,
+                Expanded(
+                  child: _buildAverageBox(
+                    context,
+                    "Class Average",
+                    classAveragePercentage,
+                    MyColors.activeBlue,
+                  ),
                 ),
               ],
             );
@@ -484,21 +506,23 @@ class StudentRankOverviewCard extends StatelessWidget {
         children: [
           HeadingForCard(controller: controller, heading: 'Rank Overview'),
           const SizedBox(height: MySizes.md),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: MyBottomSheetDropdown(
-              optionsForChips: const [
-                'Present',
-                'Absent',
-                'Late',
-                'Excused',
-              ],
-              onSingleChanged: (value) {
-                controller.selectedStatus.value =
-                    AttendanceStatus.fromLabel(value);
-              },
-              selectedValue: controller.selectedStatus.value.label.obs,
-              dropdownWidgetType: DropdownWidgetType.choiceChip,
+          Obx(
+            () => Align(
+              alignment: Alignment.centerLeft,
+              child: MyBottomSheetDropdown(
+                optionsForChips: const [
+                  'Present',
+                  'Absent',
+                  'Late',
+                  'Excused',
+                ],
+                onSingleChanged: (value) {
+                  controller.selectedStatus.value =
+                      AttendanceStatus.fromLabel(value);
+                },
+                selectedValue: controller.selectedStatus.value.label.obs,
+                dropdownWidgetType: DropdownWidgetType.choiceChip,
+              ),
             ),
           ),
           Obx(() {
@@ -882,13 +906,10 @@ class StreakItem extends StatelessWidget {
     final endDate = streak.end;
     final length = streak.length;
 
-    return Container(
-      decoration: const BoxDecoration(
-          border: Border(
-              bottom: BorderSide(color: MyColors.borderColor, width: 0.5))),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            vertical: MySizes.sm, horizontal: MySizes.md),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          vertical: MySizes.sm, horizontal: MySizes.md),
+      child: Container(
         child: Row(
           children: [
             Text(
@@ -1073,6 +1094,7 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
           case AttendanceStatus.working:
             count = monthlyData.workingDaysCount.toDouble();
             barColor = AttendanceStatus.working.color;
+            break;
           default: // Consider adding a "default" case or handling other statuses
             count = 0;
             barColor = Colors.grey; // Or any other default color
@@ -1150,76 +1172,107 @@ class MonthlyAttendanceBarChart extends GetView<AttendanceReportController> {
             ),
             SizedBox(
               height: Get.width * .6,
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY: maxAttendanceValue + 5,
-                  barGroups: barGroups,
-                  groupsSpace: 20,
-                  titlesData: FlTitlesData(
-                    show: true,
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 30,
-                        interval: 1,
-                        getTitlesWidget: (value, meta) {
-                          const style = TextStyle(
-                            color: MyColors.captionTextColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          );
-                          if (monthlyAttendanceList.isEmpty ||
-                              value.toInt() >= monthlyAttendanceList.length) {
-                            return const Text(
-                                ""); // or handle the error appropriately
-                          }
-                          final String text = DateFormat('MMM').format(
-                              DateFormat('yyyy-MM').parse(
-                                  monthlyAttendanceList[value.toInt()].month));
-                          return SideTitleWidget(
-                            axisSide: meta.axisSide,
-                            space: 10,
-                            child: Text(text, style: style),
-                          );
-                        },
-                      ),
-                    ),
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                  ),
-                  barTouchData: BarTouchData(
-                    enabled: false,
-                    touchTooltipData: BarTouchTooltipData(
-                      tooltipPadding: const EdgeInsets.all(0),
-                      getTooltipColor: (BarChartGroupData group) {
-                        return Colors.transparent;
-                      },
-                      tooltipMargin: 0,
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        return BarTooltipItem(
-                          '${rod.toY.toInt()}',
-                          const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
+              child: SingleChildScrollView(
+                // Wrap BarChart with SingleChildScrollView
+                scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+                child: SizedBox(
+                  // Give the BarChart a wider width
+                  width: monthlyAttendanceList.length *
+                      40.0, // Adjust width as needed
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: maxAttendanceValue + 5,
+                      barGroups: barGroups,
+                      groupsSpace: 20,
+                      titlesData: FlTitlesData(
+                        show: true,
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 48, // Increased reservedSize
+                            interval: 1,
+                            getTitlesWidget: (value, meta) {
+                              const style = TextStyle(
+                                color: MyColors.captionTextColor,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12, // Reduced font size
+                              );
+                              if (monthlyAttendanceList.isEmpty ||
+                                  value.toInt() >=
+                                      monthlyAttendanceList.length) {
+                                return const Text("");
+                              }
+
+                              final String monthYearString =
+                                  monthlyAttendanceList[value.toInt()].month;
+                              final DateTime monthYear = DateFormat('yyyy-MM')
+                                  .parse(monthYearString); // Parse the string
+                              final String text = DateFormat('MMM')
+                                  .format(monthYear); // Format to "MMM yy"
+                              final String year = DateFormat('yy')
+                                  .format(monthYear); // Format to "MMM yy"
+
+                              return SideTitleWidget(
+                                axisSide: meta.axisSide,
+                                space: 2, // Reduced space
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      text,
+                                      style: style,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      year,
+                                      style: style,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ),
+                        leftTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                      ),
+                      barTouchData: BarTouchData(
+                        enabled: false,
+                        touchTooltipData: BarTouchTooltipData(
+                          tooltipPadding: const EdgeInsets.all(0),
+                          getTooltipColor: (BarChartGroupData group) {
+                            return Colors.transparent;
+                          },
+                          tooltipMargin: 0,
+                          getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                            return BarTooltipItem(
+                              '${rod.toY.toInt()}',
+                              const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            );
+                          },
+                        ),
+                        handleBuiltInTouches: true,
+                      ),
+                      borderData: FlBorderData(
+                        show: false,
+                      ),
+                      gridData: const FlGridData(show: false),
                     ),
-                    handleBuiltInTouches: true,
                   ),
-                  borderData: FlBorderData(
-                    show: false,
-                  ),
-                  gridData: const FlGridData(show: false),
                 ),
               ),
             ),
@@ -1324,112 +1377,214 @@ class HeadingForCard extends StatelessWidget {
           )
         ],
       ),
-      TextButton(
-        onPressed: () {
-          Get.dialog(
-            AlertDialog(
-              title: const Text(
-                'Filter Attendance',
-                style: MyTextStyle.headlineSmall,
-              ),
-              content: SingleChildScrollView(
-                child: Obx(() => Column(
-                      children: [
-                        // Text('Filter By',style: MyTextStyle.bodyLarge,),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: MyBottomSheetDropdown(
-                            optionsForChips: const [
-                              'Monthly',
-                              'Yearly',
-                              'Custom'
-                            ],
-                            selectedValue: controller.selectedFilterType,
-                            onSingleChanged: (value) {
-                              controller.selectedFilterType.value = value;
-                              controller.selectedMonth.value = '';
-                              controller.selectedYear.value = '';
-                              controller.selectedStartDate.value = DateTime(
-                                  DateTime.now().year, DateTime.now().month, 1);
-                              controller.selectedEndDate.value = DateTime(
-                                  DateTime.now().year,
-                                  DateTime.now().month + 1,
-                                  0);
-                            },
-                            labelText: 'Filter By',
-                            dropdownWidgetType: DropdownWidgetType.choiceChip,
+      GestureDetector(
+          onTap: () {
+            Get.dialog(
+              AlertDialog(
+                title: const Text(
+                  'Filter Attendance',
+                  style: MyTextStyle.headlineSmall,
+                ),
+                content: SingleChildScrollView(
+                  child: Obx(() => Column(
+                        children: [
+                          // Text('Filter By',style: MyTextStyle.bodyLarge,),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: MyBottomSheetDropdown(
+                              optionsForChips: const [
+                                'Monthly',
+                                'Yearly',
+                                'Custom'
+                              ],
+                              selectedValue: controller.selectedFilterType,
+                              onSingleChanged: (value) {
+                                controller.selectedFilterType.value = value;
+                              },
+                              labelText: 'Filter By',
+                              dropdownWidgetType: DropdownWidgetType.choiceChip,
+                            ),
                           ),
-                        ),
 
-                        if (controller.selectedFilterType.value == 'Monthly')
-                          MyDropdownField(
-                            options: controller.monthList,
-                            selectedValue: controller.selectedMonth,
-                            onSelected: (value) {
-                              controller.selectedMonth.value = value!;
-                            },
-                            labelText: 'Month',
-                          )
-                        else if (controller.selectedFilterType.value ==
-                            'Yearly')
-                          MyDropdownField(
-                            options: controller.yearList,
-                            selectedValue: controller.selectedYear,
-                            onSelected: (value) {
-                              controller.selectedYear.value = value!;
-                            },
-                            labelText: 'Year',
-                          )
-                        else if (controller.selectedFilterType.value ==
-                            'Custom')
-                          Column(
-                            children: [
-                              MyDatePickerField(
-                                labelText: 'From',
-                                selectedDate: controller.selectedStartDate,
-                                firstDate: controller.userAttendanceData.value!
-                                    .academicPeriodStart,
-                                lastDate: DateTime.now(),
-                                onDateChanged: (value) {
-                                  controller.selectedStartDate.value = value;
-                                },
-                              ),
-                              MyDatePickerField(
-                                labelText: 'To',
-                                selectedDate: controller.selectedEndDate,
-                                firstDate: controller.userAttendanceData.value!
-                                    .academicPeriodStart,
-                                lastDate: DateTime.now(),
-                                onDateChanged: (value) {
-                                  controller.selectedEndDate.value = value;
-                                },
-                              ),
-                            ],
-                          )
-                      ],
-                    )),
+                          if (controller.selectedFilterType.value == 'Monthly')
+                            MyDropdownField(
+                              options: controller.monthList,
+                              selectedValue: controller.selectedMonth,
+                              onSelected: (value) {
+                                controller.selectedMonth.value = value!;
+                              },
+                              labelText: 'Month',
+                            )
+                          else if (controller.selectedFilterType.value ==
+                              'Yearly')
+                            MyDropdownField(
+                              options: controller.yearList,
+                              selectedValue: controller.selectedYear,
+                              onSelected: (value) {
+                                controller.selectedYear.value = value!;
+                              },
+                              labelText: 'Year',
+                            )
+                          else if (controller.selectedFilterType.value ==
+                              'Custom')
+                            Column(
+                              children: [
+                                MyDatePickerField(
+                                  labelText: 'From',
+                                  selectedDate: controller.selectedStartDate,
+                                  firstDate: controller.userAttendanceData
+                                      .value!.academicPeriodStart,
+                                  lastDate:
+                                      controller.endDateOfAttendance.value,
+                                  onDateChanged: (value) {
+                                    controller.selectedStartDate.value = value;
+                                  },
+                                ),
+                                MyDatePickerField(
+                                  labelText: 'To',
+                                  selectedDate: controller.selectedEndDate,
+                                  firstDate: controller.userAttendanceData
+                                      .value!.academicPeriodStart,
+                                  lastDate:
+                                      controller.endDateOfAttendance.value,
+                                  onDateChanged: (value) {
+                                    controller.selectedEndDate.value = value;
+                                  },
+                                ),
+                              ],
+                            )
+                        ],
+                      )),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Get.back(); // Use Get.back() to close the dialog
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      controller.updateDateRange();
+                      Get.back();
+                    },
+                    child: const Text('Apply'),
+                  ),
+                ],
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Get.back(); // Use Get.back() to close the dialog
-                  },
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    controller.updateDateRange();
-                    Get.back();
-                  },
-                  child: const Text('Apply'),
-                ),
-              ],
-            ),
-            barrierDismissible: false, // Prevents closing on tap outside
-          );
-        },
-        child: const Text('Filter'),
-      ),
+              barrierDismissible: false, // Prevents closing on tap outside
+            );
+          },
+          child: const MyLabelChip(
+            text: 'Filter',
+            color: MyColors.activeBlue,
+          ))
+      // TextButton(
+      //   onPressed: () {
+      //     Get.dialog(
+      //       AlertDialog(
+      //         title: const Text(
+      //           'Filter Attendance',
+      //           style: MyTextStyle.headlineSmall,
+      //         ),
+      //         content: SingleChildScrollView(
+      //           child: Obx(() => Column(
+      //                 children: [
+      //                   // Text('Filter By',style: MyTextStyle.bodyLarge,),
+      //                   Align(
+      //                     alignment: Alignment.centerLeft,
+      //                     child: MyBottomSheetDropdown(
+      //                       optionsForChips: const [
+      //                         'Monthly',
+      //                         'Yearly',
+      //                         'Custom'
+      //                       ],
+      //                       selectedValue: controller.selectedFilterType,
+      //                       onSingleChanged: (value) {
+      //                         controller.selectedFilterType.value = value;
+      //                         controller.selectedMonth.value = '';
+      //                         controller.selectedYear.value = '';
+      //                         controller.selectedStartDate.value = DateTime(
+      //                             DateTime.now().year, DateTime.now().month, 1);
+      //                         controller.selectedEndDate.value = DateTime(
+      //                             DateTime.now().year,
+      //                             DateTime.now().month + 1,
+      //                             0);
+      //                       },
+      //                       labelText: 'Filter By',
+      //                       dropdownWidgetType: DropdownWidgetType.choiceChip,
+      //                     ),
+      //                   ),
+      //
+      //                   if (controller.selectedFilterType.value == 'Monthly')
+      //                     MyDropdownField(
+      //                       options: controller.monthList,
+      //                       selectedValue: controller.selectedMonth,
+      //                       onSelected: (value) {
+      //                         controller.selectedMonth.value = value!;
+      //                       },
+      //                       labelText: 'Month',
+      //                     )
+      //                   else if (controller.selectedFilterType.value ==
+      //                       'Yearly')
+      //                     MyDropdownField(
+      //                       options: controller.yearList,
+      //                       selectedValue: controller.selectedYear,
+      //                       onSelected: (value) {
+      //                         controller.selectedYear.value = value!;
+      //                       },
+      //                       labelText: 'Year',
+      //                     )
+      //                   else if (controller.selectedFilterType.value ==
+      //                       'Custom')
+      //                     Column(
+      //                       children: [
+      //                         MyDatePickerField(
+      //                           labelText: 'From',
+      //                           selectedDate: controller.selectedStartDate,
+      //                           firstDate: controller.userAttendanceData.value!
+      //                               .academicPeriodStart,
+      //                           lastDate: DateTime.now(),
+      //                           onDateChanged: (value) {
+      //                             controller.selectedStartDate.value = value;
+      //                           },
+      //                         ),
+      //                         MyDatePickerField(
+      //                           labelText: 'To',
+      //                           selectedDate: controller.selectedEndDate,
+      //                           firstDate: controller.userAttendanceData.value!
+      //                               .academicPeriodStart,
+      //                           lastDate: DateTime.now(),
+      //                           onDateChanged: (value) {
+      //                             controller.selectedEndDate.value = value;
+      //                           },
+      //                         ),
+      //                       ],
+      //                     )
+      //                 ],
+      //               )),
+      //         ),
+      //         actions: [
+      //           TextButton(
+      //             onPressed: () {
+      //               Get.back(); // Use Get.back() to close the dialog
+      //             },
+      //             child: const Text('Cancel'),
+      //           ),
+      //           TextButton(
+      //             onPressed: () {
+      //               controller.updateDateRange();
+      //               Get.back();
+      //             },
+      //             child: const Text('Apply'),
+      //           ),
+      //         ],
+      //       ),
+      //       barrierDismissible: false, // Prevents closing on tap outside
+      //     );
+      //   },
+      //   child: const Text('Filter'),
+      // ),
     ]);
   }
 }

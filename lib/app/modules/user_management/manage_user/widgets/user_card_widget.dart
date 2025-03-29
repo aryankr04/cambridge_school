@@ -1,3 +1,6 @@
+import '../../../../../core/utils/constants/dynamic_colors.dart';
+import '../../../../../core/utils/constants/enums/account_status.dart';
+import '../../../../../core/widgets/divider.dart';
 import '../../create_user/models/user_model.dart';
 import 'package:cambridge_school/core/utils/constants/colors.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
@@ -26,27 +29,27 @@ class UserCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final String? fullName = userProfile.fullName;
     final String? profileImageUrl = userProfile.profileImageUrl;
-    final String? accountStatus = userProfile.accountStatus;
+    final AccountStatus? accountStatusEnum = userProfile.accountStatus;
     final String userId = userProfile.userId;
-    final AccountStatus accountStatusEnum =
-    _getAccountStatusFromString(accountStatus ?? 'pending'); // Provide default value
-    final String? rollNumber = userProfile.studentDetails?.rollNumber; //Simplified roll number access
+    final String? rollNumber =
+        userProfile.studentDetails?.rollNumber; //Simplified roll number access
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-            bottom: BorderSide(color: MyColors.borderColor, width: 0.5)),
+        border:
+            Border(bottom: BorderSide(color: MyColors.borderColor, width: 0.5)),
       ),
       child: InkWell(
         onTap: () => _showDetailsDialog(context), //Simplified onTap
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+          padding:
+              const EdgeInsets.symmetric(vertical: MySizes.xs, horizontal: 16),
           child: Row(
             children: [
               CircleAvatar(
-                radius: 24,
+                radius: 20,
                 backgroundImage: profileImageUrl != null
                     ? NetworkImage(profileImageUrl)
                     : null,
@@ -60,8 +63,13 @@ class UserCardWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      (rollNumber != null && rollNumber.isNotEmpty) ? '$rollNumber. $fullName' : fullName ?? "N/A", //Simplified conditional display and default
-                      style: MyTextStyle.titleLarge.copyWith(fontSize: 15),
+                      (rollNumber != null && rollNumber.isNotEmpty)
+                          ? '$rollNumber. $fullName'
+                          : fullName ??
+                              "N/A", //Simplified conditional display and default
+                      overflow: TextOverflow.ellipsis,
+                      style: MyTextStyle.titleLarge.copyWith(fontSize: 14),
+                      maxLines: 1,
                     ),
                     Text(
                       userId,
@@ -72,7 +80,7 @@ class UserCardWidget extends StatelessWidget {
               ),
               MyLabelChip(
                 constraints: const BoxConstraints(minWidth: 64),
-                text: accountStatusEnum.displayValue,
+                text: accountStatusEnum!.label,
                 color: accountStatusEnum.color,
               ),
             ],
@@ -82,12 +90,52 @@ class UserCardWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildProfileText(String name, String username) {
+    return Column(
+      children: [
+        Text(name, style: MyTextStyle.headlineSmall),
+        const SizedBox(
+          height: MySizes.xs,
+        ),
+        Text(username, style: MyTextStyle.labelMedium),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(List<String> values, List<String> labels) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          vertical: MySizes.sm, horizontal: MySizes.md),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(values.length, (index) {
+          return _buildTextColumn2(values[index], labels[index]);
+        }),
+      ),
+    );
+  }
+
+  Widget _buildTextColumn2(String text1, String text2) {
+    return Column(
+      children: [
+        Text(text1, style: MyTextStyle.bodyLarge),
+        const SizedBox(
+          height: MySizes.xs,
+        ),
+        Text(text2,
+            style: MyTextStyle.labelSmall
+                .copyWith(color: MyColors.subtitleTextColor)),
+      ],
+    );
+  }
+
   // Function to show the Details Dialog
   void _showDetailsDialog(BuildContext context) {
-    final AccountStatus accountStatusEnum =
-    _getAccountStatusFromString(userProfile.accountStatus ?? 'pending'); // Provide default value
-    final String? rollNumber = userProfile.studentDetails?.rollNumber; //Simplified roll number access
-    final String? className = userProfile.studentDetails?.className; // Get class name
+    // Provide default value
+    final String? rollNumber =
+        userProfile.studentDetails?.rollNumber; //Simplified roll number access
+    final String? className =
+        userProfile.studentDetails?.className; // Get class name
     final String? sectionName = userProfile.studentDetails?.section;
 
     showDialog(
@@ -112,98 +160,32 @@ class UserCardWidget extends StatelessWidget {
                   const SizedBox(
                     height: MySizes.md,
                   ),
-                  Text(
-                    userProfile.fullName ?? "N/A",// Provide default value
-                    style: MyTextStyle.titleLarge.copyWith(fontSize: 18),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(
+                    height: MySizes.md,
+                  ),
+                  if (userProfile.studentDetails !=
+                      null) //Conditional check on the details
+
+                    _buildProfileText(
+                        userProfile.fullName ?? "N/A", userProfile.userId),
+                  const SizedBox(height: MySizes.md),
+                  _buildInfoRow(['12', 'C', '10', '122473'],
+                      ['Class', 'Sec', 'Roll no.', 'Adm No.']),
+                  const SizedBox(
+                    height: MySizes.sm,
+                  ),
+                  const Divider(
+                    thickness: 0.5,
+                    color: MyColors.dividerColor,
+                    height: 1,
                   ),
                   const SizedBox(
                     height: MySizes.sm,
                   ),
-                  Text(
-                    'User ID: ${userProfile.userId}',
-                    style: MyTextStyle.bodyMedium.copyWith(fontSize: 13),
-                  ),
+                  _buildInfoRow(['934M', '76', '463B', '237'],
+                      ['Followers', 'Following', 'Likes', 'Posts']),
                   const SizedBox(
                     height: MySizes.md,
-                  ),
-                  if (userProfile.studentDetails != null) //Conditional check on the details
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: MyCard(
-                            border: Border.all(
-                                width: 1, color: MyColors.borderColor),
-                            child: Column(
-                              children: [
-                                Text(className ?? 'N/A',
-                                    style: MyTextStyle.titleLarge),
-                                Text(
-                                  'Class',
-                                  style: MyTextStyle.bodyMedium
-                                      .copyWith(fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: MyCard(
-                            border: Border.all(
-                                width: 1, color: MyColors.borderColor),
-                            child: Column(
-                              children: [
-                                Text(sectionName ?? 'N/A',
-                                    style: MyTextStyle.titleLarge),
-                                Text(
-                                  'Section',
-                                  style: MyTextStyle.bodyMedium
-                                      .copyWith(fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: MyCard(
-                            border: Border.all(
-                                width: 1, color: MyColors.borderColor),
-                            child: Column(
-                              children: [
-                                Text(rollNumber ?? "N/A",
-                                    style: MyTextStyle.titleLarge),
-                                Text(
-                                  'Roll No',
-                                  style: MyTextStyle.bodyMedium
-                                      .copyWith(fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  const SizedBox(
-                    height: MySizes.md,
-                  ),
-                  SizedBox(
-                    width: Get.width,
-                    child: MyLabelChip(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: MySizes.sm, horizontal: MySizes.md),
-                      textSize: 14,
-                      text: 'Account is ${accountStatusEnum.displayValue}',
-                      color: accountStatusEnum.color,
-                      suffixIcon: Icon(
-                        accountStatusEnum.icon,
-                        color: accountStatusEnum.color,
-                      ),
-                    ),
                   ),
                   const SizedBox(
                     height: MySizes.spaceBtwSections,
@@ -212,15 +194,15 @@ class UserCardWidget extends StatelessWidget {
                     children: [
                       Expanded(
                           child: MyButton(
-                            text: 'Delete',
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close the dialog
-                              onDelete();
-                            },
-                            backgroundColor: MyColors.activeRed,
-                            hasShadow: false,
-                            borderRadius: 8,
-                          )),
+                        text: 'Delete',
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                          onDelete();
+                        },
+                        backgroundColor: MyColors.activeRed,
+                        hasShadow: false,
+                        borderRadius: 8,
+                      )),
                       const SizedBox(
                         width: MySizes.sm,
                       ),
@@ -256,75 +238,5 @@ class UserCardWidget extends StatelessWidget {
         );
       },
     );
-  }
-
-  AccountStatus _getAccountStatusFromString(String status) {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return AccountStatus.active;
-      case 'inactive':
-        return AccountStatus.inactive;
-      case 'pending':
-        return AccountStatus.pending;
-      case 'suspended':
-        return AccountStatus.suspended;
-      default:
-        return AccountStatus.pending; // Default to pending or handle error
-    }
-  }
-}
-
-// Enum for Account Status
-enum AccountStatus {
-  active,
-  inactive,
-  pending,
-  suspended,
-}
-
-extension AccountStatusExtension on AccountStatus {
-  String get displayValue {
-    switch (this) {
-      case AccountStatus.active:
-        return 'Active';
-      case AccountStatus.inactive:
-        return 'Inactive';
-      case AccountStatus.pending:
-        return 'Pending';
-      case AccountStatus.suspended:
-        return 'Suspended';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  Color get color {
-    switch (this) {
-      case AccountStatus.active:
-        return Colors.green;
-      case AccountStatus.inactive:
-        return Colors.grey;
-      case AccountStatus.pending:
-        return Colors.orange;
-      case AccountStatus.suspended:
-        return Colors.red;
-      default:
-        return Colors.black;
-    }
-  }
-
-  IconData get icon {
-    switch (this) {
-      case AccountStatus.active:
-        return Icons.check_circle;
-      case AccountStatus.inactive:
-        return Icons.pause_circle_filled;
-      case AccountStatus.pending:
-        return Icons.access_time;
-      case AccountStatus.suspended:
-        return Icons.cancel;
-      default:
-        return Icons.error;
-    }
   }
 }

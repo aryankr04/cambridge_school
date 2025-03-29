@@ -79,7 +79,7 @@ class MarkAttendanceController extends GetxController {
         refreshAttendanceSummary();
       } else {
         userRoster.value =
-            await userRosterRepository.getEmployeeRosters(schoolId);
+            await userRosterRepository.getEmployeeRoster(schoolId);
         refreshAttendanceSummary();
       }
     } catch (e) {

@@ -1,6 +1,8 @@
 // Main User Profile
 
 
+import 'package:cambridge_school/core/utils/constants/enums/account_status.dart';
+
 import '../../../../../roles_manager.dart';
 import '../../../attendance/mark_attendance/user_attendance_model.dart';
 
@@ -9,7 +11,7 @@ class UserModel {
   final String userId;
   final String username;
   final String? email;
-  final String? accountStatus;
+  final AccountStatus? accountStatus;
   final String? fullName;
   final String? profileImageUrl;
   final String? password;
@@ -132,7 +134,7 @@ class UserModel {
       'userId': userId,
       'username': username,
       'email': email,
-      'accountStatus': accountStatus,
+      'accountStatus': accountStatus?.name, // Store the enum name
       'fullName': fullName,
       'profileImageUrl': profileImageUrl,
       'password': password,
@@ -177,6 +179,7 @@ class UserModel {
           .toList(),
       'joiningDate': joiningDate?.toIso8601String(),
       'schoolId': schoolId, //Adding schoolId to toMap
+      'permissions' : permissions?.map((permission) => permission.name).toList(),
     };
   }
 
@@ -186,7 +189,11 @@ class UserModel {
         userId: data['userId'] as String? ?? '',
         username: data['username'] as String,
         email: data['email'] as String?,
-        accountStatus: data['accountStatus'] as String?,
+        accountStatus: data['accountStatus'] != null
+            ? AccountStatus.values.firstWhere(
+                (element) => element.name == data['accountStatus'],
+            orElse: () => AccountStatus.deleted) // Handle unknown values
+            : null,
         fullName: data['fullName'] as String?,
         profileImageUrl: data['profileImageUrl'] as String?,
         password: data['password'] as String?,
@@ -217,28 +224,27 @@ class UserModel {
         bloodGroup: data['bloodGroup'] as String?,
         isPhysicalDisability: data['isPhysicalDisability'] as bool?,
         permanentAddress: data['permanentAddress'] != null
-            ? HouseAddress.fromMap(data['permanentAddress'] as Map<String, dynamic>)
+            ? HouseAddress.fromMap(
+            data['permanentAddress'] as Map<String, dynamic>)
             : null,
         currentAddress: data['currentAddress'] != null
-            ? HouseAddress.fromMap(data['currentAddress'] as Map<String, dynamic>)
+            ? HouseAddress.fromMap(
+            data['currentAddress'] as Map<String, dynamic>)
             : null,
         modeOfTransport: data['modeOfTransport'] as String?,
         transportDetails: data['transportDetails'] != null
             ? TransportDetails.fromMap(
             data['transportDetails'] as Map<String, dynamic>)
             : null,
-        roles: (data['roles'] as List<dynamic>?)
-            ?.map((roleString) {
+        roles: (data['roles'] as List<dynamic>?)?.map((roleString) {
           try {
             return UserRole.values.firstWhere((element) =>
-            element.name == (roleString as String));
+            element.name == (roleString as String).toLowerCase());
           } catch (e) {
             print('Unknown role: $roleString');
             return null;
           }
-        })
-            .whereType<UserRole>()
-            .toList(),
+        }).whereType<UserRole>().toList(),
         studentDetails: data['studentDetails'] != null
             ? StudentDetails.fromMap(
             data['studentDetails'] as Map<String, dynamic>)
@@ -297,6 +303,15 @@ class UserModel {
             ? DateTime.tryParse(data['joiningDate'] as String)
             : null,
         schoolId: data['schoolId'] as String?, //Adding schoolId fromMap
+        permissions: (data['permissions'] as List<dynamic>?)?.map((permissionString) {
+          try {
+            return AppPermission.values.firstWhere((element) =>
+            element.name == (permissionString as String).toLowerCase());
+          } catch (e) {
+            print('Unknown permission: $permissionString');
+            return null;
+          }
+        }).whereType<AppPermission>().toList(),
       );
     } catch (e) {
       print("Error creating User from map: $e");
@@ -308,7 +323,7 @@ class UserModel {
     String? userId,
     String? username,
     String? email,
-    String? accountStatus,
+    AccountStatus? accountStatus,
     String? fullName,
     String? profileImageUrl,
     String? password,
@@ -351,6 +366,7 @@ class UserModel {
     List<Qualification>? qualifications,
     DateTime? joiningDate,
     String? schoolId, //Adding schoolId in copyWith
+    List<AppPermission>? permissions,
   }) {
     return UserModel(
       userId: userId ?? this.userId,
@@ -386,7 +402,8 @@ class UserModel {
       teacherDetails: teacherDetails ?? this.teacherDetails,
       directorDetails: directorDetails ?? this.directorDetails,
       adminDetails: adminDetails ?? this.adminDetails,
-      securityGuardDetails: securityGuardDetails ?? this.securityGuardDetails,
+      securityGuardDetails:
+      securityGuardDetails ?? this.securityGuardDetails,
       maintenanceStaffDetails:
       maintenanceStaffDetails ?? this.maintenanceStaffDetails,
       driverDetails: driverDetails ?? this.driverDetails,
@@ -401,6 +418,7 @@ class UserModel {
       qualifications: qualifications ?? this.qualifications,
       joiningDate: joiningDate ?? this.joiningDate,
       schoolId: schoolId ?? this.schoolId, //Adding schoolId in copyWith
+      permissions: permissions ?? this.permissions,
     );
   }
 
@@ -431,6 +449,7 @@ class UserModel {
     return age;
   }
 }
+
 // Student Details
 class StudentDetails {
   final String? rollNumber;

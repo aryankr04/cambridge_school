@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../../core/utils/constants/enums/class_name.dart';
+import '../../../../core/utils/constants/enums/notice_category.dart';
 import '../../../../core/widgets/banner_card.dart';
 import '../../../../roles_manager.dart';
 import '../../user_management/create_user/models/roles.dart';
@@ -110,7 +112,7 @@ class NoticeScreen extends StatelessWidget {
                               (controller.selectedTargetAudience.contains('Student') ||
                                   controller.selectedTargetAudience.contains('All') ? 3 : 2),
                           child: MyBottomSheetDropdown(
-                            optionsForChips: MyLists.noticeCategories(),
+                            optionsForChips: NoticeCategory.labelsList,
                             isMultipleSelection: true,
                             onMultipleChanged: (List<String>? values) {
                               controller.setSelectedCategory(values);
@@ -130,7 +132,7 @@ class NoticeScreen extends StatelessWidget {
                               (controller.selectedTargetAudience.contains('Student') ||
                                   controller.selectedTargetAudience.contains('All') ? 3 : 2),
                           child: MyBottomSheetDropdown(
-                            optionsForChips: MyLists.classOptions,
+                            optionsForChips: ClassName.displayNamesList,
                             isMultipleSelection: true,
                             onMultipleChanged: (List<String>? values) {
                               controller.setSelectedForClass(values);

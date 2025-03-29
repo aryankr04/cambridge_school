@@ -61,7 +61,7 @@ class UserRosterRepository {
   }
 
   /// Gets employee rosters by schoolId.
-  Future<UserRoster?> getEmployeeRosters(String schoolId) async {
+  Future<UserRoster?> getEmployeeRoster(String schoolId) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection(_collectionPath)

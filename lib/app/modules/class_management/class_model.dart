@@ -24,7 +24,7 @@ class ClassModel {
     return ClassModel(
       id: map['id'] as String,
       academicYear: map['academicYear'] as String?,
-      className: ClassNameExtension.fromString(map['className'] as String),
+      className: ClassName.fromString(map['className'] as String),
       sections: (map['sections'] as List<dynamic>?)
               ?.map((dynamic sectionData) => SectionModel.fromMap(
                   sectionData as Map<String, dynamic>, null))

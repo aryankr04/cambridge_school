@@ -92,7 +92,7 @@ class MyDatePickerField extends StatelessWidget {
               ),
               child: Obx(() => Text(
                     selectedDate.value != null
-                        ? DateFormat('yyyy-MM-dd').format(selectedDate.value!)
+                        ? DateFormat('d MMM, yyyy').format(selectedDate.value!)
                         : hintText ?? 'Select Date',
                     style: selectedDate.value != null
                         ? textStyle ?? MyTextStyle.inputField

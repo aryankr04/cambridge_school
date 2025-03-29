@@ -1,4 +1,5 @@
 import 'package:cambridge_school/core/utils/constants/dynamic_colors.dart';
+import 'package:cambridge_school/core/utils/constants/enums/notice_category.dart';
 import 'package:cambridge_school/core/widgets/divider.dart';
 import 'package:cambridge_school/core/widgets/label_chip.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +41,7 @@ class _NoticeTileState extends State<NoticeTile> {
     final deviceWidth = Get.width;
     Theme.of(context);
     final categoryEmoji =
-        MyLists.getNoticeCategoryEmoji(widget.notice.category);
+        NoticeCategory.getEmojiByLabel(widget.notice.category);
     final formattedCreatedTime =
         DateFormat('d MMMM \'at\' h:mm a').format(widget.notice.createdTime);
 
@@ -59,7 +60,7 @@ class _NoticeTileState extends State<NoticeTile> {
         ),
         childrenPadding: EdgeInsets.zero,
         tilePadding: const EdgeInsets.symmetric(horizontal: MySizes.md),
-        title: _buildTitle(deviceWidth, widget.notice.title, categoryEmoji,
+        title: _buildTitle(deviceWidth, widget.notice.title, categoryEmoji!,
             formattedCreatedTime),
         onExpansionChanged: (bool expanded) {
           _isExpanded.value = expanded;

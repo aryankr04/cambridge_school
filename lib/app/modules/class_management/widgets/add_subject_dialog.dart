@@ -1,4 +1,5 @@
 
+import 'package:cambridge_school/core/utils/constants/enums/subject.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,7 +8,6 @@ import '../../../../core/utils/constants/sizes.dart';
 import '../../../../core/utils/constants/text_styles.dart';
 import '../../../../core/widgets/search_field.dart';
 import '../../../../core/widgets/snack_bar.dart';
-import '../../subject_management/subject_model.dart';
 
 class AddSubjectDialog extends StatefulWidget {
   final Function(String) onSubmit;
@@ -74,7 +74,7 @@ class _AddSubjectDialogState extends State<AddSubjectDialog> {
                 MySearchField(
                   onSelected: (val) => subjectController.text = val,
                   controller: subjectController,
-                  options: SchoolSubjects.getSubjects(),
+                  options: SubjectName.labelsList,
                   labelText: 'Subject Name', // Changed label for clarity
                   showClearIcon: true,
                 ),

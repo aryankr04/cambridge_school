@@ -37,17 +37,18 @@ class AttendanceReportController extends GetxController {
 
   // --- Attendance Calendar---
   final Rx<DateTime> selectedMonthForAttendanceCalendar = DateTime.now().obs;
+  final Rx<DateTime> endDateOfAttendance = DateTime.now().obs;
 
   // --- Data ---
   final Rx<UserRoster?> userRoster = Rx<UserRoster?>(null);
   final Rx<UserAttendance?> userAttendanceData = Rx<UserAttendance?>(null);
   final Rx<RosterAverageAttendanceSummary?> averageAttendanceSummary =
-  Rx<RosterAverageAttendanceSummary?>(null);
+      Rx<RosterAverageAttendanceSummary?>(null);
   final Rxn<UserAttendanceSummary> userAttendanceSummary =
-  Rxn<UserAttendanceSummary>();
+      Rxn<UserAttendanceSummary>();
 
   final Rx<RosterAverageAttendanceSummary?> rosterAverageAttendanceSummary =
-  Rx<RosterAverageAttendanceSummary?>(null);
+      Rx<RosterAverageAttendanceSummary?>(null);
 
   //---------------------------- Repository ----------------------------//
   final UserRosterRepository userRosterRepository = UserRosterRepository(
@@ -59,8 +60,6 @@ class AttendanceReportController extends GetxController {
   void onInit() {
     super.onInit();
     loadData(); // Load data immediately when the controller is initialized.
-    generateInitialYearAndMonthLists();
-
   }
 
   //---------------------------- Data Loading ----------------------------//
@@ -83,15 +82,24 @@ class AttendanceReportController extends GetxController {
 
       if (userRoster.value != null) {
         final user = userRoster.value!.userList.firstWhere(
-              (user) => user.userId == userId.value,
+          (user) => user.userId == userId.value,
         );
 
         userAttendanceData.value = user.userAttendance;
 
         if (userAttendanceData.value != null) {
-          //generateYearAndMonthLists(
-          //userAttendanceData.value!.academicPeriodStart,
-          //);
+          yearList.clear();
+          monthList.clear();
+          if (userRoster.value != null) {
+            if (userAttendanceData.value != null) {
+              yearList.value = userAttendanceData.value!.getListOfYears();
+              monthList.value = userAttendanceData.value!.getListOfMonths();
+              endDateOfAttendance.value =
+                  userAttendanceData.value!.getEndDateOfAttendance();
+              selectedStartDate.value =
+                  userAttendanceData.value!.academicPeriodStart;
+            }
+          }
           updateAttendanceSummary();
           updateRosterAverageAttendanceSummary();
         }
@@ -102,44 +110,13 @@ class AttendanceReportController extends GetxController {
   }
 
   //---------------------------- Data Processing ----------------------------//
-  void generateInitialYearAndMonthLists() {
-    // Check if userAttendanceData.value is not null before accessing its properties
-    if (userAttendanceData.value != null) {
-      generateYearAndMonthLists(userAttendanceData.value!.academicPeriodStart);
-    } else {
-      // Handle the case where userAttendanceData.value is null
-      // For example, set default values or show an error message
-      yearList.value = [];
-      monthList.value = [];
-      print("userAttendanceData is null. Cannot generate year and month lists.");
-    }
-  }
-
-  void generateYearAndMonthLists(DateTime startDate) {
-    yearList.clear();
-    monthList.clear();
-
-    DateTime now = DateTime.now();
-
-    for (DateTime date = startDate;
-    date.isBefore(now) || date.isAtSameMomentAs(now);
-    date = DateTime(date.year, date.month + 1)) {
-      String formattedMonthYear = DateFormat('MMMM yyyy').format(date);
-      String formattedYear = DateFormat('yyyy').format(date);
-
-      if (!yearList.contains(formattedYear)) {
-        yearList.add(formattedYear);
-      }
-      monthList.add(formattedMonthYear);
-    }
-  }
 
   void updateAttendanceSummary() {
     if (userAttendanceData.value != null) {
       userAttendanceSummary.value = userAttendanceData.value
           ?.calculateAttendanceSummaryInDateRange(
-          startDate: selectedStartDate.value,
-          endDate: selectedEndDate.value);
+              startDate: selectedStartDate.value,
+              endDate: selectedEndDate.value);
     }
   }
 
@@ -147,7 +124,7 @@ class AttendanceReportController extends GetxController {
     if (userRoster.value != null) {
       rosterAverageAttendanceSummary.value = userRoster.value
           ?.calculateAverageAttendanceInDateRange(
-          selectedStartDate.value, selectedEndDate.value);
+              selectedStartDate.value, selectedEndDate.value);
     }
   }
 
@@ -159,7 +136,7 @@ class AttendanceReportController extends GetxController {
           final monthName = parts[0];
           final year = int.parse(parts[1]);
           final month =
-          _getMonthNumber(monthName); // Helper function to get month number
+              _getMonthNumber(monthName); // Helper function to get month number
 
           // Set start date to the first day of the selected month
           selectedStartDate.value = DateTime(year, month, 1);
@@ -226,8 +203,15 @@ class AttendanceReportController extends GetxController {
   //---------------------------- Data Manipulation ----------------------------//
   void setSelectedMonth(DateTime newMonth) {
     selectedMonthForAttendanceCalendar.value = newMonth;
+    selectedMonth.value = '';
+    selectedYear.value = '';
+    selectedStartDate.value = DateTime(
+        selectedMonthForAttendanceCalendar.value.year,
+        selectedMonthForAttendanceCalendar.value.month,
+        1);
+    selectedEndDate.value = DateTime(
+        selectedMonthForAttendanceCalendar.value.year,
+        selectedMonthForAttendanceCalendar.value.month + 1,
+        0);
   }
-
-
-
 }

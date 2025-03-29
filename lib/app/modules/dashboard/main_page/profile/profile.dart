@@ -1,3 +1,4 @@
+import 'package:cambridge_school/core/utils/constants/enums/medium_of_instruction.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/widgets/button.dart';
 import 'package:cambridge_school/core/widgets/card_widget.dart';
@@ -744,7 +745,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
           Wrap(
             spacing: 8.0,
             runSpacing: 8.0,
-            children: MyLists.languageOptions
+            children: MediumOfInstruction.labelsList
                 .asMap() // Convert the list to a map to get indices
                 .entries
                 .map((entry) => MyLabelChip(

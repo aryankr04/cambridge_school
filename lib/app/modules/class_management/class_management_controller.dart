@@ -1,8 +1,10 @@
 import 'package:cambridge_school/app/modules/class_management/class_model.dart';
 import 'package:cambridge_school/app/modules/school_management/school_model.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/models/roster_model.dart';
+import 'package:cambridge_school/core/utils/constants/enums/account_status.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/enums/schedule_event_type.dart';
+import 'package:cambridge_school/core/utils/constants/enums/subject.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/widgets/full_screen_loading_widget.dart';
 import 'package:cambridge_school/core/widgets/snack_bar.dart';
@@ -187,7 +189,7 @@ class ClassManagementController extends GetxController {
   Future<void> addClassToFirebase(String className) async {
     try {
       final classId = nanoid(16);
-      final classEnum = ClassNameExtension.fromString(className);
+      final classEnum = ClassName.fromString(className);
 
       final newClass = ClassModel(
         id: classId,
@@ -253,7 +255,7 @@ class ClassManagementController extends GetxController {
       final String classId = nanoid(16);
       List<String> subjects = List.generate(
         5,
-        (i) => MyLists.subjectOptions[i % MyLists.subjectOptions.length],
+        (i) => SubjectName.labelsList[i % SubjectName.labelsList.length],
       );
       final ClassModel classModel = ClassModel(
         id: classId,
@@ -345,7 +347,7 @@ class ClassManagementController extends GetxController {
   List<ExamSubject> _generateDummyExamSubjects(Faker faker) {
     return List.generate(5, (index) {
       return ExamSubject(
-        subjectName: MyLists.subjectOptions[index],
+        subjectName: SubjectName.labelsList[index],
         topics: _generateDummyTopics(faker),
         examDate: DateTime.now(),
         totalMarks: faker.randomGenerator.decimal(scale: 100),
@@ -412,7 +414,7 @@ class ClassManagementController extends GetxController {
       String className, String sectionName, String schoolId) {
     final classId = nanoid(16);
     List<UserModel> students = List.generate(
-        10, (index) => _generateStudent(className, sectionName, schoolId));
+        50, (index) => _generateStudent(className, sectionName, schoolId));
 
     // Sort students by roll number, handling both null and type safety
     students.sort((a, b) {
@@ -459,7 +461,7 @@ class ClassManagementController extends GetxController {
       fullName: '$firstName $lastName',
       email: faker.internet.email(),
       schoolId: schoolId,
-      accountStatus: 'active',
+      accountStatus: AccountStatus.active,
       profileImageUrl: faker.image.image(),
       password: faker.internet.password(),
       points: faker.randomGenerator.integer(100),

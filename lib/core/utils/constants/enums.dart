@@ -9,16 +9,6 @@ enum YesNoOptions { yes, no }
 enum MaritalStatusOptions { single, married, divorced, widowed }
 
 // Subject Options (Examples)
-enum SubjectOptions {
-  math,
-  science,
-  english,
-  history,
-  geography,
-  arts,
-  music,
-  computerScience,
-}
 
 // Exam Pattern Options
 enum ExamPatternOptions { semester, annual, trimester }
@@ -29,21 +19,7 @@ enum GradingSystemOptions { percentage, letterGrade, cgpa, points }
 // Day Options
 enum DayOptions { monday, tuesday, wednesday, thursday, friday, saturday, sunday }
 
-// Month Options
-enum MonthOptions {
-  january,
-  february,
-  march,
-  april,
-  may,
-  june,
-  july,
-  august,
-  september,
-  october,
-  november,
-  december
-}
+
 
 // School Activity Options (Examples)
 enum SchoolActivityOptions { sports, drama, musicClub, debateClub, scienceFair, artClub }
@@ -105,16 +81,12 @@ extension EnumExtension on Enum {
         return _yesNoOptionsValues[this] ?? name;
       case MaritalStatusOptions:
         return _maritalStatusValues[this] ?? name;
-      case SubjectOptions:
-        return _subjectValues[this] ?? name;
       case ExamPatternOptions:
         return _examPatternValues[this] ?? name;
       case GradingSystemOptions:
         return _gradingSystemValues[this] ?? name;
       case DayOptions:
         return _dayValues[this] ?? name;
-      case MonthOptions:
-        return _monthValues[this] ?? name;
       case SchoolActivityOptions:
         return _schoolActivityValues[this] ?? name;
       case SchoolBoardOptions:
@@ -154,16 +126,13 @@ extension EnumExtension on Enum {
         return _yesNoOptionsIcons[this] ?? '❓';
       case MaritalStatusOptions:
         return _maritalStatusIcons[this] ?? '❓';
-      case SubjectOptions:
-        return _subjectIcons[this] ?? '❓';
+
       case ExamPatternOptions:
         return _examPatternIcons[this] ?? '❓';
       case GradingSystemOptions:
         return _gradingSystemIcons[this] ?? '❓';
       case DayOptions:
         return _dayIcons[this] ?? '❓';
-      case MonthOptions:
-        return _monthIcons[this] ?? '❓';
       case SchoolActivityOptions:
         return _schoolActivityIcons[this] ?? '❓';
       case SchoolBoardOptions:
@@ -203,16 +172,13 @@ extension EnumExtension on Enum {
         return _yesNoOptionsIconData[this] ?? Icons.error_outline;
       case MaritalStatusOptions _:
         return _maritalStatusIconData[this] ?? Icons.error_outline;
-      case SubjectOptions:
-        return _subjectIconData[this] ?? Icons.error_outline;
+
       case ExamPatternOptions:
         return _examPatternIconData[this] ?? Icons.error_outline;
       case GradingSystemOptions:
         return _gradingSystemIconData[this] ?? Icons.error_outline;
       case DayOptions:
         return _dayIconData[this] ?? Icons.error_outline;
-      case MonthOptions:
-        return _monthIconData[this] ?? Icons.error_outline;
       case SchoolActivityOptions:
         return _schoolActivityIconData[this] ?? Icons.error_outline;
       case SchoolBoardOptions:
@@ -259,16 +225,6 @@ extension EnumExtension on Enum {
     MaritalStatusOptions.widowed: 'Widowed',
   };
 
-  static const Map<SubjectOptions, String> _subjectValues = {
-    SubjectOptions.math: 'Math',
-    SubjectOptions.science: 'Science',
-    SubjectOptions.english: 'English',
-    SubjectOptions.history: 'History',
-    SubjectOptions.geography: 'Geography',
-    SubjectOptions.arts: 'Arts',
-    SubjectOptions.music: 'Music',
-    SubjectOptions.computerScience: 'Computer Science',
-  };
 
   static const Map<ExamPatternOptions, String> _examPatternValues = {
     ExamPatternOptions.semester: 'Semester',
@@ -293,20 +249,6 @@ extension EnumExtension on Enum {
     DayOptions.sunday: 'Sunday',
   };
 
-  static const Map<MonthOptions, String> _monthValues = {
-    MonthOptions.january: 'January',
-    MonthOptions.february: 'February',
-    MonthOptions.march: 'March',
-    MonthOptions.april: 'April',
-    MonthOptions.may: 'May',
-    MonthOptions.june: 'June',
-    MonthOptions.july: 'July',
-    MonthOptions.august: 'August',
-    MonthOptions.september: 'September',
-    MonthOptions.october: 'October',
-    MonthOptions.november: 'November',
-    MonthOptions.december: 'December',
-  };
 
   static const Map<SchoolActivityOptions, String> _schoolActivityValues = {
     SchoolActivityOptions.sports: 'Sports',
@@ -439,16 +381,6 @@ extension EnumExtension on Enum {
     MaritalStatusOptions.widowed: '🕊️',
   };
 
-  static const Map<SubjectOptions, String> _subjectIcons = {
-    SubjectOptions.math: '➗',
-    SubjectOptions.science: '🧪',
-    SubjectOptions.english: '📚',
-    SubjectOptions.history: '🏛️',
-    SubjectOptions.geography: '🌍',
-    SubjectOptions.arts: '🎨',
-    SubjectOptions.music: '🎵',
-    SubjectOptions.computerScience: '💻',
-  };
 
   static const Map<ExamPatternOptions, String> _examPatternIcons = {
     ExamPatternOptions.semester: '📅',
@@ -471,21 +403,6 @@ extension EnumExtension on Enum {
     DayOptions.friday: '5️⃣',
     DayOptions.saturday: '6️⃣',
     DayOptions.sunday: '7️⃣',
-  };
-
-  static const Map<MonthOptions, String> _monthIcons = {
-    MonthOptions.january: '1️⃣',
-    MonthOptions.february: '2️⃣',
-    MonthOptions.march: '3️⃣',
-    MonthOptions.april: '4️⃣',
-    MonthOptions.may: '5️⃣',
-    MonthOptions.june: '6️⃣',
-    MonthOptions.july: '7️⃣',
-    MonthOptions.august: '8️⃣',
-    MonthOptions.september: '9️⃣',
-    MonthOptions.october: '🔟',
-    MonthOptions.november: '1️⃣1️⃣',
-    MonthOptions.december: '1️⃣2️⃣',
   };
 
   static const Map<SchoolActivityOptions, String> _schoolActivityIcons = {
@@ -619,17 +536,6 @@ extension EnumExtension on Enum {
     MaritalStatusOptions.widowed: Icons.sentiment_dissatisfied,
   };
 
-  static const Map<SubjectOptions, IconData> _subjectIconData = {
-    SubjectOptions.math: Icons.calculate,
-    SubjectOptions.science: Icons.science,
-    SubjectOptions.english: Icons.book,
-    SubjectOptions.history: Icons.history,
-    SubjectOptions.geography: Icons.map,
-    SubjectOptions.arts: Icons.color_lens,
-    SubjectOptions.music: Icons.music_note,
-    SubjectOptions.computerScience: Icons.computer,
-  };
-
   static const Map<ExamPatternOptions, IconData> _examPatternIconData = {
     ExamPatternOptions.semester: Icons.calendar_view_month,
     ExamPatternOptions.annual: Icons.calendar_today,
@@ -653,20 +559,6 @@ extension EnumExtension on Enum {
     DayOptions.sunday: Icons.wb_sunny,
   };
 
-  static const Map<MonthOptions, IconData> _monthIconData = {
-    MonthOptions.january: Icons.filter_1,
-    MonthOptions.february: Icons.filter_2,
-    MonthOptions.march: Icons.filter_3,
-    MonthOptions.april: Icons.filter_4,
-    MonthOptions.may: Icons.filter_5,
-    MonthOptions.june: Icons.filter_6,
-    MonthOptions.july: Icons.filter_7,
-    MonthOptions.august: Icons.filter_8,
-    MonthOptions.september: Icons.filter_9,
-    MonthOptions.october: Icons.filter_9_plus,
-    MonthOptions.november: Icons.exposure_plus_1,
-    MonthOptions.december: Icons.exposure_plus_2,
-  };
 
   static const Map<SchoolActivityOptions, IconData> _schoolActivityIconData = {
     SchoolActivityOptions.sports: Icons.fitness_center,

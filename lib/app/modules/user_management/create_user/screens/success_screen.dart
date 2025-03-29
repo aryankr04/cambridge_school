@@ -1,3 +1,5 @@
+import 'package:cambridge_school/core/utils/constants/enums/account_status.dart';
+
 import '../../../../../roles_manager.dart';
 import '../models/roles.dart';
 import '../models/user_model.dart';
@@ -75,10 +77,8 @@ class SuccessScreen extends GetView<SuccessScreenController> {
                         const SizedBox(height: MySizes.md),
                         Obx(() => Container(
                               decoration: BoxDecoration(
-                                color: controller
-                                    .getStatusColor(controller
-                                            .dummyUser.value.accountStatus ??
-                                        "inactive") // Provide default value
+                                  color:    controller
+                                      .dummyUser.value.accountStatus?.color// Provide default value
                                     .withOpacity(0.1),
                                 borderRadius:
                                     BorderRadius.circular(MySizes.cardRadiusSm),
@@ -89,25 +89,19 @@ class SuccessScreen extends GetView<SuccessScreenController> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    controller.getStatusIcon(controller
-                                            .dummyUser.value.accountStatus ??
-                                        "inactive"), // Provide default value
-                                    color: controller.getStatusColor(controller
-                                            .dummyUser.value.accountStatus ??
-                                        "inactive"), // Provide default value
+                              controller
+                                  .dummyUser.value.accountStatus?.icon, // Provide default value
+                                    color:    controller
+                                        .dummyUser.value.accountStatus?.color, // Provide default value
                                     size: 20,
                                   ),
                                   const SizedBox(width: MySizes.md),
                                   Text(
-                                    controller.getStatusText(controller
-                                            .dummyUser.value.accountStatus ??
-                                        "inactive"), // Provide default value
+                                      controller
+                                          .dummyUser.value.accountStatus!.description, // Provide default value
                                     style: MyTextStyle.bodySmall.copyWith(
-                                        color: controller.getStatusColor(controller
-                                                .dummyUser
-                                                .value
-                                                .accountStatus ??
-                                            "inactive")), // Provide default value
+                                      color:    controller
+                                          .dummyUser.value.accountStatus?.color,), // Provide default value
                                   ),
                                 ],
                               ),
@@ -381,7 +375,7 @@ class AccountDetailSection extends GetView<SuccessScreenController> {
                             icon: Icons.stars),
                         _DetailTile(
                           title: "Account Status",
-                          value: user.accountStatus ?? "N/A",
+                          value: user.accountStatus?.label ?? AccountStatus.inactive.label,
                           icon: Icons.check_circle,
                         ),
                         _DetailTile(
@@ -453,7 +447,7 @@ class SuccessScreenController extends GetxController {
           userId: 'dummy-user-123',
           username: 'Test User',
           email: 'test@example.com',
-          accountStatus: 'active',
+          accountStatus: AccountStatus.active,
           fullName: 'Test User Full Name',
           phoneNo: '123-456-7890',
           points: 100,
@@ -588,46 +582,5 @@ class SuccessScreenController extends GetxController {
     return "${address.houseAddress ?? ''}, ${address.village ?? ''}, ${address.city ?? ''}, ${address.district ?? ''}, ${address.state ?? ''}, ${address.pinCode ?? ''}";
   }
 
-  Color getStatusColor(String status) {
-    switch (status) {
-      case 'active':
-        return MyColors.activeGreen;
-      case 'suspended':
-        return MyColors.activeRed;
-      case 'pending':
-        return MyColors.activeOrange;
-      case 'inactive':
-        return MyColors.grey;
-      default:
-        return MyColors.grey;
-    }
-  }
 
-  IconData getStatusIcon(String status) {
-    switch (status) {
-      case 'active':
-        return Icons.check_circle;
-      case 'suspended':
-      case 'pending':
-      case 'inactive':
-        return Icons.cancel;
-      default:
-        return Icons.help;
-    }
-  }
-
-  String getStatusText(String status) {
-    switch (status) {
-      case 'active':
-        return 'Your account is active';
-      case 'suspended':
-        return 'Your account is suspended';
-      case 'pending':
-        return 'Your account is pending approval';
-      case 'inactive':
-        return 'Your account is inactive';
-      default:
-        return 'Unknown account status';
-    }
-  }
 }

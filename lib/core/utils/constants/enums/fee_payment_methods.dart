@@ -1,42 +1,44 @@
-enum FeePaymentMethod { cash, bankTransfer, upi, card, cheque, online }
+enum FeePaymentMethod {
+  cash(
+    label: "Cash",
+    description: "Payment made in cash at the school office.",
+  ),
+  bankTransfer(
+    label: "Bank Transfer",
+    description: "Fee transferred directly to the school's bank account.",
+  ),
+  upi(
+    label: "UPI (Google Pay, PhonePe, Paytm)",
+    description: "Fee paid via UPI apps like Google Pay, PhonePe, Paytm.",
+  ),
+  card(
+    label: "Credit/Debit Card",
+    description: "Payment made using a credit or debit card.",
+  ),
+  cheque(
+    label: "Cheque",
+    description: "Fee paid via a bank cheque.",
+  ),
+  online(
+    label: "Online Payment",
+    description: "Fee paid through an online payment gateway.",
+  );
 
-extension FeePaymentMethodExtension on FeePaymentMethod {
-  /// Returns a user-friendly label for the payment method.
-  String get label => _labels[this] ?? "Online Payment";
+  const FeePaymentMethod({
+    required this.label,
+    required this.description,
+  });
 
-  /// Returns a description explaining the payment method.
-  String get description => _descriptions[this] ?? "Fee paid through an online payment gateway.";
+  final String label;
+  final String description;
 
-  /// Mapping of `FeePaymentMethod` to readable labels.
-  static const Map<FeePaymentMethod, String> _labels = {
-    FeePaymentMethod.cash: "Cash",
-    FeePaymentMethod.bankTransfer: "Bank Transfer",
-    FeePaymentMethod.upi: "UPI (Google Pay, PhonePe, Paytm)",
-    FeePaymentMethod.card: "Credit/Debit Card",
-    FeePaymentMethod.cheque: "Cheque",
-    FeePaymentMethod.online: "Online Payment",
-  };
-
-  /// Reverse mapping of labels to `FeePaymentMethod` enum.
-  static final Map<String, FeePaymentMethod> _labelToEnum = {
-    for (var entry in _labels.entries) entry.value.toLowerCase(): entry.key,
-  };
-
-  /// Mapping of `FeePaymentMethod` to detailed descriptions.
-  static const Map<FeePaymentMethod, String> _descriptions = {
-    FeePaymentMethod.cash: "Payment made in cash at the school office.",
-    FeePaymentMethod.bankTransfer: "Fee transferred directly to the school's bank account.",
-    FeePaymentMethod.upi: "Fee paid via UPI apps like Google Pay, PhonePe, Paytm.",
-    FeePaymentMethod.card: "Payment made using a credit or debit card.",
-    FeePaymentMethod.cheque: "Fee paid via a bank cheque.",
-    FeePaymentMethod.online: "Fee paid through an online payment gateway.",
-  };
-
-  /// Converts a string to the corresponding `FeePaymentMethod` enum.
   static FeePaymentMethod fromString(String value) {
-    return _labelToEnum[value.toLowerCase()] ?? FeePaymentMethod.online;
+    return FeePaymentMethod.values.firstWhere(
+          (element) => element.label.toLowerCase() == value.toLowerCase(),
+      orElse: () => FeePaymentMethod.online,
+    );
   }
 
-  /// Returns a list of all payment method labels.
-  static List<String> get labelsList => _labels.values.toList();
+  static List<String> get labelsList =>
+      FeePaymentMethod.values.map((e) => e.label).toList();
 }

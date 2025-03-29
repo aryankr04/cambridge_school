@@ -20,7 +20,6 @@ import '../../../../core/utils/constants/sizes.dart';
 import '../../../../core/widgets/card_widget.dart';
 import '../../../../core/widgets/dropdown_field.dart';
 import '../../school_management/school_model.dart';
-import '../attendance_report/attendance_report_screen.dart';
 import 'mark_attendance_controller.dart';
 import 'mark_attendance_user_tile.dart';
 
@@ -171,7 +170,7 @@ class AttendanceDetailsCard extends StatelessWidget {
                       child: MyDatePickerField(
                         selectedDate: controller.selectedDate,
                         firstDate: DateTime(2000),
-                        lastDate: DateTime(2026),
+                        lastDate: DateTime.now(),
                         labelText: 'Date',
                       ),
                     ),
@@ -199,7 +198,7 @@ class AttendanceDetailsCard extends StatelessWidget {
                           children: [
                             Expanded(
                               child: MyDropdownField(
-                                options: ClassNameExtension.displayNamesList,
+                                options: ClassName.displayNamesList,
                                 labelText: "Class",
                                 onSelected: (value) {
                                   controller.selectedClass.value = value!;
@@ -211,7 +210,8 @@ class AttendanceDetailsCard extends StatelessWidget {
                             const SizedBox(width: MySizes.md),
                             Expanded(
                               child: MyDropdownField(
-                                options: MyLists.sectionOptions,
+                                options: List.generate(26,
+                                    (index) => String.fromCharCode(65 + index)),
                                 labelText: "Section",
                                 onSelected: (value) {
                                   controller.selectedSection.value = value!;
@@ -266,15 +266,8 @@ class AttendanceList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: MyColors.borderColor, width: 0.5),
-        borderRadius: const BorderRadius.all(
-          Radius.circular(MySizes.cardRadiusSm),
-        ),
-        boxShadow: MyBoxShadows.kLightShadow,
-        color: Colors.white,
-      ),
+    return MyCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           AttendanceListHeader(controller: controller),
@@ -306,15 +299,26 @@ class AttendanceList extends StatelessWidget {
             Rx<AttendanceStatus> attendanceStatus = Rx<AttendanceStatus>(
                 controller.getAttendanceStatus(
                     controller.userRoster.value!.userList[index]));
-            return AttendanceCard(
-              user: controller.userRoster.value!.userList[index],
-              attendanceStatus: attendanceStatus,
-              onAttendanceChanged: (AttendanceStatus newStatus) {
-                controller.updateAttendanceStatus(
-                    controller.userRoster.value!.userList[index], newStatus);
-                attendanceStatus.value = newStatus;
-                controller.isAllMarkAttendance();
-              },
+            return Column(
+              children: [
+                AttendanceCard(
+                  user: controller.userRoster.value!.userList[index],
+                  attendanceStatus: attendanceStatus,
+                  onAttendanceChanged: (AttendanceStatus newStatus) {
+                    controller.updateAttendanceStatus(
+                        controller.userRoster.value!.userList[index],
+                        newStatus);
+                    attendanceStatus.value = newStatus;
+                    controller.isAllMarkAttendance();
+                  },
+                ),
+                if (index != controller.userRoster.value!.userList.length - 1)
+                  const Divider(
+                    color: MyColors.borderColor,
+                    thickness: 0.5,
+                    height: 1,
+                  ),
+              ],
             );
           },
         );
@@ -564,6 +568,7 @@ class AttendanceSummaryCard extends StatelessWidget {
     });
   }
 }
+
 class RosterAttendanceSummaryCard extends StatelessWidget {
   const RosterAttendanceSummaryCard({
     super.key,
@@ -599,7 +604,7 @@ class RosterAttendanceSummaryCard extends StatelessWidget {
             center: Text(
               percentage.toStringAsFixed(2),
               style:
-              MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                  MyTextStyle.bodyMedium.copyWith(fontWeight: FontWeight.w600),
             ),
             progressColor: status.color,
             backgroundColor: status.color.withOpacity(0.3),

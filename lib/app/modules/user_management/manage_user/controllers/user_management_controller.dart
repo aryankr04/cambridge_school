@@ -3,35 +3,75 @@ import 'package:get/get.dart';
 
 import '../../create_user/models/user_model.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/repositories/user_roster_repository.dart';
-import 'package:cambridge_school/app/modules/user_management/create_user/repositories/user_repository.dart';
+import 'package:cambridge_school/app/modules/user_management/manage_user/models/roster_model.dart';
 
 class UserManagementController extends GetxController {
   // Observables
   final RxInt selectedTabIndex = 0.obs;
-  final RxString className = '1'.obs;
+  final RxString className = 'Pre-Nursery'.obs;
   final RxString sectionName = 'A'.obs;
   final RxString searchTerm = "".obs;
   final RxBool isLoading = false.obs;
   final RxBool isAscending = true.obs;
 
-  // Lists of User Models
-  final RxList<UserModel> studentList = <UserModel>[].obs;
-  final RxList<UserModel> teacherList = <UserModel>[].obs;
-  final RxList<UserModel> adminList = <UserModel>[].obs;
-  final RxList<UserModel> staffList = <UserModel>[].obs;
-  final RxList<UserModel> directorList = <UserModel>[].obs;
-  final RxList<UserModel> driverList = <UserModel>[].obs;
+  final Rx<UserRoster?> studentUserRoster = Rx<UserRoster?>(null);
+  final Rx<UserRoster?> employeeUserRoster = Rx<UserRoster?>(null);
 
+  UserRosterType rosterType = UserRosterType.studentRoster;
+
+  RxString selectedSortBy = 'fullName'.obs;
+  RxString selectedOrderBy = 'ascending'.obs;
   // Constants
-  String schoolId = 'SCH00001';
+  String schoolId = 'dummy_school_1';
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchStudentUserRoster();
+    fetchEmployeeUserRoster();
+  }
 
   // Repositories
-  final UserRepository userRepository = UserRepository();
   final UserRosterRepository userRosterRepository =
-  UserRosterRepository(schoolId:'dummy_school_1');
+  UserRosterRepository(schoolId: 'dummy_school_1');
 
-  // Data Generators (Removed if not in use)
-  //final DummyDataGenerator dummyDataGenerator = DummyDataGenerator();
+  Future<void> fetchStudentUserRoster() async {
+    try {
+      isLoading.value = true;
+      studentUserRoster.value = await userRosterRepository.getClassRoster(
+          className: className.value,
+          sectionName: sectionName.value,
+          schoolId: schoolId);
+    } catch (e) {
+      print('Error fetching student roster: $e');
+      // Optionally show an error message to the user using Get.snackbar
+      Get.snackbar(
+        'Error',
+        'Failed to fetch student roster. Please try again later.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchEmployeeUserRoster() async {
+    try {
+      isLoading.value = true;
+      employeeUserRoster.value =
+      await userRosterRepository.getEmployeeRoster(schoolId);
+    } catch (e) {
+      print('Error fetching employee roster: $e');
+      // Optionally show an error message to the user using Get.snackbar
+      Get.snackbar(
+        'Error',
+        'Failed to fetch employee roster. Please try again later.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   // Sorting Options (Move this to a Config file or Constants file)
   final Map<int, List<String>> availableSortingFields = {
@@ -43,124 +83,33 @@ class UserManagementController extends GetxController {
       'rollNumber'
     ], // Students (Added rollNumber)
     1: ['fullName', 'email', 'subjectsTaught', 'experience'], // Teachers
-    2: ['fullName', 'email', 'yearsInManagement'], // Directors
-    3: ['fullName', 'email', 'permissions'], // Admins
-    4: ['fullName', 'email', 'responsibilities'], // Staff
-    5: ['fullName', 'email', 'licenseNumber', 'routesAssigned'], // Drivers
   };
-
-  // Lifecycle Methods
-  @override
-  void onInit() {
-    super.onInit();
-    fetchStudents(); // Load default list on init
-  }
-
-  // API Data Fetching Methods
-  Future<void> fetchStudents() => _fetchUsers(
-    studentList,
-      initialSortField: 'rollNumber'); // Sort by rollNumber initially
-  Future<void> fetchTeachers() => _fetchUsers(
-      teacherList,
-      initialSortField: 'fullName'); // Sort by fullName initially
-  Future<void> fetchAdmins() => _fetchUsers(
-      adminList,
-      initialSortField: 'fullName'); // Sort by fullName initially
-  Future<void> fetchStaff() => _fetchUsers(
-      staffList,
-      initialSortField: 'fullName'); // Sort by fullName initially
-  Future<void> fetchDirectors() => _fetchUsers(
-      directorList,
-      initialSortField: 'fullName'); // Sort by fullName initially
-  Future<void> fetchDrivers() => _fetchUsers(
-      driverList,
-      initialSortField: 'fullName'); // Sort by fullName initially
-
-  // Private Generic Fetching Function
-  Future<void> _fetchUsers(
-      RxList<UserModel> targetList,
-      {String? initialSortField}) async {
-    try {
-      isLoading.value = true;
-      final users =[];
-      targetList.value = users as List<UserModel>;
-
-      if (initialSortField != null) {
-        sortListByField(initialSortField); // Sort after data is loaded
-      }
-    } catch (e) {
-      // Log the error (Ideally use a logging service)
-      print("Error fetching users: $e");
-      // Show an error message to the user (use Get.snackbar for example)
-      Get.snackbar("Error",
-          "Failed to load users. Please try again. Error: ${e.toString()}"); //Show actual error
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  // UI Logic Methods
-  void changeTab(int index) {
-    selectedTabIndex.value = index;
-    switch (index) {
-      case 0:
-        fetchStudents();
-        break;
-      case 1:
-        fetchTeachers();
-        break;
-      case 2:
-        fetchDirectors();
-        break;
-      case 3:
-        fetchAdmins();
-        break;
-      case 4:
-        fetchStaff();
-        break;
-      case 5:
-        fetchDrivers();
-        break;
-      default:
-        // Consider logging or throwing an exception here for invalid index
-        print("Invalid tab index: $index");
-        break;
-    }
-  }
 
   void toggleSortingOrder() {
     isAscending.value = !isAscending.value;
   }
 
-  // Sorting Logic Methods
-
   // --- Dynamic Sorting Function ---
 
   void sortListByField(String field) {
-    RxList<UserModel> currentList;
+    List<UserModel>? currentList;
 
     switch (selectedTabIndex.value) {
       case 0:
-        currentList = studentList;
+        currentList = studentUserRoster.value?.userList;
         break;
       case 1:
-        currentList = teacherList;
+        currentList = employeeUserRoster.value?.userList;
         break;
-      case 2:
-        currentList = directorList;
-        break;
-      case 3:
-        currentList = adminList;
-        break;
-      case 4:
-        currentList = staffList;
-        break;
-      case 5:
-        currentList = driverList;
-        break;
+
       default:
         print('Invalid tab index');
         return;
+    }
+
+    if (currentList == null) {
+      print('User list is null for this tab');
+      return;
     }
 
     // Validate that the field is a valid sorting field for the current tab
@@ -172,8 +121,6 @@ class UserManagementController extends GetxController {
     currentList.sort((a, b) {
       int comparisonResult = 0; // Initialize the comparison result
 
-      // Use runtimeType to determine the type, because casting (UserModel) to a doesn't work.
-      // The runtimeType is important to determine which type to call
       switch (field) {
         case 'fullName':
           comparisonResult =
@@ -184,78 +131,30 @@ class UserManagementController extends GetxController {
               (a.email ?? '').compareTo(b.email ?? ''); // Null Safety
           break;
         case 'className':
-          if (a.studentDetails != null && b.studentDetails != null) {
-            comparisonResult = (a.studentDetails?.className ?? '')
-                .compareTo(b.studentDetails?.className ?? '');
-          }
+          comparisonResult = (a.studentDetails?.className ?? '')
+              .compareTo(b.studentDetails?.className ?? '');
+
           break;
         case 'sectionName':
-          if (a.studentDetails != null && b.studentDetails != null) {
-            comparisonResult = (a.studentDetails?.section ?? '')
-                .compareTo(b.studentDetails?.section ?? '');
-          }
+          comparisonResult = (a.studentDetails?.section ?? '')
+              .compareTo(b.studentDetails?.section ?? '');
+
           break;
         case 'rollNumber':
           comparisonResult = _compareStudentsByRollNumber(a, b);
           break;
 
         case 'subjectsTaught':
-          if (a.teacherDetails != null && b.teacherDetails != null) {
-            // Assuming subjectsTaught is a List<String>
-            final aSubjects = a.teacherDetails?.subjectsTaught ?? [];
-            final bSubjects = b.teacherDetails?.subjectsTaught ?? [];
-            comparisonResult =
-                aSubjects.join(', ').compareTo(bSubjects.join(', '));
-          }
+          final aSubjects = a.teacherDetails?.subjectsTaught ?? [];
+          final bSubjects = b.teacherDetails?.subjectsTaught ?? [];
+          comparisonResult =
+              aSubjects.join(', ').compareTo(bSubjects.join(', '));
+
           break;
         case 'experience':
-          if (a.teacherDetails != null && b.teacherDetails != null) {
-            comparisonResult = (a.teacherDetails?.experience ?? '')
-                .compareTo(b.teacherDetails?.experience ?? '');
-          }
-          break;
-        case 'yearsInManagement':
-          if (a.directorDetails != null && b.directorDetails != null) {
-            comparisonResult = (a.directorDetails?.yearsInManagement ?? 0)
-                .compareTo(b.directorDetails?.yearsInManagement ?? 0);
-          }
-          break;
-        case 'permissions':
-          if (a.adminDetails != null && b.adminDetails != null) {
-            // Assuming permissions is a List<String>
-            final aPermissions = a.permissions ?? [];
-            final bPermissions = b.permissions ?? [];
-            comparisonResult =
-                aPermissions.join(', ').compareTo(bPermissions.join(', '));
-          }
-          break;
-        case 'responsibilities':
-          if (a.maintenanceStaffDetails != null &&
-              b.maintenanceStaffDetails != null) {
-            // Assuming responsibilities is a List<String>
-            final aResponsibilities =
-                a.maintenanceStaffDetails?.responsibilities ?? [];
-            final bResponsibilities =
-                b.maintenanceStaffDetails?.responsibilities ?? [];
-            comparisonResult = aResponsibilities
-                .join(', ')
-                .compareTo(bResponsibilities.join(', '));
-          }
-          break;
+          comparisonResult = (a.teacherDetails?.experience ?? '')
+              .compareTo(b.teacherDetails?.experience ?? '');
 
-        case 'licenseNumber':
-          if (a.driverDetails != null && b.driverDetails != null) {
-            comparisonResult = (a.driverDetails?.licenseNumber ?? '')
-                .compareTo(b.driverDetails?.licenseNumber ?? '');
-          }
-          break;
-        case 'routesAssigned':
-          if (a.driverDetails != null && b.driverDetails != null) {
-            // Assuming routesAssigned is a List<String>
-            final aRoutes = a.driverDetails?.routesAssigned ?? [];
-            final bRoutes = b.driverDetails?.routesAssigned ?? [];
-            comparisonResult = aRoutes.join(', ').compareTo(bRoutes.join(', '));
-          }
           break;
 
         default:
@@ -269,7 +168,12 @@ class UserManagementController extends GetxController {
           : -comparisonResult; // Reverse for descending
     });
 
-    currentList.refresh(); // Trigger UI update
+    // Trigger UI update for the relevant roster
+    if (selectedTabIndex.value == 0) {
+      studentUserRoster.update((val) {}); // Trigger UI update for student roster
+    } else if (selectedTabIndex.value == 1) {
+      employeeUserRoster.update((val) {}); // Trigger UI update for employee roster
+    }
   }
 
   // --- Roll Number Comparison Function ---

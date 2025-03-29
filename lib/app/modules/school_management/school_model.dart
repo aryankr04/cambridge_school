@@ -3,7 +3,7 @@ import 'package:cambridge_school/core/utils/constants/enums/campus_area.dart';
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/enums/classroom_facilities.dart';
 import 'package:cambridge_school/core/utils/constants/enums/classroom_seating_arrangement.dart';
-import 'package:cambridge_school/core/utils/constants/enums/exam_pattern.dart';
+import 'package:cambridge_school/core/utils/constants/enums/examination_pattern.dart';
 import 'package:cambridge_school/core/utils/constants/enums/fee_payment_methods.dart';
 import 'package:cambridge_school/core/utils/constants/enums/grading_system.dart';
 import 'package:cambridge_school/core/utils/constants/enums/medium_of_instruction.dart';
@@ -273,7 +273,7 @@ class SchoolModel {
       schoolName: map['schoolName'] ?? '',
       schoolSlogan: map['schoolSlogan'] ?? '',
       aboutSchool: map['aboutSchool'] ?? '',
-      status: AccountStatusExtension.fromString(map['status'] ?? 'active'),
+      status: AccountStatus.fromString(map['status'] ?? 'active'),
       establishedYear: map['establishedYear'] ?? '',
       createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),
       createdById: map['createdById'] ?? '',
@@ -281,12 +281,12 @@ class SchoolModel {
       schoolCode: map['schoolCode'] ?? '',
       affiliationNumber: map['affiliationNumber'] ?? '',
       schoolBoard:
-          SchoolBoardExtension.fromString(map['schoolBoard'] ?? 'state'),
-      schoolOwnership: SchoolOwnershipExtension.fromString(
+      SchoolBoard.fromString(map['schoolBoard'] ?? 'state'),
+      schoolOwnership: SchoolOwnership.fromString(
           map['schoolOwnership'] ?? 'private'),
-      schoolSpecialization: SchoolSpecializationExtension.fromString(
+      schoolSpecialization: SchoolSpecialization .fromString(
           map['schoolSpecialization'] ?? 'coEd'),
-      schoolGenderPolicy: SchoolGenderPolicyExtension.fromString(
+      schoolGenderPolicy: SchoolGenderPolicy.fromString(
           map['schoolGenderPolicy'] ?? 'coEd'),
       address: SchoolAddress.fromMap(map['address'] ?? const {}),
       primaryPhoneNo: map['primaryPhoneNo'] ?? '',
@@ -319,13 +319,13 @@ class SchoolModel {
               ?.cast<String>()
               .toList() ??
           [],
-      gradingSystem: GradingSystemExtension.fromString(
+      gradingSystem: GradingSystem.fromString(
           map['gradingSystem'] ?? 'percentage'),
-      examPattern: ExaminationPatternExtension.fromString(
+      examPattern: ExaminationPattern.fromString(
           map['examPattern'] ?? 'semester'),
-      academicLevel: AcademicLevelExtension.fromString(
+      academicLevel: AcademicLevel.fromString(
           map['academicLevel'] ?? 'higherSecondary'),
-      mediumOfInstruction: MediumOfInstructionExtension.fromString(
+      mediumOfInstruction: MediumOfInstruction.fromString(
           map['mediumOfInstruction'] ?? 'english'),
       academicYear: map['academicYear'] ?? '',
       classes: (map['classes'] as List?)
@@ -353,7 +353,7 @@ class SchoolModel {
               [],
       feeStructure: FeeStructure.fromMap(map['feeStructure'] ?? const {}),
       feePaymentMethods: (map['feePaymentMethods'] as List?)
-              ?.map((e) => FeePaymentMethodExtension.fromString(e))
+              ?.map((e) => FeePaymentMethod.fromString(e))
               .toList() ??
           [],
       lateFeePolicy: map['lateFeePolicy'] ?? '',
@@ -1197,7 +1197,7 @@ class ClassData {
   factory ClassData.fromMap(Map<String, dynamic>? map) {
     return ClassData(
       classId: map?['classId'] ?? '',
-      className: ClassNameExtension.fromString(
+      className: ClassName.fromString(
           map?['className'] ?? ''), // Retrieve enum from stored name
       sectionName: List<String>.from(map?['sectionName'] ?? const []),
     );
@@ -1275,7 +1275,7 @@ class Vehicle {
   factory Vehicle.fromMap(Map<String, dynamic>? map) {
     return Vehicle(
       vehicleType:
-          VehicleTypeExtension.fromString(map?['vehicleType'] ?? 'bus'),
+      VehicleType.fromString(map?['vehicleType'] ?? 'bus'),
       registrationNumber: map?['registrationNumber'] ?? '',
       capacity: map?['capacity'] ?? 0,
       driverName: map?['driverName'] ?? '',
@@ -1344,10 +1344,10 @@ class Classroom {
       classroomName: map?['classroomName'] ?? '',
       capacity: map?['capacity'] ?? 0,
       facilities: (map?['facilities'] as List<dynamic>? ?? [])
-          .map((e) => ClassroomFacilityExtension.fromString(e as String))
+          .map((e) => ClassroomFacility.fromString(e as String))
           .whereType<ClassroomFacility>()
           .toList(),
-      seatingArrangement: ClassroomSeatingArrangementExtension.fromString(
+      seatingArrangement: ClassroomSeatingArrangement.fromString(
           map?['seatingArrangement'] ?? 'rows'),
     );
   }
@@ -1496,7 +1496,7 @@ class Auditorium {
       auditoriumName: map?['auditoriumName'] ?? '',
       seatingCapacity: map?['seatingCapacity'] ?? 0,
       availableEquipment: (map?['availableEquipment'] as List<dynamic>? ?? [])
-          .map((e) => ClassroomFacilityExtension.fromString(e as String))
+          .map((e) => ClassroomFacility.fromString(e as String))
           .whereType<ClassroomFacility>()
           .toList(),
     );
@@ -1557,7 +1557,7 @@ class Hostel {
       wardenName: map?['wardenName'] ?? '',
       messAvailable: map?['messAvailable'] ?? false,
       rules: (map?['rules'] as List<dynamic>? ?? [])
-          .map((e) => HostelRuleExtension.fromString(e as String))
+          .map((e) => HostelRule.fromString(e as String))
           .whereType<HostelRule>()
           .toList(),
     );
@@ -1924,8 +1924,7 @@ class SchoolImage {
   factory SchoolImage.fromMap(Map<String, dynamic>? map) {
     return SchoolImage(
       campusArea:
-          CampusAreaExtension.fromString(map?['campusArea'] as String) ??
-              CampusArea.classroom,
+          CampusArea.fromString(map?['campusArea'] as String),
       imageUrls: List<String>.from(map?['imageUrls'] ?? const []),
     );
   }

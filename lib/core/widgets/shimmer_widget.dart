@@ -1,4 +1,6 @@
 import 'package:cambridge_school/core/utils/constants/colors.dart';
+import 'package:cambridge_school/core/utils/constants/sizes.dart';
+import 'package:cambridge_school/core/utils/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -95,14 +97,13 @@ class MyShimmer extends StatelessWidget {
   }
 }
 
-class MyShimmerWithText extends StatelessWidget {
+class MyShimmers extends StatelessWidget {
   final String text;
   final double height;
   final EdgeInsetsGeometry? itemPadding;
 
-  const MyShimmerWithText(
-      {Key? key, required this.text, required this.height, this.itemPadding})
-      : super(key: key);
+  const MyShimmers(
+      {super.key, required this.text, required this.height, this.itemPadding});
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +125,7 @@ class MyShimmerWithText extends StatelessWidget {
             itemCount: 1,
             itemWidth: double.infinity,
             itemHeight: height,
+            itemBorderRadius: BorderRadius.circular(MySizes.cardRadiusSm),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:cambridge_school/app/modules/user_management/create_user/repositories/user_repository.dart';
+import 'package:cambridge_school/core/utils/constants/enums/account_status.dart';
 import 'package:cambridge_school/core/utils/constants/lists.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
@@ -835,7 +836,7 @@ class CreateUserController extends GetxController {
       userId: userId,
       username: usernameController.text,
       email: emailController.text,
-      accountStatus: 'pending',
+      accountStatus: AccountStatus.pending,
       fullName: fullNameController.text,
       profileImageUrl: "", //profileImageUrl removed to prevent confusion
       dob: dateOfBirth.value,

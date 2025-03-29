@@ -1,168 +1,219 @@
 import 'package:cambridge_school/core/utils/constants/colors.dart';
-import 'package:cambridge_school/core/utils/constants/lists.dart';
+import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
+import 'package:cambridge_school/core/widgets/bottom_sheet_dropdown.dart';
 import 'package:cambridge_school/core/widgets/dropdown_field.dart';
+import 'package:cambridge_school/core/widgets/empty_state.dart';
+import 'package:cambridge_school/core/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../../core/utils/constants/text_styles.dart';
 import '../controllers/user_management_controller.dart';
 import '../../create_user/models/user_model.dart';
+import '../models/roster_model.dart';
 import '../widgets/user_card_widget.dart';
+import 'dart:async'; // Import for Timer
 
 class UserTabView extends GetView<UserManagementController> {
-  final String rosterType;
+  final UserRosterType rosterType;
   final String title;
   final List<String> filterOptions;
-  final RxList<UserModel> userList;
-  final Future<void> Function() onSearchPressed;
+  final List<UserModel> userList;
+  final VoidCallback onSearchPressed;
 
   const UserTabView({
-    Key? key,
+    super.key, // Add Key? key for null safety
     required this.rosterType,
     required this.title,
     required this.filterOptions,
     required this.userList,
     required this.onSearchPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top:MySizes.md,left: MySizes.md,right: MySizes.md),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          pinned: true,
+          // floating: true, // Consider using floating if you want it to disappear on scroll up
+          expandedHeight: controller.selectedTabIndex.value == 0 ? 220.0 : 150,
+          flexibleSpace: FlexibleSpaceBar(
+            titlePadding: const EdgeInsets.symmetric(
+                horizontal: MySizes.md, vertical: MySizes.sm),
+            // title: Padding(
+            //   padding: const EdgeInsets.only(bottom: MySizes.md),
+            //   child: Obx(() => controller.selectedTabIndex.value == 0
+            //       ? Column(
+            //     children: [
+            //       Row(
+            //         crossAxisAlignment: CrossAxisAlignment.start,
+            //         children: [
+            //           Expanded(
+            //             child: MyDropdownField(
+            //               options: ClassName.displayNamesList,
+            //               hintText: "Class",
+            //               onSelected: (value) {
+            //                 controller.className.value = value!;
+            //               },
+            //               selectedValue: controller.className,
+            //             ),
+            //           ),
+            //           const SizedBox(
+            //             width: MySizes.md,
+            //           ),
+            //           Expanded(
+            //             child: MyDropdownField(
+            //               options: List.generate(
+            //                   26,
+            //                       (index) =>
+            //                       String.fromCharCode(65 + index)),
+            //               hintText: "Section",
+            //               onSelected: (value) {
+            //                 controller.sectionName.value = value!;
+            //               },
+            //               selectedValue: controller.sectionName,
+            //             ),
+            //           ),
+            //           const SizedBox(width: MySizes.md),
+            //           FilledButton(
+            //             onPressed: () async {
+            //               await controller.fetchStudentUserRoster();
+            //             },
+            //             child: const Text('Search'),
+            //           ),
+            //         ],
+            //       ),
+            //     ],
+            //   )
+            //       : const SizedBox.shrink()),
+            // ),
+            background: Container(
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+          ),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(100),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: MyColors.borderColor,
+                    width: 0.5,
+                  ),
+                ),
+              ),
+              child: Column(
                 children: [
-                  Expanded(
-                    child: TextField(
-                      onChanged: (text) {
-                        controller.searchTerm.value = text;
-                        print("term $text");
-                      },
-                      decoration: const InputDecoration(
-                        hintText: 'Search...',
-                        border: OutlineInputBorder(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Obx(
+                            () => Text(
+                              () {
+                            switch (controller.selectedTabIndex.value) {
+                              case 0:
+                                return 'Students (${controller.studentUserRoster.value?.userList.length ?? 0})';
+                              case 1:
+                                return 'Employees (${controller.employeeUserRoster.value?.userList.length ?? 0})';
+
+                              default:
+                                return 'Unknown';
+                            }
+                          }(),
+                          style: MyTextStyle.headlineSmall,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          _showFilterDialog(context);
+                        },
+                        child: const Text('Filter List'),
+                      ),
+                    ],
+                  ),
+                  InkWell(
+                    onTap: () {
+                      _showSearchDialog(context, userList); // Show search dialog
+                    },
+                    child: IgnorePointer(
+                      // Prevent text field interaction
+                      child: MyTextField(
+                        onTap: () {
+                          _showSearchDialog(
+                              context, userList); // Show search dialog
+                        },
+                        hintText: 'Search',
                       ),
                     ),
-                  ),
-                  const SizedBox(width: MySizes.md),
-                  FilledButton(
-                    onPressed: () async {
-                      await onSearchPressed(); // Call the passed onSearchPressed function
-                    },
-                    child: const Text('Search'),
-                  ),
+                  )
                 ],
               ),
-              const SizedBox(height: MySizes.md),
-              Obx(() => controller.selectedTabIndex.value == 0
-                  ? Column(
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: MyDropdownField(
-                                options: MyLists.classOptions,
-                                hintText: "Class",
-                                onSelected: (value) {
-                                  controller.className.value = value!;
-                                },
-                                selectedValue: controller.className,
-                              ),
-                            ),
-                            const SizedBox(
-                              width: MySizes.md,
-                            ),
-                            Expanded(
-                              child: MyDropdownField(
-                                options: MyLists.sectionOptions,
-                                hintText: "Section",
-                                onSelected: (value) {
-                                  controller.sectionName.value = value!;
-                                },
-                                selectedValue: controller.sectionName,
-                              ),
-                            ),
-                            const SizedBox(width: MySizes.md),
-                            FilledButton(
-                              onPressed: () async {
-                                await controller.fetchStudents();
-                              },
-                              child: const Text('Search'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: MySizes.md),
-                      ],
-                    )
-                  : const SizedBox.shrink()),
-
-              Divider(thickness: 0.5,color: MyColors.borderColor,),
-              const SizedBox(height: MySizes.sm),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Obx(
-                    () => Text(
-                      () {
-                        switch (controller.selectedTabIndex.value) {
-                          case 0:
-                            return 'Students (${controller.studentList.length})';
-                          case 1:
-                            return 'Teachers (${controller.teacherList.length})';
-                          case 2:
-                            return 'Directors (${controller.directorList.length})';
-                          case 3:
-                            return 'Admins (${controller.adminList.length})';
-                          case 4:
-                            return 'Staff (${controller.staffList.length})';
-                          case 5:
-                            return 'Drivers (${controller.driverList.length})';
-                          case 6:
-                            return 'Security Guards (${controller.driverList.length})';
-                          default:
-                            return 'Unknown';
-                        }
-                      }(),
-                      style: MyTextStyle.headlineSmall,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _showFilterDialog(context);
-                    },
-                    child: const Text('Filter List'),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
-        Obx(
-          () => Expanded(
-            child: controller.isLoading.value
-                ? _buildShimmerLoading()
-                : ListView.builder(
-                    itemCount: userList.length,
-                    itemBuilder: (context, index) {
-                      return UserCardWidget(
-                        userProfile: userList[index],
-                        onView: () {},
-                        onEdit: () {},
-                        onDelete: () {},
-                      );
-                    },
-                  ),
-          ),
+        // SliverPadding(
+        //   padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
+        //   sliver: SliverToBoxAdapter(
+        //     child: InkWell(
+        //       onTap: () {
+        //         _showSearchDialog(context, userList); // Show search dialog
+        //       },
+        //       child: IgnorePointer(
+        //         // Prevent text field interaction
+        //         child: MyTextField(
+        //           onTap: () {
+        //             _showSearchDialog(
+        //                 context, userList); // Show search dialog
+        //           },
+        //           hintText: 'Search',
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        SliverToBoxAdapter(
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return _buildShimmerLoading();
+            } else if (userList.isEmpty) {
+              return const Center(
+                  child: MyEmptyStateWidget(
+                      type: EmptyStateType.noData, message: 'No User Found'));
+            } else {
+              return ListView.builder(
+                shrinkWrap:
+                true, // Important: Allow ListView to size itself within the Column
+                physics:
+                const NeverScrollableScrollPhysics(), // Disable ListView's own scrolling
+                itemCount: userList.length,
+                itemBuilder: (context, index) {
+                  return UserCardWidget(
+                    userProfile: userList[index],
+                    onView: () {},
+                    onEdit: () {},
+                    onDelete: () {},
+                  );
+                },
+              );
+            }
+          }),
         ),
       ],
+    );
+  }
+
+  // Function to show the full-screen search dialog
+  void _showSearchDialog(
+      BuildContext context, List<UserModel> initialUserList) {
+    showDialog(
+      context: context,
+      useSafeArea: true,
+      builder: (BuildContext context) {
+        return SearchDialog(userList: initialUserList);
+      },
     );
   }
 
@@ -183,8 +234,10 @@ class UserTabView extends GetView<UserManagementController> {
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
       child: ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap:
+        true, // Important: Allow ListView to size itself within the Column
+        physics:
+        const NeverScrollableScrollPhysics(), // Disable ListView's own scrolling
         itemCount: 8,
         itemBuilder: (context, index) {
           return Padding(
@@ -230,20 +283,17 @@ class UserTabView extends GetView<UserManagementController> {
 
 // separate filter dialog as its own class
 class FilterDialog extends StatefulWidget {
-  final String rosterType;
+  final UserRosterType rosterType;
   final String title;
 
-  const FilterDialog({Key? key, required this.rosterType, required this.title})
-      : super(key: key);
+  const FilterDialog(
+      {super.key, required this.rosterType, required this.title});
 
   @override
   State<FilterDialog> createState() => _FilterDialogState();
 }
 
 class _FilterDialogState extends State<FilterDialog> {
-  String? selectedSortBy;
-  String? selectedOrderBy;
-
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<UserManagementController>();
@@ -257,88 +307,25 @@ class _FilterDialogState extends State<FilterDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Sort By Options
-          const Text(
-            "Sort By",
-            style: MyTextStyle.titleLarge,
+          MyBottomSheetDropdown(
+            labelText: 'Sort By',
+            optionsForChips: controller
+                .availableSortingFields[controller.selectedTabIndex.value]!,
+            onSingleChanged: (value) {
+              controller.selectedSortBy.value = value;
+            },
+            selectedValue: controller.selectedSortBy,
+            dropdownWidgetType: DropdownWidgetType.choiceChip,
           ),
-          const SizedBox(
-            height: MySizes.md,
+          MyBottomSheetDropdown(
+            labelText: 'Order By',
+            optionsForChips: const ['Ascending', 'Descending'],
+            onSingleChanged: (value) {
+              controller.selectedOrderBy.value = value;
+            },
+            selectedValue: controller.selectedOrderBy,
+            dropdownWidgetType: DropdownWidgetType.choiceChip,
           ),
-          Wrap(
-            spacing: 8.0,
-            children: controller
-                .availableSortingFields[controller.selectedTabIndex.value]!
-                .map((option) {
-              return FilterChip(
-                label: Text(option),
-                selected: selectedSortBy == option,
-                onSelected: (bool selected) {
-                  setState(() {
-                    selectedSortBy = selected ? option : null;
-                  });
-                },
-                shape: RoundedRectangleBorder(
-                  // Make chips fully rounded
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
-                side: BorderSide.none, // Remove border by default
-                backgroundColor:
-                    Colors.grey.shade200, // Set a default background color
-                selectedColor: Theme.of(context)
-                    .primaryColor, // Use the theme's primary color for selected
-                labelStyle: TextStyle(
-                  color: selectedSortBy == option
-                      ? Colors.white
-                      : MyColors
-                          .headlineTextColor, // Change text color when selected
-                ),
-              );
-            }).toList(),
-          ),
-
-          // Order By Options
-          const SizedBox(height: MySizes.lg),
-          const Text(
-            "Order By",
-            style: MyTextStyle.titleLarge,
-          ),
-          const SizedBox(
-            height: MySizes.md,
-          ),
-
-          Wrap(
-            spacing: 8.0,
-            children: ['Ascending', 'Descending'].map((option) {
-              return FilterChip(
-                label: Text(option),
-                selected: selectedOrderBy == option,
-                onSelected: (bool selected) {
-                  setState(() {
-                    selectedOrderBy = selected ? option : null;
-                  });
-                },
-                shape: RoundedRectangleBorder(
-                  // Make chips fully rounded
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
-                side: BorderSide.none, // Remove border by default
-                backgroundColor:
-                    Colors.grey.shade200, // Set a default background color
-                selectedColor: Theme.of(context)
-                    .primaryColor, // Use the theme's primary color for selected
-                labelStyle: TextStyle(
-                  color: selectedOrderBy == option
-                      ? Colors.white
-                      : MyColors
-                          .headlineTextColor, // Change text color when selected
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(
-            height: MySizes.sm,
-          )
         ],
       ),
       actions: [
@@ -359,13 +346,9 @@ class _FilterDialogState extends State<FilterDialog> {
               child: ElevatedButton(
                 onPressed: () {
                   // Apply Filter Logic Here
-                  if (selectedSortBy != null) {
-                    controller.sortListByField(selectedSortBy!);
-                  }
-                  if (selectedOrderBy != null) {
-                    controller.isAscending.value =
-                        selectedOrderBy == "Ascending";
-                  }
+                  controller.sortListByField(controller.selectedSortBy.value);
+                  controller.isAscending.value =
+                      controller.selectedOrderBy.value == "Ascending";
                   Navigator.of(context).pop();
                 },
                 child: const Text('Apply'),
@@ -375,5 +358,121 @@ class _FilterDialogState extends State<FilterDialog> {
         ),
       ],
     );
+  }
+}
+
+// Full-screen search dialog
+class SearchDialog extends StatefulWidget {
+  final List<UserModel> userList;
+
+  const SearchDialog({super.key, required this.userList});
+
+  @override
+  State<SearchDialog> createState() => _SearchDialogState();
+}
+
+class _SearchDialogState extends State<SearchDialog> {
+  final TextEditingController _searchController = TextEditingController();
+  List<UserModel> filteredUserList = []; // List to hold search results
+  final _Debouncer _debouncer =
+  _Debouncer(milliseconds: 500); // Adjust debounce duration as needed
+
+  @override
+  void initState() {
+    super.initState();
+    filteredUserList = List.from(widget.userList); // Initially, show all users
+  }
+
+  // Function to filter search results
+  Future<void> filterSearchResults(String query) async {
+    _debouncer.run(() async {
+      await Future.delayed(Duration.zero); // Ensure UI doesn't block
+
+      if (query.isEmpty) {
+        setState(() {
+          filteredUserList = List.from(widget.userList);
+        });
+        return;
+      }
+
+      List<UserModel> dummySearchList = [];
+      try {
+        dummySearchList = widget.userList
+            .where((item) =>
+        (item.fullName?.toLowerCase().contains(query.toLowerCase()) ??
+            false) ||
+            (item.email?.toLowerCase().contains(query.toLowerCase()) ??
+                false))
+            .toList();
+
+        setState(() {
+          filteredUserList = dummySearchList;
+        });
+      } catch (e) {
+        print("Error during search: $e");
+        // Consider showing a snackbar or alert to the user
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: TextField(
+          controller: _searchController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Search User',
+            hintStyle: MyTextStyle.placeholder,
+            border: InputBorder.none,
+            fillColor: Colors.white,
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () {
+                _searchController.clear();
+                filterSearchResults(''); // Clear the search
+              },
+            ),
+          ),
+          style: MyTextStyle.inputField,
+          onChanged: (value) {
+            filterSearchResults(value);
+          },
+        ),
+      ),
+      body: filteredUserList.isEmpty
+          ? const Center(
+          child: MyEmptyStateWidget(
+              type: EmptyStateType.noData,
+              message: 'No Data Found (Search Results)', svgSize: 300))
+          : ListView.builder(
+        itemCount: filteredUserList.length,
+        itemBuilder: (context, index) {
+          return UserCardWidget(
+            userProfile: filteredUserList[index],
+            onView: () {},
+            onEdit: () {},
+            onDelete: () {},
+          );
+        },
+      ),
+    );
+  }
+}
+
+// Debouncer class to delay execution of a function
+class _Debouncer {
+  final int milliseconds;
+  Timer? _timer;
+
+  _Debouncer({required this.milliseconds});
+
+  void run(VoidCallback action) {
+    if (_timer?.isActive ?? false) {
+      _timer?.cancel();
+    }
+
+    _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
 }
