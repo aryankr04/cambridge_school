@@ -61,21 +61,12 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
   void initState() {
     super.initState();
     _selectedValue = widget.selectedValue ?? Rx<String?>(null);
-    _focusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
-    _focusNode.removeListener(
-        _handleFocusChange); // Important to prevent memory leaks!
     _focusNode.dispose();
     super.dispose();
-  }
-
-  void _handleFocusChange() {
-    if (!_focusNode.hasFocus) {
-      _closeDropdown();
-    }
   }
 
   void _toggleDropdown() {
@@ -87,6 +78,7 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
   void _closeDropdown() {
     if (_isDropdownOpen.value) {
       _isDropdownOpen.value = false;
+      _focusNode.unfocus();
     }
   }
 
@@ -110,11 +102,9 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
             GestureDetector(
               onTap: widget.enabled
                   ? () {
-                      // Simplified onTap
-                      _toggleDropdown();
-                      _focusNode.requestFocus();
-                    }
-                  : null, // Disable onTap when disabled
+                _toggleDropdown();
+              }
+                  : null,
               behavior: HitTestBehavior.translucent,
               child: Container(
                 decoration: widget.decoration ??
@@ -131,23 +121,23 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
                     ],
                     Expanded(
                       child: Obx(() => Text(
-                            (_selectedValue.value != null &&
-                                    _selectedValue.value!.isNotEmpty)
-                                ? _selectedValue.value!
-                                : widget.hintText ?? defaultHintText,
-                            style: (_selectedValue.value != null &&
-                                    _selectedValue.value!.isNotEmpty)
-                                ? widget.selectedTextStyle ??
-                                    MyTextStyle.inputField
-                                : widget.hintTextStyle ??
-                                    Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: MyColors.placeholderColor,
-                                        ),
-                            overflow: TextOverflow.ellipsis,
-                          )),
+                        (_selectedValue.value != null &&
+                            _selectedValue.value!.isNotEmpty)
+                            ? _selectedValue.value!
+                            : widget.hintText ?? defaultHintText,
+                        style: (_selectedValue.value != null &&
+                            _selectedValue.value!.isNotEmpty)
+                            ? widget.selectedTextStyle ??
+                            MyTextStyle.inputField
+                            : widget.hintTextStyle ??
+                            Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                              color: MyColors.placeholderColor,
+                            ),
+                        overflow: TextOverflow.ellipsis,
+                      )),
                     ),
                     if (widget.suffixIcon != null) ...[
                       const SizedBox(width: 8.0),
@@ -167,7 +157,7 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
               if (!_isDropdownOpen.value) {
                 return const SizedBox.shrink();
               }
-              return _buildDropdownOptions(); // Extracted dropdown building to a separate method.
+              return _buildDropdownOptions();
             }),
             if (widget.isValidate) ...[
               Obx(() {
@@ -203,41 +193,38 @@ class _MyDropdownFieldState extends State<MyDropdownField> {
         ),
         constraints: const BoxConstraints(
             maxHeight: 200,
-            maxWidth: double.infinity), // Added maxHeight constraint
+            maxWidth: double.infinity),
         child: SingleChildScrollView(
           child: Column(
-            // Changed Wrap to Column
             mainAxisSize: MainAxisSize.min,
             children: widget.options
                 .map((option) => Material(
-                      color: _selectedValue.value == option
-                          ? MyColors.activeBlue.withOpacity(0.1)
-                          : Colors.transparent,
-
-                      child: InkWell(
-                        onTap: () {
-                          _selectedValue.value = option;
-                          widget.onSelected?.call(option);
-                          _closeDropdown();
-                          _focusNode.unfocus();
-                        },
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 16),
-                            child: Text(
-                              option,
-                              style: _selectedValue.value == option
-                                  ? MyTextStyle.bodyLarge.copyWith(
-                                      color: MyColors.activeBlue,
-                                      fontWeight: FontWeight.bold)
-                                  : MyTextStyle.bodyMedium,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ))
+              color: _selectedValue.value == option
+                  ? MyColors.activeBlue.withOpacity(0.1)
+                  : Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  _selectedValue.value = option;
+                  widget.onSelected?.call(option);
+                  _closeDropdown();
+                },
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                    child: Text(
+                      option,
+                      style: _selectedValue.value == option
+                          ? MyTextStyle.bodyLarge.copyWith(
+                          color: MyColors.activeBlue,
+                          fontWeight: FontWeight.bold)
+                          : MyTextStyle.bodyMedium,
+                    ),
+                  ),
+                ),
+              ),
+            ))
                 .toList(),
           ),
         ),

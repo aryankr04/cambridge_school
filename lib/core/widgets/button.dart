@@ -100,8 +100,8 @@ class MyButton extends StatelessWidget {
                                       ? MyColors.borderColor
                                       : (textColor ??
                                           MyColors.headlineTextColor),
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w600,
                                 ),
                           ),
                         ],
@@ -145,8 +145,8 @@ class MyButton extends StatelessWidget {
                             style: textStyle ??
                                 TextStyle(
                                   color: textColor ?? Colors.white,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w600,
                                 ),
                           ),
                         ],

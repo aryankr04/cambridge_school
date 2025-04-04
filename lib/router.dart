@@ -4,6 +4,8 @@ import 'package:cambridge_school/app/modules/attendance/attendance_report/attend
 import 'package:cambridge_school/app/modules/attendance/mark_attendance/mark_attendance_screen.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_binding.dart';
 import 'package:cambridge_school/app/modules/class_management/class_management_screen.dart';
+import 'package:cambridge_school/app/modules/exam/create_exam/create_exam_binding.dart';
+import 'package:cambridge_school/app/modules/exam/create_exam/create_exam_screen.dart';
 import 'package:cambridge_school/app/modules/leave/apply_leave/apply_leave_binding.dart';
 import 'package:cambridge_school/app/modules/leave/apply_leave/apply_leave_screen.dart';
 import 'package:cambridge_school/app/modules/leave/leave_dashboard/leave_dashboard_binding.dart';
@@ -25,7 +27,7 @@ import 'package:get/get.dart';
 import 'app/modules/attendance/attendance_record/attendance_record_screen.dart';
 import 'app/modules/attendance/mark_attendance/mark_attendance_binding.dart';
 import 'app/modules/auth/login/login_binding.dart';
-import 'app/modules/auth/login/screens/login_screen.dart';
+import 'app/modules/auth/login/login_screen.dart';
 import 'app/modules/notice/create_notice/create_notice_binding.dart';
 import 'app/modules/notice/create_notice/create_notice_screen.dart';
 import 'app/modules/notice/notice/notice_binding.dart';
@@ -97,6 +99,7 @@ class AppRoutes {
   static const String manageSchoolRoute = '/manage-school';
   static const String schoolListRoute = '/school-list';
   static const String editSchoolRoute = '/edit-school';
+  static const String createExamRoute = '/create-exam';
 
   //----------------------------------------------------------------------------
   // Route Definitions (Using GetX GetPage)
@@ -144,7 +147,7 @@ class AppRoutes {
     ),
     GetPage(
       name: attendanceReportRoute,
-      page: () => AttendanceReportScreen(),
+      page: () => const AttendanceReportScreen(),
       binding: AttendanceReportBinding(),
     ),
     GetPage(
@@ -191,6 +194,11 @@ class AppRoutes {
       name: editSchoolRoute,
       page: () => EditSchoolDetailsScreen(schoolId: Get.parameters['schoolId'] ?? ''),
       binding: EditSchoolDetailsBinding(schoolId: Get.parameters['schoolId'] ?? ''),
+    ),
+  GetPage(
+      name: createExamRoute,
+      page: () => const ExamSyllabusForm(),
+      binding: CreateExamBinding(),
     ),
 
   ];

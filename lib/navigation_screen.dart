@@ -29,6 +29,11 @@ class NavigationScreen extends StatelessWidget {
                 _buildNavButton('School List', AppRoutes.schoolListRoute, Icons.list),
                 _buildNavButton('Create School', AppRoutes.createSchoolRoute, Icons.school),
               ]),
+              _buildCategoryHeader("Exam"),
+              _buildButtonGrid([
+                _buildNavButton('Create Exam', AppRoutes.createExamRoute, Icons.assignment),
+
+              ]),
               _buildCategoryHeader("User Management"),
               _buildButtonGrid([
                 _buildNavButton('Login', AppRoutes.loginRoute, Icons.login),

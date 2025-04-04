@@ -1,6 +1,10 @@
 // user_management_controller.dart
 import 'package:get/get.dart';
 
+import '../../../../../core/utils/constants/enums/class_name.dart';
+import '../../../../../core/widgets/snack_bar.dart';
+import '../../../school_management/school_model.dart';
+import '../../../school_management/school_repository.dart';
 import '../../create_user/models/user_model.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/repositories/user_roster_repository.dart';
 import 'package:cambridge_school/app/modules/user_management/manage_user/models/roster_model.dart';
@@ -8,10 +12,17 @@ import 'package:cambridge_school/app/modules/user_management/manage_user/models/
 class UserManagementController extends GetxController {
   // Observables
   final RxInt selectedTabIndex = 0.obs;
-  final RxString className = 'Pre-Nursery'.obs;
-  final RxString sectionName = 'A'.obs;
+  final RxString selectedClassName = 'Pre-Nursery'.obs;
+  final RxString selectedSectionName = 'A'.obs;
   final RxString searchTerm = "".obs;
   final RxBool isLoading = false.obs;
+
+  final RxBool isLoadingOptions = false.obs;
+  final RxList<String> sectionNameOptions = RxList<String>();
+  final RxList<String> classNameOptions = RxList<String>();
+  final RxList<SectionData>? sectionsData = RxList<SectionData>();
+  final SchoolRepository schoolRepository = SchoolRepository();
+
   final RxBool isAscending = true.obs;
 
   final Rx<UserRoster?> studentUserRoster = Rx<UserRoster?>(null);
@@ -22,26 +33,27 @@ class UserManagementController extends GetxController {
   RxString selectedSortBy = 'fullName'.obs;
   RxString selectedOrderBy = 'ascending'.obs;
   // Constants
-  String schoolId = 'dummy_school_1';
+  RxString schoolId = 'dummy_school_1'.obs;
 
   @override
   void onInit() {
     super.onInit();
     fetchStudentUserRoster();
     fetchEmployeeUserRoster();
+    fetchSchoolSectionsAndPrepareClassAndSectionOptions();
   }
 
   // Repositories
   final UserRosterRepository userRosterRepository =
-  UserRosterRepository(schoolId: 'dummy_school_1');
+      UserRosterRepository(schoolId: 'dummy_school_1');
 
   Future<void> fetchStudentUserRoster() async {
     try {
       isLoading.value = true;
       studentUserRoster.value = await userRosterRepository.getClassRoster(
-          className: className.value,
-          sectionName: sectionName.value,
-          schoolId: schoolId);
+          className: selectedClassName.value,
+          sectionName: selectedSectionName.value,
+          schoolId: schoolId.value);
     } catch (e) {
       print('Error fetching student roster: $e');
       // Optionally show an error message to the user using Get.snackbar
@@ -59,7 +71,7 @@ class UserManagementController extends GetxController {
     try {
       isLoading.value = true;
       employeeUserRoster.value =
-      await userRosterRepository.getEmployeeRoster(schoolId);
+          await userRosterRepository.getEmployeeRoster(schoolId.value);
     } catch (e) {
       print('Error fetching employee roster: $e');
       // Optionally show an error message to the user using Get.snackbar
@@ -70,6 +82,48 @@ class UserManagementController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchSchoolSectionsAndPrepareClassAndSectionOptions() async {
+    isLoadingOptions.value = true;
+    try {
+      sectionsData?.value = await schoolRepository.getSections(schoolId.value);
+
+      classNameOptions.value = await extractClassNames(sectionsData);
+      if (!classNameOptions.contains(selectedClassName.value)) {
+        selectedClassName.value = classNameOptions.first;
+      }
+          await extractSectionNames();
+    } catch (error) {
+      MySnackBar.showErrorSnackBar('Error fetching school sections: $error');
+    } finally {
+      isLoadingOptions.value = false;
+    }
+  }
+
+  Future<List<String>> extractClassNames(
+      List<SectionData>? sectionsData) async {
+    if (sectionsData == null) return [];
+    Set<String> uniqueClassNames = {};
+    for (var section in sectionsData) {
+      uniqueClassNames.add(section.className.label);
+    }
+    return uniqueClassNames.toList();
+  }
+
+  Future<void> extractSectionNames() async {
+    if (sectionsData == null) {
+      sectionNameOptions.value = [];
+    } else {
+      List<String> sectionNames = [];
+      for (var section in sectionsData!) {
+        if (section.className == ClassName.fromString(selectedClassName.value)) {
+          sectionNames.add(section.sectionName);
+        }
+      }
+      sectionNameOptions.value = sectionNames;
+
     }
   }
 
@@ -170,9 +224,11 @@ class UserManagementController extends GetxController {
 
     // Trigger UI update for the relevant roster
     if (selectedTabIndex.value == 0) {
-      studentUserRoster.update((val) {}); // Trigger UI update for student roster
+      studentUserRoster
+          .update((val) {}); // Trigger UI update for student roster
     } else if (selectedTabIndex.value == 1) {
-      employeeUserRoster.update((val) {}); // Trigger UI update for employee roster
+      employeeUserRoster
+          .update((val) {}); // Trigger UI update for employee roster
     }
   }
 

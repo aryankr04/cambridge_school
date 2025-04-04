@@ -32,7 +32,8 @@ class MarkAttendanceController extends GetxController {
 
   final shouldFetchRosterOnInit = false.obs;
   final Rxn<UserRoster> userRoster = Rxn<UserRoster>();
-  final Rxn<RosterAttendanceSummary> classAttendanceSummary = Rxn<RosterAttendanceSummary>();
+  final Rxn<RosterAttendanceSummary> classAttendanceSummary =
+      Rxn<RosterAttendanceSummary>();
 
   final String attendanceTakerName = 'Mr. S.K Pandey';
 
@@ -101,8 +102,8 @@ class MarkAttendanceController extends GetxController {
       academicPeriodStartDate: selectedDate.value,
       numberOfDays: 365,
     );
-    user.userAttendance =
-        user.userAttendance!.updateAttendanceForDate(selectedDate.value, status);
+    user.userAttendance = user.userAttendance!
+        .updateAttendanceForDate(selectedDate.value, status);
     refreshAttendanceSummary();
   }
 
@@ -183,75 +184,112 @@ class MarkAttendanceController extends GetxController {
       DailyAttendanceRecordRepository attendanceRecordRepository) async {
     final date = DateTime(selectedDate.value.year, selectedDate.value.month,
         selectedDate.value.day);
-    final markedBy = AttendanceTaker(
-        uid: schoolId, name: attendanceTakerName, time: DateTime.now());
+    final AttendanceTaker newMarker = AttendanceTaker(
+      uid: schoolId,
+      name: attendanceTakerName,
+      time: DateTime.now(),
+    );
 
     try {
       DailyAttendanceRecord? existingRecord =
           await attendanceRecordRepository.getDailyAttendanceRecordByDate(date);
 
-      DailyAttendanceRecord newRecord;
       final recordId = nanoid(16);
 
       if (isClassAttendance.value) {
-        final classSummary = ClassAttendanceSummary(
-            className: selectedClass.value,
-            sectionName: selectedSection.value,
-            markedBy: markedBy,
-            presents: classAttendanceSummary.value!.presentCount,
-            absents: classAttendanceSummary.value!.absentCount);
+        // Create new class summary
+        final newClassSummary = ClassAttendanceSummary(
+          className: selectedClass.value,
+          sectionName: selectedSection.value,
+          markedBy: [newMarker],
+          rosterAttendanceSummary: classAttendanceSummary.value!,
+        );
 
         if (existingRecord != null) {
-          existingRecord.classAttendanceSummaries = [classSummary];
-          existingRecord.employeeAttendanceSummary = null;
+          // Check if record already exists for this class & section
+          final existingSummaries =
+              existingRecord.classAttendanceSummaries ?? [];
+
+          final index = existingSummaries.indexWhere((summary) =>
+              summary.className == selectedClass.value &&
+              summary.sectionName == selectedSection.value);
+
+          if (index != -1) {
+            final oldSummary = existingSummaries[index];
+
+            // Add to markedBy only if the current uid is not already present
+            final alreadyMarked =
+                oldSummary.markedBy.any((taker) => taker.uid == newMarker.uid);
+            oldSummary.markedBy.add(newMarker);
+
+            // Update the summary
+            existingSummaries[index] = ClassAttendanceSummary(
+              className: oldSummary.className,
+              sectionName: oldSummary.sectionName,
+              markedBy: oldSummary.markedBy,
+              rosterAttendanceSummary: newClassSummary.rosterAttendanceSummary,
+            );
+          } else {
+            existingSummaries.add(newClassSummary);
+          }
+
+          existingRecord.classAttendanceSummaries = existingSummaries;
           await attendanceRecordRepository
-              .updateDailyAttendanceRecord(existingRecord); //Provide ID
+              .updateDailyAttendanceRecord(existingRecord);
+
           MySnackBar.showSuccessSnackBar(
-              'Daily Attendance Record updated successfully in Firestore');
+              'Daily Attendance Record updated successfully');
         } else {
-          newRecord = DailyAttendanceRecord(
+          final newRecord = DailyAttendanceRecord(
             id: recordId,
             date: date,
-            classAttendanceSummaries: [classSummary],
+            classAttendanceSummaries: [newClassSummary],
           );
+
           await attendanceRecordRepository.addDailyAttendanceRecord(newRecord);
           MySnackBar.showSuccessSnackBar(
-              'Daily Attendance Record added successfully in Firestore');
+              'Daily Attendance Record added successfully');
         }
       } else {
-        final employeeSummary = EmployeeAttendanceSummary(
-            markedBy: markedBy,
-            presents: classAttendanceSummary.value!.presentCount,
-            absents: classAttendanceSummary.value!.absentCount);
+        // Employee attendance
+        final newEmployeeSummary = EmployeeAttendanceSummary(
+          markedBy: [newMarker],
+          rosterAttendanceSummary: classAttendanceSummary.value!,
+        );
 
         if (existingRecord != null) {
-          existingRecord.employeeAttendanceSummary = employeeSummary;
-          existingRecord.classAttendanceSummaries = null;
+          final oldSummary = existingRecord.employeeAttendanceSummary;
+
+          if (oldSummary != null) {
+            final alreadyMarked =
+                oldSummary.markedBy.any((taker) => taker.uid == newMarker.uid);
+            if (!alreadyMarked) {}
+            oldSummary.markedBy.add(newMarker);
+
+            existingRecord.employeeAttendanceSummary =
+                EmployeeAttendanceSummary(
+              markedBy: oldSummary.markedBy,
+              rosterAttendanceSummary:
+                  newEmployeeSummary.rosterAttendanceSummary,
+            );
+          } else {
+            existingRecord.employeeAttendanceSummary = newEmployeeSummary;
+          }
+
           await attendanceRecordRepository
-              .updateDailyAttendanceRecord(existingRecord); //Provide ID
+              .updateDailyAttendanceRecord(existingRecord);
           MySnackBar.showSuccessSnackBar(
-              'Daily Attendance Record updated successfully in Firestore');
+              'Daily Attendance Record updated successfully');
         } else {
-          newRecord = DailyAttendanceRecord(
+          final newRecord = DailyAttendanceRecord(
             id: recordId,
             date: date,
-            employeeAttendanceSummary: employeeSummary,
+            employeeAttendanceSummary: newEmployeeSummary,
           );
           await attendanceRecordRepository.addDailyAttendanceRecord(newRecord);
           MySnackBar.showSuccessSnackBar(
-              'Daily Attendance Record added successfully in Firestore');
+              'Daily Attendance Record added successfully');
         }
-      }
-
-      if (existingRecord?.classAttendanceSummaries == null &&
-          existingRecord?.employeeAttendanceSummary == null) {
-        MySnackBar.showErrorSnackBar("No attendance data to update.");
-        return;
-      }
-      // Handle the case where existing record is null:
-      if (existingRecord == null) {
-        MySnackBar.showErrorSnackBar("No attendance data to update.");
-        return;
       }
     } catch (e) {
       MySnackBar.showErrorSnackBar(

@@ -296,4 +296,42 @@ class RosterAttendanceSummary {
     required this.notApplicablePercentage,
     required this.workingDaysPercentage,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'presentCount': presentCount,
+      'absentCount': absentCount,
+      'holidayCount': holidayCount,
+      'lateCount': lateCount,
+      'excusedCount': excusedCount,
+      'notApplicableCount': notApplicableCount,
+      'workingDaysCount': workingDaysCount,
+      'presentPercentage': presentPercentage,
+      'absentPercentage': absentPercentage,
+      'holidayPercentage': holidayPercentage,
+      'latePercentage': latePercentage,
+      'excusedPercentage': excusedPercentage,
+      'notApplicablePercentage': notApplicablePercentage,
+      'workingDaysPercentage': workingDaysPercentage,
+    };
+  }
+
+  factory RosterAttendanceSummary.fromMap(Map<String, dynamic> map) {
+    return RosterAttendanceSummary(
+      presentCount: map['presentCount'] as int? ?? 0,
+      absentCount: map['absentCount'] as int? ?? 0,
+      holidayCount: map['holidayCount'] as int? ?? 0,
+      lateCount: map['lateCount'] as int? ?? 0,
+      excusedCount: map['excusedCount'] as int? ?? 0,
+      notApplicableCount: map['notApplicableCount'] as int? ?? 0,
+      workingDaysCount: map['workingDaysCount'] as int? ?? 0,
+      presentPercentage: (map['presentPercentage'] as num?)?.toDouble() ?? 0.0,
+      absentPercentage: (map['absentPercentage'] as num?)?.toDouble() ?? 0.0,
+      holidayPercentage: (map['holidayPercentage'] as num?)?.toDouble() ?? 0.0,
+      latePercentage: (map['latePercentage'] as num?)?.toDouble() ?? 0.0,
+      excusedPercentage: (map['excusedPercentage'] as num?)?.toDouble() ?? 0.0,
+      notApplicablePercentage: (map['notApplicablePercentage'] as num?)?.toDouble() ?? 0.0,
+      workingDaysPercentage: (map['workingDaysPercentage'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
 }

@@ -47,7 +47,7 @@ class ClassRepository {
     try {
       final List<QueryDocumentSnapshot<Map<String, dynamic>>> results =
           await _firestoreService.queryDocuments(
-              _getFullCollectionPath(), 'schoolId', schoolId);
+              _getFullCollectionPath(), 'className', className);
       final result =
           results.where((element) => element['className'] == className);
       if (result.isNotEmpty) {

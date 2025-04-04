@@ -1,6 +1,9 @@
 import 'package:cambridge_school/core/utils/constants/enums/class_name.dart';
 import 'package:cambridge_school/core/widgets/snack_bar.dart';
+import 'package:collection/collection.dart'; // For deep equality checks
 
+import '../../../core/utils/constants/enums/assessment_type.dart';
+import '../../../core/utils/constants/enums/exam_type.dart';
 import '../routine/routine_model.dart';
 
 class ClassModel {
@@ -17,7 +20,7 @@ class ClassModel {
     required this.className,
     this.sections = const [],
     this.subjects = const [],
-    required this.examSyllabus,
+    this.examSyllabus = const [],
   });
 
   factory ClassModel.fromMap(Map<String, dynamic> map, String? documentId) {
@@ -26,15 +29,15 @@ class ClassModel {
       academicYear: map['academicYear'] as String?,
       className: ClassName.fromString(map['className'] as String),
       sections: (map['sections'] as List<dynamic>?)
-              ?.map((dynamic sectionData) => SectionModel.fromMap(
-                  sectionData as Map<String, dynamic>, null))
-              .toList() ??
+          ?.map((dynamic sectionData) => SectionModel.fromMap(
+          sectionData as Map<String, dynamic>, null))
+          .toList() ??
           const [],
       subjects: (map['subjects'] as List<dynamic>?)?.cast<String>() ?? const [],
       examSyllabus: (map['examSyllabus'] as List<dynamic>?)
-              ?.map((dynamic e) =>
-                  ExamSyllabus.fromMap(e as Map<String, dynamic>))
-              .toList() ??
+          ?.map((dynamic e) =>
+          ExamSyllabus.fromMap(e as Map<String, dynamic>))
+          .toList() ??
           const [],
     );
   }
@@ -73,52 +76,70 @@ class ClassModel {
     sections.sort((a, b) => (a.sectionName).compareTo(b.sectionName));
   }
 
-  // Add a Section
+  // Add a Section (prevents duplicates)
   void addSection(SectionModel section) {
-    sections.add(section);
-  }
-
-  // Update a Section
-  void updateSection(int index, String sectionName, SectionModel updatedSection) {
-    if (index != -1) {
-      sections[index] = updatedSection;
+    if (!sections.any((s) => s == section)) {
+      sections.add(section);
     } else {
-      print('Section $sectionName not found for updating.');
+      MySnackBar.showErrorSnackBar('Section "${section.sectionName}" already exists.');
     }
   }
 
-  // Delete a Section
+  // Update a Section (finds by sectionName, replaces if found)
+  void updateSection(String sectionName, SectionModel updatedSection) {
+    final index = sections.indexWhere((s) => s.sectionName == sectionName);
+    if (index != -1) {
+      sections[index] = updatedSection;
+    } else {
+      MySnackBar.showErrorSnackBar('Section "$sectionName" not found for updating.');
+    }
+  }
+
+  // Delete a Section (finds by sectionName)
   void deleteSection(String sectionName) {
+    final initialLength = sections.length;
     sections.removeWhere((s) => s.sectionName == sectionName);
+    if (sections.length == initialLength) {
+      MySnackBar.showErrorSnackBar('Section "$sectionName" not found for deletion.');
+    }
   }
 
-  // Add a Subject
+  // Add a Subject (prevents duplicates, case-insensitive)
   void addSubject(String subject) {
-    subjects.add(subject);
+    if (!subjects.any((s) => s.toLowerCase() == subject.toLowerCase())) {
+      subjects.add(subject);
+    } else {
+      MySnackBar.showErrorSnackBar('Subject "$subject" already exists.');
+    }
   }
 
-  // Update a Subject
-  void updateSubject(int index, String updatedSubject) {
-    if (index >= 0 && index < subjects.length) {
+  // Update a Subject (finds by original subject, replaces)
+  void updateSubject(String originalSubject, String updatedSubject) {
+    final index = subjects.indexWhere((s) => s == originalSubject);
+    if (index != -1) {
       subjects[index] = updatedSubject;
     } else {
-      print('Subject not found at index $index.');
+      MySnackBar.showErrorSnackBar('Subject "$originalSubject" not found for updating.');
     }
   }
 
   // Delete a Subject
   void deleteSubject(String subject) {
+    final initialLength = subjects.length;
     subjects.remove(subject);
+    if (subjects.length == initialLength) {
+      MySnackBar.showErrorSnackBar('Subject "$subject" not found for deletion.');
+    }
   }
 
   void addEventToRoutine(String sectionName, String day, Event event) {
     try {
       final section = sections.firstWhere(
-        (s) => s.sectionName == sectionName,
+            (s) => s.sectionName == sectionName,
       );
 
       final dailyRoutine = section.routine.firstWhere(
-        (dr) => dr.day == day,
+            (dr) => dr.day == day,
         orElse: () {
           final newDailyRoutine = DailyRoutine(day: day, events: []);
           section.routine.add(newDailyRoutine);
@@ -129,8 +150,7 @@ class ClassModel {
       dailyRoutine.events.add(event);
       MySnackBar.showSuccessSnackBar('Event added successfully.');
     } catch (e) {
-      print(
-          'Error adding event: $e'); // More informative error message.  Consider re-throwing or handling appropriately.
+      // More informative error message.  Consider re-throwing or handling appropriately.
     }
   }
 
@@ -138,44 +158,38 @@ class ClassModel {
       String sectionName, String day, int index, Event updatedEvent) {
     try {
       final section = sections.firstWhere(
-        (s) => s.sectionName == sectionName,
+            (s) => s.sectionName == sectionName,
       );
 
       final dailyRoutine = section.routine.firstWhere(
-        (dr) => dr.day == day,
+            (dr) => dr.day == day,
       );
 
       if (index >= 0 && index < dailyRoutine.events.length) {
         dailyRoutine.events[index] = updatedEvent;
       } else {
-        print(
-            'Event not found at index $index on day $day for section $sectionName.');
       }
     } catch (e) {
-      print(
-          'Error updating event: $e'); //More informative.  Consider re-throwing or handling appropriately.
+      //More informative.  Consider re-throwing or handling appropriately.
     }
   }
 
   void deleteEventInRoutine(String sectionName, String day, int index) {
     try {
       final section = sections.firstWhere(
-        (s) => s.sectionName == sectionName,
+            (s) => s.sectionName == sectionName,
       );
 
       final dailyRoutine = section.routine.firstWhere(
-        (dr) => dr.day == day,
+            (dr) => dr.day == day,
       );
 
       if (index >= 0 && index < dailyRoutine.events.length) {
         dailyRoutine.events.removeAt(index);
       } else {
-        print(
-            'Event not found at index $index on day $day for section $sectionName.');
       }
     } catch (e) {
-      print(
-          'Error deleting event: $e'); //More informative.  Consider re-throwing or handling appropriately.
+      //More informative.  Consider re-throwing or handling appropriately.
     }
   }
 }
@@ -197,6 +211,27 @@ class SectionModel {
     this.routine = const [],
   });
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is SectionModel &&
+              runtimeType == other.runtimeType &&
+              sectionName == other.sectionName &&
+              classTeacherId == other.classTeacherId &&
+              classTeacherName == other.classTeacherName &&
+              roomNumber == other.roomNumber &&
+              const DeepCollectionEquality().equals(students, other.students) &&
+              const DeepCollectionEquality().equals(routine, other.routine);
+
+  @override
+  int get hashCode =>
+      sectionName.hashCode ^
+      classTeacherId.hashCode ^
+      classTeacherName.hashCode ^
+      roomNumber.hashCode ^
+      students.hashCode ^
+      routine.hashCode;
+
   factory SectionModel.fromMap(Map<String, dynamic> data, String? documentId) {
     return SectionModel(
       sectionName: data['sectionName'] as String,
@@ -204,14 +239,14 @@ class SectionModel {
       classTeacherName: data['classTeacherName'] as String,
       roomNumber: data['roomNumber'] as String,
       students: (data['students'] as List<dynamic>?)
-              ?.map((dynamic studentData) =>
-                  Student.fromMap(studentData as Map<String, dynamic>))
-              .toList() ??
+          ?.map((dynamic studentData) =>
+          Student.fromMap(studentData as Map<String, dynamic>))
+          .toList() ??
           const [],
       routine: (data['routine'] as List<dynamic>?)
-              ?.map((dynamic routineData) =>
-                  DailyRoutine.fromMap(routineData as Map<String, dynamic>))
-              .toList() ??
+          ?.map((dynamic routineData) =>
+          DailyRoutine.fromMap(routineData as Map<String, dynamic>))
+          .toList() ??
           const [],
     );
   }
@@ -252,6 +287,18 @@ class Student {
   final String roll;
 
   Student({required this.id, required this.name, required this.roll});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Student &&
+              runtimeType == other.runtimeType &&
+              id == other.id &&
+              name == other.name &&
+              roll == other.roll;
+
+  @override
+  int get hashCode => id.hashCode ^ name.hashCode ^ roll.hashCode;
 
   factory Student.fromMap(Map<String, dynamic> map) {
     return Student(
@@ -296,6 +343,20 @@ class ExamSyllabus {
   });
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is ExamSyllabus &&
+              runtimeType == other.runtimeType &&
+              examName == other.examName &&
+              const DeepCollectionEquality().equals(subjects, other.subjects) &&
+              createdAt == other.createdAt &&
+              updatedAt == other.updatedAt;
+
+  @override
+  int get hashCode =>
+      examName.hashCode ^ subjects.hashCode ^ createdAt.hashCode ^ updatedAt.hashCode;
+
+  @override
   String toString() {
     return 'ExamSyllabus{examName: $examName, subjects: $subjects, createdAt: $createdAt, updatedAt: $updatedAt}';
   }
@@ -304,9 +365,9 @@ class ExamSyllabus {
     return ExamSyllabus(
       examName: map['examName'] as String,
       subjects: (map['subjects'] as List<dynamic>?)
-              ?.map(
-                  (dynamic s) => ExamSubject.fromMap(s as Map<String, dynamic>))
-              .toList() ??
+          ?.map(
+              (dynamic s) => ExamSubject.fromMap(s as Map<String, dynamic>))
+          .toList() ??
           const [],
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'] as String)
@@ -339,14 +400,43 @@ class ExamSyllabus {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  // ExamSubject Operations
+  void addExamSubject(ExamSubject subject) {
+    if (!subjects.any((s) => s == subject)) {
+      subjects.add(subject);
+    } else {
+      MySnackBar.showErrorSnackBar('Subject "${subject.subjectName}" already exists in this exam.');
+    }
+  }
+
+  void updateExamSubject(String subjectName, ExamSubject updatedSubject) {
+    final index = subjects.indexWhere((s) => s.subjectName == subjectName);
+    if (index != -1) {
+      subjects[index] = updatedSubject;
+    } else {
+      MySnackBar.showErrorSnackBar('Subject "$subjectName" not found for updating in this exam.');
+    }
+  }
+
+  void deleteExamSubject(String subjectName) {
+    final initialLength = subjects.length;
+    subjects.removeWhere((s) => s.subjectName == subjectName);
+    if (subjects.length == initialLength) {
+      MySnackBar.showErrorSnackBar('Subject "$subjectName" not found for deletion in this exam.');
+    }
+  }
 }
+
+// Represents a subject in an exam
 
 class ExamSubject {
   final String subjectName;
-  final List<Topic> topics;
+  final List<SyllabusTopic> topics;
   final DateTime examDate;
   final double totalMarks;
-  final String examType;
+  final ExamType examType;
+  final List<AssessmentComponent> assessmentComponents;
 
   ExamSubject({
     required this.subjectName,
@@ -354,18 +444,20 @@ class ExamSubject {
     required this.examDate,
     required this.totalMarks,
     required this.examType,
+    required this.assessmentComponents,
   });
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ExamSubject &&
-          runtimeType == other.runtimeType &&
-          subjectName == other.subjectName &&
-          topics == other.topics &&
-          examDate == other.examDate &&
-          totalMarks == other.totalMarks &&
-          examType == other.examType;
+          other is ExamSubject &&
+              runtimeType == other.runtimeType &&
+              subjectName == other.subjectName &&
+              const DeepCollectionEquality().equals(topics, other.topics) &&
+              examDate == other.examDate &&
+              totalMarks == other.totalMarks &&
+              examType == other.examType &&
+              const DeepCollectionEquality().equals(assessmentComponents, other.assessmentComponents);
 
   @override
   int get hashCode =>
@@ -373,7 +465,8 @@ class ExamSubject {
       topics.hashCode ^
       examDate.hashCode ^
       totalMarks.hashCode ^
-      examType.hashCode;
+      examType.hashCode ^
+      assessmentComponents.hashCode;
 
   Map<String, dynamic> toMap() {
     return {
@@ -381,7 +474,8 @@ class ExamSubject {
       'topics': topics.map((t) => t.toMap()).toList(),
       'examDate': examDate.toIso8601String(),
       'totalMarks': totalMarks,
-      'examType': examType,
+      'examType': examType.name, // store enum name
+      'assessmentComponents': assessmentComponents.map((c) => c.toMap()).toList(),
     };
   }
 
@@ -389,20 +483,24 @@ class ExamSubject {
     return ExamSubject(
       subjectName: map['subjectName'] as String,
       topics: (map['topics'] as List<dynamic>)
-          .map((dynamic t) => Topic.fromMap(t as Map<String, dynamic>))
+          .map((t) => SyllabusTopic.fromMap(t as Map<String, dynamic>))
           .toList(),
       examDate: DateTime.parse(map['examDate'] as String),
       totalMarks: (map['totalMarks'] as num).toDouble(),
-      examType: map['examType'] as String,
+      examType: ExamType.fromString(map['examType']) ?? ExamType.theory,
+      assessmentComponents: (map['assessmentComponents'] as List<dynamic>)
+          .map((c) => AssessmentComponent.fromMap(c as Map<String, dynamic>))
+          .toList(),
     );
   }
 
   ExamSubject copyWith({
     String? subjectName,
-    List<Topic>? topics,
+    List<SyllabusTopic>? topics,
     DateTime? examDate,
     double? totalMarks,
-    String? examType,
+    ExamType? examType,
+    List<AssessmentComponent>? assessmentComponents,
   }) {
     return ExamSubject(
       subjectName: subjectName ?? this.subjectName,
@@ -410,60 +508,189 @@ class ExamSubject {
       examDate: examDate ?? this.examDate,
       totalMarks: totalMarks ?? this.totalMarks,
       examType: examType ?? this.examType,
+      assessmentComponents: assessmentComponents ?? this.assessmentComponents,
     );
+  }
+
+  // SyllabusTopic Operations
+  void addSyllabusTopic(SyllabusTopic topic) {
+    if (!topics.any((t) => t == topic)) {
+      topics.add(topic);
+    } else {
+      MySnackBar.showErrorSnackBar('Topic "${topic.topicName}" already exists in this subject.');
+    }
+  }
+
+  void updateSyllabusTopic(String topicName, SyllabusTopic updatedTopic) {
+    final index = topics.indexWhere((t) => t.topicName == topicName);
+    if (index != -1) {
+      topics[index] = updatedTopic;
+    } else {
+      MySnackBar.showErrorSnackBar('Topic "$topicName" not found for updating in this subject.');
+    }
+  }
+
+  void deleteSyllabusTopic(String topicName) {
+    final initialLength = topics.length;
+    topics.removeWhere((t) => t.topicName == topicName);
+    if (topics.length == initialLength) {
+      MySnackBar.showErrorSnackBar('Topic "$topicName" not found for deletion in this subject.');
+    }
+  }
+
+  // AssessmentComponent Operations
+  void addAssessmentComponent(AssessmentComponent component) {
+    if (!assessmentComponents.any((c) => c == component)) {
+      assessmentComponents.add(component);
+    } else {
+      MySnackBar.showErrorSnackBar('Assessment component "${component.type}" already exists in this subject.');
+    }
+  }
+
+  void updateAssessmentComponent(String type, AssessmentComponent updatedComponent) {
+    final index = assessmentComponents.indexWhere((c) => c.type == type);
+    if (index != -1) {
+      assessmentComponents[index] = updatedComponent;
+    } else {
+      MySnackBar.showErrorSnackBar('Assessment component "$type" not found for updating in this subject.');
+    }
+  }
+
+  void deleteAssessmentComponent(String type) {
+    final initialLength = assessmentComponents.length;
+    assessmentComponents.removeWhere((c) => c.type == type);
+    if (assessmentComponents.length == initialLength) {
+      MySnackBar.showErrorSnackBar('Assessment component "$type" not found for deletion in this subject.');
+    }
   }
 }
 
-class Topic {
-  final String topicName;
-  final List<String> subtopics;
-  final double topicMarks;
+// Represents a generic assessment component (Theory, Practical, Assignment, etc.)
+class AssessmentComponent {
+  final AssessmentType type;
+  final double? marks;
 
-  Topic({
-    required this.topicName,
-    required this.subtopics,
-    required this.topicMarks,
+  AssessmentComponent({
+    required this.type,
+    this.marks,
   });
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Topic &&
-          runtimeType == other.runtimeType &&
-          topicName == other.topicName &&
-          subtopics == other.subtopics &&
-          topicMarks == other.topicMarks;
+          other is AssessmentComponent &&
+              runtimeType == other.runtimeType &&
+              type == other.type &&
+              marks == other.marks;
+
+  @override
+  int get hashCode => type.hashCode ^ marks.hashCode;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'type': type.name, // store enum name (like 'theory')
+      'marks': marks,
+    };
+  }
+
+  factory AssessmentComponent.fromMap(Map<String, dynamic> map) {
+    return AssessmentComponent(
+      type: AssessmentType.values.firstWhere(
+            (e) => e.name == map['type'],
+        orElse: () => AssessmentType.theory,
+      ),
+      marks: (map['marks'] as num?)?.toDouble(),
+    );
+  }
+
+  AssessmentComponent copyWith({
+    AssessmentType? type,
+    double? marks,
+  }) {
+    return AssessmentComponent(
+      type: type ?? this.type,
+      marks: marks ?? this.marks,
+    );
+  }
+}
+
+// Represents a topic within a subject's syllabus
+class SyllabusTopic {
+  final String topicName;
+  final List<String> subtopics;
+  final double topicMarksWeight; // How much this topic contributes to total marks
+
+  SyllabusTopic({
+    required this.topicName,
+    required this.subtopics,
+    required this.topicMarksWeight,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is SyllabusTopic &&
+              runtimeType == other.runtimeType &&
+              topicName == other.topicName &&
+              const DeepCollectionEquality().equals(subtopics, other.subtopics) &&
+              topicMarksWeight == other.topicMarksWeight;
 
   @override
   int get hashCode =>
-      topicName.hashCode ^ subtopics.hashCode ^ topicMarks.hashCode;
+      topicName.hashCode ^ subtopics.hashCode ^ topicMarksWeight.hashCode;
 
   Map<String, dynamic> toMap() {
     return {
       'topicName': topicName,
       'subtopics': subtopics,
-      'topicMarks': topicMarks,
+      'topicMarks': topicMarksWeight,
     };
   }
 
-  factory Topic.fromMap(Map<String, dynamic> map) {
-    return Topic(
+  factory SyllabusTopic.fromMap(Map<String, dynamic> map) {
+    return SyllabusTopic(
       topicName: map['topicName'] as String,
-      subtopics: (map['subtopics'] as List<dynamic>).cast<String>(),
-      topicMarks: (map['topicMarks'] as num).toDouble(),
+      subtopics: List<String>.from(map['subtopics'] as List),
+      topicMarksWeight: (map['topicMarks'] as num).toDouble(),
     );
   }
 
-  Topic copyWith({
+  SyllabusTopic copyWith({
     String? topicName,
     List<String>? subtopics,
-    double? topicMarks,
+    double? topicMarksWeight,
   }) {
-    return Topic(
+    return SyllabusTopic(
       topicName: topicName ?? this.topicName,
       subtopics: subtopics ?? this.subtopics,
-      topicMarks: topicMarks ?? this.topicMarks,
+      topicMarksWeight: topicMarksWeight ?? this.topicMarksWeight,
     );
+  }
+
+  // Subtopic Operations
+  void addSubtopic(String subtopic) {
+    if (!subtopics.any((s) => s == subtopic)) {
+      subtopics.add(subtopic);
+    } else {
+      MySnackBar.showErrorSnackBar('Subtopic "$subtopic" already exists in this topic.');
+    }
+  }
+
+  void updateSubtopic(String originalSubtopic, String updatedSubtopic) {
+    final index = subtopics.indexWhere((s) => s == originalSubtopic);
+    if (index != -1) {
+      subtopics[index] = updatedSubtopic;
+    } else {
+      MySnackBar.showErrorSnackBar('Subtopic "$originalSubtopic" not found for updating in this topic.');
+    }
+  }
+
+  void deleteSubtopic(String subtopic) {
+    final initialLength = subtopics.length;
+    subtopics.remove(subtopic);
+    if (subtopics.length == initialLength) {
+      MySnackBar.showErrorSnackBar('Subtopic "$subtopic" not found for deletion in this topic.');
+    }
   }
 }
 
@@ -477,11 +704,11 @@ class SubjectModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is SubjectModel &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          name == other.name &&
-          teacherId == other.teacherId;
+          other is SubjectModel &&
+              runtimeType == other.runtimeType &&
+              id == other.id &&
+              name == other.name &&
+              teacherId == other.teacherId;
 
   @override
   int get hashCode => id.hashCode ^ name.hashCode ^ teacherId.hashCode;

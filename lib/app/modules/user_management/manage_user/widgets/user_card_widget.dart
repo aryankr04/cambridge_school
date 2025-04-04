@@ -1,12 +1,8 @@
-import '../../../../../core/utils/constants/dynamic_colors.dart';
 import '../../../../../core/utils/constants/enums/account_status.dart';
-import '../../../../../core/widgets/divider.dart';
 import '../../create_user/models/user_model.dart';
 import 'package:cambridge_school/core/utils/constants/colors.dart';
 import 'package:cambridge_school/core/utils/constants/sizes.dart';
 import 'package:cambridge_school/core/utils/constants/text_styles.dart';
-import 'package:cambridge_school/core/widgets/button.dart';
-import 'package:cambridge_school/core/widgets/card_widget.dart';
 import 'package:cambridge_school/core/widgets/label_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,7 +28,7 @@ class UserCardWidget extends StatelessWidget {
     final AccountStatus? accountStatusEnum = userProfile.accountStatus;
     final String userId = userProfile.userId;
     final String? rollNumber =
-        userProfile.studentDetails?.rollNumber; //Simplified roll number access
+        userProfile.studentDetails?.rollNumber;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
@@ -63,16 +59,15 @@ class UserCardWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      (rollNumber != null && rollNumber.isNotEmpty)
-                          ? '$rollNumber. $fullName'
-                          : fullName ??
+                           fullName ??
                               "N/A", //Simplified conditional display and default
                       overflow: TextOverflow.ellipsis,
                       style: MyTextStyle.titleLarge.copyWith(fontSize: 14),
                       maxLines: 1,
                     ),
                     Text(
-                      userId,
+
+                      '$userId (Roll no: $rollNumber)',
                       style: MyTextStyle.labelMedium.copyWith(fontSize: 11),
                     ),
                   ],
@@ -131,13 +126,6 @@ class UserCardWidget extends StatelessWidget {
 
   // Function to show the Details Dialog
   void _showDetailsDialog(BuildContext context) {
-    // Provide default value
-    final String? rollNumber =
-        userProfile.studentDetails?.rollNumber; //Simplified roll number access
-    final String? className =
-        userProfile.studentDetails?.className; // Get class name
-    final String? sectionName = userProfile.studentDetails?.section;
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -160,17 +148,23 @@ class UserCardWidget extends StatelessWidget {
                   const SizedBox(
                     height: MySizes.md,
                   ),
-                  const SizedBox(
-                    height: MySizes.md,
-                  ),
                   if (userProfile.studentDetails !=
                       null) //Conditional check on the details
 
                     _buildProfileText(
                         userProfile.fullName ?? "N/A", userProfile.userId),
                   const SizedBox(height: MySizes.md),
-                  _buildInfoRow(['12', 'C', '10', '122473'],
-                      ['Class', 'Sec', 'Roll no.', 'Adm No.']),
+                  _buildInfoRow([
+                    userProfile.studentDetails?.className ?? 'N/A',
+                    userProfile.studentDetails?.section ?? 'N/A',
+                    userProfile.studentDetails?.rollNumber ?? 'N/A',
+                    userProfile.studentDetails?.admissionNo ?? 'N/A'
+                  ], [
+                    'Class',
+                    'Sec',
+                    'Roll no.',
+                    'Adm No.'
+                  ]),
                   const SizedBox(
                     height: MySizes.sm,
                   ),
@@ -184,51 +178,56 @@ class UserCardWidget extends StatelessWidget {
                   ),
                   _buildInfoRow(['934M', '76', '463B', '237'],
                       ['Followers', 'Following', 'Likes', 'Posts']),
-                  const SizedBox(
-                    height: MySizes.md,
-                  ),
+
                   const SizedBox(
                     height: MySizes.spaceBtwSections,
                   ),
                   Row(
                     children: [
                       Expanded(
-                          child: MyButton(
-                        text: 'Delete',
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close the dialog
-                          onDelete();
-                        },
-                        backgroundColor: MyColors.activeRed,
-                        hasShadow: false,
-                        borderRadius: 8,
-                      )),
-                      const SizedBox(
-                        width: MySizes.sm,
+                        child: FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: MyColors.activeRed,
+                          ),
+                          icon: const Icon(
+                            Icons.delete,
+                            size: 18,
+                          ), // Edit Icon
+                          label: const Text('Delete',
+                              style: TextStyle(color: Colors.white)),
+                          onPressed: onDelete,
+                        ),
                       ),
+                      const SizedBox(width: MySizes.sm),
                       Expanded(
-                          child: MyButton(
-                              text: 'Edit',
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                                onEdit();
-                              },
-                              backgroundColor: MyColors.activeOrange,
-                              hasShadow: false,
-                              borderRadius: 8)),
-                      const SizedBox(
-                        width: MySizes.sm,
+                        child: FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: MyColors.activeOrange,
+                          ),
+                          icon: const Icon(
+                            Icons.edit,
+                            size: 18,
+                          ), // Edit Icon
+                          label: const Text('Edit',
+                              style: TextStyle(color: Colors.white)),
+                          onPressed: onEdit,
+                        ),
                       ),
+                      const SizedBox(width: MySizes.sm),
                       Expanded(
-                          child: MyButton(
-                              text: 'View',
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                                onView();
-                              },
-                              backgroundColor: MyColors.activeBlue,
-                              hasShadow: false,
-                              borderRadius: 8)),
+                        child: FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: MyColors.activeBlue,
+                          ),
+                          icon: const Icon(
+                            Icons.visibility,
+                            size: 18,
+                          ), // Edit Icon
+                          label: const Text('View',
+                              style: TextStyle(color: Colors.white)),
+                          onPressed: onView,
+                        ),
+                      ),
                     ],
                   )
                 ],

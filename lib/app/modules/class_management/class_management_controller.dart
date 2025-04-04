@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nanoid/nanoid.dart';
 
+import '../../../core/utils/constants/enums/exam_type.dart';
 import '../../../core/utils/constants/state_districts.dart';
 import '../../../roles_manager.dart';
 import '../attendance/mark_attendance/user_attendance_model.dart';
@@ -351,17 +352,18 @@ class ClassManagementController extends GetxController {
         topics: _generateDummyTopics(faker),
         examDate: DateTime.now(),
         totalMarks: faker.randomGenerator.decimal(scale: 100),
-        examType: faker.lorem.word(),
+        examType: ExamType.values[index % ExamType.values.length],
+        assessmentComponents: []
       );
     });
   }
 
-  List<Topic> _generateDummyTopics(Faker faker) {
+  List<SyllabusTopic> _generateDummyTopics(Faker faker) {
     return List.generate(10, (_) {
-      return Topic(
+      return SyllabusTopic(
         topicName: faker.lorem.word(),
         subtopics: List.generate(3, (_) => faker.lorem.word()),
-        topicMarks: faker.randomGenerator.decimal(scale: 20),
+        topicMarksWeight: faker.randomGenerator.decimal(scale: 20),
       );
     });
   }

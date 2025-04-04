@@ -4,7 +4,7 @@ import 'colors.dart';
 
 /// Custom Class for Individual Text Styles
 class MyTextStyle {
-  static const TextStyle headlineLarge = TextStyle(fontSize: 32.0, fontWeight: FontWeight.w600, color: MyColors.darkBackgroundColor);
+  static const TextStyle headlineLarge = TextStyle(fontSize: 28.0, fontWeight: FontWeight.w600, color: MyColors.darkBackgroundColor);
   static const TextStyle headlineMedium = TextStyle(fontSize: 24.0, fontWeight: FontWeight.w600, color: MyColors.darkBackgroundColor);
   static const TextStyle headlineSmall = TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600, color: MyColors.darkBackgroundColor);
 
@@ -14,14 +14,16 @@ class MyTextStyle {
 
   static const TextStyle bodyLarge = TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500, color: MyColors.darkBackgroundColor);
   static const TextStyle bodyMedium = TextStyle(fontSize: 14.0, fontWeight: FontWeight.normal, color: MyColors.subtitleTextColor);
-  static  TextStyle bodySmall = TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500, color: MyColors.darkBackgroundColor.withOpacity(0.5));
+  static  TextStyle bodySmall = const TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500, color: MyColors.captionTextColor);
 
   static const TextStyle labelLarge = TextStyle(fontSize: 12.0, fontWeight: FontWeight.w500, color: MyColors.darkBackgroundColor);
-  static  TextStyle labelMedium = TextStyle(fontSize: 12.0, fontWeight: FontWeight.w500, color: MyColors.subtitleTextColor.withOpacity(0.5));
-  static  TextStyle labelSmall = TextStyle(fontSize: 12.0, fontWeight: FontWeight.normal, color: MyColors.darkBackgroundColor.withOpacity(0.5));
+  static  TextStyle labelMedium = const TextStyle(fontSize: 12.0, fontWeight: FontWeight.w500, color: MyColors.captionTextColor);
+  static  TextStyle labelSmall = const TextStyle(fontSize: 12.0, fontWeight: FontWeight.normal, color: MyColors.captionTextColor);
 
 
   static const TextStyle placeholder = TextStyle(fontSize: 15.0, fontWeight: FontWeight.w400, color: MyColors.placeholderColor);
   static const TextStyle inputField = TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500, color: MyColors.darkBackgroundColor);
   static const TextStyle inputLabel = TextStyle(fontSize: 12.0, fontWeight: FontWeight.w500, color: MyColors.darkBackgroundColor);
+
+  static const TextStyle buttonText = TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: MyColors.white);
 }

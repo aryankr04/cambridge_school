@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../user_management/manage_user/models/roster_model.dart';
+
 class DailyAttendanceRecord {
   String id; // Add the ID field
   DateTime date;
@@ -39,25 +41,22 @@ class DailyAttendanceRecord {
 class ClassAttendanceSummary {
   String className;
   String sectionName;
-  AttendanceTaker markedBy;
-  int presents;
-  int absents;
-
+  List<AttendanceTaker> markedBy;
+  RosterAttendanceSummary rosterAttendanceSummary;
   ClassAttendanceSummary({
     required this.className,
     required this.sectionName,
     required this.markedBy,
-    required this.presents,
-    required this.absents,
+    required this.rosterAttendanceSummary,
+
   });
 
   Map<String, dynamic> toMap() {
     return {
       'className': className,
       'sectionName': sectionName,
-      'markedBy': markedBy.toMap(),
-      'presents': presents,
-      'absents': absents,
+      'markedBy': markedBy.map((e) => e.toMap()).toList(),
+      'rosterAttendanceSummary': rosterAttendanceSummary.toMap(),
     };
   }
 
@@ -65,39 +64,36 @@ class ClassAttendanceSummary {
     return ClassAttendanceSummary(
       className: map['className'] as String,
       sectionName: map['sectionName'] as String,
-      markedBy:
-      AttendanceTaker.fromMap(map['markedBy'] as Map<String, dynamic>),
-      presents: map['presents'] as int,
-      absents: map['absents'] as int,
+      markedBy: (map['markedBy'] as List<dynamic>)
+          .map((e) => AttendanceTaker.fromMap(e as Map<String, dynamic>))
+          .toList(),
+      rosterAttendanceSummary: RosterAttendanceSummary.fromMap(map['rosterAttendanceSummary'] as Map<String, dynamic>),
     );
   }
 }
 
 class EmployeeAttendanceSummary {
-  AttendanceTaker markedBy;
-  int presents;
-  int absents;
+  List<AttendanceTaker> markedBy;
+  RosterAttendanceSummary rosterAttendanceSummary;
 
   EmployeeAttendanceSummary({
     required this.markedBy,
-    required this.presents,
-    required this.absents,
+    required this.rosterAttendanceSummary,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'markedBy': markedBy.toMap(),
-      'presents': presents,
-      'absents': absents,
+      'markedBy': markedBy.map((e) => e.toMap()).toList(),
+      'rosterAttendanceSummary': rosterAttendanceSummary.toMap(),
     };
   }
 
   factory EmployeeAttendanceSummary.fromMap(Map<String, dynamic> map) {
     return EmployeeAttendanceSummary(
-      markedBy:
-      AttendanceTaker.fromMap(map['markedBy'] as Map<String, dynamic>),
-      presents: map['presents'] as int,
-      absents: map['absents'] as int,
+      markedBy: (map['markedBy'] as List<dynamic>)
+          .map((e) => AttendanceTaker.fromMap(e as Map<String, dynamic>))
+          .toList(),
+      rosterAttendanceSummary: RosterAttendanceSummary.fromMap(map['rosterAttendanceSummary'] as Map<String, dynamic>),
     );
   }
 }

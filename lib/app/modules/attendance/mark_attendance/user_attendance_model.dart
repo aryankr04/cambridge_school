@@ -157,7 +157,8 @@ class UserAttendance {
 
   // Get the attendance status for a specific date.
   AttendanceStatus getAttendanceStatusForDate(DateTime date) {
-    final dayOffset = date.difference(academicPeriodStart).inDays;
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final dayOffset = normalizedDate.difference(academicPeriodStart).inDays;
     if (dayOffset < 0 || dayOffset >= attendanceString.length) {
       return AttendanceStatus.notApplicable;
     }

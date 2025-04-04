@@ -213,5 +213,6 @@ class AttendanceReportController extends GetxController {
         selectedMonthForAttendanceCalendar.value.year,
         selectedMonthForAttendanceCalendar.value.month + 1,
         0);
+    updateDateRange();
   }
 }

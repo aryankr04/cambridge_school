@@ -51,9 +51,9 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
               children: [
                 _buildClassSelectionHeader(),
                 const SizedBox(height: MySizes.sm),
-                // FilledButton(onPressed: (){controller.createAndUploadDummyClassRosters();}, child: Text('Send')),
+                // FilledButton(onPressed: (){controller.generateAndUploadDummyClasses();}, child: Text('Send')),
                 MyBottomSheetDropdown(
-                  optionsForChips:controller.availableClassNames,
+                  optionsForChips: controller.availableClassNames,
                   onSingleChanged: (value) {
                     controller.selectedClassName.value = value;
                     controller.fetchClass(value);
@@ -431,7 +431,6 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
           try {
             if (section != null) {
               controller.classModels.value?.updateSection(
-                index!,
                 controller.selectedClassName.value,
                 newSection,
               );
@@ -441,7 +440,6 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
               );
             }
             controller.classModels.refresh();
-            Get.back(); // Close the dialog after submission
           } catch (e) {
             MySnackBar.showErrorSnackBar('Failed to update section: $e');
           }
@@ -464,7 +462,7 @@ class ClassManagementScreen extends GetView<ClassManagementController> {
           try {
             if (subject != null) {
               controller.classModels.value?.updateSubject(
-                index!,
+                subject,
                 newSubject,
               );
             } else {

@@ -115,7 +115,7 @@ class AttendanceReportScreen extends GetView<AttendanceReportController> {
 }
 
 class AttendanceStreakCard extends StatelessWidget {
-  AttendanceStreakCard({Key? key, required this.controller}) : super(key: key);
+  AttendanceStreakCard({super.key, required this.controller});
 
   final AttendanceReportController controller;
   final RxBool _isExpanded = false.obs; // For "Show More/Less" functionality
@@ -639,26 +639,23 @@ class StudentRankOverviewCard extends StatelessWidget {
     );
   }
 
-  // Function to calculate rank, handling ties
   int calculateRank(
-    List<UserAverageAttendanceSummary> sortedSummaries,
-    double userPercentage,
-    AttendanceStatus selectedStatus,
-  ) {
+      List<UserAverageAttendanceSummary> sortedSummaries,
+      double userPercentage,
+      AttendanceStatus selectedStatus,
+      ) {
     int rank = 1;
+
     for (int i = 0; i < sortedSummaries.length; i++) {
-      final percentage =
-          getAveragePercentage(sortedSummaries[i], selectedStatus);
+      final percentage = getAveragePercentage(sortedSummaries[i], selectedStatus);
+
       if (percentage > userPercentage) {
         rank++;
-      } else if (percentage == userPercentage) {
-        // Already found a tie, return the current rank
-        break;
       } else {
-        //Found user
-        break;
+        break; // Stop when the user's percentage is found or passed
       }
     }
+
     return rank;
   }
 
